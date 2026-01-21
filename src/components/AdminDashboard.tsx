@@ -1,9 +1,8 @@
-import { useState } from 'react';
 import {
     Activity, ClipboardCheck, Package, Calendar, ShieldAlert,
-    FileText, User, LogOut, DollarSign, Sparkles, AlertTriangle
+    FileText, LogOut, DollarSign, Sparkles, AlertTriangle
 } from 'lucide-react';
-import { PATIENTS, INVENTORY, SHIFTS, VITALS_HISTORY } from '../data/mock-data';
+import { PATIENTS, INVENTORY, SHIFTS } from '../data/mock-data';
 import type { AdminDashboardProps, NavItemProps } from '../types/components';
 
 export default function AdminDashboard({ view, setView, onLogout, tenant }: AdminDashboardProps) {
@@ -28,9 +27,7 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                     <NavItem icon={Calendar} label="Rostering" active={view === 'roster'} onClick={() => setView('roster')} />
                     <NavItem icon={ShieldAlert} label="Compliance" active={view === 'compliance'} onClick={() => setView('compliance')} />
                     <NavItem icon={FileText} label="Billing & RIPS" active={view === 'billing'} onClick={() => setView('billing')} />
-                    <div className="pt-4 mt-4 border-t border-slate-800">
-                        <NavItem icon={User} label="Family Portal" active={view === 'family'} onClick={() => setView('family')} />
-                    </div>
+
                 </nav>
                 <div className="p-4 border-t border-slate-800">
                     <div className="p-4 bg-slate-800/40 rounded-2xl mb-4">
@@ -51,7 +48,7 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                         {view === 'roster' && 'Rostering'}
                         {view === 'compliance' && 'Compliance (Res 3100)'}
                         {view === 'billing' && 'Billing & RIPS'}
-                        {view === 'family' && 'Family Portal'}
+
                     </h2>
                     <div className="flex items-center gap-4">
                         <span className="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-xs font-bold">Res 3100 Compliant</span>
@@ -65,7 +62,6 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                     {view === 'roster' && <RosterView />}
                     {view === 'compliance' && <ComplianceView />}
                     {view === 'billing' && <BillingView />}
-                    {view === 'family' && <FamilyView />}
                 </div>
             </main>
         </div>
@@ -300,85 +296,3 @@ function BillingView() {
     );
 }
 
-function FamilyView() {
-    const [selectedPatient, setSelectedPatient] = useState(PATIENTS[0]);
-    const vitalsHistory = VITALS_HISTORY.filter(v => v.patientId === selectedPatient.id);
-
-    return (
-        <div className="space-y-6">
-            <div className="bg-white p-6 rounded-2xl border border-slate-100">
-                <h3 className="font-black text-slate-900 mb-4">Select Family Member</h3>
-                <div className="grid grid-cols-2 gap-4">
-                    {PATIENTS.map(patient => (
-                        <div
-                            key={patient.id}
-                            onClick={() => setSelectedPatient(patient)}
-                            className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedPatient.id === patient.id ? 'border-[#2563eb] bg-blue-50' : 'border-slate-100 hover:border-slate-200'
-                                }`}
-                        >
-                            <h4 className="font-bold text-slate-900">{patient.name}</h4>
-                            <p className="text-xs text-slate-500">{patient.diagnosis}</p>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-6 rounded-2xl">
-                <h3 className="font-black text-xl mb-4">Current Care Status</h3>
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white/10 backdrop-blur p-4 rounded-xl">
-                        <p className="text-xs text-blue-200 mb-1">Assigned Nurse</p>
-                        <p className="font-black text-lg">Maria Gonzalez</p>
-                    </div>
-                    <div className="bg-white/10 backdrop-blur p-4 rounded-xl">
-                        <p className="text-xs text-blue-200 mb-1">Next Visit</p>
-                        <p className="font-black text-lg">Tomorrow 7 AM</p>
-                    </div>
-                </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl border border-slate-100">
-                <h3 className="font-black text-slate-900 mb-4">Vital Signs History</h3>
-                <div className="space-y-3">
-                    {vitalsHistory.map((vital, i) => (
-                        <div key={i} className="p-4 bg-slate-50 rounded-xl">
-                            <div className="mb-3">
-                                <span className="font-bold text-slate-900 text-sm">{vital.date}</span>
-                                <span className="text-xs text-emerald-600 ml-2 font-bold">Normal Range</span>
-                            </div>
-                            <div className="grid grid-cols-4 gap-2 mb-2">
-                                <div className="text-center p-2 bg-white rounded">
-                                    <div className="text-xs text-slate-400">BP Sys</div>
-                                    <div className="font-black text-slate-900">{vital.sys}</div>
-                                </div>
-                                <div className="text-center p-2 bg-white rounded">
-                                    <div className="text-xs text-slate-400">BP Dia</div>
-                                    <div className="font-black text-slate-900">{vital.dia}</div>
-                                </div>
-                                <div className="text-center p-2 bg-white rounded">
-                                    <div className="text-xs text-slate-400">SpO2</div>
-                                    <div className="font-black text-slate-900">{vital.spo2}%</div>
-                                </div>
-                                <div className="text-center p-2 bg-white rounded">
-                                    <div className="text-xs text-slate-400">HR</div>
-                                    <div className="font-black text-slate-900">{vital.hr}</div>
-                                </div>
-                            </div>
-                            <p className="text-xs text-slate-600 italic">{vital.note}</p>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl flex items-center gap-4">
-                <div className="h-12 w-12 bg-white rounded-lg flex items-center justify-center text-blue-600">
-                    <ShieldAlert size={24} />
-                </div>
-                <div>
-                    <h4 className="font-black text-blue-900 text-sm">Protected Health Information</h4>
-                    <p className="text-xs text-blue-800">Secured under Colombian Law 1581 (Habeas Data)</p>
-                </div>
-            </div>
-        </div>
-    );
-}

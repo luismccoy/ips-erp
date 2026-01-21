@@ -9,7 +9,7 @@ import type { Tenant } from '../types';
  */
 export function useAuth() {
     const [user, setUser] = useState<any>(null); // Replace 'any' with proper Cognito user type if available
-    const [role, setRole] = useState<'admin' | 'nurse' | null>(null);
+    const [role, setRole] = useState<'admin' | 'nurse' | 'family' | null>(null);
     const [tenant, setTenant] = useState<Tenant | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -64,7 +64,7 @@ export function useAuth() {
     }
 
     // Manual overrides for demo/mocking purposes
-    const setDemoState = (newRole: 'admin' | 'nurse', newTenant: Tenant) => {
+    const setDemoState = (newRole: 'admin' | 'nurse' | 'family', newTenant: Tenant) => {
         setRole(newRole);
         setTenant(newTenant);
     };

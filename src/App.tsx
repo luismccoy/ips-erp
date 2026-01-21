@@ -8,6 +8,7 @@ import { TENANTS } from './data/mock-data';
 // Lazy loaded components for performance
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const SimpleNurseApp = lazy(() => import('./components/SimpleNurseApp'));
+const FamilyPortal = lazy(() => import('./components/FamilyPortal'));
 
 // Loading Fallback Component
 const PageLoader = () => (
@@ -34,10 +35,10 @@ export default function App() {
   useEffect(() => {
     if (role === 'admin') setView('dashboard');
     if (role === 'nurse') setView('nurse');
+    if (role === 'family') setView('family');
+
     if (!role) {
       setView('login');
-      // Only show landing if appropriate (e.g. initial load)
-      // For simplicity, we keep showLanding logic as is unless user logs out
     }
 
     if (role && tenant) {
@@ -73,8 +74,17 @@ export default function App() {
     trackEvent('Demo Login Used', { role: 'admin' });
   };
 
-  // NOTE: Logic to select role if unspecified but logged in can be handled here
-  // For this refactor, we simplify: if useAuth says admin, show admin. 
+  const handleDemoNurse = () => {
+    setDemoState('nurse', TENANTS[0]);
+    setShowLanding(false);
+    trackEvent('Demo Login Used', { role: 'nurse' });
+  };
+
+  const handleDemoFamily = () => {
+    setDemoState('family', TENANTS[0]);
+    setShowLanding(false);
+    trackEvent('Demo Login Used', { role: 'family' });
+  };
 
   if (loading) {
     return (
@@ -140,13 +150,27 @@ export default function App() {
               {isSigningIn ? 'Signing in...' : 'Enter Platform'}
             </button>
 
-            <div className="pt-4 border-t border-slate-50">
+            <div className="pt-4 border-t border-slate-50 space-y-2">
               <button
                 type="button"
                 onClick={handleDemoAdmin}
-                className="w-full py-4 text-xs font-bold text-slate-400 uppercase hover:text-[#2563eb] transition-colors"
+                className="w-full py-3 text-xs font-bold text-slate-400 uppercase hover:text-[#2563eb] hover:bg-slate-50 rounded-xl transition-all"
               >
-                Skip to Demo (Mock Auth)
+                Demo as Admin
+              </button>
+              <button
+                type="button"
+                onClick={handleDemoNurse}
+                className="w-full py-3 text-xs font-bold text-slate-400 uppercase hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all"
+              >
+                Demo as Nurse
+              </button>
+              <button
+                type="button"
+                onClick={handleDemoFamily}
+                className="w-full py-3 text-xs font-bold text-slate-400 uppercase hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+              >
+                Demo as Family
               </button>
             </div>
           </form>
@@ -158,11 +182,9 @@ export default function App() {
   // Use Suspense to handle loading state of lazy components
   return (
     <Suspense fallback={<PageLoader />}>
-      {role === 'nurse' ? (
-        <SimpleNurseApp onLogout={handleLogout} />
-      ) : (
-        <AdminDashboard view={view} setView={setView} onLogout={handleLogout} tenant={tenant} />
-      )}
+      {role === 'nurse' && <SimpleNurseApp onLogout={handleLogout} />}
+      {role === 'family' && <FamilyPortal onLogout={handleLogout} />}
+      {role === 'admin' && <AdminDashboard view={view} setView={setView} onLogout={handleLogout} tenant={tenant} />}
     </Suspense>
   );
 }
