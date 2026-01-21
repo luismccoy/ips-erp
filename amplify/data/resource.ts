@@ -191,6 +191,7 @@ const schema = a.schema({
     // CUSTOM QUERIES (Lambda Functions)
     // ============================================
 
+    // AI-powered roster generation
     generateRoster: a.query()
         .arguments({
             nurses: a.json(),
@@ -199,6 +200,26 @@ const schema = a.schema({
         .returns(a.json())
         .authorization(allow => [allow.authenticated()])
         .handler(a.handler.function('roster-architect')),
+
+    // RIPS compliance validation
+    validateRIPS: a.query()
+        .arguments({
+            billingRecord: a.json()
+        })
+        .returns(a.json())
+        .authorization(allow => [allow.authenticated()])
+        .handler(a.handler.function('rips-validator')),
+
+    // AI-powered billing defense letter generation
+    generateGlosaDefense: a.query()
+        .arguments({
+            billingRecord: a.json(),
+            patientHistory: a.json(),
+            clinicalNotes: a.json()
+        })
+        .returns(a.json())
+        .authorization(allow => [allow.authenticated()])
+        .handler(a.handler.function('glosa-defender')),
 });
 
 export type Schema = ClientSchema<typeof schema>;

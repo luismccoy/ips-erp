@@ -286,3 +286,253 @@ npx ampx deploy --branch main
 **Issues:** Check CloudWatch Logs  
 **Schema Changes:** Edit `amplify/data/resource.ts`  
 **Redeploy:** `npx ampx sandbox --once`
+
+
+---
+
+## Lambda Functions (Custom Queries)
+
+### 1. generateRoster
+**Purpose:** AI-powered nurse shift assignment optimization
+
+**Handler:** `amplify/functions/roster-architect/handler.ts`  
+**Model:** Claude 3.5 Sonnet (AWS Bedrock)  
+**Timeout:** 60 seconds
+
+**Input:**
+```typescript
+{
+  nurses: Array<{
+    id: string;
+    name: string;
+    skills: string[];
+    locationLat: number;
+    locationLng: number;
+  }>;
+  unassignedShifts: Array<{
+    id: string;
+    patientId: string;
+    scheduledTime: string;
+    requiredSkills?: string[];
+    locationLat: number;
+    locationLng: number;
+  }>;
+}
+```
+
+**Output:**
+```typescript
+{
+  assignments: Array<{
+    shiftId: string;
+    nurseId: string;
+  }>;
+}
+```
+
+**Algorithm:**
+- Matches nurse skills to shift requirements
+- Minimizes travel distance using GPS coordinates
+- Optimizes for continuity of care
+- Falls back to empty assignments on error
+
+**Usage:**
+```graphql
+query GenerateRoster($nurses: AWSJSON!, $shifts: AWSJSON!) {
+  generateRoster(nurses: $nurses, unassignedShifts: $shifts)
+}
+```
+
+---
+
+### 2. validateRIPS
+**Purpose:** Colombian health ministry compliance validation (Resolución 2275)
+
+**Handler:** `amplify/functions/rips-validator/handler.ts`  
+**Timeout:** 30 seconds
+
+**Input:**
+```typescript
+{
+  billingRecord: {
+    date: string;           // ISO 8601 format (YYYY-MM-DD)
+    procedures: string[];   // CUPS codes (6 digits)
+    diagnosis: string;      // ICD-10 code (e.g., A00.0)
+    eps: string;           // Health insurance provider
+    totalAmount?: number;
+    patientId?: string;
+    shiftId?: string;
+  }
+}
+```
+
+**Output:**
+```typescript
+{
+  isValid: boolean;
+  errors: Array<{
+    field: string;
+    message: string;
+  }>;
+  warnings: string[];
+}
+```
+
+**Validation Rules:**
+1. **Required fields:** date, procedures, diagnosis, eps
+2. **Date format:** ISO 8601 (YYYY-MM-DD), not in future
+3. **CUPS codes:** 6-digit format (Colombian procedure codes)
+4. **ICD-10 codes:** Letter + 2 digits + optional decimal (e.g., A00, A00.0)
+5. **EPS validation:** Minimum 3 characters, warns if not in common list
+6. **Amount validation:** Cannot be negative, warns if zero
+
+**Usage:**
+```graphql
+query ValidateRIPS($record: AWSJSON!) {
+  validateRIPS(billingRecord: $record)
+}
+```
+
+**Example:**
+```json
+{
+  "billingRecord": {
+    "date": "2026-01-21",
+    "procedures": ["890201", "890301"],
+    "diagnosis": "I10.0",
+    "eps": "SURA",
+    "totalAmount": 150000,
+    "patientId": "patient-123",
+    "shiftId": "shift-456"
+  }
+}
+```
+
+---
+
+### 3. generateGlosaDefense
+**Purpose:** AI-powered billing dispute defense letter generation
+
+**Handler:** `amplify/functions/glosa-defender/handler.ts`  
+**Model:** Claude 3.5 Sonnet (AWS Bedrock)  
+**Timeout:** 60 seconds
+
+**Input:**
+```typescript
+{
+  billingRecord: {
+    id: string;
+    date: string;
+    procedures: string[];
+    diagnosis: string;
+    eps: string;
+    totalAmount: number;
+    rejectionReason: string;
+  };
+  patientHistory: {
+    name: string;
+    age?: number;
+    diagnosis: string;
+    vitalSigns: Array<{
+      date: string;
+      sys: number;
+      dia: number;
+      spo2: number;
+      hr: number;
+      note?: string;
+    }>;
+  };
+  clinicalNotes: string[];
+}
+```
+
+**Output:**
+```typescript
+{
+  success: boolean;
+  defenseLetter: string;      // Professional letter in Spanish
+  generatedAt: string;        // ISO timestamp
+  model?: string;             // AI model used
+  error?: string;             // Error message if failed
+}
+```
+
+**Features:**
+- Generates professional defense letters in Spanish
+- Cites Colombian health regulations (Resolución 3100, Ley 100)
+- Provides clinical justification using patient vital signs
+- References shift clinical notes
+- Argues against rejection reason
+- Formal letter structure (date, recipient, subject, body, closing)
+- Fallback template if AI fails
+
+**Usage:**
+```graphql
+query GenerateGlosaDefense(
+  $record: AWSJSON!
+  $history: AWSJSON!
+  $notes: AWSJSON!
+) {
+  generateGlosaDefense(
+    billingRecord: $record
+    patientHistory: $history
+    clinicalNotes: $notes
+  )
+}
+```
+
+**Example:**
+```json
+{
+  "billingRecord": {
+    "id": "bill-123",
+    "date": "2026-01-15",
+    "procedures": ["890201"],
+    "diagnosis": "I10.0",
+    "eps": "SURA",
+    "totalAmount": 150000,
+    "rejectionReason": "Procedimiento no autorizado previamente"
+  },
+  "patientHistory": {
+    "name": "María González",
+    "age": 68,
+    "diagnosis": "Hipertensión arterial",
+    "vitalSigns": [
+      {
+        "date": "2026-01-15",
+        "sys": 160,
+        "dia": 95,
+        "spo2": 96,
+        "hr": 88,
+        "note": "Paciente con cefalea intensa"
+      }
+    ]
+  },
+  "clinicalNotes": [
+    "Control de signos vitales por hipertensión descompensada",
+    "Administración de medicación antihipertensiva"
+  ]
+}
+```
+
+---
+
+## Phase 3 Status
+
+✅ **Completed:**
+1. RIPS Validator Lambda function
+2. Glosa Defender Lambda function  
+3. Custom queries added to GraphQL schema
+4. Backend configuration updated
+5. File count: 10/10 (target achieved)
+
+**Lambda Functions Summary:**
+- `roster-architect` - AI-powered shift assignment (60s timeout)
+- `rips-validator` - Colombian compliance validation (30s timeout)
+- `glosa-defender` - AI billing defense letters (60s timeout)
+
+**Next Steps:**
+- Deploy Phase 3 functions to AWS
+- Test Lambda functions in AWS console
+- Verify AI model access (Bedrock permissions)
+- Test end-to-end workflows

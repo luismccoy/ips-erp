@@ -31,12 +31,25 @@ inclusion: always
 - ❌ Multiple documentation files
 - ❌ Unnecessary abstractions
 
-## Current Phase: Phase 2 - Schema Testing
-**Status:** Schema implemented, needs automated testing
+## Current Phase: Phase 3 - Lambda Functions
+**Status:** Schema deployed and tested (Phase 2 complete)
+
+**Goal:** Implement 2 critical Lambda functions for AI-powered operations
 
 **Tasks:**
-1. Create automated test script
-2. Deploy backend to AWS
-3. Run automated tests
-4. Document results in API_DOCUMENTATION.md
-5. Commit and move to Phase 3
+1. Implement RIPS Validator function (Colombian compliance)
+2. Implement Glosa Defender function (AI billing defense)
+3. Add custom queries to data/resource.ts
+4. Test functions in AWS console (Lambda, CloudWatch)
+5. Update API_DOCUMENTATION.md with function details
+6. Commit Phase 3 completion
+
+**File Count Target:** 7 → 10 files (3 new files allowed)
+
+**New Files:**
+- `amplify/functions/rips-validator/handler.ts`
+- `amplify/functions/rips-validator/resource.ts`
+- `amplify/functions/glosa-defender/handler.ts`
+- `amplify/functions/glosa-defender/resource.ts`
+
+**Note:** Roster Architect already exists from Phase 2, may need enhancement
