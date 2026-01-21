@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "IPS ERP Backend Context Reminder",
+  "description": "Displays critical implementation rules and workflow guidance when starting work on IPS ERP backend. Reminds about file limits, testing approach, and current phase.",
+  "version": "1",
+  "when": {
+    "type": "promptSubmit"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Before starting work on IPS ERP backend, review these critical points:\n\n📌 QUICK RULES:\n- Work ONLY on current phase in KIRO_IMPLEMENTATION_GUIDE.md\n- Target: ~10 files total in amplify/ directory\n- NO test files, NO scripts, NO utils/helpers\n- Test manually in AWS console (AppSync, Lambda, CloudWatch)\n- Document ONLY in docs/API_DOCUMENTATION.md\n\n🚦 WORKFLOW:\n1. Check current phase in Implementation Guide\n2. Edit ONLY files specified for that phase\n3. Test in AWS console\n4. Update API_DOCUMENTATION.md\n5. Mark phase complete and commit\n\n🚨 STOP if creating:\n- Test files (*.test.ts, *.spec.ts)\n- Deployment scripts\n- Helper/utility directories\n- Multiple documentation files\n- Files outside amplify/ (except docs/)\n\n✅ Current Phase: Check KIRO_IMPLEMENTATION_GUIDE.md\n✅ File Count: Run `find amplify/ -type f | wc -l` (should be ~10)\n\nRemember: Amplify does most work. Keep it simple. Less is more."
+  }
+}

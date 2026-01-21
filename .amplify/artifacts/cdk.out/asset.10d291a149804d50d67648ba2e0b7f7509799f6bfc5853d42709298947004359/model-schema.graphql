@@ -1,0 +1,159 @@
+enum ShiftStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum InventoryStatus {
+  IN_STOCK
+  LOW_STOCK
+  OUT_OF_STOCK
+}
+
+enum BillingStatus {
+  PENDING
+  SUBMITTED
+  APPROVED
+  REJECTED
+  PAID
+}
+
+type Tenant @model @auth(rules: [{allow: private}])
+{
+  name: String!
+  nit: String!
+  nurses: [Nurse] @hasMany(references: ["tenantId"])
+  patients: [Patient] @hasMany(references: ["tenantId"])
+  shifts: [Shift] @hasMany(references: ["tenantId"])
+  inventory: [InventoryItem] @hasMany(references: ["tenantId"])
+  vitalSigns: [VitalSigns] @hasMany(references: ["tenantId"])
+  billingRecords: [BillingRecord] @hasMany(references: ["tenantId"])
+}
+
+type Patient @model @auth(rules: [{allow: owner, ownerField: "tenantId", identityClaim: "custom:tenantId"}])
+{
+  tenantId: ID!
+  tenant: Tenant @belongsTo(references: ["tenantId"])
+  name: String!
+  documentId: String!
+  age: Int
+  address: String
+  diagnosis: String
+  medications: [Medication]
+  tasks: [Task]
+  shifts: [Shift] @hasMany(references: ["patientId"])
+  vitalSigns: [VitalSigns] @hasMany(references: ["patientId"])
+}
+
+type Nurse @model @auth(rules: [{allow: owner, ownerField: "tenantId", identityClaim: "custom:tenantId"}])
+{
+  tenantId: ID!
+  tenant: Tenant @belongsTo(references: ["tenantId"])
+  name: String!
+  email: String
+  role: NurseRole
+  skills: [String]
+  locationLat: Float
+  locationLng: Float
+  shifts: [Shift] @hasMany(references: ["nurseId"])
+}
+
+type Shift @model @auth(rules: [{allow: owner, ownerField: "tenantId", identityClaim: "custom:tenantId"}])
+{
+  tenantId: ID!
+  tenant: Tenant @belongsTo(references: ["tenantId"])
+  nurseId: ID!
+  nurse: Nurse @belongsTo(references: ["nurseId"])
+  patientId: ID!
+  patient: Patient @belongsTo(references: ["patientId"])
+  scheduledTime: String!
+  status: ShiftStatus
+  clinicalNote: String
+  startedAt: AWSDateTime
+  completedAt: AWSDateTime
+  startLat: Float
+  startLng: Float
+}
+
+type InventoryItem @model @auth(rules: [{allow: owner, ownerField: "tenantId", identityClaim: "custom:tenantId"}])
+{
+  tenantId: ID!
+  tenant: Tenant @belongsTo(references: ["tenantId"])
+  name: String!
+  sku: String
+  quantity: Int! @default(value: "0")
+  unit: String
+  reorderLevel: Int! @default(value: "10")
+  status: InventoryStatus
+  expiryDate: String
+}
+
+type VitalSigns @model @auth(rules: [{allow: owner, ownerField: "tenantId", identityClaim: "custom:tenantId"}])
+{
+  tenantId: ID!
+  tenant: Tenant @belongsTo(references: ["tenantId"])
+  patientId: ID!
+  patient: Patient @belongsTo(references: ["patientId"])
+  date: String!
+  sys: Int!
+  dia: Int!
+  spo2: Int!
+  hr: Int!
+  temperature: Float
+  weight: Float
+  note: String
+}
+
+type BillingRecord @model @auth(rules: [{allow: owner, ownerField: "tenantId", identityClaim: "custom:tenantId"}])
+{
+  tenantId: ID!
+  tenant: Tenant @belongsTo(references: ["tenantId"])
+  patientId: ID!
+  shiftId: ID
+  date: String!
+  procedures: [String]
+  diagnosis: String!
+  eps: String!
+  totalAmount: Float!
+  ripsGenerated: Boolean! @default(value: "false")
+  status: BillingStatus
+  submittedAt: AWSDateTime
+  approvedAt: AWSDateTime
+  rejectionReason: String
+  glosaDefense: String
+}
+
+type Medication 
+{
+  id: ID!
+  name: String!
+  dosage: String!
+  frequency: String!
+  prescribedBy: String
+  status: MedicationStatus
+}
+
+type Task 
+{
+  id: ID!
+  patientId: ID!
+  description: String!
+  completed: Boolean!
+  dueDate: String
+}
+
+enum NurseRole {
+  ADMIN
+  NURSE
+  COORDINATOR
+}
+
+enum MedicationStatus {
+  ACTIVE
+  DISCONTINUED
+}
+
+type Query {
+  generateRoster(nurses: AWSJSON, unassignedShifts: AWSJSON): AWSJSON @function(name: "roster-architect") @auth(rules: [{allow: private}])
+}

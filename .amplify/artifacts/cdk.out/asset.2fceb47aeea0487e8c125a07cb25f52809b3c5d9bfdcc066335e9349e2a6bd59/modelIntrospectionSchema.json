@@ -1,0 +1,1287 @@
+{
+    "version": 1,
+    "models": {
+        "Tenant": {
+            "name": "Tenant",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "nit": {
+                    "name": "nit",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "nurses": {
+                    "name": "nurses",
+                    "isArray": true,
+                    "type": {
+                        "model": "Nurse"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "tenantId"
+                        ]
+                    }
+                },
+                "patients": {
+                    "name": "patients",
+                    "isArray": true,
+                    "type": {
+                        "model": "Patient"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "tenantId"
+                        ]
+                    }
+                },
+                "shifts": {
+                    "name": "shifts",
+                    "isArray": true,
+                    "type": {
+                        "model": "Shift"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "tenantId"
+                        ]
+                    }
+                },
+                "inventory": {
+                    "name": "inventory",
+                    "isArray": true,
+                    "type": {
+                        "model": "InventoryItem"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "tenantId"
+                        ]
+                    }
+                },
+                "vitalSigns": {
+                    "name": "vitalSigns",
+                    "isArray": true,
+                    "type": {
+                        "model": "VitalSigns"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "tenantId"
+                        ]
+                    }
+                },
+                "billingRecords": {
+                    "name": "billingRecords",
+                    "isArray": true,
+                    "type": {
+                        "model": "BillingRecord"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "tenantId"
+                        ]
+                    }
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "Tenants",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ],
+            "primaryKeyInfo": {
+                "isCustomPrimaryKey": false,
+                "primaryKeyFieldName": "id",
+                "sortKeyFieldNames": []
+            }
+        },
+        "Patient": {
+            "name": "Patient",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "tenantId": {
+                    "name": "tenantId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "tenant": {
+                    "name": "tenant",
+                    "isArray": false,
+                    "type": {
+                        "model": "Tenant"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "tenantId"
+                        ]
+                    }
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "documentId": {
+                    "name": "documentId",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "age": {
+                    "name": "age",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "address": {
+                    "name": "address",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "diagnosis": {
+                    "name": "diagnosis",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "medications": {
+                    "name": "medications",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "Medication"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "tasks": {
+                    "name": "tasks",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "Task"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "shifts": {
+                    "name": "shifts",
+                    "isArray": true,
+                    "type": {
+                        "model": "Shift"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "patientId"
+                        ]
+                    }
+                },
+                "vitalSigns": {
+                    "name": "vitalSigns",
+                    "isArray": true,
+                    "type": {
+                        "model": "VitalSigns"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "patientId"
+                        ]
+                    }
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "Patients",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "provider": "userPools",
+                                "ownerField": "tenantId",
+                                "allow": "owner",
+                                "identityClaim": "custom:tenantId",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ],
+            "primaryKeyInfo": {
+                "isCustomPrimaryKey": false,
+                "primaryKeyFieldName": "id",
+                "sortKeyFieldNames": []
+            }
+        },
+        "Nurse": {
+            "name": "Nurse",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "tenantId": {
+                    "name": "tenantId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "tenant": {
+                    "name": "tenant",
+                    "isArray": false,
+                    "type": {
+                        "model": "Tenant"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "tenantId"
+                        ]
+                    }
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "email": {
+                    "name": "email",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "role": {
+                    "name": "role",
+                    "isArray": false,
+                    "type": {
+                        "enum": "NurseRole"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "skills": {
+                    "name": "skills",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "locationLat": {
+                    "name": "locationLat",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "locationLng": {
+                    "name": "locationLng",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "shifts": {
+                    "name": "shifts",
+                    "isArray": true,
+                    "type": {
+                        "model": "Shift"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "nurseId"
+                        ]
+                    }
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "Nurses",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "provider": "userPools",
+                                "ownerField": "tenantId",
+                                "allow": "owner",
+                                "identityClaim": "custom:tenantId",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ],
+            "primaryKeyInfo": {
+                "isCustomPrimaryKey": false,
+                "primaryKeyFieldName": "id",
+                "sortKeyFieldNames": []
+            }
+        },
+        "Shift": {
+            "name": "Shift",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "tenantId": {
+                    "name": "tenantId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "tenant": {
+                    "name": "tenant",
+                    "isArray": false,
+                    "type": {
+                        "model": "Tenant"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "tenantId"
+                        ]
+                    }
+                },
+                "nurseId": {
+                    "name": "nurseId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "nurse": {
+                    "name": "nurse",
+                    "isArray": false,
+                    "type": {
+                        "model": "Nurse"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "nurseId"
+                        ]
+                    }
+                },
+                "patientId": {
+                    "name": "patientId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "patient": {
+                    "name": "patient",
+                    "isArray": false,
+                    "type": {
+                        "model": "Patient"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "patientId"
+                        ]
+                    }
+                },
+                "scheduledTime": {
+                    "name": "scheduledTime",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "ShiftStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "clinicalNote": {
+                    "name": "clinicalNote",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "startedAt": {
+                    "name": "startedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "completedAt": {
+                    "name": "completedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "startLat": {
+                    "name": "startLat",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "startLng": {
+                    "name": "startLng",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "Shifts",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "provider": "userPools",
+                                "ownerField": "tenantId",
+                                "allow": "owner",
+                                "identityClaim": "custom:tenantId",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ],
+            "primaryKeyInfo": {
+                "isCustomPrimaryKey": false,
+                "primaryKeyFieldName": "id",
+                "sortKeyFieldNames": []
+            }
+        },
+        "InventoryItem": {
+            "name": "InventoryItem",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "tenantId": {
+                    "name": "tenantId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "tenant": {
+                    "name": "tenant",
+                    "isArray": false,
+                    "type": {
+                        "model": "Tenant"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "tenantId"
+                        ]
+                    }
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "sku": {
+                    "name": "sku",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "quantity": {
+                    "name": "quantity",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "unit": {
+                    "name": "unit",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "reorderLevel": {
+                    "name": "reorderLevel",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "InventoryStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "expiryDate": {
+                    "name": "expiryDate",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "InventoryItems",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "provider": "userPools",
+                                "ownerField": "tenantId",
+                                "allow": "owner",
+                                "identityClaim": "custom:tenantId",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ],
+            "primaryKeyInfo": {
+                "isCustomPrimaryKey": false,
+                "primaryKeyFieldName": "id",
+                "sortKeyFieldNames": []
+            }
+        },
+        "VitalSigns": {
+            "name": "VitalSigns",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "tenantId": {
+                    "name": "tenantId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "tenant": {
+                    "name": "tenant",
+                    "isArray": false,
+                    "type": {
+                        "model": "Tenant"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "tenantId"
+                        ]
+                    }
+                },
+                "patientId": {
+                    "name": "patientId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "patient": {
+                    "name": "patient",
+                    "isArray": false,
+                    "type": {
+                        "model": "Patient"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "patientId"
+                        ]
+                    }
+                },
+                "date": {
+                    "name": "date",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "sys": {
+                    "name": "sys",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "dia": {
+                    "name": "dia",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "spo2": {
+                    "name": "spo2",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "hr": {
+                    "name": "hr",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "temperature": {
+                    "name": "temperature",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "weight": {
+                    "name": "weight",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "note": {
+                    "name": "note",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "VitalSigns",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "provider": "userPools",
+                                "ownerField": "tenantId",
+                                "allow": "owner",
+                                "identityClaim": "custom:tenantId",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ],
+            "primaryKeyInfo": {
+                "isCustomPrimaryKey": false,
+                "primaryKeyFieldName": "id",
+                "sortKeyFieldNames": []
+            }
+        },
+        "BillingRecord": {
+            "name": "BillingRecord",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "tenantId": {
+                    "name": "tenantId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "tenant": {
+                    "name": "tenant",
+                    "isArray": false,
+                    "type": {
+                        "model": "Tenant"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "tenantId"
+                        ]
+                    }
+                },
+                "patientId": {
+                    "name": "patientId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "shiftId": {
+                    "name": "shiftId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "date": {
+                    "name": "date",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "procedures": {
+                    "name": "procedures",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "diagnosis": {
+                    "name": "diagnosis",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "eps": {
+                    "name": "eps",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalAmount": {
+                    "name": "totalAmount",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "ripsGenerated": {
+                    "name": "ripsGenerated",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "BillingStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "submittedAt": {
+                    "name": "submittedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "approvedAt": {
+                    "name": "approvedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rejectionReason": {
+                    "name": "rejectionReason",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "glosaDefense": {
+                    "name": "glosaDefense",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "BillingRecords",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "provider": "userPools",
+                                "ownerField": "tenantId",
+                                "allow": "owner",
+                                "identityClaim": "custom:tenantId",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ],
+            "primaryKeyInfo": {
+                "isCustomPrimaryKey": false,
+                "primaryKeyFieldName": "id",
+                "sortKeyFieldNames": []
+            }
+        }
+    },
+    "enums": {
+        "ShiftStatus": {
+            "name": "ShiftStatus",
+            "values": [
+                "PENDING",
+                "IN_PROGRESS",
+                "COMPLETED",
+                "CANCELLED"
+            ]
+        },
+        "InventoryStatus": {
+            "name": "InventoryStatus",
+            "values": [
+                "IN_STOCK",
+                "LOW_STOCK",
+                "OUT_OF_STOCK"
+            ]
+        },
+        "BillingStatus": {
+            "name": "BillingStatus",
+            "values": [
+                "PENDING",
+                "SUBMITTED",
+                "APPROVED",
+                "REJECTED",
+                "PAID"
+            ]
+        },
+        "NurseRole": {
+            "name": "NurseRole",
+            "values": [
+                "ADMIN",
+                "NURSE",
+                "COORDINATOR"
+            ]
+        },
+        "MedicationStatus": {
+            "name": "MedicationStatus",
+            "values": [
+                "ACTIVE",
+                "DISCONTINUED"
+            ]
+        }
+    },
+    "nonModels": {
+        "Medication": {
+            "name": "Medication",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "dosage": {
+                    "name": "dosage",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "frequency": {
+                    "name": "frequency",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "prescribedBy": {
+                    "name": "prescribedBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "MedicationStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "Task": {
+            "name": "Task",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "patientId": {
+                    "name": "patientId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "description": {
+                    "name": "description",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "completed": {
+                    "name": "completed",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "dueDate": {
+                    "name": "dueDate",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        }
+    },
+    "queries": {
+        "generateRoster": {
+            "name": "generateRoster",
+            "isArray": false,
+            "type": "AWSJSON",
+            "isRequired": false,
+            "arguments": {
+                "nurses": {
+                    "name": "nurses",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false
+                },
+                "unassignedShifts": {
+                    "name": "unassignedShifts",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false
+                }
+            }
+        }
+    }
+}
