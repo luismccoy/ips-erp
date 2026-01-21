@@ -1,18 +1,21 @@
-import { generateClient } from 'aws-amplify/data';
-import { type Schema } from '../amplify/data/resource';
-import { Amplify } from 'aws-amplify';
-import outputs from '../amplify_outputs.json';
+// import { generateClient } from 'aws-amplify/data';
+import { generateMockClient } from './mock-client';
+import type { AmplifyUser } from './types';
+// import { type Schema } from '../amplify/data/resource';
+// import { Amplify } from 'aws-amplify';
+// import outputs from '../amplify_outputs.json';
 
 // Configure Amplify with mock outputs
-Amplify.configure(outputs);
+// Amplify.configure(outputs);
 
 // Export the typed client
-export const client = generateClient<Schema>({
-    authMode: 'userPool',
-});
+// export const client = generateClient<Schema>({
+//    authMode: 'userPool',
+// });
+export const client = generateMockClient();
 
 // Mock User Context for development
-export const MOCK_USER = {
+export const MOCK_USER: AmplifyUser = {
     username: 'nurse-maria',
     attributes: {
         sub: 'mock-user-id-123',
@@ -20,3 +23,4 @@ export const MOCK_USER = {
         'custom:tenantId': 'tenant-bogota-01'
     }
 };
+

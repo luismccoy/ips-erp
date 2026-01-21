@@ -1,0 +1,245 @@
+.adminRoster {
+    margin-bottom: 2rem;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.rosterGrid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 1.5rem;
+}
+
+.rosterCard {
+    background: white;
+    border-radius: var(--radius-xl, 1rem);
+    padding: 2rem;
+    box-shadow: var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1));
+    position: relative;
+    overflow: hidden;
+}
+
+.rosterCard:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #7c3aed, #a78bfa, #7c3aed);
+    background-size: 200% 100%;
+    animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+.rosterHeader {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.headerIcon {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--radius-lg, 0.5rem);
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3);
+}
+
+.headerIcon svg {
+    width: 32px;
+    height: 32px;
+    stroke: white;
+}
+
+.headerText h2 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.75rem;
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.headerText p {
+    margin: 0;
+    color: var(--neutral-600, #475569);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.rosterDescription {
+    background: var(--neutral-50, #f8fafc);
+    border-left: 4px solid #7c3aed;
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius-md, 0.375rem);
+    margin-bottom: 1.5rem;
+}
+
+.statsRow {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.statItem {
+    flex: 1;
+    background: var(--neutral-50, #f8fafc);
+    padding: 1rem;
+    border-radius: var(--radius-md, 0.375rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.statLabel {
+    font-size: 0.75rem;
+    color: var(--neutral-500, #64748b);
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.statValue {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--neutral-900, #0f172a);
+}
+
+.assignmentsSection {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px dashed var(--neutral-200, #e2e8f0);
+}
+
+.assignmentsList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.assignmentItem {
+    background: var(--primary-50, #eff6ff);
+    border: 1px solid var(--primary-200, #bfdbfe);
+    padding: 1rem;
+    border-radius: var(--radius-md, 0.375rem);
+}
+
+.itemInfo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.shiftId {
+    font-weight: 700;
+    color: var(--primary-700, #1d4ed8);
+}
+
+.nurseName {
+    font-weight: 700;
+    color: var(--neutral-900, #0f172a);
+}
+
+.arrowIcon {
+    width: 20px;
+    height: 20px;
+    color: var(--primary-400, #60a5fa);
+}
+
+.glassCard {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--neutral-200, #e2e8f0);
+    border-radius: var(--radius-xl, 1rem);
+    padding: 1.5rem;
+    height: 100%;
+}
+
+.sidebarList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.sidebarItem {
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--neutral-100, #f1f5f9);
+}
+
+.sidebarItem:last-child {
+    border-bottom: none;
+}
+
+.sidebarItem .name {
+    font-weight: 600;
+    color: var(--neutral-800, #1e293b);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.skillsTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.skillTag {
+    font-size: 0.7rem;
+    background: var(--neutral-100, #f1f5f9);
+    color: var(--neutral-600, #475569);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+@media (max-width: 1024px) {
+    .rosterGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .rosterHeader {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .statsRow {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .rosterCard {
+        padding: 1.5rem;
+    }
+}

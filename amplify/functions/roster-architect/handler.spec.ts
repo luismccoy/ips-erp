@@ -35,7 +35,7 @@ describe('Roster Architect AI', () => {
         });
 
         // 3. Invoke Handler
-        // @ts-ignore - Partial mock of the event
+        // @ts-expect-error - Partial mock of the event
         const result = await handler(event);
 
         // 4. Assertions
@@ -54,7 +54,7 @@ describe('Roster Architect AI', () => {
     it('should handle AI failure gracefully', async () => {
         bedrockMock.on(InvokeModelCommand).rejects(new Error('Bedrock Throttling'));
 
-        // @ts-ignore
+        // @ts-expect-error - Testing valid failure case
         const result = await handler({ arguments: { nurses: [], unassignedShifts: [] } });
 
         expect(result).toEqual({ assignments: [] });
