@@ -1,73 +1,81 @@
-# React + TypeScript + Vite
+# IPS ERP - Enterprise Resource Planning
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A comprehensive ERP solution for Home Care IPS (Instituciones Prestadoras de Salud) in Colombia, built with modern web technologies.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Role-Based Access**: Admin and Nurse portals with distinct functionalities.
+- **Rostering**: AI-assisted shift management and nurse routing.
+- **Inventory Management**: Real-time stock tracking with thresholds and expiry alerts.
+- **Clinical Audit**: Resolution 3100 compliance tracking and risk analysis.
+- **Billing**: RIPS validation and Glosa defense using AI suggestions.
+- **Family Portal**: Secure access for family members to view patient status.
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend**: React 18, Vite, TypeScript
+- **Styling**: Vanilla CSS Modules (zero-runtime overhead)
+- **Authentication**: AWS Amplify (Cognito)
+- **Icons**: Lucide React
+- **Analytics**: Custom lightweight hook
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Prerequisites
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- Node.js (v18+)
+- AWS Account (for backend features)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Installation
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1.  Clone the repository:
+    ```bash
+    git clone https://github.com/your-org/ips-erp.git
+    cd ips-erp
+    ```
+
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+
+3.  Configure Environment:
+    Copy `.env.example` to `.env` and fill in your AWS credentials.
+    ```bash
+    cp .env.example .env
+    ```
+
+4.  Start Development Server:
+    ```bash
+    npm run dev
+    ```
+
+### Building for Production
+
+```bash
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Project Structure
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+src/
+├── components/         # React Components
+│   ├── ui/             # Reusable UI Elements (Button, Card, Input)
+│   └── ...             # Dashboard Views (AdminRoster, etc.)
+├── config/             # Environment & App Config
+├── data/               # Mock Data & Constants
+├── hooks/              # Custom Hooks (useAuth, useForm, useAnalytics)
+├── types/              # TypeScript Interfaces
+└── App.tsx             # Main Entry Point with Lazy Loading
+```
+
+## Key Decisions
+
+- **CSS Modules**: Chosen for style isolation and performance over CSS-in-JS libraries.
+- **Lazy Loading**: Admin and Nurse dashboards are code-split to improve initial load time.
+- **Zero `any`**: The codebase enforces strict type safety.
+
+## License
+
+Private Property of IPS Organization.

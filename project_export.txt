@@ -1,0 +1,2958 @@
+Project Structure:
+src/
+├── assets/
+├── components/
+│   ├── AdminRoster.tsx
+│   ├── EvidenceGenerator.tsx
+│   ├── InventoryDashboard.tsx
+│   ├── LandingPage.tsx
+│   ├── NurseDashboard.tsx
+│   ├── PatientDashboard.tsx
+│   ├── ReportingDashboard.tsx
+│   ├── RipsValidator.tsx
+│   ├── ShiftAction.tsx
+│   └── StaffManagement.tsx
+├── services/
+│   └── integration-layer.ts
+├── App.css
+├── App.tsx
+├── amplify-utils.ts
+├── index.css
+├── main.tsx
+├── mock-client.ts
+└── types.ts
+
+=== FILENAME ===
+package.json
+=== END ===
+{
+  "name": "ips-erp",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@aws-amplify/backend": "^1.20.0",
+    "@aws-amplify/backend-cli": "^1.8.2",
+    "@aws-sdk/client-bedrock-runtime": "^3.972.0",
+    "aws-amplify": "^6.15.10",
+    "lucide-react": "^0.562.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.12.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@tailwindcss/vite": "^4.1.18",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "autoprefixer": "^10.4.23",
+    "aws-sdk-client-mock": "^4.1.0",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vercel": "^50.4.8",
+    "vite": "^7.2.4",
+    "vitest": "^4.0.17"
+  }
+}
+
+=== END ===
+
+=== FILENAME ===
+src/App.tsx
+import { useState, useEffect } from 'react';
+import {
+  FileText, AlertTriangle, DollarSign, Activity, Calendar,
+  ShieldAlert, LogOut, Stethoscope, Briefcase,
+  Sparkles, ClipboardCheck,
+  Package, User
+} from 'lucide-react';
+// import { generateClient } from 'aws-amplify/data';
+import { signIn, signOut, fetchUserAttributes, getCurrentUser } from 'aws-amplify/auth';
+// import type { Schema } from '../amplify/data/resource';
+import LandingPage from './components/LandingPage';
+
+// const client = generateClient<Schema>();
+
+// Mock data constants
+const TENANTS = [{ id: 'ips-vida', name: 'IPS Vida en Casa S.A.S', nit: '900.123.456-1' }];
+const PATIENTS = [
+  { id: 'p1', name: 'Roberto Gomez', address: 'Calle 100 #15-20', diagnosis: 'I10 - Hipertensión', eps: 'Sanitas', riskLevel: 'High' },
+  { id: 'p2', name: 'Ana Martinez', address: 'Carrera 7 #80-45', diagnosis: 'E11 - Diabetes', eps: 'Sura', riskLevel: 'Medium' }
+];
+
+const SHIFTS = [
+  { id: 's1', patientId: 'p1', nurseId: 'n1', date: '2026-01-21', startTime: '07:00', status: 'Pending' },
+  { id: 's2', patientId: 'p2', nurseId: 'n2', date: '2026-01-21', startTime: '14:00', status: 'Completed' }
+];
+
+const INVENTORY = [
+  { id: 'i1', name: 'Jeringa 5cc', quantity: 45, reorderThreshold: 20, unit: 'Unidad' },
+  { id: 'i2', name: 'Guantes Nitrilo', quantity: 120, reorderThreshold: 50, unit: 'Par' },
+  { id: 'i3', name: 'Gasa Estéril', quantity: 12, reorderThreshold: 30, unit: 'Paquete' }
+];
+
+const VITALS_HISTORY = [
+  { patientId: 'p1', date: '2026-01-20', sys: 145, dia: 90, spo2: 95, hr: 78, note: 'Paciente estable con medicación ajustada' },
+  { patientId: 'p1', date: '2026-01-18', sys: 150, dia: 95, spo2: 94, hr: 82, note: 'Presión arterial ligeramente elevada' },
+  { patientId: 'p2', date: '2026-01-20', sys: 125, dia: 80, spo2: 97, hr: 72, note: 'Niveles de glucosa controlados' }
+];
+
+// Main App Component
+export default function App() {
+  const [currentTenant, setCurrentTenant] = useState<any>(null);
+  const [currentUserRole, setCurrentUserRole] = useState<any>(null);
+  const [view, setView] = useState('login');
+  const [isLoading, setIsLoading] = useState(true);
+  const [showLanding, setShowLanding] = useState(true);
+
+  // Login state
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [isSigningIn, setIsSigningIn] = useState(false);
+
+  useEffect(() => {
+    checkUser();
+  }, []);
+
+  async function checkUser() {
+    try {
+      const user = await getCurrentUser();
+      if (user) {
+        await fetchUserAttributes();
+        setCurrentTenant(TENANTS[0]);
+        setCurrentUserRole('admin');
+        setView('dashboard');
+        setShowLanding(false);
+      }
+    } catch (e) {
+      console.log('No user logged in');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleSignIn(e: React.FormEvent) {
+    e.preventDefault();
+    setIsSigningIn(true);
+    setAuthError('');
+    try {
+      await signIn({ username: email, password });
+      await checkUser();
+    } catch (e: any) {
+      setAuthError(e.message || 'Login failed');
+    } finally {
+      setIsSigningIn(false);
+    }
+  }
+
+  async function handleLogout() {
+    try {
+      await signOut();
+      setCurrentTenant(null);
+      setCurrentUserRole(null);
+      setView('login');
+      setShowLanding(true);
+    } catch (e) {
+      console.error('Error signing out', e);
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-center">
+          <div className="h-12 w-12 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Loading IPS ERP...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (showLanding && !currentTenant) {
+    return <LandingPage onEnterApp={() => setShowLanding(false)} />;
+  }
+
+  if (!currentTenant) {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center p-4 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-100/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-100/50 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+
+        <div className="max-w-md w-full bg-white p-12 rounded-[40px] shadow-2xl border border-slate-100 z-10">
+          <div className="flex justify-center mb-10">
+            <div className="h-20 w-20 bg-[#2563eb] rounded-[24px] flex items-center justify-center shadow-xl">
+              <Activity className="h-10 w-10 text-white" />
+            </div>
+          </div>
+          <h1 className="text-3xl font-black text-center text-slate-900 tracking-tighter mb-2 italic">IPS ERP</h1>
+          <p className="text-center text-slate-400 font-bold uppercase tracking-[2px] text-xs mb-12">Organization Access</p>
+
+          <form onSubmit={handleSignIn} className="space-y-6">
+            <div>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[3px] px-2 mb-2 block">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full p-6 border border-slate-100 rounded-[24px] focus:outline-none focus:ring-4 focus:ring-blue-50 focus:border-[#2563eb] transition-all font-bold text-slate-700"
+                placeholder="nombre@ips.com"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[3px] px-2 mb-2 block">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-6 border border-slate-100 rounded-[24px] focus:outline-none focus:ring-4 focus:ring-blue-50 focus:border-[#2563eb] transition-all font-bold text-slate-700"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+
+            {authError && <p className="text-rose-500 text-xs font-bold text-center">{authError}</p>}
+
+            <button
+              type="submit"
+              disabled={isSigningIn}
+              className="w-full py-6 bg-[#2563eb] text-white rounded-[24px] font-black uppercase tracking-[4px] shadow-xl hover:bg-blue-700 transition-all disabled:opacity-50"
+            >
+              {isSigningIn ? 'Signing in...' : 'Enter Platform'}
+            </button>
+
+            <div className="pt-4 border-t border-slate-50">
+              <button
+                type="button"
+                onClick={() => setCurrentTenant(TENANTS[0])}
+                className="w-full py-4 text-xs font-bold text-slate-400 uppercase hover:text-[#2563eb] transition-colors"
+              >
+                Skip to Demo (Mock Auth)
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentUserRole) {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white p-12 rounded-[40px] shadow-2xl text-center">
+          <h2 className="text-2xl font-black text-slate-900 mb-8">Select Role</h2>
+          <div className="space-y-4">
+            <button
+              onClick={() => { setCurrentUserRole('admin'); setView('dashboard'); }}
+              className="w-full p-8 border-2 border-slate-100 rounded-3xl hover:border-[#2563eb] hover:bg-blue-50 transition-all flex items-center gap-6"
+            >
+              <div className="h-16 w-16 bg-indigo-100 rounded-2xl flex items-center justify-center text-[#4f46e5]">
+                <Briefcase size={28} />
+              </div>
+              <div className="text-left">
+                <h3 className="font-black text-slate-900">Admin Dashboard</h3>
+                <p className="text-sm text-slate-500">Office Management</p>
+              </div>
+            </button>
+            <button
+              onClick={() => { setCurrentUserRole('nurse'); setView('nurse'); }}
+              className="w-full p-8 border-2 border-slate-100 rounded-3xl hover:border-emerald-200 hover:bg-emerald-50 transition-all flex items-center gap-6"
+            >
+              <div className="h-16 w-16 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600">
+                <Stethoscope size={28} />
+              </div>
+              <div className="text-left">
+                <h3 className="font-black text-slate-900">Nurse App</h3>
+                <p className="text-sm text-slate-500">Field Operations</p>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (currentUserRole === 'nurse') {
+    return <SimpleNurseApp onLogout={handleLogout} />;
+  }
+
+  return <AdminDashboard view={view} setView={setView} onLogout={handleLogout} tenant={currentTenant} />;
+}
+
+// Simplified Admin Dashboard Component
+function AdminDashboard({ view, setView, onLogout, tenant }: any) {
+  return (
+    <div className="flex h-screen bg-[#f8fafc]">
+      <aside className="w-64 bg-slate-900 text-white flex flex-col">
+        <div className="p-6 border-b border-slate-800">
+          <div className="flex items-center gap-2">
+            <div className="h-10 w-10 bg-[#2563eb] rounded-xl flex items-center justify-center">
+              <Activity size={22} />
+            </div>
+            <div>
+              <span className="font-black text-lg">IPS ERP</span>
+              <p className="text-xs text-slate-500">Enterprise</p>
+            </div>
+          </div>
+        </div>
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+          <NavItem icon={Activity} label="Dashboard" active={view === 'dashboard'} onClick={() => setView('dashboard')} />
+          <NavItem icon={ClipboardCheck} label="Clinical Audit" active={view === 'audit'} onClick={() => setView('audit')} />
+          <NavItem icon={Package} label="Inventory" active={view === 'inventory'} onClick={() => setView('inventory')} />
+          <NavItem icon={Calendar} label="Rostering" active={view === 'roster'} onClick={() => setView('roster')} />
+          <NavItem icon={ShieldAlert} label="Compliance" active={view === 'compliance'} onClick={() => setView('compliance')} />
+          <NavItem icon={FileText} label="Billing & RIPS" active={view === 'billing'} onClick={() => setView('billing')} />
+          <div className="pt-4 mt-4 border-t border-slate-800">
+            <NavItem icon={User} label="Family Portal" active={view === 'family'} onClick={() => setView('family')} />
+          </div>
+        </nav>
+        <div className="p-4 border-t border-slate-800">
+          <div className="p-4 bg-slate-800/40 rounded-2xl mb-4">
+            <p className="text-xs font-black text-slate-500 uppercase">License</p>
+            <p className="text-sm text-white font-bold truncate">{tenant?.name}</p>
+          </div>
+          <button onClick={onLogout} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+            <LogOut size={16} /> Logout
+          </button>
+        </div>
+      </aside>
+      <main className="flex-1 overflow-y-auto">
+        <header className="bg-white/80 backdrop-blur-md border-b border-slate-100 px-8 py-4 flex justify-between items-center sticky top-0 z-20">
+          <h2 className="text-2xl font-black text-slate-900">
+            {view === 'dashboard' && 'Business Overview'}
+            {view === 'audit' && 'Clinical Audit'}
+            {view === 'inventory' && 'Inventory Management'}
+            {view === 'roster' && 'Rostering'}
+            {view === 'compliance' && 'Compliance (Res 3100)'}
+            {view === 'billing' && 'Billing & RIPS'}
+            {view === 'family' && 'Family Portal'}
+          </h2>
+          <div className="flex items-center gap-4">
+            <span className="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-xs font-bold">Res 3100 Compliant</span>
+            <div className="h-10 w-10 bg-slate-900 rounded-xl flex items-center justify-center text-white font-bold">A</div>
+          </div>
+        </header>
+        <div className="p-8">
+          {view === 'dashboard' && <DashboardView />}
+          {view === 'audit' && <AuditView />}
+          {view === 'inventory' && <InventoryView />}
+          {view === 'roster' && <RosterView />}
+          {view === 'compliance' && <ComplianceView />}
+          {view === 'billing' && <BillingView />}
+          {view === 'family' && <FamilyView />}
+        </div>
+      </main>
+    </div>
+  );
+}
+
+function NavItem({ icon: Icon, label, active, onClick }: any) {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${active ? 'bg-[#2563eb] text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+        }`}
+    >
+      <Icon size={18} />
+      <span className="text-sm font-bold">{label}</span>
+    </button>
+  );
+}
+
+function DashboardView() {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-3 gap-6">
+        {[
+          { label: 'Revenue', value: '$42.5M COP', change: '+12%', color: 'blue' },
+          { label: 'Shifts', value: '485/500', change: '98%', color: 'purple' },
+          { label: 'Stock Alerts', value: '3 Items', change: 'Low', color: 'red' }
+        ].map((kpi, i) => (
+          <div key={i} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+            <div className="flex justify-between items-start mb-4">
+              <div className={`p-2 bg-${kpi.color}-50 rounded-lg`}>
+                <DollarSign className={`h-5 w-5 text-${kpi.color}-600`} />
+              </div>
+              <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">{kpi.change}</span>
+            </div>
+            <div className="text-2xl font-black text-slate-900">{kpi.value}</div>
+            <div className="text-xs text-slate-400 uppercase font-bold">{kpi.label}</div>
+          </div>
+        ))}
+      </div>
+      <div className="bg-white p-6 rounded-2xl border border-slate-100">
+        <h3 className="font-black text-slate-900 mb-4">Recent Activity</h3>
+        <div className="space-y-3">
+          {['Maria G. checked in', 'Carlos R. completed shift', 'Inventory updated'].map((activity, i) => (
+            <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+              <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-xs">
+                {activity[0]}
+              </div>
+              <span className="text-sm text-slate-700 font-medium">{activity}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AuditView() {
+  return (
+    <div className="bg-white p-6 rounded-2xl border border-slate-100">
+      <h3 className="font-black text-slate-900 mb-4 flex items-center gap-2">
+        Clinical Audit <span className="bg-indigo-50 text-indigo-600 px-2 py-1 rounded text-xs font-bold">AI Analysis</span>
+      </h3>
+      <div className="space-y-4">
+        {PATIENTS.map(patient => (
+          <div key={patient.id} className="p-4 border border-slate-100 rounded-xl hover:shadow-md transition-all">
+            <div className="flex justify-between items-start">
+              <div>
+                <h4 className="font-bold text-slate-900">{patient.name}</h4>
+                <p className="text-sm text-slate-500">{patient.diagnosis}</p>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-xs font-bold ${patient.riskLevel === 'High' ? 'bg-red-50 text-red-600' : 'bg-yellow-50 text-yellow-600'
+                }`}>{patient.riskLevel} Risk</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function InventoryView() {
+  return (
+    <div className="bg-white p-6 rounded-2xl border border-slate-100">
+      <h3 className="font-black text-slate-900 mb-4">Inventory (Farmacia)</h3>
+      <div className="space-y-3">
+        {INVENTORY.map(item => (
+          <div key={item.id} className="p-4 border border-slate-100 rounded-xl flex justify-between items-center">
+            <div>
+              <h4 className="font-bold text-slate-900">{item.name}</h4>
+              <p className="text-sm text-slate-500">{item.unit}</p>
+            </div>
+            <div className="text-right">
+              <div className={`text-lg font-black ${item.quantity < item.reorderThreshold ? 'text-red-600' : 'text-green-600'}`}>
+                {item.quantity}
+              </div>
+              <div className="text-xs text-slate-400">Threshold: {item.reorderThreshold}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RosterView() {
+  return (
+    <div className="bg-white p-6 rounded-2xl border border-slate-100">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="font-black text-slate-900">Shift Management</h3>
+        <button className="bg-[#2563eb] text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-blue-700 transition-all flex items-center gap-2">
+          <Sparkles size={16} /> Optimize Routes (AI)
+        </button>
+      </div>
+      <div className="space-y-3">
+        {SHIFTS.map(shift => {
+          const patient = PATIENTS.find(p => p.id === shift.patientId);
+          return (
+            <div key={shift.id} className="p-4 border border-slate-100 rounded-xl">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h4 className="font-bold text-slate-900">{patient?.name}</h4>
+                  <p className="text-sm text-slate-500">{shift.date} at {shift.startTime}</p>
+                </div>
+                <span className={`px-3 py-1 rounded-full text-xs font-bold ${shift.status === 'Completed' ? 'bg-green-50 text-green-600' : 'bg-yellow-50 text-yellow-600'
+                  }`}>{shift.status}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function ComplianceView() {
+  return (
+    <div className="space-y-6">
+      <div className="bg-white p-6 rounded-2xl border border-slate-100">
+        <h3 className="font-black text-slate-900 mb-4">Resolución 3100 Compliance</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="p-4 bg-green-50 border border-green-100 rounded-xl">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center text-green-600">
+                <ShieldAlert size={20} />
+              </div>
+              <div>
+                <div className="text-2xl font-black text-green-900">98%</div>
+                <div className="text-xs text-green-600 font-bold">Audit Score</div>
+              </div>
+            </div>
+          </div>
+          <div className="p-4 bg-red-50 border border-red-100 rounded-xl">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="h-10 w-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
+                <AlertTriangle size={20} />
+              </div>
+              <div>
+                <div className="text-2xl font-black text-red-900">2</div>
+                <div className="text-xs text-red-600 font-bold">Critical Alerts</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="bg-white p-6 rounded-2xl border border-slate-100">
+        <h4 className="font-bold text-slate-900 mb-3">Equipment Status</h4>
+        <div className="space-y-2">
+          {['Tensiómetro Digital', 'Oxímetro de Pulso', 'Termómetro'].map((item, i) => (
+            <div key={i} className="p-3 bg-slate-50 rounded-xl flex justify-between items-center">
+              <span className="text-sm font-medium text-slate-700">{item}</span>
+              <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">Calibrated</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BillingView() {
+  return (
+    <div className="space-y-6">
+      <div className="bg-white p-6 rounded-2xl border border-slate-100">
+        <h3 className="font-black text-slate-900 mb-4">Billing Batches</h3>
+        <div className="space-y-3">
+          {[1025, 1026].map(id => (
+            <div key={id} className="p-4 border border-slate-100 rounded-xl flex justify-between items-center">
+              <div>
+                <h4 className="font-bold text-slate-900">EPS Sanitas (Batch FE-{id})</h4>
+                <p className="text-xs text-emerald-600 font-bold">✓ Validation Passed</p>
+              </div>
+              <button className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold hover:bg-slate-900 hover:text-white transition-all">
+                Inspect Packet
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-6">
+        <div className="bg-white p-6 rounded-2xl border border-red-100">
+          <h4 className="font-bold text-slate-900 mb-3 flex items-center gap-2">
+            <Sparkles className="text-purple-500" size={18} /> Glosa Defense Engine
+          </h4>
+          <div className="p-4 bg-rose-50 border border-rose-100 rounded-xl">
+            <div className="mb-2">
+              <span className="text-xs font-bold text-red-600">Glosa: $4.2M COP</span>
+              <span className="text-xs text-rose-400 ml-2">EPS SURA</span>
+            </div>
+            <h5 className="font-black text-rose-950 text-sm mb-2">Rejection Code: 402</h5>
+            <p className="text-xs text-rose-900 mb-3">Claims rejected due to "unjustified home care extension"</p>
+            <button className="bg-rose-900 text-white px-4 py-2 rounded-xl text-xs font-black hover:bg-rose-800 transition-all w-full">
+              Generate Rebuttal (AI)
+            </button>
+          </div>
+        </div>
+        <div className="bg-white p-6 rounded-2xl border border-slate-100">
+          <h4 className="font-bold text-slate-900 mb-3">RIPS 2275 Validator</h4>
+          <div className="p-8 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200 text-center">
+            <div className="h-16 w-16 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 mx-auto mb-3">
+              <ClipboardCheck size={32} />
+            </div>
+            <p className="font-bold text-slate-800 mb-2">Drop RIPS Bundle</p>
+            <p className="text-xs text-slate-400">JSON validation vs MinSalud API</p>
+            <button className="mt-4 bg-[#2563eb] text-white px-6 py-2 rounded-xl text-xs font-bold hover:bg-blue-700 transition-all">
+              Select Files
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FamilyView() {
+  const [selectedPatient, setSelectedPatient] = useState(PATIENTS[0]);
+  const vitalsHistory = VITALS_HISTORY.filter(v => v.patientId === selectedPatient.id);
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white p-6 rounded-2xl border border-slate-100">
+        <h3 className="font-black text-slate-900 mb-4">Select Family Member</h3>
+        <div className="grid grid-cols-2 gap-4">
+          {PATIENTS.map(patient => (
+            <div
+              key={patient.id}
+              onClick={() => setSelectedPatient(patient)}
+              className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedPatient.id === patient.id ? 'border-[#2563eb] bg-blue-50' : 'border-slate-100 hover:border-slate-200'
+                }`}
+            >
+              <h4 className="font-bold text-slate-900">{patient.name}</h4>
+              <p className="text-xs text-slate-500">{patient.diagnosis}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-6 rounded-2xl">
+        <h3 className="font-black text-xl mb-4">Current Care Status</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-white/10 backdrop-blur p-4 rounded-xl">
+            <p className="text-xs text-blue-200 mb-1">Assigned Nurse</p>
+            <p className="font-black text-lg">Maria Gonzalez</p>
+          </div>
+          <div className="bg-white/10 backdrop-blur p-4 rounded-xl">
+            <p className="text-xs text-blue-200 mb-1">Next Visit</p>
+            <p className="font-black text-lg">Tomorrow 7 AM</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white p-6 rounded-2xl border border-slate-100">
+        <h3 className="font-black text-slate-900 mb-4">Vital Signs History</h3>
+        <div className="space-y-3">
+          {vitalsHistory.map((vital, i) => (
+            <div key={i} className="p-4 bg-slate-50 rounded-xl">
+              <div className="mb-3">
+                <span className="font-bold text-slate-900 text-sm">{vital.date}</span>
+                <span className="text-xs text-emerald-600 ml-2 font-bold">Normal Range</span>
+              </div>
+              <div className="grid grid-cols-4 gap-2 mb-2">
+                <div className="text-center p-2 bg-white rounded">
+                  <div className="text-xs text-slate-400">BP Sys</div>
+                  <div className="font-black text-slate-900">{vital.sys}</div>
+                </div>
+                <div className="text-center p-2 bg-white rounded">
+                  <div className="text-xs text-slate-400">BP Dia</div>
+                  <div className="font-black text-slate-900">{vital.dia}</div>
+                </div>
+                <div className="text-center p-2 bg-white rounded">
+                  <div className="text-xs text-slate-400">SpO2</div>
+                  <div className="font-black text-slate-900">{vital.spo2}%</div>
+                </div>
+                <div className="text-center p-2 bg-white rounded">
+                  <div className="text-xs text-slate-400">HR</div>
+                  <div className="font-black text-slate-900">{vital.hr}</div>
+                </div>
+              </div>
+              <p className="text-xs text-slate-600 italic">{vital.note}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl flex items-center gap-4">
+        <div className="h-12 w-12 bg-white rounded-lg flex items-center justify-center text-blue-600">
+          <ShieldAlert size={24} />
+        </div>
+        <div>
+          <h4 className="font-black text-blue-900 text-sm">Protected Health Information</h4>
+          <p className="text-xs text-blue-800">Secured under Colombian Law 1581 (Habeas Data)</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SimpleNurseApp({ onLogout }: any) {
+  const [activeTab, setActiveTab] = useState('route');
+
+  return (
+    <div className="min-h-screen bg-slate-900 text-white">
+      <header className="bg-slate-800 p-4 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <Activity size={24} className="text-[#2563eb]" />
+          <span className="font-black text-lg">IPS ERP</span>
+        </div>
+        <button onClick={onLogout} className="text-sm text-slate-400 hover:text-white">
+          <LogOut size={20} />
+        </button>
+      </header>
+
+      <div className="p-4">
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => setActiveTab('route')}
+            className={`flex-1 py-3 rounded-xl font-bold ${activeTab === 'route' ? 'bg-[#2563eb] text-white' : 'bg-slate-800 text-slate-400'
+              }`}
+          >
+            My Route
+          </button>
+          <button
+            onClick={() => setActiveTab('stats')}
+            className={`flex-1 py-3 rounded-xl font-bold ${activeTab === 'stats' ? 'bg-[#2563eb] text-white' : 'bg-slate-800 text-slate-400'
+              }`}
+          >
+            Stats
+          </button>
+        </div>
+
+        {activeTab === 'route' && (
+          <div className="space-y-4">
+            {SHIFTS.map(shift => {
+              const patient = PATIENTS.find(p => p.id === shift.patientId);
+              return (
+                <div key={shift.id} className="bg-slate-800 p-4 rounded-xl">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-bold text-white">{patient?.name}</h3>
+                    <span className={`px-2 py-1 rounded text-xs font-bold ${shift.status === 'Completed' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'
+                      }`}>{shift.status}</span>
+                  </div>
+                  <p className="text-sm text-slate-400 mb-2">{patient?.address}</p>
+                  <p className="text-xs text-slate-500">{shift.startTime}</p>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {activeTab === 'stats' && (
+          <div className="space-y-4">
+            <div className="bg-slate-800 p-6 rounded-xl text-center">
+              <div className="text-4xl font-black text-emerald-400 mb-2">8</div>
+              <div className="text-sm text-slate-400">Shifts This Week</div>
+            </div>
+            <div className="bg-slate-800 p-6 rounded-xl text-center">
+              <div className="text-4xl font-black text-blue-400 mb-2">100%</div>
+              <div className="text-sm text-slate-400">Completion Rate</div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+=== END ===
+
+=== FILENAME ===
+src/main.tsx
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { Amplify } from 'aws-amplify'
+import outputs from '../amplify_outputs.json'
+import './index.css'
+import App from './App.tsx'
+
+Amplify.configure(outputs)
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+
+=== END ===
+
+=== FILENAME ===
+src/components/LandingPage.tsx
+import { useState } from 'react';
+import {
+    Activity, ArrowRight, PlayCircle, Calendar, WifiOff, ShieldCheck,
+    Package, Sparkles, Bot, FileText, Check, CheckCircle2, Lock,
+    Globe, Cloud, X, DollarSign, CalendarCheck, AlertTriangle, Map,
+    Shield, Heart, PlusCircle
+} from 'lucide-react';
+
+export default function LandingPage({ onEnterApp }: { onEnterApp: () => void }) {
+    const [showVideoModal, setShowVideoModal] = useState(false);
+
+    return (
+        <div className="font-sans text-slate-600 bg-slate-50 antialiased">
+            {/* NAVIGATION */}
+            <nav className="fixed w-full z-50 transition-all duration-300 bg-white/70 backdrop-blur-md border-b border-slate-200/50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-between items-center h-20">
+                        <div className="flex items-center gap-2">
+                            <div className="bg-[#2563eb] text-white p-2 rounded-lg">
+                                <Activity className="h-6 w-6" />
+                            </div>
+                            <span className="font-bold text-xl text-slate-900 tracking-tight">IPS ERP</span>
+                        </div>
+                        <div className="hidden md:flex space-x-8">
+                            <a href="#features" className="text-sm font-medium hover:text-[#2563eb] transition-colors">Plataforma</a>
+                            <a href="#ai" className="text-sm font-medium hover:text-[#2563eb] transition-colors flex items-center gap-1">
+                                <Sparkles className="h-3 w-3 text-purple-500" /> Generative AI
+                            </a>
+                            <a href="#infrastructure" className="text-sm font-medium hover:text-[#2563eb] transition-colors">Infrastructure</a>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <button onClick={onEnterApp} className="hidden md:block text-sm font-medium text-slate-900 hover:text-[#2563eb]">Login</button>
+                            <button onClick={onEnterApp} className="bg-slate-900 text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-slate-800 transition-all hover:shadow-lg transform hover:-translate-y-0.5">
+                                Agendar Demo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            {/* HERO SECTION */}
+            <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-slate-50" style={{
+                backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)',
+                backgroundSize: '32px 32px'
+            }}>
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-gradient-to-b from-white to-transparent pointer-events-none"></div>
+
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-[#2563eb] text-xs font-semibold uppercase tracking-wide mb-8">
+                        <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                        </span>
+                        Powered by Generative AI Models
+                    </div>
+
+                    <h1 className="text-5xl md:text-7xl font-bold text-slate-900 tracking-tight mb-6 leading-tight">
+                        No gestione pacientes.<br />
+                        <span className="bg-gradient-to-r from-[#2563eb] to-[#4f46e5] bg-clip-text text-transparent">Gestione su Margen.</span>
+                    </h1>
+
+                    <p className="mt-4 text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed mb-10">
+                        El primer ERP "Admin-First" para Atención Domiciliaria.
+                        Proteja su facturación, elimine glosas y automatice sus turnos con
+                        <strong> Inteligencia Artificial Predictiva</strong>.
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                        <button onClick={onEnterApp} className="w-full sm:w-auto px-8 py-4 bg-[#2563eb] text-white rounded-xl font-semibold shadow-xl shadow-blue-500/20 hover:bg-[#1d4ed8] transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2">
+                            Comenzar Prueba Gratis
+                            <ArrowRight className="h-4 w-4" />
+                        </button>
+                        <button onClick={() => setShowVideoModal(true)} className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-xl font-semibold hover:bg-slate-50 transition-all flex items-center justify-center gap-2 group">
+                            <div className="bg-slate-100 rounded-full p-1 group-hover:scale-110 transition-transform">
+                                <PlayCircle className="h-5 w-5 text-slate-600" />
+                            </div>
+                            Ver Demo (30s)
+                        </button>
+                    </div>
+
+                    {/* ANIMATED UI MOCKUP */}
+                    <div className="mt-20 relative max-w-5xl mx-auto transform hover:scale-[1.01] transition-transform duration-700">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur opacity-20 animate-pulse"></div>
+                        <div className="relative bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden h-[500px] md:h-[600px] flex flex-col">
+                            {/* Browser Chrome */}
+                            <div className="flex items-center gap-2 px-4 py-3 border-b bg-slate-50 shrink-0">
+                                <div className="flex gap-1.5">
+                                    <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                                    <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                                    <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                                </div>
+                                <div className="flex-1 text-center">
+                                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-white border rounded-md text-[10px] text-slate-400 font-mono shadow-sm">
+                                        <Lock className="h-3 w-3" /> dashboard.ipserp.com/admin
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex flex-1 overflow-hidden">
+                                {/* Sidebar */}
+                                <div className="hidden md:flex w-64 bg-slate-900 flex-col p-4 border-r border-slate-800 shrink-0">
+                                    <div className="flex items-center gap-3 mb-8">
+                                        <div className="h-8 w-8 bg-blue-600 rounded-lg"></div>
+                                        <div className="h-4 w-24 bg-slate-700 rounded"></div>
+                                    </div>
+                                    <div className="space-y-3">
+                                        <div className="h-10 w-full bg-slate-800 rounded-lg"></div>
+                                        <div className="h-10 w-full bg-transparent border border-slate-800 rounded-lg"></div>
+                                        <div className="h-10 w-full bg-transparent border border-slate-800 rounded-lg"></div>
+                                    </div>
+                                </div>
+                                {/* Main Area */}
+                                <div className="flex-1 bg-slate-50 p-6 md:p-8 overflow-hidden">
+                                    <div className="flex justify-between items-end mb-8">
+                                        <div>
+                                            <h2 className="text-2xl font-bold text-slate-800">Resumen General</h2>
+                                            <p className="text-sm text-slate-500">Bienvenido de nuevo, Dr. Martinez</p>
+                                        </div>
+                                    </div>
+                                    {/* Cards */}
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="p-2 bg-blue-50 rounded-lg text-blue-600"><DollarSign className="h-5 w-5" /></div>
+                                                <span className="text-xs text-green-600 font-bold bg-green-50 px-2 py-1 rounded-full">+12%</span>
+                                            </div>
+                                            <div className="text-2xl font-bold text-slate-800 mb-1">$42.5M</div>
+                                            <div className="text-xs text-slate-400">Facturación Mes</div>
+                                        </div>
+                                        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="p-2 bg-purple-50 rounded-lg text-purple-600"><CalendarCheck className="h-5 w-5" /></div>
+                                                <span className="text-xs text-slate-500 font-medium">98%</span>
+                                            </div>
+                                            <div className="text-2xl font-bold text-slate-800 mb-1">485/500</div>
+                                            <div className="text-xs text-slate-400">Turnos Completados</div>
+                                        </div>
+                                        <div className="bg-white p-5 rounded-xl border border-red-100 shadow-sm relative overflow-hidden">
+                                            <div className="absolute inset-0 bg-red-50/50 animate-pulse"></div>
+                                            <div className="relative z-10">
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <div className="p-2 bg-red-100 rounded-lg text-red-600"><AlertTriangle className="h-5 w-5" /></div>
+                                                    <span className="text-xs text-red-600 font-bold bg-white px-2 py-1 rounded-full border border-red-100">Acción Requerida</span>
+                                                </div>
+                                                <div className="text-lg font-bold text-slate-800 mb-1">2 Glosas</div>
+                                                <div className="text-xs text-red-500 font-medium">Falta Soporte GPS</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* SOCIAL PROOF */}
+            <div className="border-y border-slate-100 bg-white py-10">
+                <div className="max-w-7xl mx-auto px-4 text-center">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Confían en IPS ERP más de 50 agencias en Colombia</p>
+                    <div className="flex justify-center items-center gap-12 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+                        <div className="text-xl font-bold text-slate-800 flex items-center gap-2"><Shield className="fill-current" /> IPS Cuidar</div>
+                        <div className="text-xl font-bold text-slate-800 flex items-center gap-2"><Heart className="fill-current" /> SaludCasa</div>
+                        <div className="text-xl font-bold text-slate-800 flex items-center gap-2"><PlusCircle className="fill-current" /> MedicaLife</div>
+                        <div className="text-xl font-bold text-slate-800 flex items-center gap-2"><Activity className="fill-current" /> VitalHome</div>
+                    </div>
+                </div>
+            </div>
+
+            {/* BENTO GRID (FEATURES) */}
+            <section id="features" className="py-24 bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center max-w-3xl mx-auto mb-16">
+                        <h2 className="text-base font-bold text-[#2563eb] uppercase tracking-wide">La Suite Completa</h2>
+                        <p className="mt-2 text-3xl font-bold text-slate-900 sm:text-4xl">Todo lo que su IPS necesita para escalar.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 auto-rows-[300px]">
+                        {/* Card 1: Rostering (Large) */}
+                        <div className="md:col-span-2 row-span-1 bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:border-blue-200 transition-all group overflow-hidden relative">
+                            <div className="absolute right-0 top-0 w-1/2 h-full bg-gradient-to-l from-blue-50 to-transparent"></div>
+                            <div className="relative z-10 max-w-md">
+                                <div className="h-12 w-12 bg-white rounded-xl shadow-sm flex items-center justify-center mb-6 text-[#2563eb]">
+                                    <Calendar className="h-6 w-6" />
+                                </div>
+                                <h3 className="text-2xl font-bold text-slate-900 mb-2">Rostering Inteligente</h3>
+                                <p className="text-slate-500">Nuestro agente de IA analiza la ubicación del paciente y las habilidades de la enfermera para asignar el turno perfecto en segundos. Optimice costos de desplazamiento automáticamente.</p>
+                            </div>
+                            <div className="absolute right-[-40px] bottom-[-40px] w-64 h-64 bg-white rounded-full shadow-2xl border-4 border-white opacity-80 group-hover:scale-105 transition-transform">
+                                <div className="w-full h-full flex items-center justify-center text-slate-200">
+                                    <Map className="h-24 w-24" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Card 2: Offline */}
+                        <div className="bg-slate-900 rounded-3xl p-8 text-white relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 p-32 bg-blue-600 rounded-full filter blur-3xl opacity-20 group-hover:opacity-30 transition-opacity"></div>
+                            <div className="relative z-10">
+                                <div className="h-12 w-12 bg-white/10 rounded-xl backdrop-blur-sm flex items-center justify-center mb-6">
+                                    <WifiOff className="h-6 w-6 text-white" />
+                                </div>
+                                <h3 className="text-xl font-bold mb-2">Modo "Zona Roja"</h3>
+                                <p className="text-slate-400 text-sm">La App de Enfermería funciona 100% offline. Sincronización automática cuando vuelve la señal.</p>
+                            </div>
+                        </div>
+
+                        {/* Card 3: Compliance */}
+                        <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
+                            <div className="h-12 w-12 bg-green-50 rounded-xl flex items-center justify-center mb-6 text-green-600">
+                                <ShieldCheck className="h-6 w-6" />
+                            </div>
+                            <h3 className="text-xl font-bold text-slate-900 mb-2">Habilitación 3100</h3>
+                            <p className="text-slate-500 text-sm">Alertas automáticas de vencimiento de documentos ReTHUS y calibración de equipos biomédicos.</p>
+                        </div>
+
+                        {/* Card 4: Inventory (Large) */}
+                        <div className="md:col-span-2 bg-gradient-to-br from-indigo-50 to-white rounded-3xl p-8 border border-indigo-50 relative overflow-hidden">
+                            <div className="flex flex-col md:flex-row gap-8 items-center h-full">
+                                <div className="flex-1">
+                                    <div className="h-12 w-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-6 text-indigo-600">
+                                        <Package className="h-6 w-6" />
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-slate-900 mb-2">Control de Farmacia</h3>
+                                    <p className="text-slate-500">Kardex Digital. Cada procedimiento registrado descuenta automáticamente los insumos del inventario virtual de la enfermera. Detecte fugas al instante.</p>
+                                </div>
+                                <div className="w-full md:w-1/2 bg-white rounded-xl shadow-lg p-4 border border-slate-100 transform rotate-2 hover:rotate-0 transition-transform">
+                                    <div className="flex justify-between items-center border-b pb-2 mb-2">
+                                        <span className="text-xs font-bold text-slate-400">ITEM</span>
+                                        <span className="text-xs font-bold text-slate-400">STOCK</span>
+                                    </div>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-sm font-medium text-slate-700">Jeringa 5cc</span>
+                                        <span className="text-xs font-bold text-red-500 bg-red-50 px-2 py-1 rounded">Bajo (12)</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm font-medium text-slate-700">Guantes Nitrilo</span>
+                                        <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">OK (45)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* AI SECTION */}
+            <section id="ai" className="py-24 bg-slate-900 text-white relative overflow-hidden">
+                <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600 rounded-full filter blur-[128px] opacity-20"></div>
+                <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600 rounded-full filter blur-[128px] opacity-20"></div>
+
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div className="flex flex-col md:flex-row items-center gap-16">
+                        <div className="flex-1">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-blue-300 text-xs font-bold uppercase mb-6">
+                                <Sparkles className="h-3 w-3" />
+                                Powered by AWS Bedrock
+                            </div>
+                            <h2 className="text-4xl font-bold mb-6">Su Defensa contra las Glosas es una IA Generativa.</h2>
+                            <p className="text-slate-300 text-lg mb-8 leading-relaxed">
+                                Nuestro agente "Glosa Defender" utiliza <strong>Large Language Models (LLMs)</strong> para analizar historiales clínicos y la normativa vigente, redactando justificaciones legales automáticamente ante rechazos de las EPS.
+                            </p>
+                            <ul className="space-y-4 mb-8">
+                                <li className="flex items-start gap-3">
+                                    <CheckCircle2 className="text-green-400 mt-1" />
+                                    <span className="text-slate-300">Validación automática de JSON RIPS (Res 2275).</span>
+                                </li>
+                                <li className="flex items-start gap-3">
+                                    <CheckCircle2 className="text-green-400 mt-1" />
+                                    <span className="text-slate-300">Motores predictivos para auditoría de notas clínicas.</span>
+                                </li>
+                            </ul>
+                            <button onClick={() => setShowVideoModal(true)} className="bg-white text-slate-900 px-6 py-3 rounded-lg font-bold hover:bg-slate-100 transition-colors">
+                                Ver Demo IA
+                            </button>
+                        </div>
+                        <div className="flex-1 w-full">
+                            {/* Chat Interface Mock */}
+                            <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-6">
+                                <div className="space-y-4">
+                                    <div className="flex justify-end">
+                                        <div className="bg-blue-600 text-white rounded-2xl rounded-tr-none px-4 py-3 max-w-xs text-sm">
+                                            La EPS rechazó la factura #1092 por falta de soportes de oxigenoterapia.
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-start">
+                                        <div className="bg-slate-700 text-slate-200 rounded-2xl rounded-tl-none px-4 py-3 max-w-md text-sm shadow-lg">
+                                            <div className="flex items-center gap-2 mb-2 text-blue-400 text-xs font-bold uppercase">
+                                                <Bot className="h-3 w-3" /> Glosa Defender
+                                            </div>
+                                            <p className="mb-3">Analizando historial del paciente Roberto Gomez...</p>
+                                            <p>He generado una carta de justificación citando los registros de SpO2 del 12/01 (88%) y 13/01 (85%), que justifican el soporte según la Res 3100. El PDF está listo para descargar.</p>
+                                            <div className="mt-3 p-2 bg-slate-800 rounded border border-slate-600 flex items-center gap-2 cursor-pointer hover:bg-slate-900">
+                                                <FileText className="text-red-400 h-4 w-4" />
+                                                <span className="text-xs font-bold">Justificacion_Glosa_1092.pdf</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* INFRASTRUCTURE */}
+            <section id="infrastructure" className="py-24 bg-slate-50 border-t border-slate-200">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center max-w-3xl mx-auto mb-12">
+                        <h2 className="text-3xl font-bold text-slate-900">Infraestructura de Clase Mundial</h2>
+                        <p className="mt-4 text-lg text-slate-500">
+                            IPS ERP es un software 100% en la nube, impulsado por el proveedor líder mundial para garantizar que sus datos estén seguros y disponibles 24/7.
+                        </p>
+                    </div>
+
+                    <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8 md:p-12">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                            <div>
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="h-10 w-16 bg-slate-900 rounded flex items-center justify-center text-white font-bold tracking-tighter">AWS</div>
+                                    <span className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Technology Partner</span>
+                                </div>
+                                <h3 className="text-2xl font-bold text-slate-900 mb-4">Cloud-Native Reliability</h3>
+                                <ul className="space-y-4">
+                                    <li className="flex items-start gap-3">
+                                        <div className="bg-green-100 p-1 rounded-full text-green-600 mt-0.5"><Check className="h-4 w-4" /></div>
+                                        <div>
+                                            <span className="font-bold text-slate-800">99.99% SLA Uptime</span>
+                                            <p className="text-sm text-slate-500">Arquitectura sin servidor (Serverless) para máxima disponibilidad.</p>
+                                        </div>
+                                    </li>
+                                    <li className="flex items-start gap-3">
+                                        <div className="bg-green-100 p-1 rounded-full text-green-600 mt-0.5"><Lock className="h-4 w-4" /></div>
+                                        <div>
+                                            <span className="font-bold text-slate-800">Seguridad Grado Hospitalario</span>
+                                            <p className="text-sm text-slate-500">Encriptación AES-256 en reposo y TLS 1.3 en tránsito.</p>
+                                        </div>
+                                    </li>
+                                    <li className="flex items-start gap-3">
+                                        <div className="bg-green-100 p-1 rounded-full text-green-600 mt-0.5"><Globe className="h-4 w-4" /></div>
+                                        <div>
+                                            <span className="font-bold text-slate-800">Residencia de Datos Local</span>
+                                            <p className="text-sm text-slate-500">Cumplimiento de soberanía de datos utilizando AWS Local Zones (Bogotá).</p>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div className="relative">
+                                <div className="absolute inset-0 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl transform rotate-3"></div>
+                                <div className="relative bg-slate-900 rounded-xl p-6 text-white shadow-2xl">
+                                    <div className="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
+                                        <span className="font-mono text-xs text-green-400">● System Operational</span>
+                                        <span className="font-mono text-xs text-slate-400">us-east-1 / bog-1</span>
+                                    </div>
+                                    <div className="space-y-3 font-mono text-xs text-slate-300">
+                                        <div className="flex justify-between"><span>Database Latency</span><span className="text-green-400">12ms</span></div>
+                                        <div className="flex justify-between"><span>Encryption Status</span><span className="text-green-400">Active (KMS)</span></div>
+                                        <div className="flex justify-between"><span>Backup Policy</span><span className="text-blue-400">Hourly (PITR)</span></div>
+                                        <div className="h-1 w-full bg-slate-700 rounded mt-4 overflow-hidden">
+                                            <div className="h-full bg-green-500 w-[98%]"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* FOOTER */}
+            <footer className="bg-white border-t border-slate-200 pt-16 pb-8">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+                        <div className="col-span-2 md:col-span-1">
+                            <div className="flex items-center gap-2 mb-4">
+                                <div className="bg-slate-900 text-white p-1.5 rounded-md">
+                                    <Activity className="h-5 w-5" />
+                                </div>
+                                <span className="font-bold text-lg text-slate-900">IPS ERP</span>
+                            </div>
+                            <p className="text-sm text-slate-500">
+                                Tecnología diseñada en Bogotá para el sector salud colombiano.
+                            </p>
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-slate-900 mb-4">Producto</h4>
+                            <ul className="space-y-2 text-sm text-slate-500">
+                                <li><a href="#" className="hover:text-[#2563eb]">Rostering</a></li>
+                                <li><a href="#" className="hover:text-[#2563eb]">Billing Defense</a></li>
+                                <li><a href="#" className="hover:text-[#2563eb]">App Enfermería</a></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-slate-900 mb-4">Legal</h4>
+                            <ul className="space-y-2 text-sm text-slate-500">
+                                <li><a href="#" className="hover:text-[#2563eb]">Habeas Data</a></li>
+                                <li><a href="#" className="hover:text-[#2563eb]">Términos</a></li>
+                                <li><a href="#" className="hover:text-[#2563eb]">SLA</a></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-slate-900 mb-4">Contacto</h4>
+                            <ul className="space-y-2 text-sm text-slate-500">
+                                <li>ventas@ipserp.com</li>
+                                <li>Bogotá, Colombia</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div className="border-t border-slate-100 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                        <p className="text-xs text-slate-400">© 2026 IPS ERP S.A.S. Todos los derechos reservados.</p>
+                        <div className="flex items-center gap-2 text-xs text-slate-400 font-medium bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
+                            <Cloud className="h-3 w-3" />
+                            Powered by AWS LatAm
+                        </div>
+                    </div>
+                </div>
+            </footer>
+
+            {/* VIDEO MODAL */}
+            {showVideoModal && (
+                <div className="fixed inset-0 z-[60]">
+                    <div className="absolute inset-0 bg-slate-900/90 backdrop-blur-sm" onClick={() => setShowVideoModal(false)}></div>
+                    <div className="absolute inset-0 flex items-center justify-center p-4">
+                        <div className="bg-black w-full max-w-4xl aspect-video rounded-2xl shadow-2xl overflow-hidden relative">
+                            <button onClick={() => setShowVideoModal(false)} className="absolute top-4 right-4 z-10 text-white/50 hover:text-white bg-black/50 hover:bg-black/70 rounded-full p-2 transition-colors">
+                                <X className="h-6 w-6" />
+                            </button>
+                            <video className="w-full h-full object-cover" controls autoPlay>
+                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" type="video/mp4" />
+                                Your browser does not support the video tag.
+                            </video>
+                            <div className="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
+                                <h3 className="text-white font-bold text-xl">IPS ERP Demo</h3>
+                                <p className="text-slate-300 text-sm">Mostrando flujo de Rostering Automático y Validación de RIPS.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+=== END ===
+
+=== FILENAME ===
+src/components/InventoryDashboard.tsx
+import React, { useEffect, useState } from 'react';
+import { client, MOCK_USER } from '../amplify-utils';
+import { type InventoryItem } from '../types';
+
+export const InventoryDashboard: React.FC = () => {
+    const [items, setItems] = useState<InventoryItem[]>([]);
+
+    useEffect(() => {
+        const sub = client.models.Inventory.observeQuery({
+            filter: {
+                tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] }
+            }
+        }).subscribe({
+            next: (data: { items: InventoryItem[] }) => setItems([...data.items]),
+            error: (err: Error) => console.error('Inventory sub error:', err)
+        });
+
+        return () => sub.unsubscribe();
+    }, []);
+
+    const handleAddItem = async () => {
+        const name = prompt("Item Name (e.g., Syringes):");
+        if (!name) return;
+        const threshold = prompt("Reorder Threshold (units):", "10");
+        const expiry = prompt("Expiry Date (YYYY-MM-DD):", "2026-01-01");
+
+        await client.models.Inventory.create({
+            tenantId: MOCK_USER.attributes['custom:tenantId'],
+            name,
+            sku: `SKU-${Date.now().toString().slice(-6)}`,
+            stockCount: 100,
+            unit: 'Unidad',
+            reorderThreshold: parseInt(threshold || '10'),
+            expiryDate: expiry || '2026-01-01'
+        });
+    };
+
+    const getStockStatus = (item: InventoryItem) => {
+        const count = item.stockCount || 0;
+        const threshold = item.reorderThreshold || 20;
+        if (count === 0) return 'out-of-stock';
+        if (count <= threshold) return 'low-stock';
+        return 'in-stock';
+    };
+
+    const isExpiringSoon = (date: string | null | undefined) => {
+        if (!date) return false;
+        const expiryDate = new Date(date);
+        const today = new Date();
+        const diffTime = expiryDate.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays < 90; // Warn if < 3 months
+    };
+
+    const totalItems = items.length;
+    const totalStock = items.reduce((sum, item) => sum + (item.stockCount || 0), 0);
+    const lowStockItems = items.filter(item => getStockStatus(item) !== 'in-stock').length;
+    const expiringSoonCount = items.filter(item => isExpiringSoon(item.expiryDate)).length;
+
+    return (
+        <div className="inventory-dashboard">
+            <div className="inventory-card">
+                <div className="inventory-header">
+                    <div className="header-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M16 21V5C16 4.46957 15.7893 3.96086 15.4142 3.58579C15.0391 3.21071 14.5304 3 14 3H10C9.46957 3 8.96086 3.21071 8.58579 3.58579C8.21071 3.96086 8 4.46957 8 5V21M4 7H20M6 21H18C18.5304 21 19.0391 20.7893 19.4142 20.4142C19.7893 20.0391 20 19.5304 20 19V9C20 8.46957 19.7893 7.96086 19.4142 7.58579C19.0391 7.21071 18.5304 7 18 7H6C5.46957 7 4.96086 7.21071 4.58579 7.58579C4.21071 7.96086 4 8.46957 4 9V19C4 19.5304 4.21071 20.0391 4.58579 20.4142C4.96086 20.7893 5.46957 21 6 21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    </div>
+                    <div className="header-text">
+                        <h2>Farmacia / Inventory</h2>
+                        <p>Gestión de insumos y equipos médicos</p>
+                    </div>
+                    <button className="btn-primary" onClick={handleAddItem}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 5V19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <path d="M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        Nuevo Insumo
+                    </button>
+                </div>
+
+                <div className="stats-grid">
+                    <div className="stat-card">
+                        <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #6366f1, #4f46e5)' }}>
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M20 7H4C2.89543 7 2 7.89543 2 9V19C2 20.1046 2.89543 21 4 21H20C21.1046 21 22 20.1046 22 19V9C22 7.89543 21.1046 7 20 7Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M16 21V5C16 4.46957 15.7893 3.96086 15.4142 3.58579C15.0391 3.21071 14.5304 3 14 3H10C9.46957 3 8.96086 3.21071 8.58579 3.58579C8.21071 3.96086 8 4.46957 8 5V21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </div>
+                        <div className="stat-details">
+                            <div className="stat-value">{totalItems}</div>
+                            <div className="stat-label">Insumos</div>
+                        </div>
+                    </div>
+
+                    <div className="stat-card">
+                        <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #22c55e, #15803d)' }}>
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M21 16V8C20.9996 7.64927 20.9071 7.30481 20.7315 7.00116C20.556 6.69751 20.3037 6.44536 20 6.27L13 2.27C12.696 2.09446 12.3511 2.00205 12 2.00205C11.6489 2.00205 11.304 2.09446 11 2.27L4 6.27C3.69626 6.44536 3.44398 6.69751 3.26846 7.00116C3.09294 7.30481 3.00036 7.64927 3 8V16C3.00036 16.3507 3.09294 16.6952 3.26846 16.9988C3.44398 17.3025 3.69626 17.5546 4 17.73L11 21.73C11.304 21.9055 11.6489 21.9979 12 21.9979C12.3511 21.9979 12.696 21.9055 13 21.73L20 17.73C20.3037 17.5546 20.556 17.3025 20.7315 16.9988C20.9071 16.6952 20.9996 16.3507 21 16Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M3.27002 6.96L12 12.01L20.73 6.96" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M12 22.08V12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </div>
+                        <div className="stat-details">
+                            <div className="stat-value">{totalStock}</div>
+                            <div className="stat-label">Unidades</div>
+                        </div>
+                    </div>
+
+                    <div className="stat-card">
+                        <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #ef4444, #b91c1c)' }}>
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 9V14" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M12 18H12.01" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M10.29 3.86L1.82 18C1.64539 18.3024 1.55299 18.6453 1.55201 18.9945C1.55103 19.3437 1.64151 19.6871 1.81445 19.9905C1.98738 20.2939 2.23675 20.5467 2.53773 20.7239C2.83871 20.901 3.18082 20.9962 3.53002 21H20.47C20.8192 20.9962 21.1613 20.901 21.4623 20.7239C21.7633 20.5467 22.0126 20.2939 22.1856 19.9905C22.3585 19.6871 22.449 19.3437 22.448 18.9945C22.447 18.6453 22.3546 18.3024 22.18 18L13.71 3.86C13.5318 3.56611 13.2807 3.32313 12.9812 3.15449C12.6817 2.98585 12.3438 2.89726 12 2.89726C11.6562 2.89726 11.3183 2.98585 11.0188 3.15449C10.7193 3.32313 10.4682 3.56611 10.29 3.86Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </div>
+                        <div className="stat-details">
+                            <div className="stat-value">{lowStockItems}</div>
+                            <div className="stat-label">Stock Crítico</div>
+                        </div>
+                    </div>
+
+                    <div className="stat-card">
+                        <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <line x1="16" y1="2" x2="16" y2="6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <line x1="8" y1="2" x2="8" y2="6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <line x1="3" y1="10" x2="21" y2="10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </div>
+                        <div className="stat-details">
+                            <div className="stat-value">{expiringSoonCount}</div>
+                            <div className="stat-label">Por Vencer</div>
+                        </div>
+                    </div>
+                </div>
+
+                {items.length === 0 ? (
+                    <div className="empty-state">
+                        <svg className="empty-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M16 21V5C16 4.46957 15.7893 3.96086 15.4142 3.58579C15.0391 3.21071 14.5304 3 14 3H10C9.46957 3 8.96086 3.21071 8.58579 3.58579C8.21071 3.96086 8 4.46957 8 5V21M4 7H20M6 21H18C18.5304 21 19.0391 20.7893 19.4142 20.4142C19.7893 20.0391 20 19.5304 20 19V9C20 8.46957 19.7893 7.96086 19.4142 7.58579C19.0391 7.21071 18.5304 7 18 7H6C5.46957 7 4.96086 7.21071 4.58579 7.58579C4.21071 7.96086 4 8.46957 4 9V19C4 19.5304 4.21071 20.0391 4.58579 20.4142C4.96086 20.7893 5.46957 21 6 21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        <h4>No hay insumos</h4>
+                        <p>Comienza agregando el primer ítem al inventario.</p>
+                    </div>
+                ) : (
+                    <div className="table-container shadow-sm profile-border">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>SKU</th>
+                                    <th>Nombre del Ítem</th>
+                                    <th>Cantiad</th>
+                                    <th>Umbral</th>
+                                    <th>Vencimiento</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {items.map((item, index) => {
+                                    const status = getStockStatus(item);
+                                    const expiringSoon = isExpiringSoon(item.expiryDate);
+                                    return (
+                                        <tr key={item.id} className="animate-fade-in" style={{ animationDelay: `${index * 0.05}s` }}>
+                                            <td>
+                                                <code className="sku-code">{item.sku}</code>
+                                            </td>
+                                            <td className="item-name">
+                                                <svg className="item-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M20 7H4C2.89543 7 2 7.89543 2 9V19C2 20.1046 2.89543 21 4 21H20C21.1046 21 22 20.1046 22 19V9C22 7.89543 21.1046 7 20 7Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                    <path d="M16 21V5C16 4.46957 15.7893 3.96086 15.4142 3.58579C15.0391 3.21071 14.5304 3 14 3H10C9.46957 3 8.96086 3.21071 8.58579 3.58579C8.21071 3.96086 8 4.46957 8 5V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                </svg>
+                                                {item.name}
+                                            </td>
+                                            <td>
+                                                <strong>{item.stockCount}</strong> {item.unit}
+                                            </td>
+                                            <td>
+                                                <span className="threshold-val">{item.reorderThreshold}</span>
+                                            </td>
+                                            <td>
+                                                <span className={`expiry-val ${expiringSoon ? 'expiring' : ''}`}>
+                                                    {item.expiryDate || 'N/A'}
+                                                    {expiringSoon && (
+                                                        <svg className="warn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M12 9V14M12 18H12.01M10.29 3.86L1.82 18C1.55 18.3 1.55 18.64 1.81 18.99C1.98 19.34 2.23 19.68 2.53 19.99C2.83 20.29 3.18 20.47 3.53 20.47H20.47C20.81 20.47 21.16 20.29 21.46 19.99C21.76 19.68 22 19.34 22.18 18.99C22.35 18.64 22.44 18.3 22.18 18L13.71 3.86C13.53 3.56 13.28 3.32 12.98 3.15C12.68 2.98 12.34 2.89 12 2.89C11.65 2.89 11.31 2.98 11.01 3.15C10.71 3.32 10.46 3.56 10.29 3.86Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                        </svg>
+                                                    )}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span className={`status-badge ${status}`}>
+                                                    {status === 'in-stock' && 'En Stock'}
+                                                    {status === 'low-stock' && 'Stock Bajo'}
+                                                    {status === 'out-of-stock' && 'Agotado'}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
+
+            <style>{`
+                .inventory-dashboard {
+                    margin-bottom: 2rem;
+                }
+
+                .inventory-card {
+                    background: white;
+                    border-radius: var(--radius-xl);
+                    padding: 2rem;
+                    box-shadow: var(--shadow-lg);
+                }
+
+                .inventory-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 1.5rem;
+                    margin-bottom: 2rem;
+                    flex-wrap: wrap;
+                }
+
+                .header-icon {
+                    width: 60px;
+                    height: 60px;
+                    border-radius: var(--radius-lg);
+                    background: linear-gradient(135deg, #22c55e, #15803d);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-shrink: 0;
+                    box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3);
+                }
+
+                .header-icon svg {
+                    width: 32px;
+                    height: 32px;
+                    stroke: white;
+                }
+
+                .header-text {
+                    flex: 1;
+                }
+
+                .header-text h2 {
+                    margin: 0 0 0.25rem 0;
+                    font-size: 1.75rem;
+                    background: linear-gradient(135deg, #22c55e, #15803d);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                }
+
+                .header-text p {
+                    margin: 0;
+                    color: var(--neutral-600);
+                    font-size: 0.875rem;
+                    font-weight: 500;
+                }
+
+                .stats-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 1.5rem;
+                    margin-bottom: 2rem;
+                }
+
+                .stat-card {
+                    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+                    border: 2px solid var(--neutral-200);
+                    border-radius: var(--radius-lg);
+                    padding: 1.5rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    transition: all var(--transition-base);
+                }
+
+                .stat-card:hover {
+                    transform: translateY(-4px);
+                    box-shadow: var(--shadow-xl);
+                    border-color: var(--primary-300);
+                }
+
+                .stat-icon {
+                    width: 56px;
+                    height: 56px;
+                    border-radius: var(--radius-md);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-shrink: 0;
+                    box-shadow: var(--shadow-md);
+                }
+
+                .stat-icon svg {
+                    width: 28px;
+                    height: 28px;
+                }
+
+                .stat-details {
+                    flex: 1;
+                }
+
+                .stat-value {
+                    font-size: 2rem;
+                    font-weight: 800;
+                    color: var(--neutral-900);
+                    line-height: 1;
+                    margin-bottom: 0.25rem;
+                }
+
+                .stat-label {
+                    font-size: 0.875rem;
+                    color: var(--neutral-600);
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                }
+
+                .empty-state {
+                    text-align: center;
+                    padding: 4rem 2rem;
+                    color: var(--neutral-500);
+                }
+
+                .empty-icon {
+                    width: 80px;
+                    height: 80px;
+                    margin: 0 auto 1.5rem;
+                    stroke: var(--neutral-300);
+                    opacity: 0.5;
+                }
+
+                .empty-state h4 {
+                    color: var(--neutral-700);
+                    font-size: 1.25rem;
+                    margin-bottom: 0.5rem;
+                }
+
+                .empty-state p {
+                    color: var(--neutral-500);
+                    max-width: 400px;
+                    margin: 0 auto;
+                }
+
+                .table-container {
+                    overflow-x: auto;
+                    border-radius: var(--radius-lg);
+                }
+
+                .sku-code {
+                    background: var(--neutral-100);
+                    padding: 0.25rem 0.625rem;
+                    border-radius: var(--radius-sm);
+                    font-family: 'Courier New', monospace;
+                    font-size: 0.875rem;
+                    color: var(--neutral-700);
+                    font-weight: 600;
+                }
+
+                .item-name {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                    font-weight: 600;
+                    color: var(--neutral-800);
+                }
+
+                .item-icon {
+                    width: 20px;
+                    height: 20px;
+                    stroke: var(--primary-500);
+                    flex-shrink: 0;
+                }
+
+                .status-badge {
+                    display: inline-block;
+                    padding: 0.375rem 0.875rem;
+                    border-radius: var(--radius-md);
+                    font-size: 0.8125rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                }
+
+                .status-badge.in-stock {
+                    background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+                    color: #15803d;
+                }
+
+                .status-badge.low-stock {
+                    background: linear-gradient(135deg, #fed7aa, #fdba74);
+                    color: #c2410c;
+                }
+
+                .status-badge.out-of-stock {
+                    background: linear-gradient(135deg, #fecaca, #fca5a5);
+                    color: #be123c;
+                }
+
+                .threshold-val {
+                    font-weight: 700;
+                    color: var(--neutral-500);
+                }
+
+                .expiry-val {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    font-weight: 600;
+                    color: var(--neutral-600);
+                }
+
+                .expiry-val.expiring {
+                    color: #d97706;
+                }
+
+                .warn-icon {
+                    width: 16px;
+                    height: 16px;
+                    color: #f59e0b;
+                }
+
+                @media (max-width: 768px) {
+                    .inventory-header {
+                        flex-direction: column;
+                        align-items: flex-start;
+                    }
+
+                    .inventory-header button {
+                        width: 100%;
+                    }
+
+                    .stats-grid {
+                        grid-template-columns: 1fr;
+                    }
+                }
+            `}</style>
+        </div>
+    );
+};
+
+=== END ===
+
+=== FILENAME ===
+src/components/NurseDashboard.tsx
+import React, { useEffect, useState } from 'react';
+import { client, MOCK_USER } from '../amplify-utils';
+import { type Shift } from '../types';
+import { ShiftAction } from './ShiftAction';
+
+export const NurseDashboard: React.FC = () => {
+    const [shifts, setShifts] = useState<Shift[]>([]);
+
+    useEffect(() => {
+        // Real-time subscription to assignments for this tenant
+        const sub = client.models.Shift.observeQuery({
+            filter: {
+                tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] }
+            }
+        }).subscribe({
+            next: (data: { items: Shift[] }) => setShifts([...data.items]),
+            error: (err: Error) => console.error('Subscription error:', err)
+        });
+
+        return () => sub.unsubscribe();
+    }, []);
+
+    const handleUpdateStatus = async (id: string, newStatus: Shift['status']) => {
+        try {
+            await client.models.Shift.update({
+                id,
+                status: newStatus,
+                ...(newStatus === 'IN_PROGRESS' ? { startedAt: new Date().toISOString() } : {}),
+                ...(newStatus === 'COMPLETED' ? { completedAt: new Date().toISOString() } : {}),
+            });
+        } catch (err) {
+            console.error('Failed to update shift:', err);
+            alert('Failed to update status. You might be offline (check console).');
+        }
+    };
+
+    const handleCreateMockShift = async () => {
+        await client.models.Shift.create({
+            tenantId: MOCK_USER.attributes['custom:tenantId'],
+            status: 'ASSIGNED',
+            clinicalNote: 'Routine wound care',
+            nurseId: 'mock-nurse-id'
+        });
+    };
+
+    const getStatusBadgeClass = (status: string) => {
+        switch (status) {
+            case 'ASSIGNED':
+                return 'badge-assigned';
+            case 'IN_PROGRESS':
+                return 'badge-in-progress';
+            case 'COMPLETED':
+                return 'badge-completed';
+            default:
+                return 'badge-cancelled';
+        }
+    };
+
+    return (
+        <div className="nurse-dashboard">
+            <div className="dashboard-header">
+                <div className="user-info-card">
+                    <div className="user-avatar">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    </div>
+                    <div className="user-details">
+                        <h2>Welcome, {MOCK_USER.username}</h2>
+                        <p className="tenant-info">
+                            <svg className="icon-inline" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M21 10C21 17 12 23 12 23C12 23 3 17 3 10C3 7.61305 3.94821 5.32387 5.63604 3.63604C7.32387 1.94821 9.61305 1 12 1C14.3869 1 16.6761 1.94821 18.364 3.63604C20.0518 5.32387 21 7.61305 21 10Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M12 13C13.6569 13 15 11.6569 15 10C15 8.34315 13.6569 7 12 7C10.3431 7 9 8.34315 9 10C9 11.6569 10.3431 13 12 13Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            Tenant: {MOCK_USER.attributes['custom:tenantId']}
+                        </p>
+                    </div>
+                </div>
+
+                <button className="btn-primary" onClick={handleCreateMockShift}>
+                    <svg className="button-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 5V19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    Create Test Shift
+                </button>
+            </div>
+
+            <div className="shifts-section">
+                <div className="section-header">
+                    <h3>My Shifts</h3>
+                    <div className="shift-count">
+                        <span className="count-number">{shifts.length}</span>
+                        <span className="count-label">{shifts.length === 1 ? 'Shift' : 'Shifts'}</span>
+                    </div>
+                </div>
+
+                {shifts.length === 0 ? (
+                    <div className="empty-state">
+                        <svg className="empty-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 11L12 14L22 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <path d="M21 12V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        <h4>No Shifts Assigned</h4>
+                        <p>You don't have any shifts assigned yet. Create a test shift to get started.</p>
+                    </div>
+                ) : (
+                    <div className="shifts-grid">
+                        {shifts.map((shift, index) => (
+                            <div key={shift.id} className="shift-card animate-slide-in" style={{ animationDelay: `${index * 0.1}s` }}>
+                                <div className="shift-header">
+                                    <span className={`badge ${getStatusBadgeClass(shift.status ?? 'ASSIGNED')}`}>
+                                        {shift.status?.replace('_', ' ') ?? 'Assigned'}
+                                    </span>
+                                    <span className="shift-id">ID: {shift.id?.slice(0, 8) ?? 'N/A'}</span>
+                                </div>
+
+                                <div className="shift-body">
+                                    <div className="shift-note">
+                                        <svg className="note-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                            <path d="M14 2V8H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
+                                        <p>{shift.clinicalNote || 'No notes provided'}</p>
+                                    </div>
+
+                                    {shift.startedAt && (
+                                        <div className="shift-timestamp">
+                                            <svg className="icon-inline" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                            </svg>
+                                            Started: {new Date(shift.startedAt).toLocaleString()}
+                                        </div>
+                                    )}
+
+                                    {shift.completedAt && (
+                                        <div className="shift-timestamp">
+                                            <svg className="icon-inline" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.7088 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.76489 14.1003 1.98232 16.07 2.86" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                <path d="M22 4L12 14.01L9 11.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                            </svg>
+                                            Completed: {new Date(shift.completedAt).toLocaleString()}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="shift-footer">
+                                    <ShiftAction shift={shift} onUpdate={handleUpdateStatus} />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            <style>{`
+                .nurse-dashboard {
+                    padding: 0;
+                }
+
+                .dashboard-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    margin-bottom: 2rem;
+                    gap: 2rem;
+                    flex-wrap: wrap;
+                }
+
+                .user-info-card {
+                    display: flex;
+                    align-items: center;
+                    gap: 1.5rem;
+                    background: white;
+                    padding: 1.5rem 2rem;
+                    border-radius: var(--radius-xl);
+                    box-shadow: var(--shadow-lg);
+                    flex: 1;
+                    min-width: 300px;
+                }
+
+                .user-avatar {
+                    width: 70px;
+                    height: 70px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, #667eea, #764ba2);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-shrink: 0;
+                    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+                }
+
+                .user-avatar svg {
+                    width: 36px;
+                    height: 36px;
+                    stroke: white;
+                }
+
+                .user-details h2 {
+                    margin: 0 0 0.5rem 0;
+                    font-size: 1.5rem;
+                    color: var(--neutral-900);
+                }
+
+                .tenant-info {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    color: var(--neutral-600);
+                    font-size: 0.875rem;
+                    margin: 0;
+                }
+
+                .icon-inline {
+                    width: 16px;
+                    height: 16px;
+                    stroke: currentColor;
+                }
+
+                .button-icon {
+                    width: 20px;
+                    height: 20px;
+                    stroke: currentColor;
+                }
+
+                .shifts-section {
+                    background: white;
+                    border-radius: var(--radius-xl);
+                    padding: 2rem;
+                    box-shadow: var(--shadow-lg);
+                }
+
+                .section-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 1.5rem;
+                    padding-bottom: 1rem;
+                    border-bottom: 2px solid var(--neutral-200);
+                }
+
+                .section-header h3 {
+                    margin: 0;
+                    font-size: 1.75rem;
+                    color: var(--neutral-900);
+                }
+
+                .shift-count {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    background: linear-gradient(135deg, #667eea, #764ba2);
+                    padding: 0.5rem 1.25rem;
+                    border-radius: var(--radius-lg);
+                    color: white;
+                }
+
+                .count-number {
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                }
+
+                .count-label {
+                    font-size: 0.875rem;
+                    font-weight: 600;
+                }
+
+                .empty-state {
+                    text-align: center;
+                    padding: 4rem 2rem;
+                    color: var(--neutral-500);
+                }
+
+                .empty-icon {
+                    width: 80px;
+                    height: 80px;
+                    margin: 0 auto 1.5rem;
+                    stroke: var(--neutral-300);
+                    opacity: 0.5;
+                }
+
+                .empty-state h4 {
+                    color: var(--neutral-700);
+                    font-size: 1.25rem;
+                    margin-bottom: 0.5rem;
+                }
+
+                .empty-state p {
+                    color: var(--neutral-500);
+                    max-width: 400px;
+                    margin: 0 auto;
+                }
+
+                .shifts-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+                    gap: 1.5rem;
+                }
+
+                .shift-card {
+                    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+                    border: 2px solid var(--neutral-200);
+                    border-radius: var(--radius-lg);
+                    padding: 1.5rem;
+                    transition: all var(--transition-base);
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .shift-card:before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 4px;
+                    height: 100%;
+                    background: linear-gradient(135deg, #667eea, #764ba2);
+                    transition: width var(--transition-base);
+                }
+
+                .shift-card:hover {
+                    border-color: #667eea;
+                    transform: translateY(-4px);
+                    box-shadow: 0 12px 30px rgba(102, 126, 234, 0.15);
+                }
+
+                .shift-card:hover:before {
+                    width: 8px;
+                }
+
+                .shift-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 1rem;
+                }
+
+                .shift-id {
+                    font-size: 0.75rem;
+                    color: var(--neutral-500);
+                    font-family: monospace;
+                    background: var(--neutral-100);
+                    padding: 0.25rem 0.5rem;
+                    border-radius: var(--radius-sm);
+                }
+
+                .shift-body {
+                    margin-bottom: 1.5rem;
+                }
+
+                .shift-note {
+                    display: flex;
+                    gap: 0.75rem;
+                    align-items: flex-start;
+                    margin-bottom: 1rem;
+                }
+
+                .note-icon {
+                    width: 20px;
+                    height: 20px;
+                    stroke: var(--primary-500);
+                    flex-shrink: 0;
+                    margin-top: 2px;
+                }
+
+                .shift-note p {
+                    margin: 0;
+                    color: var(--neutral-700);
+                    line-height: 1.6;
+                    font-weight: 500;
+                }
+
+                .shift-timestamp {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    font-size: 0.8125rem;
+                    color: var(--neutral-600);
+                    margin-top: 0.5rem;
+                }
+
+                .shift-footer {
+                    border-top: 1px solid var(--neutral-200);
+                    padding-top: 1rem;
+                }
+
+                @media (max-width: 768px) {
+                    .dashboard-header {
+                        flex-direction: column;
+                    }
+
+                    .user-info-card {
+                        width: 100%;
+                    }
+
+                    .shifts-grid {
+                        grid-template-columns: 1fr;
+                    }
+                }
+            `}</style>
+        </div>
+    );
+};
+
+=== END ===
+
+=== FILENAME ===
+src/components/PatientDashboard.tsx
+import React, { useEffect, useState } from 'react';
+import { client, MOCK_USER } from '../amplify-utils';
+import { type Patient, type Medication, type Task } from '../types';
+
+export const PatientDashboard: React.FC = () => {
+    const [patients, setPatients] = useState<Patient[]>([]);
+    const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+    const [medications, setMedications] = useState<Medication[]>([]);
+    const [tasks, setTasks] = useState<Task[]>([]);
+
+    useEffect(() => {
+        // Subscribe to patients for this tenant
+        const patientSub = client.models.Patient.observeQuery({
+            filter: {
+                tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] }
+            }
+        }).subscribe({
+            next: (data: { items: Patient[] }) => {
+                setPatients([...data.items]);
+                if (data.items.length > 0 && !selectedPatient) {
+                    setSelectedPatient(data.items[0]);
+                }
+            },
+            error: (err: Error) => console.error('Patient sub error:', err)
+        });
+
+        return () => patientSub.unsubscribe();
+    }, [selectedPatient]);
+
+    useEffect(() => {
+        if (!selectedPatient) return;
+
+        // Subscribe to medications for selected patient
+        const medSub = client.models.Medication.observeQuery({
+            filter: {
+                patientId: { eq: selectedPatient.id }
+            }
+        }).subscribe({
+            next: (data: { items: Medication[] }) => setMedications([...data.items]),
+            error: (err: Error) => console.error('Medication sub error:', err)
+        });
+
+        // Subscribe to tasks for selected patient
+        const taskSub = client.models.Task.observeQuery({
+            filter: {
+                patientId: { eq: selectedPatient.id }
+            }
+        }).subscribe({
+            next: (data: { items: Task[] }) => setTasks([...data.items]),
+            error: (err: Error) => console.error('Task sub error:', err)
+        });
+
+        return () => {
+            medSub.unsubscribe();
+            taskSub.unsubscribe();
+        };
+    }, [selectedPatient]);
+
+    const handleToggleTask = async (task: Task) => {
+        await client.models.Task.update({
+            id: task.id,
+            isCompleted: !task.isCompleted
+        });
+    };
+
+    if (!selectedPatient) {
+        return <div className="loading">Loading patient data...</div>;
+    }
+
+    return (
+        <div className="patient-dashboard-container">
+            <aside className="patient-sidebar glass">
+                <h3>Mis Pacientes</h3>
+                <div className="patient-list-sidebar">
+                    {patients.map(p => (
+                        <div
+                            key={p.id}
+                            className={`sidebar-patient-item ${selectedPatient.id === p.id ? 'active' : ''}`}
+                            onClick={() => setSelectedPatient(p)}
+                        >
+                            <span className="name">{p.name}</span>
+                            <span className="doc-id-small">{p.documentId}</span>
+                        </div>
+                    ))}
+                </div>
+            </aside>
+
+            <div className="patient-dashboard-main">
+                <div className="patient-header-grid">
+                    <div className="patient-card glass">
+                        <div className="card-header">
+                            <div className="avatar">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                            </div>
+                            <div className="info">
+                                <h2>{selectedPatient.name}</h2>
+                                <p className="doc-id">CC: {selectedPatient.documentId}</p>
+                            </div>
+                        </div>
+                        <div className="card-body">
+                            <div className="info-row">
+                                <span className="label">Edad:</span>
+                                <span className="value">{selectedPatient.age} años</span>
+                            </div>
+                            <div className="info-row">
+                                <span className="label">Dirección:</span>
+                                <span className="value">{selectedPatient.address}</span>
+                            </div>
+                            <div className="info-row highlight">
+                                <span className="label">Diagnóstico:</span>
+                                <span className="value">{selectedPatient.diagnosis}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="task-summary-card glass">
+                        <div className="summary-stat">
+                            <span className="stat-value">{tasks.filter(t => t.isCompleted).length}/{tasks.length}</span>
+                            <span className="stat-label">Tareas Completadas</span>
+                        </div>
+                        <div className="summary-stat">
+                            <span className="stat-value text-primary">{medications.filter(m => m.status === 'ACTIVE').length}</span>
+                            <span className="stat-label">Medicamentos Activos</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="dashboard-grid">
+                    <section className="medications-section glass">
+                        <div className="section-header">
+                            <h3>Digital Kardex (Medicamentos)</h3>
+                            <svg className="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M4.83,21.17l-.33-.33c-2-2-2-5.17,0-7.17L13.67,4.83c2-2,5.17-2,7.17,0L21.17,5.17c2,2,2,5.17,0,7.17L12.33,21.17C10.33,23.17,7.17,23.17,5.17,21.17z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M12.33,21.17l-7.17-7.17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </div>
+                        <div className="med-list">
+                            {medications.map(med => (
+                                <div key={med.id} className={`med-item ${med.status.toLowerCase()}`}>
+                                    <div className="med-info">
+                                        <span className="med-name">{med.name}</span>
+                                        <span className="med-details">{med.dosage} • {med.frequency}</span>
+                                    </div>
+                                    <span className={`status-pill ${med.status.toLowerCase()}`}>{med.status}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
+                    <section className="tasks-section glass">
+                        <div className="section-header">
+                            <h3>Ruta de Cuidado (Tareas)</h3>
+                            <svg className="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 11l3 3l8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </div>
+                        <div className="task-list">
+                            {tasks.map(task => (
+                                <div key={task.id} className="task-item" onClick={() => handleToggleTask(task)}>
+                                    <div className={`checkbox ${task.isCompleted ? 'checked' : ''}`}>
+                                        {task.isCompleted && (
+                                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M20 6L9 17l-5-5" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                                            </svg>
+                                        )}
+                                    </div>
+                                    <div className="task-content">
+                                        <span className={`task-desc ${task.isCompleted ? 'completed' : ''}`}>{task.description}</span>
+                                        {task.dueDate && <span className="task-date">Vence: {new Date(task.dueDate).toLocaleTimeString()}</span>}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <style>{`
+                .patient-dashboard-container {
+                    display: grid;
+                    grid-template-columns: 280px 1fr;
+                    gap: 1.5rem;
+                    min-height: 80vh;
+                }
+
+                .patient-sidebar {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1.5rem;
+                    height: fit-content;
+                    position: sticky;
+                    top: 1.5rem;
+                }
+
+                .patient-sidebar h3 {
+                    margin: 0;
+                    font-size: 1.125rem;
+                    color: var(--neutral-800);
+                    padding-bottom: 1rem;
+                    border-bottom: 1px solid var(--neutral-100);
+                }
+
+                .patient-list-sidebar {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.5rem;
+                }
+
+                .sidebar-patient-item {
+                    padding: 1rem;
+                    border-radius: var(--radius-md);
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                    border: 2px solid transparent;
+                }
+
+                .sidebar-patient-item:hover {
+                    background: var(--neutral-50);
+                }
+
+                .sidebar-patient-item.active {
+                    background: var(--primary-50);
+                    border-color: var(--primary-500);
+                }
+
+                .sidebar-patient-item .name {
+                    font-weight: 700;
+                    color: var(--neutral-900);
+                }
+
+                .sidebar-patient-item .doc-id-small {
+                    font-size: 0.75rem;
+                    color: var(--neutral-500);
+                    font-family: monospace;
+                }
+
+                .patient-dashboard-main {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1.5rem;
+                }
+
+                .glass {
+                    background: rgba(255, 255, 255, 0.9);
+                    backdrop-filter: blur(10px);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+                    border-radius: var(--radius-xl);
+                    padding: 1.5rem;
+                }
+
+                .patient-header-grid {
+                    display: grid;
+                    grid-template-columns: 2fr 1fr;
+                    gap: 1.5rem;
+                }
+
+                .patient-card .card-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 1.5rem;
+                    margin-bottom: 1.5rem;
+                    padding-bottom: 1rem;
+                    border-bottom: 1px solid var(--neutral-100);
+                }
+
+                .avatar {
+                    width: 64px;
+                    height: 64px;
+                    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+                }
+
+                .avatar svg { width: 32px; height: 32px; }
+
+                .info h2 { margin: 0; font-size: 1.5rem; color: var(--neutral-900); }
+                .doc-id { margin: 4px 0 0; color: var(--neutral-500); font-weight: 600; font-family: monospace; }
+
+                .card-body {
+                    display: grid;
+                    gap: 0.75rem;
+                }
+
+                .info-row {
+                    display: flex;
+                    justify-content: space-between;
+                    font-size: 0.95rem;
+                }
+
+                .info-row.highlight {
+                    background: var(--primary-50);
+                    padding: 0.75rem;
+                    border-radius: var(--radius-md);
+                    margin-top: 0.5rem;
+                }
+
+                .info-row .label { color: var(--neutral-500); font-weight: 500; }
+                .info-row .value { color: var(--neutral-800); font-weight: 700; }
+                .info-row.highlight .value { color: var(--primary-700); }
+
+                .task-summary-card {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    gap: 1.5rem;
+                    text-align: center;
+                }
+
+                .summary-stat {
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .stat-value { font-size: 2.25rem; font-weight: 800; color: var(--neutral-900); line-height: 1; }
+                .stat-label { font-size: 0.875rem; color: var(--neutral-500); font-weight: 600; margin-top: 4px; }
+                .text-primary { color: var(--primary-600); }
+
+                .dashboard-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 1.5rem;
+                }
+
+                .section-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 1.5rem;
+                }
+
+                .section-header h3 { margin: 0; font-size: 1.125rem; color: var(--neutral-900); }
+                .icon { width: 24px; height: 24px; color: var(--primary-500); }
+
+                .med-list, .task-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.75rem;
+                }
+
+                .med-item {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 1rem;
+                    background: var(--neutral-50);
+                    border-radius: var(--radius-md);
+                    border: 1px solid var(--neutral-100);
+                    transition: transform 0.2s;
+                }
+
+                .med-item:hover { transform: translateX(4px); }
+
+                .med-info { display: flex; flex-direction: column; gap: 2px; }
+                .med-name { font-weight: 700; color: var(--neutral-800); }
+                .med-details { font-size: 0.875rem; color: var(--neutral-500); }
+
+                .status-pill {
+                    padding: 0.25rem 0.75rem;
+                    border-radius: 999px;
+                    font-size: 0.75rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                }
+
+                .status-pill.active { background: #dcfce7; color: #15803d; }
+                .status-pill.discontinued { background: #fee2e2; color: #991b1b; }
+
+                .task-item {
+                    display: flex;
+                    gap: 1rem;
+                    padding: 1rem;
+                    background: white;
+                    border: 1px solid var(--neutral-100);
+                    border-radius: var(--radius-md);
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+
+                .task-item:hover { border-color: var(--primary-300); background: var(--primary-50); }
+
+                .checkbox {
+                    width: 24px;
+                    height: 24px;
+                    border: 2px solid var(--neutral-300);
+                    border-radius: 6px;
+                    flex-shrink: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.2s;
+                }
+
+                .checkbox.checked { background: var(--success-500); border-color: var(--success-500); }
+
+                .task-content { display: flex; flex-direction: column; gap: 2px; }
+                .task-desc { font-weight: 600; color: var(--neutral-800); }
+                .task-desc.completed { text-decoration: line-through; color: var(--neutral-400); }
+                .task-date { font-size: 0.75rem; color: var(--neutral-500); }
+
+                @media (max-width: 1024px) {
+                    .patient-dashboard-container { grid-template-columns: 1fr; }
+                    .patient-sidebar { position: static; }
+                    .patient-header-grid, .dashboard-grid { grid-template-columns: 1fr; }
+                }
+            `}</style>
+        </div>
+    );
+};
+
+=== END ===
+
+=== FILENAME ===
+src/components/AdminRoster.tsx
+import React, { useState, useEffect } from 'react';
+import { client, MOCK_USER } from '../amplify-utils';
+import { type Shift } from '../types';
+
+interface Assignment {
+    shiftId: string;
+    nurseId: string;
+    nurseName?: string;
+}
+
+export const AdminRoster: React.FC = () => {
+    const [loading, setLoading] = useState(false);
+    const [assignments, setAssignments] = useState<Assignment[]>([]);
+    const [nurses, setNurses] = useState<any[]>([]);
+    const [shifts, setShifts] = useState<Shift[]>([]);
+
+    useEffect(() => {
+        const tenantId = MOCK_USER.attributes['custom:tenantId'];
+
+        const nurseSub = client.models.Nurse.observeQuery({
+            filter: { tenantId: { eq: tenantId } }
+        }).subscribe({
+            next: (data: any) => setNurses(data.items)
+        });
+
+        const shiftSub = client.models.Shift.observeQuery({
+            filter: {
+                tenantId: { eq: tenantId },
+                status: { eq: 'PENDING' }
+            }
+        }).subscribe({
+            next: (data: any) => setShifts(data.items)
+        });
+
+        return () => {
+            nurseSub.unsubscribe();
+            shiftSub.unsubscribe();
+        };
+    }, []);
+
+    const handleAutoAssign = async () => {
+        if (shifts.length === 0 || nurses.length === 0) {
+            alert('No hay turnos pendientes o enfermeros disponibles.');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const { data, errors } = await client.queries.generateRoster({
+                nurses: JSON.stringify(nurses),
+                unassignedShifts: JSON.stringify(shifts)
+            });
+
+            if (errors) throw new Error(errors[0].message);
+
+            if (data) {
+                const result = JSON.parse(data as string);
+                setAssignments(result.assignments || []);
+            }
+        } catch (err) {
+            console.error('AI Roster failed:', err);
+            alert('Error al generar el roster con AI.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleConfirmAssignments = async () => {
+        setLoading(true);
+        try {
+            for (const assignment of assignments) {
+                if (assignment.nurseId !== 'UNASSIGNED') {
+                    await client.models.Shift.update({
+                        id: assignment.shiftId,
+                        nurseId: assignment.nurseId,
+                        status: 'ASSIGNED'
+                    });
+                }
+            }
+            setAssignments([]);
+            alert('¡Roster confirmado y asignado exitosamente!');
+        } catch (err) {
+            console.error('Confirm failed:', err);
+            alert('Error al confirmar las asignaciones.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="admin-roster">
+            <div className="roster-grid">
+                <div className="roster-card main-card">
+                    <div className="roster-header">
+                        <div className="header-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </div>
+                        <div className="header-text">
+                            <h2>Roster Architect</h2>
+                            <p>Powered by Claude 3.5 Sonnet</p>
+                        </div>
+                    </div>
+
+                    <div className="roster-description">
+                        <p>Optimiza automáticamente las asignaciones de turnos basadas en habilidades, proximidad y carga de trabajo.</p>
+                    </div>
+
+                    <div className="stats-row">
+                        <div className="stat-item">
+                            <span className="stat-label">Turnos Pendientes</span>
+                            <span className="stat-value">{shifts.length}</span>
+                        </div>
+                        <div className="stat-item">
+                            <span className="stat-label">Personal Disponible</span>
+                            <span className="stat-value">{nurses.length}</span>
+                        </div>
+                    </div>
+
+                    <button
+                        className="btn-secondary"
+                        onClick={handleAutoAssign}
+                        disabled={loading || shifts.length === 0}
+                        style={{ width: '100%', marginTop: '1rem' }}
+                    >
+                        {loading ? 'Generando Roster Óptimo...' : 'Autocompletar Roster'}
+                    </button>
+
+                    {assignments.length > 0 && (
+                        <div className="assignments-section animate-slide-in">
+                            <h3>Asignaciones Sugeridas</h3>
+                            <div className="assignments-list">
+                                {assignments.map((a, idx) => (
+                                    <div key={idx} className="assignment-item">
+                                        <div className="item-info">
+                                            <span className="shift-id">Turno: {a.shiftId.split('-')[1]}</span>
+                                            <svg className="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                            </svg>
+                                            <span className="nurse-name">{a.nurseName || 'Sin Asignar'}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <button
+                                className="btn-success"
+                                onClick={handleConfirmAssignments}
+                                style={{ width: '100%', marginTop: '1rem' }}
+                                disabled={loading}
+                            >
+                                Confirmar y Publicar Roster
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                <div className="roster-sidebar">
+                    <div className="glass-card">
+                        <h3>Personal Activo</h3>
+                        <div className="sidebar-list">
+                            {nurses.map(n => (
+                                <div key={n.id} className="sidebar-item">
+                                    <span className="name">{n.name}</span>
+                                    <div className="skills-tags">
+                                        {n.skills?.map((s: string) => <span key={s} className="skill-tag">{s}</span>)}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <style>{`
+                .admin-roster {
+                    margin-bottom: 2rem;
+                    animation: fadeIn 0.5s ease-out;
+                }
+
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+
+                .roster-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 300px;
+                    gap: 1.5rem;
+                }
+
+                .roster-card {
+                    background: white;
+                    border-radius: var(--radius-xl);
+                    padding: 2rem;
+                    box-shadow: var(--shadow-lg);
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .roster-card:before {
+                    content: '';
+                    position: absolute;
+                    top: 0; left: 0; right: 0; height: 6px;
+                    background: linear-gradient(90deg, #7c3aed, #a78bfa, #7c3aed);
+                    background-size: 200% 100%;
+                    animation: gradientShift 3s ease infinite;
+                }
+
+                @keyframes gradientShift {
+                    0%, 100% { background-position: 0% 50%; }
+                    50% { background-position: 100% 50%; }
+                }
+
+                .roster-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 1.5rem;
+                    margin-bottom: 1.5rem;
+                }
+
+                .header-icon {
+                    width: 60px; height: 60px;
+                    border-radius: var(--radius-lg);
+                    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+                    display: flex; align-items: center; justify-content: center;
+                    flex-shrink: 0;
+                    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3);
+                }
+
+                .header-icon svg { width: 32px; height: 32px; stroke: white; }
+
+                .header-text h2 {
+                    margin: 0 0 0.25rem 0;
+                    font-size: 1.75rem;
+                    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                }
+
+                .header-text p { margin: 0; color: var(--neutral-600); font-size: 0.875rem; font-weight: 500; }
+
+                .roster-description {
+                    background: var(--neutral-50);
+                    border-left: 4px solid #7c3aed;
+                    padding: 1rem 1.25rem;
+                    border-radius: var(--radius-md);
+                    margin-bottom: 1.5rem;
+                }
+
+                .stats-row {
+                    display: flex;
+                    gap: 1.5rem;
+                    margin-bottom: 1.5rem;
+                }
+
+                .stat-item {
+                    flex: 1;
+                    background: var(--neutral-50);
+                    padding: 1rem;
+                    border-radius: var(--radius-md);
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                }
+
+                .stat-label { font-size: 0.75rem; color: var(--neutral-500); font-weight: 700; text-transform: uppercase; }
+                .stat-value { font-size: 1.5rem; font-weight: 800; color: var(--neutral-900); }
+
+                .assignments-section {
+                    margin-top: 2rem;
+                    padding-top: 1.5rem;
+                    border-top: 2px dashed var(--neutral-200);
+                }
+
+                .assignments-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.75rem;
+                    margin-bottom: 1.5rem;
+                }
+
+                .assignment-item {
+                    background: var(--primary-50);
+                    border: 1px solid var(--primary-200);
+                    padding: 1rem;
+                    border-radius: var(--radius-md);
+                }
+
+                .item-info {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 1rem;
+                }
+
+                .shift-id { font-weight: 700; color: var(--primary-700); }
+                .nurse-name { font-weight: 700; color: var(--neutral-900); }
+                .arrow-icon { width: 20px; height: 20px; color: var(--primary-400); }
+
+                .glass-card {
+                    background: rgba(255, 255, 255, 0.8);
+                    backdrop-filter: blur(10px);
+                    border: 1px solid var(--neutral-200);
+                    border-radius: var(--radius-xl);
+                    padding: 1.5rem;
+                    height: 100%;
+                }
+
+                .sidebar-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1rem;
+                    margin-top: 1rem;
+                }
+
+                .sidebar-item {
+                    padding-bottom: 1rem;
+                    border-bottom: 1px solid var(--neutral-100);
+                }
+
+                .sidebar-item:last-child { border-bottom: none; }
+                .sidebar-item .name { font-weight: 600; color: var(--neutral-800); display: block; margin-bottom: 0.5rem; }
+
+                .skills-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+                .skill-tag {
+                    font-size: 0.7rem;
+                    background: var(--neutral-100);
+                    color: var(--neutral-600);
+                    padding: 2px 8px;
+                    border-radius: 999px;
+                    font-weight: 600;
+                }
+
+                @media (max-width: 1024px) {
+                    .roster-grid { grid-template-columns: 1fr; }
+                }
+            `}</style>
+        </div>
+    );
+};
+
+=== END ===
+
+=== FILENAME ===
+vite.config.ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+
+// https://vite.dev/config/
+export default defineConfig({
+  base: '/',
+  plugins: [
+    react(),
+    tailwindcss(),
+  ],
+  define: {
+    'process.env': {}
+  }
+})
+
+=== END ===
+
+=== FILENAME ===
+tsconfig.json
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
+}
+
+=== END ===
+
+=== FILENAME ===
+src/services/integration-layer.ts
+/**
+ * Future Integration Layer for IPS ERP
+ * Placeholders for external systems connectivity.
+ */
+
+export const IntegrationLayer = {
+    /**
+     * ADRES (Administradora de los Recursos del Sistema General de Seguridad Social en Salud)
+     * Placeholder for real-time verification of patient insurance status and debt recovery.
+     */
+    adres: {
+        verifyPatient: async (documentId: string) => {
+            console.log(`[Integration] Verifying Document ${documentId} with ADRES...`);
+            return { status: 'ACTIVE', eps: 'Sanitas', regime: 'CONTRIBUTIVE' };
+        },
+        reportService: async (data: any) => {
+            console.log(`[Integration] Reporting service to ADRES repository...`, data);
+            return { trackingId: `ADRES-${Math.random().toString(36).substr(2, 9)}` };
+        }
+    },
+
+    /**
+     * Electronic Health Records (EHR) Bridge
+     * Placeholder for HL7/FHIR compatibility with hospitals and clinics.
+     */
+    ehr: {
+        syncMedications: async (patientId: string) => {
+            console.log(`[Integration] Syncing medications from Hospital EHR for ${patientId}...`);
+            return [];
+        },
+        exportClinicalNote: async (noteId: string) => {
+            console.log(`[Integration] Exporting clinical note ${noteId} in HL7 FHIR format...`);
+        }
+    },
+
+    /**
+     * EPS (Entidades Promotoras de Salud) Connectors
+     * Custom connectors for specific insurance APIs (Sanitas, Sura, Compensa, etc.)
+     */
+    eps: {
+        requestAuthorization: async (patientId: string, serviceCode: string) => {
+            console.log(`[Integration] Requesting authorization from EPS for ${patientId} / ${serviceCode}...`);
+            return { status: 'APPROVED', authCode: 'AUTH-' + Math.random().toString().substr(2, 6) };
+        }
+    }
+};
+
+=== END ===
+
+=== FILENAME ===
+src/amplify-utils.ts
+// import { generateClient } from 'aws-amplify/data';
+import { generateMockClient } from './mock-client';
+// import { type Schema } from '../amplify/data/resource';
+// import { Amplify } from 'aws-amplify';
+// import outputs from '../amplify_outputs.json';
+
+// Configure Amplify with mock outputs
+// Amplify.configure(outputs);
+
+// Export the typed client
+// export const client = generateClient<Schema>({
+//    authMode: 'userPool',
+// });
+export const client = generateMockClient();
+
+// Mock User Context for development
+export const MOCK_USER = {
+    username: 'nurse-maria',
+    attributes: {
+        sub: 'mock-user-id-123',
+        email: 'maria@ips.com',
+        'custom:tenantId': 'tenant-bogota-01'
+    }
+};
+
+=== END ===

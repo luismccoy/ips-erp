@@ -1,0 +1,236 @@
+.inventoryDashboard {
+    margin-bottom: 2rem;
+}
+
+.inventoryCard {
+    /* attributes handled by Card component */
+    padding: 2rem;
+}
+
+.inventoryHeader {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.headerIcon {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--radius-lg, 0.5rem);
+    background: linear-gradient(135deg, #22c55e, #15803d);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3);
+}
+
+.headerIcon svg {
+    width: 32px;
+    height: 32px;
+    stroke: white;
+}
+
+.headerText {
+    flex: 1;
+}
+
+.headerText h2 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.75rem;
+    background: linear-gradient(135deg, #22c55e, #15803d);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.headerText p {
+    margin: 0;
+    color: var(--neutral-600, #475569);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.statCard {
+    /* Using Card component for base styles */
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    transition: all 0.2s ease;
+}
+
+.statCard:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary-300, #a5b4fc);
+    /* box-shadow handled by Card or hover effect */
+    box-shadow: var(--shadow-xl, 0 20px 25px -5px rgb(0 0 0 / 0.1));
+}
+
+.statIcon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-md, 0.375rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgb(0 0 0 / 0.1));
+}
+
+.statIcon svg {
+    width: 28px;
+    height: 28px;
+}
+
+.statDetails {
+    flex: 1;
+}
+
+.statValue {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--neutral-900, #0f172a);
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.statLabel {
+    font-size: 0.875rem;
+    color: var(--neutral-600, #475569);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.emptyState {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--neutral-500, #64748b);
+}
+
+.emptyIcon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    stroke: var(--neutral-300, #cbd5e1);
+    opacity: 0.5;
+}
+
+.emptyState h4 {
+    color: var(--neutral-700, #334155);
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.emptyState p {
+    color: var(--neutral-500, #64748b);
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.tableContainer {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    /* smooth scrolling on iOS */
+}
+
+/* Table styles usually need global or module scoping. keeping strict. */
+.tableContainer table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+    /* Force scroll on small screens */
+}
+
+.tableContainer th {
+    text-align: left;
+    padding: 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--neutral-600, #475569);
+    border-bottom: 1px solid var(--neutral-200, #e2e8f0);
+}
+
+.tableContainer td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--neutral-100, #f1f5f9);
+    font-size: 0.875rem;
+}
+
+.skuCode {
+    background: var(--neutral-100, #f1f5f9);
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--radius-sm, 0.125rem);
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    color: var(--neutral-700, #334155);
+    font-weight: 600;
+}
+
+.itemName {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+    color: var(--neutral-800, #1e293b);
+}
+
+.itemIcon {
+    width: 20px;
+    height: 20px;
+    stroke: var(--primary-500, #6366f1);
+    flex-shrink: 0;
+}
+
+.thresholdVal {
+    font-weight: 700;
+    color: var(--neutral-500, #64748b);
+}
+
+.expiryVal {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--neutral-600, #475569);
+}
+
+.expiryVal.expiring {
+    color: #d97706;
+}
+
+.warnIcon {
+    width: 16px;
+    height: 16px;
+    color: #f59e0b;
+}
+
+@media (max-width: 768px) {
+    .inventoryHeader {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .inventoryHeader button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .statsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .inventoryCard {
+        padding: 1rem;
+    }
+}

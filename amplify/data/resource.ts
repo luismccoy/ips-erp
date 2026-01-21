@@ -14,10 +14,11 @@ const schema = a.schema({
     Tenant: a.model({
         name: a.string().required(),
         nit: a.string(),
-        // Relation: One tenant has many Nurses, Shifts, Inventory items
+        // Relation: One tenant has many Nurses, Shifts, Inventory items, Patients
         nurses: a.hasMany('Nurse', 'tenantId'),
         shifts: a.hasMany('Shift', 'tenantId'),
         inventory: a.hasMany('Inventory', 'tenantId'),
+        patients: a.hasMany('Patient', 'tenantId'),
     }).authorization(allow => [allow.authenticated()]),
 
     Nurse: a.model({
@@ -25,6 +26,8 @@ const schema = a.schema({
         tenant: a.belongsTo('Tenant', 'tenantId'),
 
         name: a.string().required(),
+        email: a.string(),
+        role: a.enum(['ADMIN', 'NURSE', 'COORDINATOR']),
         skills: a.string().array(), // e.g., ["Palliativos", "Curaciones"]
         locationLat: a.float(),
         locationLng: a.float(),
@@ -33,12 +36,50 @@ const schema = a.schema({
         shifts: a.hasMany('Shift', 'nurseId'),
     }).authorization(allow => [allow.authenticated()]),
 
+    Patient: a.model({
+        tenantId: a.id().required(),
+        tenant: a.belongsTo('Tenant', 'tenantId'),
+
+        name: a.string().required(),
+        documentId: a.string().required(), // e.g., Cédula
+        age: a.integer(),
+        address: a.string(),
+        diagnosis: a.string(),
+
+        // Relations
+        medications: a.hasMany('Medication', 'patientId'),
+        tasks: a.hasMany('Task', 'patientId'),
+        shifts: a.hasMany('Shift', 'patientId'),
+    }).authorization(allow => [allow.authenticated()]),
+
+    Medication: a.model({
+        patientId: a.id().required(),
+        patient: a.belongsTo('Patient', 'patientId'),
+
+        name: a.string().required(),
+        dosage: a.string().required(), // e.g., "500mg"
+        frequency: a.string().required(), // e.g., "Cada 8 horas"
+        status: a.enum(['ACTIVE', 'DISCONTINUED']),
+    }).authorization(allow => [allow.authenticated()]),
+
+    Task: a.model({
+        patientId: a.id().required(),
+        patient: a.belongsTo('Patient', 'patientId'),
+
+        description: a.string().required(),
+        isCompleted: a.boolean().default(false),
+        dueDate: a.datetime(),
+    }).authorization(allow => [allow.authenticated()]),
+
     Shift: a.model({
         tenantId: a.id().required(),
         tenant: a.belongsTo('Tenant', 'tenantId'),
 
         nurseId: a.id(),
         nurse: a.belongsTo('Nurse', 'nurseId'),
+
+        patientId: a.id(),
+        patient: a.belongsTo('Patient', 'patientId'),
 
         status: a.enum(['PENDING', 'ASSIGNED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']),
         clinicalNote: a.string(),
@@ -58,6 +99,9 @@ const schema = a.schema({
         name: a.string().required(),
         stockCount: a.integer().default(0),
         unit: a.string(), // e.g. "Unidad", "Caja"
+
+        reorderThreshold: a.integer().default(10),
+        expiryDate: a.date(),
     }).authorization(allow => [allow.authenticated()]),
 
     generateRoster: a.query()

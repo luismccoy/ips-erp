@@ -1,0 +1,236 @@
+.nurseDashboard {
+    padding: 0;
+}
+
+.dashboardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.userInfoCard {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    /* background/borderRadius/shadow handled by Card */
+    flex: 1;
+    min-width: 300px;
+}
+
+.userAvatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.userAvatar svg {
+    width: 36px;
+    height: 36px;
+    stroke: white;
+}
+
+.userDetails h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.5rem;
+    color: var(--neutral-900, #0f172a);
+}
+
+.tenantInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--neutral-600, #475569);
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.iconInline {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+}
+
+.buttonIcon {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+}
+
+.shiftsSection {
+    /* background/borderRadius/shadow handled by Card */
+}
+
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--neutral-200, #e2e8f0);
+}
+
+.sectionHeader h3 {
+    margin: 0;
+    font-size: 1.75rem;
+    color: var(--neutral-900, #0f172a);
+}
+
+.shiftCount {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    padding: 0.5rem 1.25rem;
+    border-radius: var(--radius-lg, 0.5rem);
+    color: white;
+}
+
+.countNumber {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.countLabel {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.emptyState {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--neutral-500, #64748b);
+}
+
+.emptyIcon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    stroke: var(--neutral-300, #cbd5e1);
+    opacity: 0.5;
+}
+
+.emptyState h4 {
+    color: var(--neutral-700, #334155);
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.emptyState p {
+    color: var(--neutral-500, #64748b);
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.shiftsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.shiftCard {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    /* border handled by Card */
+    transition: all 0.2s ease;
+    position: relative;
+    /* overflow handled by Card */
+}
+
+.shiftCard:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    transition: width 0.2s ease;
+}
+
+.shiftCard:hover {
+    border-color: #667eea;
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(102, 126, 234, 0.15);
+}
+
+.shiftCard:hover:before {
+    width: 8px;
+}
+
+.shiftHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.shiftId {
+    font-size: 0.75rem;
+    color: var(--neutral-500, #64748b);
+    font-family: monospace;
+    background: var(--neutral-100, #f1f5f9);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm, 0.125rem);
+}
+
+.shiftBody {
+    margin-bottom: 1.5rem;
+}
+
+.shiftNote {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.noteIcon {
+    width: 20px;
+    height: 20px;
+    stroke: var(--primary-500, #6366f1);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.shiftNote p {
+    margin: 0;
+    color: var(--neutral-700, #334155);
+    line-height: 1.6;
+    font-weight: 500;
+}
+
+.shiftTimestamp {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--neutral-600, #475569);
+    margin-top: 0.5rem;
+}
+
+.shiftFooter {
+    border-top: 1px solid var(--neutral-200, #e2e8f0);
+    padding-top: 1rem;
+}
+
+@media (max-width: 768px) {
+    .dashboardHeader {
+        flex-direction: column;
+    }
+
+    .userInfoCard {
+        width: 100%;
+    }
+
+    .shiftsGrid {
+        grid-template-columns: 1fr;
+    }
+}
