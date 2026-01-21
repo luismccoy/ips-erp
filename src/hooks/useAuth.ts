@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getCurrentUser, signIn, signOut, fetchUserAttributes, type SignInInput } from 'aws-amplify/auth';
+import { getCurrentUser, signIn, signOut, fetchUserAttributes, type SignInInput, type AuthUser } from 'aws-amplify/auth';
 import { TENANTS } from '../data/mock-data';
 import type { Tenant } from '../types';
 
@@ -8,7 +8,7 @@ import type { Tenant } from '../types';
  * Handles current user, role, tenant context, and sign-in/sign-out actions.
  */
 export function useAuth() {
-    const [user, setUser] = useState<any>(null); // Replace 'any' with proper Cognito user type if available
+    const [user, setUser] = useState<AuthUser | null>(null);
     const [role, setRole] = useState<'admin' | 'nurse' | 'family' | null>(null);
     const [tenant, setTenant] = useState<Tenant | null>(null);
     const [loading, setLoading] = useState(true);
@@ -28,7 +28,7 @@ export function useAuth() {
             // For now, we mock standard role assignment upon successful login
             setRole('admin');
             setTenant(TENANTS[0]);
-        } catch (e) {
+        } catch {
             // No user signed in
             setUser(null);
             setRole(null);
@@ -44,9 +44,10 @@ export function useAuth() {
         try {
             await signIn(input);
             await checkUser();
-        } catch (e: any) {
-            setError(e.message || 'Login failed');
-            throw e;
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Login failed';
+            setError(message);
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -58,8 +59,8 @@ export function useAuth() {
             setUser(null);
             setRole(null);
             setTenant(null);
-        } catch (e) {
-            console.error('Logout failed', e);
+        } catch (error) {
+            console.error('Logout failed', error);
         }
     }
 

@@ -76,6 +76,31 @@ src/
 - **Lazy Loading**: Admin and Nurse dashboards are code-split to improve initial load time.
 - **Zero `any`**: The codebase enforces strict type safety.
 
+## Deployment
+
+This project uses AWS Amplify for hosting and CI/CD.
+
+### Quick Start
+
+```bash
+# Initialize Git repository
+./scripts/init-git.sh
+
+# Connect to GitHub
+git remote add origin <your-repo-url>
+./scripts/push-all-branches.sh
+
+# Set up AWS Amplify (see docs/CICD_SETUP.md)
+```
+
+### Environments
+
+- **Development**: `develop` branch → Auto-deploy
+- **Staging**: `staging` branch → Auto-deploy
+- **Production**: `main` branch → Requires approval
+
+See [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) for complete workflow.
+
 ## License
 
 Private Property of IPS Organization.

@@ -9,7 +9,7 @@ interface StoreType {
     Patient: Patient[];
     Medication: Medication[];
     Task: Task[];
-    [key: string]: any[];
+    [key: string]: unknown[];
 }
 
 const STORE: StoreType = {
@@ -39,7 +39,10 @@ const STORE: StoreType = {
     ]
 };
 
-const LISTENERS: Record<string, Function[]> = {
+// Properly type LISTENERS using a generic function type or unknown
+type ListenerCallback<T> = (data: { items: T[] }) => void;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const LISTENERS: Record<string, ListenerCallback<any>[]> = {
     Shift: [],
     Nurse: [],
     Inventory: [],
@@ -48,14 +51,14 @@ const LISTENERS: Record<string, Function[]> = {
     Task: []
 };
 
-function notify(model: string) {
-    if (LISTENERS[model]) {
-        LISTENERS[model].forEach((cb) => cb({ items: STORE[model] }));
+function notify<T>(model: keyof StoreType) {
+    if (LISTENERS[model as string]) {
+        LISTENERS[model as string].forEach((cb) => cb({ items: STORE[model] as T[] }));
     }
 }
 
 interface MockModelClient<T> {
-    observeQuery: (options?: any) => {
+    observeQuery: (options?: unknown) => {
         subscribe: (observer: { next: (data: { items: T[] }) => void; error?: (err: Error) => void }) => { unsubscribe: () => void };
     };
     create: (item: Partial<T>) => Promise<{ data: T }>;
@@ -73,38 +76,42 @@ export interface MockClient {
         Task: MockModelClient<Task>;
     };
     queries: {
-        generateRoster: (args: { nurses: string; unassignedShifts: string }) => Promise<{ data: string; errors?: any[] }>;
+        generateRoster: (args: { nurses: string; unassignedShifts: string }) => Promise<{ data: string; errors?: Error[] }>;
     };
 }
 
 export function generateMockClient(): MockClient {
-    const createModelHandlers = <T extends { id: string }>(model: string): MockModelClient<T> => ({
+    const createModelHandlers = <T extends { id: string }>(model: keyof StoreType): MockModelClient<T> => ({
         observeQuery: () => ({
-            subscribe: ({ next }: any) => {
-                LISTENERS[model].push(next);
-                next({ items: STORE[model] });
-                return { unsubscribe: () => { } };
+            subscribe: ({ next }: { next: (data: { items: T[] }) => void }) => {
+                LISTENERS[model as string].push(next);
+                next({ items: STORE[model] as T[] });
+                return { unsubscribe: () => { /* No-op */ } };
             }
         }),
         create: async (item: Partial<T>) => {
             const newItem = { ...item, id: Math.random().toString(36).substr(2, 9) } as T;
-            STORE[model].push(newItem);
-            notify(model);
+            (STORE[model] as T[]).push(newItem);
+            notify<T>(model);
             return { data: newItem };
         },
         update: async (item: Partial<T>) => {
-            const index = STORE[model].findIndex((i: any) => i.id === item.id);
+            const list = STORE[model] as T[];
+            const index = list.findIndex((i) => i.id === item.id);
             if (index !== -1) {
-                STORE[model][index] = { ...STORE[model][index], ...item };
-                notify(model);
+                list[index] = { ...list[index], ...item };
+                notify<T>(model);
+                return { data: list[index] };
             }
-            return { data: STORE[model][index] };
+            // Fallback if not found, though in mock env we usually assume it exists
+            return { data: item as T };
         },
         delete: async (item: { id: string }) => {
-            const index = STORE[model].findIndex((i: any) => i.id === item.id);
+            const list = STORE[model] as T[];
+            const index = list.findIndex((i) => i.id === item.id);
             if (index !== -1) {
-                const deleted = STORE[model].splice(index, 1)[0];
-                notify(model);
+                const deleted = list.splice(index, 1)[0];
+                notify<T>(model);
                 return { data: deleted };
             }
             return { data: null };
@@ -122,15 +129,19 @@ export function generateMockClient(): MockClient {
         },
         queries: {
             generateRoster: async (args: { nurses: string; unassignedShifts: string }) => {
-                const nurses = JSON.parse(args.nurses);
-                const shifts = JSON.parse(args.unassignedShifts);
+                const nurses = JSON.parse(args.nurses) as Nurse[];
+                const shifts = JSON.parse(args.unassignedShifts) as Shift[];
 
                 // Simple logic: Match by first skill overlap
-                const assignments = shifts.map((s: any) => {
-                    const nurse = nurses.find((n: any) =>
-                        n.skills.some((sk: string) => s.requiredSkill === sk)
+                const assignments = shifts.map((s) => {
+                    const nurse = nurses.find((n) =>
+                        n.skills?.some((sk: string) => s.requiredSkill === sk)
                     );
-                    return { shiftId: s.id, nurseId: nurse ? nurse.id : 'UNASSIGNED', nurseName: nurse ? nurse.name : null };
+                    return {
+                        shiftId: s.id,
+                        nurseId: nurse ? nurse.id : 'UNASSIGNED',
+                        nurseName: nurse ? nurse.name : undefined
+                    };
                 });
 
                 await new Promise(r => setTimeout(r, 2000));
@@ -141,4 +152,3 @@ export function generateMockClient(): MockClient {
         }
     };
 }
-

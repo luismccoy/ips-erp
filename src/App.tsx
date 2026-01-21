@@ -1,6 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { Activity } from 'lucide-react';
 import LandingPage from './components/LandingPage';
+import DemoSelection from './components/DemoSelection';
 import { useAuth } from './hooks/useAuth';
 import { useAnalytics } from './hooks/useAnalytics';
 import { TENANTS } from './data/mock-data';
@@ -25,7 +26,7 @@ export default function App() {
   const { role, tenant, loading, error, login, logout, setDemoState } = useAuth();
   const { trackEvent, identifyUser } = useAnalytics();
   const [view, setView] = useState<string>('login');
-  const [showLanding, setShowLanding] = useState(true);
+  const [authStage, setAuthStage] = useState<'landing' | 'demo' | 'login'>('landing');
 
   // Login form state
   const [email, setEmail] = useState('');
@@ -45,14 +46,14 @@ export default function App() {
       identifyUser(role, { tenant: tenant.name, role });
       trackEvent('Session Started', { role });
     }
-  }, [role, tenant]);
+  }, [role, tenant, identifyUser, trackEvent]);
 
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault();
     setIsSigningIn(true);
     try {
       await login({ username: email, password });
-      setShowLanding(false);
+      // authStage irrelevant once role is set
       trackEvent('Login Success', { method: 'email' });
     } catch (e) {
       trackEvent('Login Failed', { error: String(e) });
@@ -64,25 +65,22 @@ export default function App() {
   async function handleLogout() {
     await logout();
     trackEvent('Logout');
-    setShowLanding(true);
+    setAuthStage('landing');
   }
 
   // Demo / Mock Auth Handlers
   const handleDemoAdmin = () => {
     setDemoState('admin', TENANTS[0]);
-    setShowLanding(false);
     trackEvent('Demo Login Used', { role: 'admin' });
   };
 
   const handleDemoNurse = () => {
     setDemoState('nurse', TENANTS[0]);
-    setShowLanding(false);
     trackEvent('Demo Login Used', { role: 'nurse' });
   };
 
   const handleDemoFamily = () => {
     setDemoState('family', TENANTS[0]);
-    setShowLanding(false);
     trackEvent('Demo Login Used', { role: 'family' });
   };
 
@@ -97,11 +95,28 @@ export default function App() {
     );
   }
 
-  if (showLanding && !role) {
-    return <LandingPage onEnterApp={() => setShowLanding(false)} />;
-  }
-
   if (!role) {
+    if (authStage === 'landing') {
+      return (
+        <LandingPage
+          onLogin={() => setAuthStage('login')}
+          onViewDemo={() => setAuthStage('demo')}
+        />
+      );
+    }
+
+    if (authStage === 'demo') {
+      return (
+        <DemoSelection
+          onSelectAdmin={handleDemoAdmin}
+          onSelectNurse={handleDemoNurse}
+          onSelectFamily={handleDemoFamily}
+          onBack={() => setAuthStage('landing')}
+        />
+      );
+    }
+
+    // Default to Login View
     return (
       <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center p-4 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-100/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
@@ -149,28 +164,13 @@ export default function App() {
             >
               {isSigningIn ? 'Signing in...' : 'Enter Platform'}
             </button>
-
-            <div className="pt-4 border-t border-slate-50 space-y-2">
+            <div className="text-center pt-4">
               <button
                 type="button"
-                onClick={handleDemoAdmin}
-                className="w-full py-3 text-xs font-bold text-slate-400 uppercase hover:text-[#2563eb] hover:bg-slate-50 rounded-xl transition-all"
+                onClick={() => setAuthStage('landing')}
+                className="text-xs font-bold text-slate-400 uppercase hover:text-slate-600 transition-colors"
               >
-                Demo as Admin
-              </button>
-              <button
-                type="button"
-                onClick={handleDemoNurse}
-                className="w-full py-3 text-xs font-bold text-slate-400 uppercase hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all"
-              >
-                Demo as Nurse
-              </button>
-              <button
-                type="button"
-                onClick={handleDemoFamily}
-                className="w-full py-3 text-xs font-bold text-slate-400 uppercase hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
-              >
-                Demo as Family
+                Back to Home
               </button>
             </div>
           </form>

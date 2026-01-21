@@ -2,11 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { client, MOCK_USER } from '../amplify-utils';
 import { type Patient } from '../types';
 
+interface HistoryItem {
+    id: string;
+    date: string;
+    patient: string;
+    status: 'COMPLETED' | 'READY';
+    size: string;
+}
+
 export const EvidenceGenerator: React.FC = () => {
     const [patients, setPatients] = useState<Patient[]>([]);
     const [selectedPatient, setSelectedPatient] = useState<string>('');
     const [isGenerating, setIsGenerating] = useState(false);
-    const [history, setHistory] = useState<any[]>([
+    const [history, setHistory] = useState<HistoryItem[]>([
         { id: 'EXP-001', date: '2026-01-15', patient: 'Juan Manuel Santos', status: 'COMPLETED', size: '2.4 MB' },
         { id: 'EXP-002', date: '2026-01-18', patient: 'Maria Rodriguez', status: 'READY', size: '1.8 MB' }
     ]);
@@ -15,7 +23,7 @@ export const EvidenceGenerator: React.FC = () => {
         const sub = client.models.Patient.observeQuery({
             filter: { tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] } }
         }).subscribe({
-            next: (data: any) => setPatients(data.items)
+            next: (data: { items: Patient[] }) => setPatients(data.items)
         });
         return () => sub.unsubscribe();
     }, []);

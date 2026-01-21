@@ -6,7 +6,7 @@ import { ErrorAlert } from './ui/ErrorAlert';
 import { Button } from './ui/Button';
 import { Card } from './ui/Card';
 import { Badge } from './ui/Badge';
-import { type Shift } from '../types';
+import { type Shift, type Nurse } from '../types';
 import styles from './AdminRoster.module.css';
 
 interface Assignment {
@@ -15,10 +15,14 @@ interface Assignment {
     nurseName?: string;
 }
 
+interface RosterActionResponse {
+    assignments: Assignment[];
+}
+
 export const AdminRoster: React.FC = () => {
-    const api = useApiCall<any>(); // Generic API handler for roster actions
+    const api = useApiCall<RosterActionResponse>(); // Generic API handler for roster actions
     const [assignments, setAssignments] = useState<Assignment[]>([]);
-    const [nurses, setNurses] = useState<any[]>([]);
+    const [nurses, setNurses] = useState<Nurse[]>([]);
     const [shifts, setShifts] = useState<Shift[]>([]);
 
     useEffect(() => {
@@ -58,12 +62,14 @@ export const AdminRoster: React.FC = () => {
                     unassignedShifts: JSON.stringify(shifts)
                 });
 
-                if (errors) throw new Error(errors[0].message);
+                if (errors && errors.length > 0) throw new Error(errors[0].message);
+
                 if (data) {
-                    const result = JSON.parse(data as string);
+                    const result = JSON.parse(data as string) as RosterActionResponse;
                     setAssignments(result.assignments || []);
                     return result;
                 }
+                throw new Error('No data received');
             })());
         } catch (err) {
             console.error('AI Roster failed:', err);
@@ -84,6 +90,7 @@ export const AdminRoster: React.FC = () => {
                 }
                 setAssignments([]);
                 alert('¡Roster confirmado y asignado exitosamente!');
+                return { assignments: [] };
             })());
         } catch (err) {
             console.error('Confirm failed:', err);

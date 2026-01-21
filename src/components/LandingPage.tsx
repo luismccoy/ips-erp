@@ -6,7 +6,7 @@ import {
     Shield, Heart, PlusCircle
 } from 'lucide-react';
 
-export default function LandingPage({ onEnterApp }: { onEnterApp: () => void }) {
+export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => void, onViewDemo: () => void }) {
     const [showVideoModal, setShowVideoModal] = useState(false);
 
     return (
@@ -29,8 +29,8 @@ export default function LandingPage({ onEnterApp }: { onEnterApp: () => void }) 
                             <a href="#infrastructure" className="text-sm font-medium hover:text-[#2563eb] transition-colors">Infrastructure</a>
                         </div>
                         <div className="flex items-center gap-4">
-                            <button onClick={onEnterApp} className="hidden md:block text-sm font-medium text-slate-900 hover:text-[#2563eb]">Login</button>
-                            <button onClick={onEnterApp} className="bg-slate-900 text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-slate-800 transition-all hover:shadow-lg transform hover:-translate-y-0.5">
+                            <button onClick={onLogin} className="hidden md:block text-sm font-medium text-slate-900 hover:text-[#2563eb]">Login</button>
+                            <button onClick={onViewDemo} className="bg-slate-900 text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-slate-800 transition-all hover:shadow-lg transform hover:-translate-y-0.5">
                                 Agendar Demo
                             </button>
                         </div>
@@ -66,8 +66,8 @@ export default function LandingPage({ onEnterApp }: { onEnterApp: () => void }) 
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                        <button onClick={onEnterApp} className="w-full sm:w-auto px-8 py-4 bg-[#2563eb] text-white rounded-xl font-semibold shadow-xl shadow-blue-500/20 hover:bg-[#1d4ed8] transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2">
-                            Comenzar Prueba Gratis
+                        <button onClick={onViewDemo} className="w-full sm:w-auto px-8 py-4 bg-[#2563eb] text-white rounded-xl font-semibold shadow-xl shadow-blue-500/20 hover:bg-[#1d4ed8] transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2">
+                            View Demo
                             <ArrowRight className="h-4 w-4" />
                         </button>
                         <button onClick={() => setShowVideoModal(true)} className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-xl font-semibold hover:bg-slate-50 transition-all flex items-center justify-center gap-2 group">
@@ -424,10 +424,11 @@ export default function LandingPage({ onEnterApp }: { onEnterApp: () => void }) 
                             <button onClick={() => setShowVideoModal(false)} className="absolute top-4 right-4 z-10 text-white/50 hover:text-white bg-black/50 hover:bg-black/70 rounded-full p-2 transition-colors">
                                 <X className="h-6 w-6" />
                             </button>
-                            <video className="w-full h-full object-cover" controls autoPlay>
-                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" type="video/mp4" />
-                                Your browser does not support the video tag.
-                            </video>
+                            <img
+                                src="/app_walkthrough.webp"
+                                className="w-full h-full object-contain bg-black"
+                                alt="IPS ERP App Walkthrough"
+                            />
                             <div className="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
                                 <h3 className="text-white font-bold text-xl">IPS ERP Demo</h3>
                                 <p className="text-slate-300 text-sm">Mostrando flujo de Rostering Automático y Validación de RIPS.</p>

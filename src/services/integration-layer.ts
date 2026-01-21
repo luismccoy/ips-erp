@@ -9,11 +9,11 @@ export const IntegrationLayer = {
      * Placeholder for real-time verification of patient insurance status and debt recovery.
      */
     adres: {
-        verifyPatient: async (documentId: string) => {
+        verifyPatient: async (documentId: string): Promise<{ status: string; eps: string; regime: string }> => {
             console.log(`[Integration] Verifying Document ${documentId} with ADRES...`);
             return { status: 'ACTIVE', eps: 'Sanitas', regime: 'CONTRIBUTIVE' };
         },
-        reportService: async (data: any) => {
+        reportService: async (data: Record<string, unknown>): Promise<{ trackingId: string }> => {
             console.log(`[Integration] Reporting service to ADRES repository...`, data);
             return { trackingId: `ADRES-${Math.random().toString(36).substr(2, 9)}` };
         }

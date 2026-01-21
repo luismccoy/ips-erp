@@ -8,7 +8,7 @@ interface UseApiCallReturn<T> {
     reset: () => void;
 }
 
-export function useApiCall<T = any>(): UseApiCallReturn<T> {
+export function useApiCall<T>(): UseApiCallReturn<T> {
     const [data, setData] = useState<T | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<Error | null>(null);
