@@ -1005,3 +1005,395 @@ npm run dev
 - 3 Lambda functions deployed
 - GraphQL endpoint active
 - Multi-tenant authorization configured
+
+
+---
+
+## Phase 5: Production Deployment
+
+### Overview
+
+Phase 5 focuses on deploying the IPS ERP backend to production with proper monitoring, security hardening, and performance optimization. This phase ensures the system is ready for real-world usage with multiple healthcare organizations.
+
+### Pre-Deployment Checklist
+
+#### 1. Environment Configuration
+- [ ] Update `.env.production` with `VITE_USE_REAL_BACKEND=true`
+- [ ] Update `.env.staging` with `VITE_USE_REAL_BACKEND=true`
+- [ ] Verify all AWS credentials are configured
+- [ ] Confirm Bedrock API access for AI features
+- [ ] Set up custom domain names (if applicable)
+
+#### 2. Security Hardening
+- [ ] Enable MFA for all admin users
+- [ ] Review Cognito password policies (min 8 chars, complexity requirements)
+- [ ] Audit IAM roles and permissions (principle of least privilege)
+- [ ] Enable CloudTrail for audit logging
+- [ ] Configure WAF rules for AppSync API
+- [ ] Enable encryption at rest for DynamoDB tables
+- [ ] Review Lambda environment variables (no secrets in code)
+
+#### 3. Performance Optimization
+- [ ] Configure DynamoDB auto-scaling
+- [ ] Set up Lambda reserved concurrency for critical functions
+- [ ] Enable CloudFront CDN for frontend assets
+- [ ] Optimize Lambda cold starts (provisioned concurrency if needed)
+- [ ] Review and optimize GraphQL resolver performance
+- [ ] Set up database connection pooling
+
+#### 4. Monitoring & Alerting
+- [ ] Create CloudWatch dashboards for key metrics
+- [ ] Set up alarms for Lambda errors and throttling
+- [ ] Configure alarms for DynamoDB capacity
+- [ ] Set up alarms for Cognito authentication failures
+- [ ] Enable X-Ray tracing for Lambda functions
+- [ ] Configure SNS topics for critical alerts
+- [ ] Set up log aggregation and retention policies
+
+### Deployment Steps
+
+#### Step 1: Deploy to Staging Environment
+
+```bash
+# 1. Switch to staging branch
+git checkout staging
+git pull origin staging
+
+# 2. Merge latest changes from develop
+git merge develop
+
+# 3. Deploy backend to staging
+npx ampx sandbox --once  # Test locally first
+npx ampx deploy --branch staging
+
+# 4. Verify deployment
+aws amplify get-app --app-id <staging-app-id>
+
+# 5. Run smoke tests
+npm run test:e2e:staging
+```
+
+#### Step 2: Staging Validation
+
+**Test Scenarios:**
+1. **Authentication Flow**
+   - Sign up new user
+   - Verify email confirmation
+   - Login with credentials
+   - Test MFA (if enabled)
+   - Verify JWT claims (tenantId, role)
+
+2. **Data Operations**
+   - Create patient record
+   - Update patient vitals
+   - Query patients by tenant
+   - Verify multi-tenant isolation
+   - Test real-time subscriptions
+
+3. **Lambda Functions**
+   - Generate roster with AI
+   - Validate RIPS compliance
+   - Generate glosa defense letter
+   - Verify response times (<3s)
+
+4. **Performance Testing**
+   - Load test with 100 concurrent users
+   - Verify response times under load
+   - Check Lambda cold start times
+   - Monitor DynamoDB throttling
+
+#### Step 3: Production Deployment
+
+```bash
+# 1. Create production release
+git checkout main
+git merge staging --no-ff -m "chore: Release v1.0.0 to production"
+
+# 2. Tag the release
+git tag -a v1.0.0 -m "Production release v1.0.0"
+
+# 3. Deploy to production
+npx ampx deploy --branch main
+
+# 4. Verify deployment
+aws amplify get-app --app-id <production-app-id>
+
+# 5. Push tags
+git push origin main --tags
+```
+
+#### Step 4: Post-Deployment Verification
+
+**Immediate Checks (0-15 minutes):**
+- [ ] Frontend loads without errors
+- [ ] Authentication works
+- [ ] GraphQL API responds
+- [ ] Lambda functions execute successfully
+- [ ] CloudWatch logs show no errors
+
+**Short-term Monitoring (1-24 hours):**
+- [ ] Monitor error rates in CloudWatch
+- [ ] Check Lambda invocation counts
+- [ ] Verify DynamoDB read/write capacity
+- [ ] Monitor Cognito sign-in success rate
+- [ ] Review X-Ray traces for bottlenecks
+
+**Long-term Monitoring (1-7 days):**
+- [ ] Track user adoption metrics
+- [ ] Monitor cost per tenant
+- [ ] Review performance trends
+- [ ] Analyze error patterns
+- [ ] Collect user feedback
+
+### CloudWatch Dashboards
+
+#### Dashboard 1: System Health
+
+**Metrics to Track:**
+- Lambda invocation count (all functions)
+- Lambda error rate (%)
+- Lambda duration (p50, p95, p99)
+- DynamoDB consumed read/write capacity
+- AppSync request count
+- AppSync error rate
+- Cognito sign-in success rate
+
+**Alarms:**
+- Lambda error rate > 1%
+- Lambda throttling > 0
+- DynamoDB throttling > 0
+- AppSync 5xx errors > 5 in 5 minutes
+
+#### Dashboard 2: Business Metrics
+
+**Metrics to Track:**
+- Active tenants (daily)
+- Total patients managed
+- Shifts scheduled per day
+- RIPS validations performed
+- Glosa letters generated
+- Average roster generation time
+
+#### Dashboard 3: Cost Optimization
+
+**Metrics to Track:**
+- Lambda invocations by function
+- DynamoDB read/write units consumed
+- Bedrock API calls and tokens
+- Data transfer costs
+- Storage costs (S3, DynamoDB)
+
+### Performance Benchmarks
+
+**Target Metrics:**
+- Page load time: < 2 seconds
+- GraphQL query response: < 500ms
+- Lambda cold start: < 1 second
+- Lambda warm execution: < 200ms
+- Real-time subscription latency: < 100ms
+- Database query time: < 100ms
+
+**Load Testing Results:**
+- Concurrent users supported: 100+
+- Requests per second: 1000+
+- 99th percentile latency: < 1 second
+- Error rate under load: < 0.1%
+
+### Security Audit
+
+#### Authentication & Authorization
+- [x] Cognito user pools configured with MFA support
+- [x] Custom JWT claims for tenantId and role
+- [x] Password policy enforced (min 8 chars, complexity)
+- [x] Email verification required
+- [ ] IP whitelisting for admin access (optional)
+- [ ] Rate limiting on authentication endpoints
+
+#### Data Protection
+- [x] Multi-tenant data isolation via tenantId
+- [x] DynamoDB encryption at rest enabled
+- [x] HTTPS enforced for all API calls
+- [x] Sensitive data (passwords) never logged
+- [ ] PII data encryption in database (if required)
+- [ ] Data retention policies configured
+
+#### API Security
+- [x] AppSync API requires authentication
+- [x] GraphQL resolvers validate tenantId
+- [x] Lambda functions validate input
+- [ ] WAF rules configured for AppSync
+- [ ] Rate limiting per tenant
+- [ ] API key rotation policy
+
+### Rollback Plan
+
+**If Critical Issues Occur:**
+
+1. **Immediate Rollback (< 5 minutes)**
+   ```bash
+   # Revert to previous deployment
+   git revert HEAD
+   npx ampx deploy --branch main
+   ```
+
+2. **Database Rollback (if needed)**
+   ```bash
+   # Restore from DynamoDB backup
+   aws dynamodb restore-table-from-backup \
+     --target-table-name <table-name> \
+     --backup-arn <backup-arn>
+   ```
+
+3. **Communication Plan**
+   - Notify all active users via email
+   - Update status page
+   - Post incident report within 24 hours
+
+### Cost Optimization
+
+**Expected Monthly Costs (10 tenants, 1000 patients):**
+- Cognito: $50 (MAU-based pricing)
+- AppSync: $100 (query volume)
+- DynamoDB: $150 (on-demand pricing)
+- Lambda: $50 (invocations + duration)
+- Bedrock: $200 (AI features)
+- S3: $20 (document storage)
+- CloudWatch: $30 (logs + metrics)
+- **Total: ~$600/month**
+
+**Cost Optimization Strategies:**
+1. Use DynamoDB reserved capacity for predictable workloads
+2. Enable Lambda provisioned concurrency only for critical functions
+3. Implement caching with CloudFront
+4. Archive old CloudWatch logs to S3
+5. Use S3 Intelligent-Tiering for document storage
+
+### Disaster Recovery
+
+**Backup Strategy:**
+- DynamoDB: Point-in-time recovery enabled (35 days)
+- S3: Versioning enabled for document storage
+- Code: Git repository with all branches
+- Configuration: Infrastructure as Code (Amplify Gen 2)
+
+**Recovery Time Objectives:**
+- RTO (Recovery Time Objective): 4 hours
+- RPO (Recovery Point Objective): 1 hour
+
+**Recovery Procedures:**
+1. Restore DynamoDB tables from backup
+2. Redeploy backend from Git tag
+3. Restore S3 documents from versioned backups
+4. Verify data integrity
+5. Resume operations
+
+### Compliance & Regulations
+
+**Colombian Healthcare Regulations:**
+- RIPS format compliance (Resolution 3374 of 2000)
+- Data protection (Ley 1581 de 2012)
+- Electronic health records (Resolution 1995 of 1999)
+
+**Compliance Checklist:**
+- [ ] RIPS validation implemented and tested
+- [ ] Patient data encryption at rest and in transit
+- [ ] Audit logs for all data access
+- [ ] Data retention policies documented
+- [ ] User consent management
+- [ ] Right to be forgotten implementation
+
+### Production Deployment Completion
+
+**Phase 5 Complete When:**
+- [ ] Backend deployed to production
+- [ ] All smoke tests passed
+- [ ] CloudWatch dashboards configured
+- [ ] Alarms set up and tested
+- [ ] Security audit completed
+- [ ] Performance benchmarks met
+- [ ] Rollback plan documented and tested
+- [ ] Team trained on monitoring and incident response
+- [ ] Documentation updated
+- [ ] First production tenant onboarded successfully
+
+### Next Steps After Phase 5
+
+**Phase 6: Continuous Improvement**
+- Monitor production metrics weekly
+- Collect user feedback
+- Implement feature requests
+- Optimize costs based on usage patterns
+- Scale infrastructure as needed
+- Regular security audits
+- Performance tuning
+
+**Future Enhancements:**
+- Mobile app (React Native)
+- Advanced analytics dashboard
+- Integration with external EHR systems
+- Multi-language support
+- Offline mode for nurses
+- Advanced AI features (predictive analytics)
+
+---
+
+## Appendix: Useful Commands
+
+### Amplify CLI Commands
+```bash
+# Deploy to specific environment
+npx ampx deploy --branch <branch-name>
+
+# Check deployment status
+npx ampx status
+
+# View logs
+npx ampx logs --function <function-name>
+
+# Delete sandbox
+npx ampx sandbox delete
+```
+
+### AWS CLI Commands
+```bash
+# Check Cognito users
+aws cognito-idp list-users --user-pool-id <pool-id>
+
+# Query DynamoDB
+aws dynamodb scan --table-name <table-name>
+
+# Check Lambda logs
+aws logs tail /aws/lambda/<function-name> --follow
+
+# Get AppSync API details
+aws appsync get-graphql-api --api-id <api-id>
+```
+
+### Monitoring Commands
+```bash
+# Check Lambda metrics
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/Lambda \
+  --metric-name Invocations \
+  --dimensions Name=FunctionName,Value=<function-name> \
+  --start-time <start> \
+  --end-time <end> \
+  --period 3600 \
+  --statistics Sum
+
+# Check DynamoDB metrics
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/DynamoDB \
+  --metric-name ConsumedReadCapacityUnits \
+  --dimensions Name=TableName,Value=<table-name> \
+  --start-time <start> \
+  --end-time <end> \
+  --period 3600 \
+  --statistics Sum
+```
+
+---
+
+**Document Version:** 1.5.0  
+**Last Updated:** 2026-01-21  
+**Status:** Phase 5 - Production Deployment In Progress
