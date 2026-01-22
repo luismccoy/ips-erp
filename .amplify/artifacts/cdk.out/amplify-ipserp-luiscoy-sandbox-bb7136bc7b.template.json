@@ -222,6 +222,20 @@
         "Outputs.amplifyipserpluiscoysandboxbb7136bc7bfunctionrosterarchitectlambdaF38DEDD6Ref"
        ]
       },
+      "\",\"",
+      {
+       "Fn::GetAtt": [
+        "function1351588B",
+        "Outputs.amplifyipserpluiscoysandboxbb7136bc7bfunctionripsvalidatorlambdaC851B002Ref"
+       ]
+      },
+      "\",\"",
+      {
+       "Fn::GetAtt": [
+        "function1351588B",
+        "Outputs.amplifyipserpluiscoysandboxbb7136bc7bfunctionglosadefenderlambdaE67B9F26Ref"
+       ]
+      },
       "\"]"
      ]
     ]
@@ -326,7 +340,7 @@
        {
         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
        },
-       "/db8296cb300c2245c56b8324b4c772716d0a0b32f00227bc7e180ea81228a8c5.json"
+       "/5bb18e3229e1a44518e599c9f436c73266414f57d588674a42f5fb334aedd16d.json"
       ]
      ]
     }
@@ -368,7 +382,7 @@
        {
         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
        },
-       "/3e311b652411c3504524490b1367699a286352f6fd6efab71c0c0b479e5571d7.json"
+       "/5c20839947d93c48fec6b39987a2436ff1fb25f817c9c45e890b490aac39ffe4.json"
       ]
      ]
     }

@@ -2,10 +2,13 @@ import { useState, useEffect } from 'react';
 import { getCurrentUser, signIn, signOut, fetchUserAttributes, type SignInInput, type AuthUser } from 'aws-amplify/auth';
 import { TENANTS } from '../data/mock-data';
 import type { Tenant } from '../types';
+import { isUsingRealBackend } from '../amplify-utils';
 
 /**
  * Custom hook for managing authentication state via AWS Amplify.
  * Handles current user, role, tenant context, and sign-in/sign-out actions.
+ * 
+ * Supports both real Cognito authentication and mock mode for development.
  */
 export function useAuth() {
     const [user, setUser] = useState<AuthUser | null>(null);
@@ -20,14 +23,31 @@ export function useAuth() {
 
     async function checkUser() {
         try {
-            const currentUser = await getCurrentUser();
-            await fetchUserAttributes();
+            if (isUsingRealBackend()) {
+                // Real Cognito authentication
+                const currentUser = await getCurrentUser();
+                const attributes = await fetchUserAttributes();
 
-            setUser(currentUser);
-            // In a real app, role and tenant would come from attributes or DB
-            // For now, we mock standard role assignment upon successful login
-            setRole('admin');
-            setTenant(TENANTS[0]);
+                setUser(currentUser);
+                
+                // Extract role and tenantId from custom attributes
+                const userRole = attributes['custom:role'] as 'admin' | 'nurse' | 'family' || 'admin';
+                const tenantId = attributes['custom:tenantId'] || '';
+                
+                setRole(userRole);
+                
+                // In production, fetch tenant from DynamoDB using tenantId
+                // For now, use mock tenant with real tenantId
+                setTenant({
+                    ...TENANTS[0],
+                    id: tenantId
+                });
+            } else {
+                // Mock mode - no real authentication
+                setUser(null);
+                setRole(null);
+                setTenant(null);
+            }
         } catch {
             // No user signed in
             setUser(null);
@@ -42,8 +62,14 @@ export function useAuth() {
         setLoading(true);
         setError(null);
         try {
-            await signIn(input);
-            await checkUser();
+            if (isUsingRealBackend()) {
+                await signIn(input);
+                await checkUser();
+            } else {
+                // Mock login - just set demo state
+                setRole('admin');
+                setTenant(TENANTS[0]);
+            }
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Login failed';
             setError(message);
@@ -55,7 +81,9 @@ export function useAuth() {
 
     async function logout() {
         try {
-            await signOut();
+            if (isUsingRealBackend()) {
+                await signOut();
+            }
             setUser(null);
             setRole(null);
             setTenant(null);

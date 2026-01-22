@@ -1,20 +1,24 @@
-// import { generateClient } from 'aws-amplify/data';
+import { generateClient } from 'aws-amplify/data';
 import { generateMockClient } from './mock-client';
 import type { AmplifyUser } from './types';
-// import { type Schema } from '../amplify/data/resource';
-// import { Amplify } from 'aws-amplify';
-// import outputs from '../amplify_outputs.json';
+import { type Schema } from '../amplify/data/resource';
+import { Amplify } from 'aws-amplify';
+import outputs from '../amplify_outputs.json';
 
-// Configure Amplify with mock outputs
-// Amplify.configure(outputs);
+// Determine if we should use real backend or mock
+const USE_REAL_BACKEND = import.meta.env.VITE_USE_REAL_BACKEND === 'true';
 
-// Export the typed client
-// export const client = generateClient<Schema>({
-//    authMode: 'userPool',
-// });
-export const client = generateMockClient();
+// Configure Amplify with real outputs
+if (USE_REAL_BACKEND) {
+    Amplify.configure(outputs);
+}
 
-// Mock User Context for development
+// Export the typed client (real or mock based on environment)
+export const client = USE_REAL_BACKEND 
+    ? generateClient<Schema>({ authMode: 'userPool' })
+    : generateMockClient();
+
+// Mock User Context for development (only used when USE_REAL_BACKEND is false)
 export const MOCK_USER: AmplifyUser = {
     username: 'nurse-maria',
     attributes: {
@@ -23,4 +27,7 @@ export const MOCK_USER: AmplifyUser = {
         'custom:tenantId': 'tenant-bogota-01'
     }
 };
+
+// Helper to check if using real backend
+export const isUsingRealBackend = () => USE_REAL_BACKEND;
 

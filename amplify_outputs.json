@@ -1332,6 +1332,46 @@
               "isRequired": false
             }
           }
+        },
+        "validateRIPS": {
+          "name": "validateRIPS",
+          "isArray": false,
+          "type": "AWSJSON",
+          "isRequired": false,
+          "arguments": {
+            "billingRecord": {
+              "name": "billingRecord",
+              "isArray": false,
+              "type": "AWSJSON",
+              "isRequired": false
+            }
+          }
+        },
+        "generateGlosaDefense": {
+          "name": "generateGlosaDefense",
+          "isArray": false,
+          "type": "AWSJSON",
+          "isRequired": false,
+          "arguments": {
+            "billingRecord": {
+              "name": "billingRecord",
+              "isArray": false,
+              "type": "AWSJSON",
+              "isRequired": false
+            },
+            "patientHistory": {
+              "name": "patientHistory",
+              "isArray": false,
+              "type": "AWSJSON",
+              "isRequired": false
+            },
+            "clinicalNotes": {
+              "name": "clinicalNotes",
+              "isArray": false,
+              "type": "AWSJSON",
+              "isRequired": false
+            }
+          }
         }
       }
     }
