@@ -4,6 +4,7 @@ frontend:
     preBuild:
       commands:
         - npm ci
+        - echo "VITE_USE_REAL_BACKEND=$VITE_USE_REAL_BACKEND"
     build:
       commands:
         - npm run build
