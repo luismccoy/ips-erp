@@ -1,5 +1,5 @@
 // import { type Schema } from '../amplify/data/resource';
-import type { Shift, Nurse, InventoryItem, Patient, Medication, Task } from './types';
+import type { Shift, Nurse, InventoryItem, Patient, Medication, Task, VitalSigns } from './types';
 
 // Simple In-Memory Store
 interface StoreType {
@@ -9,6 +9,7 @@ interface StoreType {
     Patient: Patient[];
     Medication: Medication[];
     Task: Task[];
+    VitalSigns: VitalSigns[];
     [key: string]: unknown[];
 }
 
@@ -36,6 +37,10 @@ const STORE: StoreType = {
     Task: [
         { id: 't1', patientId: 'p1', description: 'Revisión de signos vitales', completed: false, dueDate: new Date().toISOString() },
         { id: 't2', patientId: 'p1', description: 'Curación de herida en mano derecha', completed: false, dueDate: new Date().toISOString() }
+    ],
+    VitalSigns: [
+        { id: 'v1', tenantId: 'tenant-bogota-01', patientId: 'p1', date: '2026-01-20', sys: 145, dia: 90, spo2: 95, hr: 78, note: 'Paciente estable con medicación ajustada', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+        { id: 'v2', tenantId: 'tenant-bogota-01', patientId: 'p1', date: '2026-01-18', sys: 150, dia: 95, spo2: 94, hr: 82, note: 'Presión arterial ligeramente elevada', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
     ]
 };
 
@@ -48,7 +53,8 @@ const LISTENERS: Record<string, ListenerCallback<any>[]> = {
     Inventory: [],
     Patient: [],
     Medication: [],
-    Task: []
+    Task: [],
+    VitalSigns: []
 };
 
 function notify<T>(model: keyof StoreType) {
@@ -74,6 +80,7 @@ export interface MockClient {
         Patient: MockModelClient<Patient>;
         Medication: MockModelClient<Medication>;
         Task: MockModelClient<Task>;
+        VitalSigns: MockModelClient<VitalSigns>;
     };
     queries: {
         generateRoster: (args: { nurses: string; unassignedShifts: string }) => Promise<{ data: string; errors?: Error[] }>;
@@ -125,7 +132,8 @@ export function generateMockClient(): MockClient {
             Inventory: createModelHandlers<InventoryItem>('Inventory'),
             Patient: createModelHandlers<Patient>('Patient'),
             Medication: createModelHandlers<Medication>('Medication'),
-            Task: createModelHandlers<Task>('Task')
+            Task: createModelHandlers<Task>('Task'),
+            VitalSigns: createModelHandlers<VitalSigns>('VitalSigns')
         },
         queries: {
             generateRoster: async (args: { nurses: string; unassignedShifts: string }) => {
