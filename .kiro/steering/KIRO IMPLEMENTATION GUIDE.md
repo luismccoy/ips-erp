@@ -300,3 +300,81 @@ After Phase 7 deployment, users still saw mock data even with `VITE_USE_REAL_BAC
 - All components operational with real backend toggle
 
 **Next Phase:** Production Operations & Data Population
+
+
+## Phase 9: Workflow Compliance (Visit State Machine)
+**Status:** ✅ COMPLETE
+
+**Goal:** Implement visit state machine with admin approval workflow, audit logging, and family-safe data visibility.
+
+**Completed Tasks:**
+1. ✅ Updated GraphQL schema with Visit, AuditLog, Notification models
+2. ✅ Added KARDEX, MedicationAdmin, TaskCompletion, VisitSummary custom types
+3. ✅ Implemented createVisitDraftFromShift Lambda (DRAFT creation)
+4. ✅ Implemented submitVisit Lambda (DRAFT/REJECTED → SUBMITTED)
+5. ✅ Implemented rejectVisit Lambda (SUBMITTED → REJECTED)
+6. ✅ Implemented approveVisit Lambda (SUBMITTED → APPROVED, immutable)
+7. ✅ Implemented listApprovedVisitSummariesForFamily query
+8. ✅ Added audit logging for all state transitions
+9. ✅ Added notifications for workflow events
+10. ✅ Deployed and validated in AppSync Console
+11. ✅ Fixed QueryCommand → ScanCommand in submitVisit Lambda
+12. ✅ Tested complete workflow: DRAFT → SUBMITTED → APPROVED
+13. ✅ Tested rejection workflow: SUBMITTED → REJECTED → SUBMITTED
+14. ✅ Verified audit trail (3 entries per workflow)
+15. ✅ Verified notification system (nurse + family notifications)
+16. ✅ Tested all 6 state machine invariants
+17. ✅ Tested multi-tenant isolation
+18. ✅ Tested KARDEX validation
+19. ✅ Updated API_DOCUMENTATION.md with comprehensive test results
+
+**Results:**
+- 5 new Lambda functions deployed and tested
+- Visit state machine enforced (DRAFT → SUBMITTED → REJECTED/APPROVED)
+- 1:1 Shift-Visit relationship enforced (Visit.id = shiftId)
+- Admin approval workflow with rejection handling
+- Family-safe data visibility (approved visits only)
+- Immutable audit trail for all state transitions
+- Multi-recipient notifications
+- All tests passed ✅
+
+**Lambda Functions:**
+- `createvisitdraftlambda` - Creates DRAFT visit from completed shift
+- `submitvisitlambda` - Transitions DRAFT/REJECTED → SUBMITTED
+- `rejectvisitlambda` - Admin rejects visit (SUBMITTED → REJECTED)
+- `approvevisitlambda` - Admin approves visit (SUBMITTED → APPROVED)
+- `listapprovedvisitsummari` - Family query for approved visits only
+
+**Key Features:**
+- ✅ DynamoDB SDK integration (no Amplify client dependencies)
+- ✅ Type-safe handlers with Schema types
+- ✅ Identity extraction with type assertions
+- ✅ Tenant isolation enforced
+- ✅ Role-based authorization (Nurse.role = ADMIN)
+- ✅ State machine validation
+- ✅ Audit logging with JSON details
+- ✅ Multi-recipient notifications
+
+**Invariants Enforced:**
+- INV-V1: Cannot update APPROVED visit ✅
+- INV-V2: Only assigned nurse can create/submit ✅
+- INV-V3: Only admin can approve/reject ✅
+- INV-V4: Rejection reason required ✅
+- INV-V5: Cannot skip states ✅
+- INV-V6: 1:1 Shift-Visit relationship ✅
+- INV-F1-F3: Family cannot see unapproved visits ✅
+
+**Test Results:**
+- Complete approval workflow: ✅ Passed
+- Rejection and resubmit workflow: ✅ Passed
+- Audit trail verification: ✅ 3 entries per workflow
+- Notification system: ✅ Nurse + family notifications
+- State machine invariants: ✅ All 6 tested and enforced
+- Multi-tenant isolation: ✅ Cross-tenant access blocked
+- KARDEX validation: ✅ Required fields enforced
+
+**AppSync Endpoint:** https://ga4dwdcapvg5ziixpgipcvmfbe.appsync-api.us-east-1.amazonaws.com/graphql
+
+**Spec Location:** `.kiro/specs/workflow-compliance/`
+
+**Next Phase:** Frontend Integration for Workflow Compliance (Phase 10)
