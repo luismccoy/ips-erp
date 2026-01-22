@@ -14,9 +14,3 @@ frontend:
   cache:
     paths:
       - node_modules/**/*
-backend:
-  phases:
-    build:
-      commands:
-        - npm ci --prefix amplify/functions/roster-architect
-        - npm run build --prefix amplify/functions/roster-architect
