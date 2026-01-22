@@ -62,7 +62,7 @@ export type Task = {
     id: string;
     patientId: string;
     description: string;
-    isCompleted: boolean;
+    completed: boolean;
     dueDate?: string | null;
 };
 
