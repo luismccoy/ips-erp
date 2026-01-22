@@ -236,6 +236,41 @@
         "Outputs.amplifyipserpluiscoysandboxbb7136bc7bfunctionglosadefenderlambdaE67B9F26Ref"
        ]
       },
+      "\",\"",
+      {
+       "Fn::GetAtt": [
+        "function1351588B",
+        "Outputs.amplifyipserpluiscoysandboxbb7136bc7bfunctionlistapprovedvisitsummarieslambda7A6A03E3Ref"
+       ]
+      },
+      "\",\"",
+      {
+       "Fn::GetAtt": [
+        "function1351588B",
+        "Outputs.amplifyipserpluiscoysandboxbb7136bc7bfunctioncreatevisitdraftlambdaF3C4898BRef"
+       ]
+      },
+      "\",\"",
+      {
+       "Fn::GetAtt": [
+        "function1351588B",
+        "Outputs.amplifyipserpluiscoysandboxbb7136bc7bfunctionsubmitvisitlambdaEFAE3B8CRef"
+       ]
+      },
+      "\",\"",
+      {
+       "Fn::GetAtt": [
+        "function1351588B",
+        "Outputs.amplifyipserpluiscoysandboxbb7136bc7bfunctionrejectvisitlambda339F163ERef"
+       ]
+      },
+      "\",\"",
+      {
+       "Fn::GetAtt": [
+        "function1351588B",
+        "Outputs.amplifyipserpluiscoysandboxbb7136bc7bfunctionapprovevisitlambdaA75308DDRef"
+       ]
+      },
       "\"]"
      ]
     ]
@@ -340,7 +375,7 @@
        {
         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
        },
-       "/5bb18e3229e1a44518e599c9f436c73266414f57d588674a42f5fb334aedd16d.json"
+       "/786d6c03cf45bf03ac375660d56544c7b86e16dd78b2fe09264371934bd1d606.json"
       ]
      ]
     }
@@ -382,7 +417,7 @@
        {
         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
        },
-       "/5c20839947d93c48fec6b39987a2436ff1fb25f817c9c45e890b490aac39ffe4.json"
+       "/6697a8fbea78889a6dc8495a1733ed766abc14d25611b1dcd8161c6e4d8c8f77.json"
       ]
      ]
     }

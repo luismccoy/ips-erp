@@ -1,5 +1,5 @@
 import { type Schema } from '../../data/resource';
-import { BedrockRuntimeClient, InvokeModelCommand } from "@aws-sdk/client-bedrock-runtime";
+import { AIClient } from './ai-client';
 
 /**
  * Glosa Defender - AI-Powered Billing Defense
@@ -12,9 +12,14 @@ import { BedrockRuntimeClient, InvokeModelCommand } from "@aws-sdk/client-bedroc
  * - Colombian health regulations
  * 
  * Outputs: Professional defense letter in Spanish for EPS submission
+ * 
+ * Environment Variables:
+ * - MODEL_ID: Bedrock model identifier (required)
+ * - AI_TEST_MODE: 'LIVE' | 'RECORDED' (default: 'LIVE')
+ * - AI_RECORDINGS_S3_BUCKET: S3 bucket for AI recordings (required for RECORDED mode)
  */
 
-const bedrock = new BedrockRuntimeClient({ region: "us-east-1" });
+const aiClient = new AIClient();
 
 interface DefenseInput {
     billingRecord: {
@@ -44,6 +49,15 @@ interface DefenseInput {
 
 export const handler: Schema["generateGlosaDefense"]["functionHandler"] = async (event) => {
     const input = event.arguments as DefenseInput;
+    
+    // Validate required environment variables
+    if (!process.env.MODEL_ID) {
+        throw new Error('MODEL_ID environment variable is required');
+    }
+    
+    if (process.env.AI_TEST_MODE === 'RECORDED' && !process.env.AI_RECORDINGS_S3_BUCKET) {
+        throw new Error('AI_RECORDINGS_S3_BUCKET environment variable is required for RECORDED mode');
+    }
     
     // 1. Construct comprehensive prompt for AI
     const prompt = `
@@ -86,28 +100,13 @@ Devuelve ÚNICAMENTE el texto de la carta, sin comentarios adicionales.
 `;
 
     try {
-        // 2. Call Bedrock (Claude 3.5 Sonnet)
-        const command = new InvokeModelCommand({
-            modelId: process.env.MODEL_ID,
-            contentType: "application/json",
-            accept: "application/json",
-            body: JSON.stringify({
-                anthropic_version: "bedrock-2023-05-31",
-                max_tokens: 2000,
-                temperature: 0.7,
-                messages: [
-                    {
-                        role: "user",
-                        content: [
-                            { type: "text", text: prompt }
-                        ]
-                    }
-                ]
-            }),
+        // 2. Call AI model via AIClient wrapper (supports LIVE/RECORDED modes)
+        const responseBody = await aiClient.invokeModel({
+            modelId: process.env.MODEL_ID!,
+            prompt: prompt,
+            maxTokens: 2000,
+            temperature: 0.7
         });
-
-        const response = await bedrock.send(command);
-        const responseBody = JSON.parse(new TextDecoder().decode(response.body));
 
         // 3. Extract defense letter
         const defenseLetter = responseBody.content[0].text;

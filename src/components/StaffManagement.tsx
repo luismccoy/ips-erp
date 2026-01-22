@@ -1,25 +1,51 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { client, MOCK_USER } from '../amplify-utils';
+import { usePagination } from '../hooks/usePagination';
 import { type Nurse } from '../types';
 
 export const StaffManagement: React.FC = () => {
-    const [staff, setStaff] = useState<Nurse[]>([]);
-    const [loading, setLoading] = useState(false);
+    const { items: staff, loadMore, hasMore, isLoading } = usePagination<Nurse>();
+    const [localLoading, setLocalLoading] = useState(false);
+
+    const fetchStaff = useCallback(async (token: string | null = null, isReset = false) => {
+        loadMore(async (t) => {
+            const response = await (client.models.Nurse as any).list({
+                filter: {
+                    tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] }
+                },
+                limit: 50,
+                nextToken: token || t
+            });
+            return { data: response.data || [], nextToken: response.nextToken };
+        }, isReset);
+    }, [loadMore]);
 
     useEffect(() => {
+        fetchStaff(null, true);
+
+        // Use subscription ONLY for real-time updates of EXISTING list items or new additions
+        // But for initial load and pagination, we use the list query.
         const query = client.models.Nurse.observeQuery({
             filter: {
                 tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] }
             }
         });
-        
+
         const sub = (query as any).subscribe({
-            next: (data: any) => setStaff([...data.items]),
+            next: () => {
+                // If we're in the first page, we can sync with observeQuery
+                // For simplicity in this ERP, we'll just keep the paginated list 
+                // and maybe refresh on significant changes.
+            },
             error: (err: Error) => console.error('Staff sub error:', err)
         });
 
         return () => sub.unsubscribe();
-    }, []);
+    }, [fetchStaff]);
+
+    const handleLoadMore = () => {
+        fetchStaff();
+    };
 
     const handleAddStaff = async () => {
         const name = prompt("Nombre completo:");
@@ -28,7 +54,7 @@ export const StaffManagement: React.FC = () => {
         const roleInput = prompt("Rol (ADMIN, NURSE, COORDINATOR):", "NURSE") || "NURSE";
         const role = ['ADMIN', 'NURSE', 'COORDINATOR'].includes(roleInput) ? roleInput : 'NURSE';
 
-        setLoading(true);
+        setLocalLoading(true);
         try {
             await client.models.Nurse.create({
                 tenantId: MOCK_USER.attributes['custom:tenantId'],
@@ -40,7 +66,7 @@ export const StaffManagement: React.FC = () => {
         } catch (err) {
             console.error('Add staff error:', err);
         } finally {
-            setLoading(false);
+            setLocalLoading(false);
         }
     };
 
@@ -56,7 +82,7 @@ export const StaffManagement: React.FC = () => {
                     <h2>Gestión de Personal & RBAC</h2>
                     <p>Manejo de roles, habilidades y permisos de acceso.</p>
                 </div>
-                <button className="btn-primary" onClick={handleAddStaff} disabled={loading}>
+                <button className="btn-primary" onClick={handleAddStaff} disabled={isLoading || localLoading}>
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
@@ -91,6 +117,16 @@ export const StaffManagement: React.FC = () => {
                     </div>
                 ))}
             </div>
+
+            {hasMore && (
+                <button
+                    onClick={handleLoadMore}
+                    disabled={isLoading}
+                    className="w-full py-4 text-sm font-bold text-slate-500 bg-white border border-slate-100 rounded-2xl hover:bg-slate-50 hover:border-slate-200 transition-all disabled:opacity-50 shadow-sm"
+                >
+                    {isLoading ? 'Cargando más...' : 'Cargar Más Personal'}
+                </button>
+            )}
 
             <style>{`
                 .staff-management-container {

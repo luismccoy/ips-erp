@@ -278,6 +278,922 @@
   }
  },
  "Resources": {
+  "CreateVisitDraftLambdaDataSourceServiceRoleAD9FDD36": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "appsync.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Tags": [
+     {
+      "Key": "amplify:deployment-type",
+      "Value": "sandbox"
+     },
+     {
+      "Key": "amplify:friendly-name",
+      "Value": "amplifyData"
+     },
+     {
+      "Key": "created-by",
+      "Value": "amplify"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/CreateVisitDraftLambdaDataSource/ServiceRole/Resource"
+   }
+  },
+  "CreateVisitDraftLambdaDataSourceServiceRoleDefaultPolicy7878C074": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::If": [
+          "HasEnvironmentParameter",
+          {
+           "Fn::Sub": [
+            "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:create-visit-draft",
+            {}
+           ]
+          },
+          {
+           "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:create-visit-draft"
+          }
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::If": [
+             "HasEnvironmentParameter",
+             {
+              "Fn::Sub": [
+               "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:create-visit-draft",
+               {}
+              ]
+             },
+             {
+              "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:create-visit-draft"
+             }
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "CreateVisitDraftLambdaDataSourceServiceRoleDefaultPolicy7878C074",
+    "Roles": [
+     {
+      "Ref": "CreateVisitDraftLambdaDataSourceServiceRoleAD9FDD36"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/CreateVisitDraftLambdaDataSource/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "CreateVisitDraftLambdaDataSource": {
+   "Type": "AWS::AppSync::DataSource",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPI2EA0F806ApiId"
+    },
+    "LambdaConfig": {
+     "LambdaFunctionArn": {
+      "Fn::If": [
+       "HasEnvironmentParameter",
+       {
+        "Fn::Sub": [
+         "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:create-visit-draft",
+         {}
+        ]
+       },
+       {
+        "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:create-visit-draft"
+       }
+      ]
+     }
+    },
+    "Name": "CreateVisitDraftLambdaDataSource",
+    "ServiceRoleArn": {
+     "Fn::GetAtt": [
+      "CreateVisitDraftLambdaDataSourceServiceRoleAD9FDD36",
+      "Arn"
+     ]
+    },
+    "Type": "AWS_LAMBDA"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/CreateVisitDraftLambdaDataSource/Resource"
+   }
+  },
+  "InvokeCreateVisitDraftLambdaDataSourceInvokeCreateVisitDraftLambdaDataSourceAppSyncFunctionAF717D73": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPI2EA0F806ApiId"
+    },
+    "DataSourceName": {
+     "Fn::GetAtt": [
+      "CreateVisitDraftLambdaDataSource",
+      "Name"
+     ]
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "InvokeCreateVisitDraftLambdaDataSource",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/9b89f30c1ac05206023d3cbab2c66fcd6354f2e5d5298e39e5cf35ba81c8cf1f.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/a20e304512b1fde77dc16ed9d5e0ed03817afcab629ce87ef11c99877b7b1e30.vtl"
+    }
+   },
+   "DependsOn": [
+    "CreateVisitDraftLambdaDataSource"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/InvokeCreateVisitDraftLambdaDataSource/InvokeCreateVisitDraftLambdaDataSource.AppSyncFunction"
+   }
+  },
+  "MutationcreateVisitDraftFromShiftResolver": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPI2EA0F806ApiId"
+    },
+    "FieldName": "createVisitDraftFromShift",
+    "Kind": "PIPELINE",
+    "PipelineConfig": {
+     "Functions": [
+      {
+       "Fn::GetAtt": [
+        "MutationCreateVisitDraftFromShiftAuthFNMutationCreateVisitDraftFromShiftAuthFNAppSyncFunction53576502",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "InvokeCreateVisitDraftLambdaDataSourceInvokeCreateVisitDraftLambdaDataSourceAppSyncFunctionAF717D73",
+        "FunctionId"
+       ]
+      }
+     ]
+    },
+    "RequestMappingTemplate": {
+     "Fn::Join": [
+      "",
+      [
+       "## [Start] Stash resolver specific context.. **\n$util.qr($ctx.stash.put(\"typeName\", \"Mutation\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"createVisitDraftFromShift\"))\n$util.qr($ctx.stash.put(\"authRole\", \"arn:aws:sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bauthNestedStackauthNestedStackResource3AD4712AOutputsamplifyipserpluiscoysandboxbb7136bc7bauthamplifyAuthauthenticatedUserRoleF97D1B61Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:aws:sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bauthNestedStackauthNestedStackResource3AD4712AOutputsamplifyipserpluiscoysandboxbb7136bc7bauthamplifyAuthunauthenticatedUserRole58812DAARef"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"",
+       {
+        "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bauthNestedStackauthNestedStackResource3AD4712AOutputsamplifyipserpluiscoysandboxbb7136bc7bauthamplifyAuthIdentityPoolBA7C7C57Ref"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"adminRoles\", []))\n{}\n## [End] Stash resolver specific context.. **"
+      ]
+     ]
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/387d5992f5fc03d05de27289457dcc374a84c42a889acb504aff1031047dde00.vtl"
+    },
+    "TypeName": "Mutation"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/mutationCreateVisitDraftFromShiftResolver"
+   }
+  },
+  "SubmitVisitLambdaDataSourceServiceRole006C7FF5": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "appsync.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Tags": [
+     {
+      "Key": "amplify:deployment-type",
+      "Value": "sandbox"
+     },
+     {
+      "Key": "amplify:friendly-name",
+      "Value": "amplifyData"
+     },
+     {
+      "Key": "created-by",
+      "Value": "amplify"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/SubmitVisitLambdaDataSource/ServiceRole/Resource"
+   }
+  },
+  "SubmitVisitLambdaDataSourceServiceRoleDefaultPolicy7ADA442A": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::If": [
+          "HasEnvironmentParameter",
+          {
+           "Fn::Sub": [
+            "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:submit-visit",
+            {}
+           ]
+          },
+          {
+           "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:submit-visit"
+          }
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::If": [
+             "HasEnvironmentParameter",
+             {
+              "Fn::Sub": [
+               "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:submit-visit",
+               {}
+              ]
+             },
+             {
+              "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:submit-visit"
+             }
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "SubmitVisitLambdaDataSourceServiceRoleDefaultPolicy7ADA442A",
+    "Roles": [
+     {
+      "Ref": "SubmitVisitLambdaDataSourceServiceRole006C7FF5"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/SubmitVisitLambdaDataSource/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "SubmitVisitLambdaDataSource": {
+   "Type": "AWS::AppSync::DataSource",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPI2EA0F806ApiId"
+    },
+    "LambdaConfig": {
+     "LambdaFunctionArn": {
+      "Fn::If": [
+       "HasEnvironmentParameter",
+       {
+        "Fn::Sub": [
+         "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:submit-visit",
+         {}
+        ]
+       },
+       {
+        "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:submit-visit"
+       }
+      ]
+     }
+    },
+    "Name": "SubmitVisitLambdaDataSource",
+    "ServiceRoleArn": {
+     "Fn::GetAtt": [
+      "SubmitVisitLambdaDataSourceServiceRole006C7FF5",
+      "Arn"
+     ]
+    },
+    "Type": "AWS_LAMBDA"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/SubmitVisitLambdaDataSource/Resource"
+   }
+  },
+  "InvokeSubmitVisitLambdaDataSourceInvokeSubmitVisitLambdaDataSourceAppSyncFunctionEDC61AAE": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPI2EA0F806ApiId"
+    },
+    "DataSourceName": {
+     "Fn::GetAtt": [
+      "SubmitVisitLambdaDataSource",
+      "Name"
+     ]
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "InvokeSubmitVisitLambdaDataSource",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/e8c644e72ec9d9a6c8871e31fcb4b30cd40216af123a41630a686f8d3a3b34c9.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/a20e304512b1fde77dc16ed9d5e0ed03817afcab629ce87ef11c99877b7b1e30.vtl"
+    }
+   },
+   "DependsOn": [
+    "SubmitVisitLambdaDataSource"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/InvokeSubmitVisitLambdaDataSource/InvokeSubmitVisitLambdaDataSource.AppSyncFunction"
+   }
+  },
+  "MutationsubmitVisitResolver": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPI2EA0F806ApiId"
+    },
+    "FieldName": "submitVisit",
+    "Kind": "PIPELINE",
+    "PipelineConfig": {
+     "Functions": [
+      {
+       "Fn::GetAtt": [
+        "MutationSubmitVisitAuthFNMutationSubmitVisitAuthFNAppSyncFunction787DC8A6",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "InvokeSubmitVisitLambdaDataSourceInvokeSubmitVisitLambdaDataSourceAppSyncFunctionEDC61AAE",
+        "FunctionId"
+       ]
+      }
+     ]
+    },
+    "RequestMappingTemplate": {
+     "Fn::Join": [
+      "",
+      [
+       "## [Start] Stash resolver specific context.. **\n$util.qr($ctx.stash.put(\"typeName\", \"Mutation\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"submitVisit\"))\n$util.qr($ctx.stash.put(\"authRole\", \"arn:aws:sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bauthNestedStackauthNestedStackResource3AD4712AOutputsamplifyipserpluiscoysandboxbb7136bc7bauthamplifyAuthauthenticatedUserRoleF97D1B61Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:aws:sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bauthNestedStackauthNestedStackResource3AD4712AOutputsamplifyipserpluiscoysandboxbb7136bc7bauthamplifyAuthunauthenticatedUserRole58812DAARef"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"",
+       {
+        "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bauthNestedStackauthNestedStackResource3AD4712AOutputsamplifyipserpluiscoysandboxbb7136bc7bauthamplifyAuthIdentityPoolBA7C7C57Ref"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"adminRoles\", []))\n{}\n## [End] Stash resolver specific context.. **"
+      ]
+     ]
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/387d5992f5fc03d05de27289457dcc374a84c42a889acb504aff1031047dde00.vtl"
+    },
+    "TypeName": "Mutation"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/mutationSubmitVisitResolver"
+   }
+  },
+  "RejectVisitLambdaDataSourceServiceRole46F11020": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "appsync.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Tags": [
+     {
+      "Key": "amplify:deployment-type",
+      "Value": "sandbox"
+     },
+     {
+      "Key": "amplify:friendly-name",
+      "Value": "amplifyData"
+     },
+     {
+      "Key": "created-by",
+      "Value": "amplify"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/RejectVisitLambdaDataSource/ServiceRole/Resource"
+   }
+  },
+  "RejectVisitLambdaDataSourceServiceRoleDefaultPolicy1D61FF9C": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::If": [
+          "HasEnvironmentParameter",
+          {
+           "Fn::Sub": [
+            "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:reject-visit",
+            {}
+           ]
+          },
+          {
+           "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:reject-visit"
+          }
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::If": [
+             "HasEnvironmentParameter",
+             {
+              "Fn::Sub": [
+               "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:reject-visit",
+               {}
+              ]
+             },
+             {
+              "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:reject-visit"
+             }
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "RejectVisitLambdaDataSourceServiceRoleDefaultPolicy1D61FF9C",
+    "Roles": [
+     {
+      "Ref": "RejectVisitLambdaDataSourceServiceRole46F11020"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/RejectVisitLambdaDataSource/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "RejectVisitLambdaDataSource": {
+   "Type": "AWS::AppSync::DataSource",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPI2EA0F806ApiId"
+    },
+    "LambdaConfig": {
+     "LambdaFunctionArn": {
+      "Fn::If": [
+       "HasEnvironmentParameter",
+       {
+        "Fn::Sub": [
+         "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:reject-visit",
+         {}
+        ]
+       },
+       {
+        "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:reject-visit"
+       }
+      ]
+     }
+    },
+    "Name": "RejectVisitLambdaDataSource",
+    "ServiceRoleArn": {
+     "Fn::GetAtt": [
+      "RejectVisitLambdaDataSourceServiceRole46F11020",
+      "Arn"
+     ]
+    },
+    "Type": "AWS_LAMBDA"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/RejectVisitLambdaDataSource/Resource"
+   }
+  },
+  "InvokeRejectVisitLambdaDataSourceInvokeRejectVisitLambdaDataSourceAppSyncFunction8AB254F6": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPI2EA0F806ApiId"
+    },
+    "DataSourceName": {
+     "Fn::GetAtt": [
+      "RejectVisitLambdaDataSource",
+      "Name"
+     ]
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "InvokeRejectVisitLambdaDataSource",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/9a0ef6bec630ad3ac2d6595d4bdc827abbdb8ee1729d33eb3e3455aed4b3da7a.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/a20e304512b1fde77dc16ed9d5e0ed03817afcab629ce87ef11c99877b7b1e30.vtl"
+    }
+   },
+   "DependsOn": [
+    "RejectVisitLambdaDataSource"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/InvokeRejectVisitLambdaDataSource/InvokeRejectVisitLambdaDataSource.AppSyncFunction"
+   }
+  },
+  "MutationrejectVisitResolver": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPI2EA0F806ApiId"
+    },
+    "FieldName": "rejectVisit",
+    "Kind": "PIPELINE",
+    "PipelineConfig": {
+     "Functions": [
+      {
+       "Fn::GetAtt": [
+        "MutationRejectVisitAuthFNMutationRejectVisitAuthFNAppSyncFunction980E2A15",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "InvokeRejectVisitLambdaDataSourceInvokeRejectVisitLambdaDataSourceAppSyncFunction8AB254F6",
+        "FunctionId"
+       ]
+      }
+     ]
+    },
+    "RequestMappingTemplate": {
+     "Fn::Join": [
+      "",
+      [
+       "## [Start] Stash resolver specific context.. **\n$util.qr($ctx.stash.put(\"typeName\", \"Mutation\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"rejectVisit\"))\n$util.qr($ctx.stash.put(\"authRole\", \"arn:aws:sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bauthNestedStackauthNestedStackResource3AD4712AOutputsamplifyipserpluiscoysandboxbb7136bc7bauthamplifyAuthauthenticatedUserRoleF97D1B61Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:aws:sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bauthNestedStackauthNestedStackResource3AD4712AOutputsamplifyipserpluiscoysandboxbb7136bc7bauthamplifyAuthunauthenticatedUserRole58812DAARef"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"",
+       {
+        "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bauthNestedStackauthNestedStackResource3AD4712AOutputsamplifyipserpluiscoysandboxbb7136bc7bauthamplifyAuthIdentityPoolBA7C7C57Ref"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"adminRoles\", []))\n{}\n## [End] Stash resolver specific context.. **"
+      ]
+     ]
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/387d5992f5fc03d05de27289457dcc374a84c42a889acb504aff1031047dde00.vtl"
+    },
+    "TypeName": "Mutation"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/mutationRejectVisitResolver"
+   }
+  },
+  "ApproveVisitLambdaDataSourceServiceRole6E8ADC73": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "appsync.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Tags": [
+     {
+      "Key": "amplify:deployment-type",
+      "Value": "sandbox"
+     },
+     {
+      "Key": "amplify:friendly-name",
+      "Value": "amplifyData"
+     },
+     {
+      "Key": "created-by",
+      "Value": "amplify"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/ApproveVisitLambdaDataSource/ServiceRole/Resource"
+   }
+  },
+  "ApproveVisitLambdaDataSourceServiceRoleDefaultPolicy73E78250": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::If": [
+          "HasEnvironmentParameter",
+          {
+           "Fn::Sub": [
+            "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:approve-visit",
+            {}
+           ]
+          },
+          {
+           "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:approve-visit"
+          }
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::If": [
+             "HasEnvironmentParameter",
+             {
+              "Fn::Sub": [
+               "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:approve-visit",
+               {}
+              ]
+             },
+             {
+              "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:approve-visit"
+             }
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ApproveVisitLambdaDataSourceServiceRoleDefaultPolicy73E78250",
+    "Roles": [
+     {
+      "Ref": "ApproveVisitLambdaDataSourceServiceRole6E8ADC73"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/ApproveVisitLambdaDataSource/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "ApproveVisitLambdaDataSource": {
+   "Type": "AWS::AppSync::DataSource",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPI2EA0F806ApiId"
+    },
+    "LambdaConfig": {
+     "LambdaFunctionArn": {
+      "Fn::If": [
+       "HasEnvironmentParameter",
+       {
+        "Fn::Sub": [
+         "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:approve-visit",
+         {}
+        ]
+       },
+       {
+        "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:approve-visit"
+       }
+      ]
+     }
+    },
+    "Name": "ApproveVisitLambdaDataSource",
+    "ServiceRoleArn": {
+     "Fn::GetAtt": [
+      "ApproveVisitLambdaDataSourceServiceRole6E8ADC73",
+      "Arn"
+     ]
+    },
+    "Type": "AWS_LAMBDA"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/ApproveVisitLambdaDataSource/Resource"
+   }
+  },
+  "InvokeApproveVisitLambdaDataSourceInvokeApproveVisitLambdaDataSourceAppSyncFunction2C3B63DB": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPI2EA0F806ApiId"
+    },
+    "DataSourceName": {
+     "Fn::GetAtt": [
+      "ApproveVisitLambdaDataSource",
+      "Name"
+     ]
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "InvokeApproveVisitLambdaDataSource",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/c0d9f1b51ce9dba96241e4693b1ffe0e1b4f90f31be56f12806018385c733748.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/a20e304512b1fde77dc16ed9d5e0ed03817afcab629ce87ef11c99877b7b1e30.vtl"
+    }
+   },
+   "DependsOn": [
+    "ApproveVisitLambdaDataSource"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/InvokeApproveVisitLambdaDataSource/InvokeApproveVisitLambdaDataSource.AppSyncFunction"
+   }
+  },
+  "MutationapproveVisitResolver": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPI2EA0F806ApiId"
+    },
+    "FieldName": "approveVisit",
+    "Kind": "PIPELINE",
+    "PipelineConfig": {
+     "Functions": [
+      {
+       "Fn::GetAtt": [
+        "MutationApproveVisitAuthFNMutationApproveVisitAuthFNAppSyncFunction27C57E49",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "InvokeApproveVisitLambdaDataSourceInvokeApproveVisitLambdaDataSourceAppSyncFunction2C3B63DB",
+        "FunctionId"
+       ]
+      }
+     ]
+    },
+    "RequestMappingTemplate": {
+     "Fn::Join": [
+      "",
+      [
+       "## [Start] Stash resolver specific context.. **\n$util.qr($ctx.stash.put(\"typeName\", \"Mutation\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"approveVisit\"))\n$util.qr($ctx.stash.put(\"authRole\", \"arn:aws:sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bauthNestedStackauthNestedStackResource3AD4712AOutputsamplifyipserpluiscoysandboxbb7136bc7bauthamplifyAuthauthenticatedUserRoleF97D1B61Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:aws:sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bauthNestedStackauthNestedStackResource3AD4712AOutputsamplifyipserpluiscoysandboxbb7136bc7bauthamplifyAuthunauthenticatedUserRole58812DAARef"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"",
+       {
+        "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bauthNestedStackauthNestedStackResource3AD4712AOutputsamplifyipserpluiscoysandboxbb7136bc7bauthamplifyAuthIdentityPoolBA7C7C57Ref"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"adminRoles\", []))\n{}\n## [End] Stash resolver specific context.. **"
+      ]
+     ]
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/387d5992f5fc03d05de27289457dcc374a84c42a889acb504aff1031047dde00.vtl"
+    },
+    "TypeName": "Mutation"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/mutationApproveVisitResolver"
+   }
+  },
   "RosterArchitectLambdaDataSourceServiceRole0DD92782": {
    "Type": "AWS::IAM::Role",
    "Properties": {
@@ -965,6 +1881,323 @@
     "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/queryGenerateGlosaDefenseResolver"
    }
   },
+  "ListApprovedVisitSummariesLambdaDataSourceServiceRoleC9B6B022": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "appsync.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Tags": [
+     {
+      "Key": "amplify:deployment-type",
+      "Value": "sandbox"
+     },
+     {
+      "Key": "amplify:friendly-name",
+      "Value": "amplifyData"
+     },
+     {
+      "Key": "created-by",
+      "Value": "amplify"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/ListApprovedVisitSummariesLambdaDataSource/ServiceRole/Resource"
+   }
+  },
+  "ListApprovedVisitSummariesLambdaDataSourceServiceRoleDefaultPolicy800CDB1B": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::If": [
+          "HasEnvironmentParameter",
+          {
+           "Fn::Sub": [
+            "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:list-approved-visit-summaries",
+            {}
+           ]
+          },
+          {
+           "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:list-approved-visit-summaries"
+          }
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::If": [
+             "HasEnvironmentParameter",
+             {
+              "Fn::Sub": [
+               "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:list-approved-visit-summaries",
+               {}
+              ]
+             },
+             {
+              "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:list-approved-visit-summaries"
+             }
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ListApprovedVisitSummariesLambdaDataSourceServiceRoleDefaultPolicy800CDB1B",
+    "Roles": [
+     {
+      "Ref": "ListApprovedVisitSummariesLambdaDataSourceServiceRoleC9B6B022"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/ListApprovedVisitSummariesLambdaDataSource/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "ListApprovedVisitSummariesLambdaDataSource": {
+   "Type": "AWS::AppSync::DataSource",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPI2EA0F806ApiId"
+    },
+    "LambdaConfig": {
+     "LambdaFunctionArn": {
+      "Fn::If": [
+       "HasEnvironmentParameter",
+       {
+        "Fn::Sub": [
+         "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:list-approved-visit-summaries",
+         {}
+        ]
+       },
+       {
+        "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:list-approved-visit-summaries"
+       }
+      ]
+     }
+    },
+    "Name": "ListApprovedVisitSummariesLambdaDataSource",
+    "ServiceRoleArn": {
+     "Fn::GetAtt": [
+      "ListApprovedVisitSummariesLambdaDataSourceServiceRoleC9B6B022",
+      "Arn"
+     ]
+    },
+    "Type": "AWS_LAMBDA"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/ListApprovedVisitSummariesLambdaDataSource/Resource"
+   }
+  },
+  "InvokeListApprovedVisitSummariesLambdaDataSourceInvokeListApprovedVisitSummariesLambdaDataSourceAppSyncFunction53491E53": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPI2EA0F806ApiId"
+    },
+    "DataSourceName": {
+     "Fn::GetAtt": [
+      "ListApprovedVisitSummariesLambdaDataSource",
+      "Name"
+     ]
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "InvokeListApprovedVisitSummariesLambdaDataSource",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/5b04f60697b26bcf9565bc154237a63d3029f2a2935777ce548d379184ffacaf.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/a20e304512b1fde77dc16ed9d5e0ed03817afcab629ce87ef11c99877b7b1e30.vtl"
+    }
+   },
+   "DependsOn": [
+    "ListApprovedVisitSummariesLambdaDataSource"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/InvokeListApprovedVisitSummariesLambdaDataSource/InvokeListApprovedVisitSummariesLambdaDataSource.AppSyncFunction"
+   }
+  },
+  "QuerylistApprovedVisitSummariesForFamilyResolver": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPI2EA0F806ApiId"
+    },
+    "FieldName": "listApprovedVisitSummariesForFamily",
+    "Kind": "PIPELINE",
+    "PipelineConfig": {
+     "Functions": [
+      {
+       "Fn::GetAtt": [
+        "QueryListApprovedVisitSummariesForFamilyAuthFNQueryListApprovedVisitSummariesForFamilyAuthFNAppSyncFunction00D511EE",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "InvokeListApprovedVisitSummariesLambdaDataSourceInvokeListApprovedVisitSummariesLambdaDataSourceAppSyncFunction53491E53",
+        "FunctionId"
+       ]
+      }
+     ]
+    },
+    "RequestMappingTemplate": {
+     "Fn::Join": [
+      "",
+      [
+       "## [Start] Stash resolver specific context.. **\n$util.qr($ctx.stash.put(\"typeName\", \"Query\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"listApprovedVisitSummariesForFamily\"))\n$util.qr($ctx.stash.put(\"authRole\", \"arn:aws:sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bauthNestedStackauthNestedStackResource3AD4712AOutputsamplifyipserpluiscoysandboxbb7136bc7bauthamplifyAuthauthenticatedUserRoleF97D1B61Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:aws:sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bauthNestedStackauthNestedStackResource3AD4712AOutputsamplifyipserpluiscoysandboxbb7136bc7bauthamplifyAuthunauthenticatedUserRole58812DAARef"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"",
+       {
+        "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bauthNestedStackauthNestedStackResource3AD4712AOutputsamplifyipserpluiscoysandboxbb7136bc7bauthamplifyAuthIdentityPoolBA7C7C57Ref"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"adminRoles\", []))\n{}\n## [End] Stash resolver specific context.. **"
+      ]
+     ]
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/387d5992f5fc03d05de27289457dcc374a84c42a889acb504aff1031047dde00.vtl"
+    },
+    "TypeName": "Query"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/queryListApprovedVisitSummariesForFamilyResolver"
+   }
+  },
+  "MutationCreateVisitDraftFromShiftAuthFNMutationCreateVisitDraftFromShiftAuthFNAppSyncFunction53576502": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPI2EA0F806ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPINONEDS93E553E0Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationCreateVisitDraftFromShiftAuthFN",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/8e18f3cebc70282364886a18ce867a8409c5568357ceaed6f86c71740cb443eb.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/MutationCreateVisitDraftFromShiftAuthFN/MutationCreateVisitDraftFromShiftAuthFN.AppSyncFunction"
+   }
+  },
+  "MutationSubmitVisitAuthFNMutationSubmitVisitAuthFNAppSyncFunction787DC8A6": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPI2EA0F806ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPINONEDS93E553E0Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationSubmitVisitAuthFN",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/8e18f3cebc70282364886a18ce867a8409c5568357ceaed6f86c71740cb443eb.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/MutationSubmitVisitAuthFN/MutationSubmitVisitAuthFN.AppSyncFunction"
+   }
+  },
+  "MutationRejectVisitAuthFNMutationRejectVisitAuthFNAppSyncFunction980E2A15": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPI2EA0F806ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPINONEDS93E553E0Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationRejectVisitAuthFN",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/8e18f3cebc70282364886a18ce867a8409c5568357ceaed6f86c71740cb443eb.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/MutationRejectVisitAuthFN/MutationRejectVisitAuthFN.AppSyncFunction"
+   }
+  },
+  "MutationApproveVisitAuthFNMutationApproveVisitAuthFNAppSyncFunction27C57E49": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPI2EA0F806ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPINONEDS93E553E0Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationApproveVisitAuthFN",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/8e18f3cebc70282364886a18ce867a8409c5568357ceaed6f86c71740cb443eb.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/MutationApproveVisitAuthFN/MutationApproveVisitAuthFN.AppSyncFunction"
+   }
+  },
   "QueryGenerateRosterAuthFNQueryGenerateRosterAuthFNAppSyncFunction1A5F7EE7": {
    "Type": "AWS::AppSync::FunctionConfiguration",
    "Properties": {
@@ -1029,6 +2262,28 @@
    "DeletionPolicy": "Delete",
    "Metadata": {
     "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/QueryGenerateGlosaDefenseAuthFN/QueryGenerateGlosaDefenseAuthFN.AppSyncFunction"
+   }
+  },
+  "QueryListApprovedVisitSummariesForFamilyAuthFNQueryListApprovedVisitSummariesForFamilyAuthFNAppSyncFunction00D511EE": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPI2EA0F806ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPINONEDS93E553E0Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "QueryListApprovedVisitSummariesForFamilyAuthFN",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/8e18f3cebc70282364886a18ce867a8409c5568357ceaed6f86c71740cb443eb.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/QueryListApprovedVisitSummariesForFamilyAuthFN/QueryListApprovedVisitSummariesForFamilyAuthFN.AppSyncFunction"
    }
   },
   "CDKMetadata": {

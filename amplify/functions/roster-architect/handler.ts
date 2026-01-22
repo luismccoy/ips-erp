@@ -1,8 +1,8 @@
 import { type Schema } from '../../data/resource';
-import { BedrockRuntimeClient, InvokeModelCommand } from "@aws-sdk/client-bedrock-runtime";
+import { AIClient } from './ai-client';
 
-// Initialize Bedrock Client
-const bedrock = new BedrockRuntimeClient({ region: "us-east-1" });
+// Initialize AI Client (supports LIVE and RECORDED modes)
+const aiClient = new AIClient();
 
 export const handler: Schema["generateRoster"]["functionHandler"] = async (event) => {
     const { nurses, unassignedShifts } = event.arguments;
@@ -22,28 +22,22 @@ export const handler: Schema["generateRoster"]["functionHandler"] = async (event
     3. Output JSON ONLY. Format: { "assignments": [ { "shiftId": "...", "nurseId": "..." } ] }
   `;
 
-    // 2. Call Bedrock (Claude 3.5 Sonnet)
+    // 2. Call AI Client (supports LIVE and RECORDED modes)
     try {
-        const command = new InvokeModelCommand({
-            modelId: process.env.MODEL_ID,
-            contentType: "application/json",
-            accept: "application/json",
-            body: JSON.stringify({
-                anthropic_version: "bedrock-2023-05-31",
-                max_tokens: 1000,
-                messages: [
-                    {
-                        role: "user",
-                        content: [
-                            { type: "text", text: prompt }
-                        ]
-                    }
-                ]
-            }),
-        });
+        // Validate required environment variables
+        if (!process.env.MODEL_ID) {
+            throw new Error("MODEL_ID environment variable is required");
+        }
+        if (!process.env.AI_RECORDINGS_S3_BUCKET) {
+            throw new Error("AI_RECORDINGS_S3_BUCKET environment variable is required");
+        }
 
-        const response = await bedrock.send(command);
-        const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+        const responseBody = await aiClient.invokeModel({
+            modelId: process.env.MODEL_ID,
+            prompt: prompt,
+            maxTokens: 1000,
+            temperature: 0.7
+        });
 
         // Extract the text content
         const textOutput = responseBody.content[0].text;
