@@ -22,7 +22,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-${AWS::Region}",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-${AWS::Region}",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/5fcdf8d203f9b600850f93184692d07f8ccd0d83b02afcd33a3c65ab1c349c52.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/5b1cfa0b9db1ddf3c327aa0ce4705efd839f68074f4beb4cc9e10b0a0ea2c97c.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -4131,6 +4131,102 @@
             "data": "Query.generateRoster"
           }
         ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/RipsValidatorLambdaDataSource": [
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "RipsValidatorLambdaDataSource"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/RipsValidatorLambdaDataSource/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RipsValidatorLambdaDataSourceServiceRole991437A6"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/RipsValidatorLambdaDataSource/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RipsValidatorLambdaDataSourceServiceRoleDefaultPolicy98DB2CC5"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/RipsValidatorLambdaDataSource/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RipsValidatorLambdaDataSource"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "RipsValidatorLambdaDataSource"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/InvokeRipsValidatorLambdaDataSource/InvokeRipsValidatorLambdaDataSource.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "InvokeRipsValidatorLambdaDataSourceInvokeRipsValidatorLambdaDataSourceAppSyncFunction0DCC5512"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "InvokeRipsValidatorLambdaDataSource"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/queryValidateRIPSResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QueryvalidateRIPSResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Query.validateRIPS"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/GlosaDefenderLambdaDataSource": [
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "GlosaDefenderLambdaDataSource"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/GlosaDefenderLambdaDataSource/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GlosaDefenderLambdaDataSourceServiceRoleC365BB57"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/GlosaDefenderLambdaDataSource/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GlosaDefenderLambdaDataSourceServiceRoleDefaultPolicyA5DB163D"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/GlosaDefenderLambdaDataSource/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GlosaDefenderLambdaDataSource"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "GlosaDefenderLambdaDataSource"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/InvokeGlosaDefenderLambdaDataSource/InvokeGlosaDefenderLambdaDataSource.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "InvokeGlosaDefenderLambdaDataSourceInvokeGlosaDefenderLambdaDataSourceAppSyncFunction7165B4CC"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "InvokeGlosaDefenderLambdaDataSource"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/queryGenerateGlosaDefenseResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QuerygenerateGlosaDefenseResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Query.generateGlosaDefense"
+          }
+        ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/QueryGenerateRosterAuthFN/QueryGenerateRosterAuthFN.AppSyncFunction": [
           {
             "type": "aws:cdk:logicalId",
@@ -4139,6 +4235,26 @@
           {
             "type": "graphqltransformer:resourceName",
             "data": "QueryGenerateRosterAuthFN"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/QueryValidateRIPSAuthFN/QueryValidateRIPSAuthFN.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QueryValidateRIPSAuthFNQueryValidateRIPSAuthFNAppSyncFunctionB0BFF69B"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QueryValidateRIPSAuthFN"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/QueryGenerateGlosaDefenseAuthFN/QueryGenerateGlosaDefenseAuthFN.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QueryGenerateGlosaDefenseAuthFNQueryGenerateGlosaDefenseAuthFNAppSyncFunctionBC94B6EE"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QueryGenerateGlosaDefenseAuthFN"
           }
         ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/CDKMetadata/Default": [
@@ -5137,6 +5253,30 @@
             "data": "rosterarchitectlambdaF2FBCABC"
           }
         ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/rips-validator-lambda/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ripsvalidatorlambdaServiceRole5DCE9323"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/rips-validator-lambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ripsvalidatorlambdaD72E96F7"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/glosa-defender-lambda/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "glosadefenderlambdaServiceRoleCA0D20C7"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/glosa-defender-lambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "glosadefenderlambdaDB136293"
+          }
+        ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/CDKMetadata/Default": [
           {
             "type": "aws:cdk:logicalId",
@@ -5153,6 +5293,18 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "amplifyipserpluiscoysandboxbb7136bc7bfunctionrosterarchitectlambdaF38DEDD6Ref"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/amplifyipserpluiscoysandboxbb7136bc7bfunctionripsvalidatorlambdaC851B002Ref": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "amplifyipserpluiscoysandboxbb7136bc7bfunctionripsvalidatorlambdaC851B002Ref"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/amplifyipserpluiscoysandboxbb7136bc7bfunctionglosadefenderlambdaE67B9F26Ref": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "amplifyipserpluiscoysandboxbb7136bc7bfunctionglosadefenderlambdaE67B9F26Ref"
           }
         ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function.NestedStack/function.NestedStackResource": [
