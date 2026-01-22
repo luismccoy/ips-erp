@@ -1,6 +1,6 @@
 import type { Schema } from '../../data/resource';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, GetCommand, UpdateCommand, PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, UpdateCommand, PutCommand, ScanCommand } from '@aws-sdk/lib-dynamodb';
 
 const ddbClient = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddbClient);
@@ -95,13 +95,11 @@ export const handler: Handler = async (event) => {
       }
     }));
 
-    // 8. Query all admins in tenant for notifications (using GSI on tenantId)
-    // Note: This requires a GSI on tenantId+role or we scan with filter
-    const nursesResult = await docClient.send(new QueryCommand({
+    // 8. Scan all nurses in tenant and filter for admins
+    // Note: Using ScanCommand since Nurse table doesn't have GSI on tenantId
+    const nursesResult = await docClient.send(new ScanCommand({
       TableName: NURSE_TABLE,
-      IndexName: 'byTenantId',
-      KeyConditionExpression: 'tenantId = :tenantId',
-      FilterExpression: '#role = :role',
+      FilterExpression: 'tenantId = :tenantId AND #role = :role',
       ExpressionAttributeNames: { '#role': 'role' },
       ExpressionAttributeValues: {
         ':tenantId': tenantId,
