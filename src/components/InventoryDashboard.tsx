@@ -25,12 +25,14 @@ export const InventoryDashboard: React.FC = () => {
     const [items, setItems] = useState<InventoryItem[]>([]);
 
     useEffect(() => {
-        const sub = client.models.Inventory.observeQuery({
+        const query = client.models.Inventory.observeQuery({
             filter: {
                 tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] }
             }
-        }).subscribe({
-            next: (data: { items: InventoryItem[] }) => setItems([...data.items]),
+        });
+        
+        const sub = (query as any).subscribe({
+            next: (data: any) => setItems([...data.items]),
             error: (err: Error) => console.error('Inventory sub error:', err)
         });
 

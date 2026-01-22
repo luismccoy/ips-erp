@@ -10,12 +10,14 @@ export const PatientDashboard: React.FC = () => {
 
     useEffect(() => {
         // Subscribe to patients for this tenant
-        const patientSub = client.models.Patient.observeQuery({
+        const patientQuery = client.models.Patient.observeQuery({
             filter: {
                 tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] }
             }
-        }).subscribe({
-            next: (data: { items: Patient[] }) => {
+        });
+        
+        const patientSub = (patientQuery as any).subscribe({
+            next: (data: any) => {
                 setPatients([...data.items]);
                 if (data.items.length > 0 && !selectedPatient) {
                     setSelectedPatient(data.items[0]);
@@ -31,22 +33,26 @@ export const PatientDashboard: React.FC = () => {
         if (!selectedPatient) return;
 
         // Subscribe to medications for selected patient
-        const medSub = client.models.Medication.observeQuery({
+        const medQuery = client.models.Medication.observeQuery({
             filter: {
                 patientId: { eq: selectedPatient.id }
             }
-        }).subscribe({
-            next: (data: { items: Medication[] }) => setMedications([...data.items]),
+        });
+        
+        const medSub = (medQuery as any).subscribe({
+            next: (data: any) => setMedications([...data.items]),
             error: (err: Error) => console.error('Medication sub error:', err)
         });
 
         // Subscribe to tasks for selected patient
-        const taskSub = client.models.Task.observeQuery({
+        const taskQuery = client.models.Task.observeQuery({
             filter: {
                 patientId: { eq: selectedPatient.id }
             }
-        }).subscribe({
-            next: (data: { items: Task[] }) => setTasks([...data.items]),
+        });
+        
+        const taskSub = (taskQuery as any).subscribe({
+            next: (data: any) => setTasks([...data.items]),
             error: (err: Error) => console.error('Task sub error:', err)
         });
 

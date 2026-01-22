@@ -17,12 +17,14 @@ export const NurseDashboard: React.FC = () => {
 
     useEffect(() => {
         // Real-time subscription to assignments for this tenant
-        const sub = client.models.Shift.observeQuery({
+        const query = client.models.Shift.observeQuery({
             filter: {
                 tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] }
             }
-        }).subscribe({
-            next: (data: { items: Shift[] }) => setShifts([...data.items]),
+        });
+        
+        const sub = (query as any).subscribe({
+            next: (data: any) => setShifts([...data.items]),
             error: (err: Error) => console.error('Subscription error:', err)
         });
 

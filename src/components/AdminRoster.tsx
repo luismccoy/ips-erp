@@ -28,19 +28,23 @@ export const AdminRoster: React.FC = () => {
     useEffect(() => {
         const tenantId = MOCK_USER.attributes['custom:tenantId'];
 
-        const nurseSub = client.models.Nurse.observeQuery({
+        const nurseQuery = client.models.Nurse.observeQuery({
             filter: { tenantId: { eq: tenantId } }
-        }).subscribe({
-            next: (data) => setNurses(data.items)
+        });
+        
+        const nurseSub = (nurseQuery as any).subscribe({
+            next: (data: any) => setNurses(data.items)
         });
 
-        const shiftSub = client.models.Shift.observeQuery({
+        const shiftQuery = client.models.Shift.observeQuery({
             filter: {
                 tenantId: { eq: tenantId },
                 status: { eq: 'PENDING' }
             }
-        }).subscribe({
-            next: (data) => setShifts(data.items)
+        });
+        
+        const shiftSub = (shiftQuery as any).subscribe({
+            next: (data: any) => setShifts(data.items)
         });
 
         return () => {
@@ -57,17 +61,17 @@ export const AdminRoster: React.FC = () => {
 
         try {
             await api.execute((async () => {
-                const { data, errors } = await client.queries.generateRoster({
+                const result: any = await client.queries.generateRoster({
                     nurses: JSON.stringify(nurses),
                     unassignedShifts: JSON.stringify(shifts)
                 });
 
-                if (errors && errors.length > 0) throw new Error(errors[0].message);
+                if (result.errors && result.errors.length > 0) throw new Error(result.errors[0].message);
 
-                if (data) {
-                    const result = JSON.parse(data as string) as RosterActionResponse;
-                    setAssignments(result.assignments || []);
-                    return result;
+                if (result.data) {
+                    const parsedResult = JSON.parse(result.data as string) as RosterActionResponse;
+                    setAssignments(parsedResult.assignments || []);
+                    return parsedResult;
                 }
                 throw new Error('No data received');
             })());
