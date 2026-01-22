@@ -1,9 +1,12 @@
+import { useState, useEffect } from 'react';
 import {
     Activity, ClipboardCheck, Package, Calendar, ShieldAlert,
     FileText, LogOut, DollarSign, Sparkles, AlertTriangle
 } from 'lucide-react';
+import { client, isUsingRealBackend } from '../amplify-utils';
 import { PATIENTS, INVENTORY, SHIFTS } from '../data/mock-data';
 import type { AdminDashboardProps, NavItemProps } from '../types/components';
+import type { Patient, InventoryItem, Shift } from '../types';
 
 export default function AdminDashboard({ view, setView, onLogout, tenant }: AdminDashboardProps) {
     return (
@@ -82,20 +85,72 @@ function NavItem({ icon: Icon, label, active, onClick }: NavItemProps) {
 }
 
 function DashboardView() {
+    const [stats, setStats] = useState({ patients: 0, shifts: 0, inventory: 0 });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            if (!isUsingRealBackend()) {
+                // Use mock data
+                setStats({
+                    patients: PATIENTS.length,
+                    shifts: SHIFTS.length,
+                    inventory: INVENTORY.filter(i => i.quantity < i.reorderThreshold).length
+                });
+                setLoading(false);
+                return;
+            }
+
+            try {
+                // Fetch real data
+                const [patientsRes, shiftsRes, inventoryRes] = await Promise.all([
+                    (client.models.Patient as any).list(),
+                    (client.models.Shift as any).list(),
+                    (client.models.InventoryItem as any).list()
+                ]);
+
+                const lowStockItems = (inventoryRes.data || []).filter(
+                    (item: any) => item.quantity < item.reorderThreshold
+                );
+
+                setStats({
+                    patients: patientsRes.data?.length || 0,
+                    shifts: shiftsRes.data?.length || 0,
+                    inventory: lowStockItems.length
+                });
+            } catch (error) {
+                console.error('Error fetching dashboard stats:', error);
+                setStats({ patients: 0, shifts: 0, inventory: 0 });
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchStats();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="text-slate-400">Loading dashboard...</div>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-6">
             <div className="grid grid-cols-3 gap-6">
                 {[
-                    { label: 'Revenue', value: '$42.5M COP', change: '+12%', color: 'blue' },
-                    { label: 'Shifts', value: '485/500', change: '98%', color: 'purple' },
-                    { label: 'Stock Alerts', value: '3 Items', change: 'Low', color: 'red' }
+                    { label: 'Patients', value: stats.patients.toString(), change: 'Active', color: 'blue' },
+                    { label: 'Shifts', value: stats.shifts.toString(), change: 'Total', color: 'purple' },
+                    { label: 'Stock Alerts', value: `${stats.inventory} Items`, change: stats.inventory > 0 ? 'Low' : 'OK', color: stats.inventory > 0 ? 'red' : 'green' }
                 ].map((kpi, i) => (
                     <div key={i} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
                         <div className="flex justify-between items-start mb-4">
                             <div className={`p-2 bg-${kpi.color}-50 rounded-lg`}>
                                 <DollarSign className={`h-5 w-5 text-${kpi.color}-600`} />
                             </div>
-                            <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">{kpi.change}</span>
+                            <span className="text-xs font-bold text-slate-600 bg-slate-50 px-2 py-1 rounded-full">{kpi.change}</span>
                         </div>
                         <div className="text-2xl font-black text-slate-900">{kpi.value}</div>
                         <div className="text-xs text-slate-400 uppercase font-bold">{kpi.label}</div>
@@ -103,16 +158,16 @@ function DashboardView() {
                 ))}
             </div>
             <div className="bg-white p-6 rounded-2xl border border-slate-100">
-                <h3 className="font-black text-slate-900 mb-4">Recent Activity</h3>
+                <h3 className="font-black text-slate-900 mb-4">System Status</h3>
                 <div className="space-y-3">
-                    {['Maria G. checked in', 'Carlos R. completed shift', 'Inventory updated'].map((activity, i) => (
-                        <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-                            <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-xs">
-                                {activity[0]}
-                            </div>
-                            <span className="text-sm text-slate-700 font-medium">{activity}</span>
+                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                        <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold text-xs">
+                            ✓
                         </div>
-                    ))}
+                        <span className="text-sm text-slate-700 font-medium">
+                            {isUsingRealBackend() ? 'Connected to AWS Backend' : 'Using Mock Data (Development Mode)'}
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -120,13 +175,51 @@ function DashboardView() {
 }
 
 function AuditView() {
+    const [patients, setPatients] = useState<Patient[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchPatients = async () => {
+            if (!isUsingRealBackend()) {
+                setPatients(PATIENTS);
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const response = await (client.models.Patient as any).list();
+                setPatients(response.data || []);
+            } catch (error) {
+                console.error('Error fetching patients:', error);
+                setPatients([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPatients();
+    }, []);
+
+    if (loading) {
+        return <div className="bg-white p-6 rounded-2xl border border-slate-100 text-center text-slate-400">Loading patients...</div>;
+    }
+
+    if (patients.length === 0) {
+        return (
+            <div className="bg-white p-6 rounded-2xl border border-slate-100 text-center">
+                <p className="text-slate-400 mb-4">No patients registered yet</p>
+                <p className="text-xs text-slate-500">Add patients to see clinical audit data</p>
+            </div>
+        );
+    }
+
     return (
         <div className="bg-white p-6 rounded-2xl border border-slate-100">
             <h3 className="font-black text-slate-900 mb-4 flex items-center gap-2">
                 Clinical Audit <span className="bg-indigo-50 text-indigo-600 px-2 py-1 rounded text-xs font-bold">AI Analysis</span>
             </h3>
             <div className="space-y-4">
-                {PATIENTS.map(patient => (
+                {patients.map(patient => (
                     <div key={patient.id} className="p-4 border border-slate-100 rounded-xl hover:shadow-md transition-all">
                         <div className="flex justify-between items-start">
                             <div>
@@ -144,11 +237,49 @@ function AuditView() {
 }
 
 function InventoryView() {
+    const [inventory, setInventory] = useState<InventoryItem[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchInventory = async () => {
+            if (!isUsingRealBackend()) {
+                setInventory(INVENTORY);
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const response = await (client.models.InventoryItem as any).list();
+                setInventory(response.data || []);
+            } catch (error) {
+                console.error('Error fetching inventory:', error);
+                setInventory([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchInventory();
+    }, []);
+
+    if (loading) {
+        return <div className="bg-white p-6 rounded-2xl border border-slate-100 text-center text-slate-400">Loading inventory...</div>;
+    }
+
+    if (inventory.length === 0) {
+        return (
+            <div className="bg-white p-6 rounded-2xl border border-slate-100 text-center">
+                <p className="text-slate-400 mb-4">No inventory items yet</p>
+                <p className="text-xs text-slate-500">Add items to track pharmacy inventory</p>
+            </div>
+        );
+    }
+
     return (
         <div className="bg-white p-6 rounded-2xl border border-slate-100">
             <h3 className="font-black text-slate-900 mb-4">Inventory (Farmacia)</h3>
             <div className="space-y-3">
-                {INVENTORY.map(item => (
+                {inventory.map(item => (
                     <div key={item.id} className="p-4 border border-slate-100 rounded-xl flex justify-between items-center">
                         <div>
                             <h4 className="font-bold text-slate-900">{item.name}</h4>
@@ -168,6 +299,51 @@ function InventoryView() {
 }
 
 function RosterView() {
+    const [shifts, setShifts] = useState<Shift[]>([]);
+    const [patients, setPatients] = useState<Patient[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            if (!isUsingRealBackend()) {
+                setShifts(SHIFTS);
+                setPatients(PATIENTS);
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const [shiftsRes, patientsRes] = await Promise.all([
+                    (client.models.Shift as any).list(),
+                    (client.models.Patient as any).list()
+                ]);
+                setShifts(shiftsRes.data || []);
+                setPatients(patientsRes.data || []);
+            } catch (error) {
+                console.error('Error fetching roster data:', error);
+                setShifts([]);
+                setPatients([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    if (loading) {
+        return <div className="bg-white p-6 rounded-2xl border border-slate-100 text-center text-slate-400">Loading shifts...</div>;
+    }
+
+    if (shifts.length === 0) {
+        return (
+            <div className="bg-white p-6 rounded-2xl border border-slate-100 text-center">
+                <p className="text-slate-400 mb-4">No shifts scheduled yet</p>
+                <p className="text-xs text-slate-500">Create shifts to manage nurse assignments</p>
+            </div>
+        );
+    }
+
     return (
         <div className="bg-white p-6 rounded-2xl border border-slate-100">
             <div className="flex justify-between items-center mb-4">
@@ -177,16 +353,16 @@ function RosterView() {
                 </button>
             </div>
             <div className="space-y-3">
-                {SHIFTS.map(shift => {
-                    const patient = PATIENTS.find(p => p.id === shift.patientId);
+                {shifts.map(shift => {
+                    const patient = patients.find(p => p.id === shift.patientId);
                     return (
                         <div key={shift.id} className="p-4 border border-slate-100 rounded-xl">
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <h4 className="font-bold text-slate-900">{patient?.name}</h4>
+                                    <h4 className="font-bold text-slate-900">{patient?.name || 'Unknown Patient'}</h4>
                                     <p className="text-sm text-slate-500">{shift.date} at {shift.startTime}</p>
                                 </div>
-                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${shift.status === 'Completed' ? 'bg-green-50 text-green-600' : 'bg-yellow-50 text-yellow-600'
+                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${shift.status === 'COMPLETED' ? 'bg-green-50 text-green-600' : 'bg-yellow-50 text-yellow-600'
                                     }`}>{shift.status}</span>
                             </div>
                         </div>

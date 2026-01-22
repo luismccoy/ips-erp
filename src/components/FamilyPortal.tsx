@@ -1,11 +1,95 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ShieldAlert, LogOut, Activity } from 'lucide-react';
-import { PATIENTS, VITALS_HISTORY } from '../data/mock-data';
-import type { SimpleNurseAppProps } from '../types/components'; // Reusing similar prop type
+import { client, isUsingRealBackend } from '../amplify-utils';
+import type { SimpleNurseAppProps } from '../types/components';
+import type { Patient, VitalSigns } from '../types';
 
 export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
-    const [selectedPatient, setSelectedPatient] = useState(PATIENTS[0]);
-    const vitalsHistory = VITALS_HISTORY.filter(v => v.patientId === selectedPatient.id);
+    const [patients, setPatients] = useState<Patient[]>([]);
+    const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+    const [vitalsHistory, setVitalsHistory] = useState<VitalSigns[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            if (!isUsingRealBackend()) {
+                // Import mock data dynamically only when needed
+                const { PATIENTS, VITALS_HISTORY } = await import('../data/mock-data');
+                setPatients(PATIENTS);
+                setSelectedPatient(PATIENTS[0]);
+                setVitalsHistory(VITALS_HISTORY.filter(v => v.patientId === PATIENTS[0].id));
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const [patientsRes, vitalsRes] = await Promise.all([
+                    (client.models.Patient as any).list(),
+                    (client.models.VitalSigns as any).list()
+                ]);
+                
+                const fetchedPatients = patientsRes.data || [];
+                setPatients(fetchedPatients);
+                
+                if (fetchedPatients.length > 0) {
+                    setSelectedPatient(fetchedPatients[0]);
+                    const patientVitals = (vitalsRes.data || []).filter(
+                        (v: any) => v.patientId === fetchedPatients[0].id
+                    );
+                    setVitalsHistory(patientVitals);
+                } else {
+                    setSelectedPatient(null);
+                    setVitalsHistory([]);
+                }
+            } catch (error) {
+                console.error('Error fetching family portal data:', error);
+                setPatients([]);
+                setSelectedPatient(null);
+                setVitalsHistory([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    useEffect(() => {
+        const updateVitals = async () => {
+            if (selectedPatient) {
+                if (!isUsingRealBackend()) {
+                    const { VITALS_HISTORY } = await import('../data/mock-data');
+                    setVitalsHistory(VITALS_HISTORY.filter(v => v.patientId === selectedPatient.id));
+                } else {
+                    try {
+                        const response = await (client.models.VitalSigns as any).list();
+                        const patientVitals = (response.data || []).filter(
+                            (v: any) => v.patientId === selectedPatient.id
+                        );
+                        setVitalsHistory(patientVitals);
+                    } catch (error) {
+                        console.error('Error fetching vitals:', error);
+                        setVitalsHistory([]);
+                    }
+                }
+            }
+        };
+        
+        updateVitals();
+    }, [selectedPatient]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[#f0f9ff] flex items-center justify-center">
+                <div className="text-center">
+                    <div className="h-12 w-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white mx-auto mb-4">
+                        <Activity size={24} />
+                    </div>
+                    <p className="text-slate-600 font-medium">Loading family portal...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[#f0f9ff]">
@@ -25,77 +109,99 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
             </header>
 
             <main className="p-4 max-w-lg mx-auto space-y-6">
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                    <h3 className="font-black text-slate-900 mb-4">Select Family Member</h3>
-                    <div className="grid grid-cols-1 gap-3">
-                        {PATIENTS.map(patient => (
-                            <button
-                                key={patient.id}
-                                onClick={() => setSelectedPatient(patient)}
-                                className={`p-4 rounded-xl border-2 text-left transition-all ${selectedPatient.id === patient.id
-                                    ? 'border-indigo-600 bg-indigo-50 shadow-md ring-2 ring-indigo-100'
-                                    : 'border-slate-100 hover:border-indigo-200 hover:bg-slate-50'
-                                    }`}
-                            >
-                                <div className="flex justify-between items-center">
-                                    <h4 className="font-bold text-slate-900">{patient.name}</h4>
-                                    {selectedPatient.id === patient.id && <div className="h-2 w-2 rounded-full bg-indigo-600"></div>}
-                                </div>
-                                <p className="text-xs text-slate-500 mt-1">{patient.diagnosis}</p>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="bg-gradient-to-br from-indigo-600 to-violet-600 text-white p-6 rounded-3xl shadow-xl shadow-indigo-200">
-                    <h3 className="font-black text-xl mb-4">Current Care Status</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
-                            <p className="text-xs text-indigo-100 mb-1 uppercase tracking-wider font-bold">Assigned Nurse</p>
-                            <p className="font-black text-lg">Maria Gonzalez</p>
+                {patients.length === 0 ? (
+                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 text-center">
+                        <div className="h-16 w-16 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-600 mx-auto mb-4">
+                            <Activity size={32} />
                         </div>
-                        <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
-                            <p className="text-xs text-indigo-100 mb-1 uppercase tracking-wider font-bold">Next Visit</p>
-                            <p className="font-black text-lg">Tomorrow 7 AM</p>
-                        </div>
+                        <h3 className="font-black text-slate-900 mb-2">No Family Members</h3>
+                        <p className="text-sm text-slate-500 mb-4">No patients are registered in your family account yet.</p>
+                        <p className="text-xs text-slate-400">Contact your healthcare provider to add family members.</p>
                     </div>
-                </div>
-
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                    <h3 className="font-black text-slate-900 mb-4 flex items-center gap-2">
-                        <Activity size={18} className="text-emerald-500" /> Vital Signs History
-                    </h3>
-                    <div className="space-y-3">
-                        {vitalsHistory.map((vital, i) => (
-                            <div key={i} className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                                <div className="flex justify-between items-center mb-3">
-                                    <span className="font-black text-slate-700 text-sm">{vital.date}</span>
-                                    <span className="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wide">Normal</span>
-                                </div>
-                                <div className="grid grid-cols-4 gap-2 mb-3">
-                                    <ViewVitalsBox label="Sys" value={vital.sys} />
-                                    <ViewVitalsBox label="Dia" value={vital.dia} />
-                                    <ViewVitalsBox label="SpO2" value={`${vital.spo2}%`} />
-                                    <ViewVitalsBox label="HR" value={vital.hr} />
-                                </div>
-                                <p className="text-xs text-slate-500 italic border-t border-slate-200 pt-2 mt-2">"{vital.note}"</p>
+                ) : (
+                    <>
+                        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                            <h3 className="font-black text-slate-900 mb-4">Select Family Member</h3>
+                            <div className="grid grid-cols-1 gap-3">
+                                {patients.map(patient => (
+                                    <button
+                                        key={patient.id}
+                                        onClick={() => setSelectedPatient(patient)}
+                                        className={`p-4 rounded-xl border-2 text-left transition-all ${selectedPatient?.id === patient.id
+                                            ? 'border-indigo-600 bg-indigo-50 shadow-md ring-2 ring-indigo-100'
+                                            : 'border-slate-100 hover:border-indigo-200 hover:bg-slate-50'
+                                            }`}
+                                    >
+                                        <div className="flex justify-between items-center">
+                                            <h4 className="font-bold text-slate-900">{patient.name}</h4>
+                                            {selectedPatient?.id === patient.id && <div className="h-2 w-2 rounded-full bg-indigo-600"></div>}
+                                        </div>
+                                        <p className="text-xs text-slate-500 mt-1">{patient.diagnosis || 'No diagnosis recorded'}</p>
+                                    </button>
+                                ))}
                             </div>
-                        ))}
-                        {vitalsHistory.length === 0 && <p className="text-slate-400 text-center py-4">No recent history.</p>}
-                    </div>
-                </div>
+                        </div>
 
-                <div className="bg-blue-50 border border-blue-100 p-5 rounded-3xl flex items-start gap-4">
-                    <div className="h-10 w-10 bg-white rounded-full flex items-center justify-center text-blue-600 shadow-sm shrink-0">
-                        <ShieldAlert size={20} />
-                    </div>
-                    <div>
-                        <h4 className="font-black text-blue-900 text-sm mb-1">Privacy Protected</h4>
-                        <p className="text-xs text-blue-700 leading-relaxed">
-                            Your family member's health data is secured under Colombian Law 1581 (Habeas Data). Access is audited.
-                        </p>
-                    </div>
-                </div>
+                        {selectedPatient && (
+                            <>
+                                <div className="bg-gradient-to-br from-indigo-600 to-violet-600 text-white p-6 rounded-3xl shadow-xl shadow-indigo-200">
+                                    <h3 className="font-black text-xl mb-4">Current Care Status</h3>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
+                                            <p className="text-xs text-indigo-100 mb-1 uppercase tracking-wider font-bold">Assigned Nurse</p>
+                                            <p className="font-black text-lg">Maria Gonzalez</p>
+                                        </div>
+                                        <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
+                                            <p className="text-xs text-indigo-100 mb-1 uppercase tracking-wider font-bold">Next Visit</p>
+                                            <p className="font-black text-lg">Tomorrow 7 AM</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                                    <h3 className="font-black text-slate-900 mb-4 flex items-center gap-2">
+                                        <Activity size={18} className="text-emerald-500" /> Vital Signs History
+                                    </h3>
+                                    <div className="space-y-3">
+                                        {vitalsHistory.map((vital, i) => (
+                                            <div key={i} className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                                <div className="flex justify-between items-center mb-3">
+                                                    <span className="font-black text-slate-700 text-sm">{vital.date}</span>
+                                                    <span className="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wide">Normal</span>
+                                                </div>
+                                                <div className="grid grid-cols-4 gap-2 mb-3">
+                                                    <ViewVitalsBox label="Sys" value={vital.sys} />
+                                                    <ViewVitalsBox label="Dia" value={vital.dia} />
+                                                    <ViewVitalsBox label="SpO2" value={`${vital.spo2}%`} />
+                                                    <ViewVitalsBox label="HR" value={vital.hr} />
+                                                </div>
+                                                <p className="text-xs text-slate-500 italic border-t border-slate-200 pt-2 mt-2">"{vital.note}"</p>
+                                            </div>
+                                        ))}
+                                        {vitalsHistory.length === 0 && (
+                                            <div className="text-center py-8">
+                                                <p className="text-slate-400 mb-2">No vital signs recorded yet</p>
+                                                <p className="text-xs text-slate-500">Vitals will appear here after nurse visits</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </>
+                        )}
+
+                        <div className="bg-blue-50 border border-blue-100 p-5 rounded-3xl flex items-start gap-4">
+                            <div className="h-10 w-10 bg-white rounded-full flex items-center justify-center text-blue-600 shadow-sm shrink-0">
+                                <ShieldAlert size={20} />
+                            </div>
+                            <div>
+                                <h4 className="font-black text-blue-900 text-sm mb-1">Privacy Protected</h4>
+                                <p className="text-xs text-blue-700 leading-relaxed">
+                                    Your family member's health data is secured under Colombian Law 1581 (Habeas Data). Access is audited.
+                                </p>
+                            </div>
+                        </div>
+                    </>
+                )}
             </main>
         </div>
     );
