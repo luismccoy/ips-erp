@@ -4,7 +4,7 @@ import { usePagination } from '../hooks/usePagination';
 import { type Patient, type Medication, type Task } from '../types';
 
 export const PatientDashboard: React.FC = () => {
-    const { items: patients, loadMore, hasMore, isLoading, setItems: setPatients } = usePagination<Patient>();
+    const { items: patients, loadMore, hasMore, isLoading } = usePagination<Patient>();
     const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
     const [medications, setMedications] = useState<Medication[]>([]);
     const [tasks, setTasks] = useState<Task[]>([]);

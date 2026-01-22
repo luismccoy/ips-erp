@@ -55,7 +55,7 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
                 return;
             }
 
-            loadMore(async (token) => {
+            loadMore(async () => {
                 const response = await listApprovedVisitSummaries(selectedPatient.id);
 
                 if (response.success && response.data) {

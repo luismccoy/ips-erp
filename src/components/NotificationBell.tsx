@@ -52,10 +52,8 @@ import type { NotificationBellProps, NotificationItem, NotificationType } from '
 /**
  * Simulates network delay for mock mode.
  */
-async function simulateNetworkDelay(minMs: number = 200, maxMs: number = 500): Promise<void> {
-  const delay = Math.random() * (maxMs - minMs) + minMs;
-  await new Promise(resolve => setTimeout(resolve, delay));
-}
+// simulateNetworkDelay removed
+
 
 /**
  * Formats a timestamp to a relative time string.
