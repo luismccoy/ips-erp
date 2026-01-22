@@ -145,7 +145,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ userId, onNo
     setIsLoading(true);
 
     const sub = (client.models.Notification.observeQuery({
-      filter: { recipientId: { eq: userId } }
+      filter: { userId: { eq: userId } }
     }) as any).subscribe({
       next: ({ items }: any) => {
         setNotifications(items as NotificationItem[]);

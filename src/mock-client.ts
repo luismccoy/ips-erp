@@ -289,6 +289,7 @@ export function generateMockClient(): MockClient {
                 // Create notification for admin
                 const notification: NotificationItem = {
                     id: `notif-${Date.now()}`,
+                    userId: 'admin', // Notify admin
                     type: 'VISIT_PENDING_REVIEW',
                     message: `Nueva visita pendiente de revisión`,
                     entityId: shiftId,

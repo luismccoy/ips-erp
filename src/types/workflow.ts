@@ -185,9 +185,9 @@ export interface VisitSummary {
 /**
  * Notification type enum for workflow events.
  */
-export type NotificationType = 
-  | 'VISIT_APPROVED' 
-  | 'VISIT_REJECTED' 
+export type NotificationType =
+  | 'VISIT_APPROVED'
+  | 'VISIT_REJECTED'
   | 'VISIT_PENDING_REVIEW';
 
 /**
@@ -199,6 +199,8 @@ export type NotificationType =
 export interface NotificationItem {
   /** Unique notification identifier */
   id: string;
+  /** Recipient User ID */
+  userId: string;
   /** Type of notification event */
   type: NotificationType;
   /** Human-readable notification message */
@@ -408,7 +410,7 @@ export function isVisitApproved(visit: Visit): boolean {
  */
 export function validateVitals(vitals: Partial<VitalsData>): string[] {
   const errors: string[] = [];
-  
+
   if (vitals.sys === undefined || vitals.sys <= 0) {
     errors.push('sys');
   }
@@ -421,7 +423,7 @@ export function validateVitals(vitals: Partial<VitalsData>): string[] {
   if (vitals.hr === undefined || vitals.hr <= 0) {
     errors.push('hr');
   }
-  
+
   return errors;
 }
 
@@ -431,10 +433,10 @@ export function validateVitals(vitals: Partial<VitalsData>): string[] {
  */
 export function validateKardex(kardex: Partial<KardexData>): string[] {
   const errors: string[] = [];
-  
+
   if (!kardex.generalObservations || kardex.generalObservations.trim() === '') {
     errors.push('generalObservations');
   }
-  
+
   return errors;
 }
