@@ -50,7 +50,7 @@ export const NurseDashboard: React.FC = () => {
         try {
             await api.execute(client.models.Shift.create({
                 tenantId: MOCK_USER.attributes['custom:tenantId'],
-                status: 'ASSIGNED',
+                status: 'PENDING',
                 patientName: 'Test Patient',
                 location: 'Test Location',
                 nurseName: MOCK_USER.username,
@@ -64,7 +64,7 @@ export const NurseDashboard: React.FC = () => {
 
     const getStatusBadgeVariant = (status: string): BadgeVariant => {
         switch (status) {
-            case 'ASSIGNED': return 'info';
+            case 'PENDING': return 'info';
             case 'IN_PROGRESS': return 'warning';
             case 'COMPLETED': return 'success';
             case 'CANCELLED': return 'error';

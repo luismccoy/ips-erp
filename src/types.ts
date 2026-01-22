@@ -10,7 +10,7 @@ export type Shift = {
     patientName: string;
     requiredSkill?: string;
     location: string;
-    status: 'ASSIGNED' | 'IN_PROGRESS' | 'COMPLETED' | 'PENDING' | 'CANCELLED' | null;
+    status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | null;
     scheduledTime: string;
     startedAt?: string | null;
     completedAt?: string | null;

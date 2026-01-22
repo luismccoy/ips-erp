@@ -88,7 +88,7 @@ export const AdminRoster: React.FC = () => {
                         await client.models.Shift.update({
                             id: assignment.shiftId,
                             nurseId: assignment.nurseId,
-                            status: 'ASSIGNED'
+                            status: 'PENDING'
                         });
                     }
                 }
