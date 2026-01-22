@@ -25,7 +25,7 @@ export const InventoryDashboard: React.FC = () => {
     const [items, setItems] = useState<InventoryItem[]>([]);
 
     useEffect(() => {
-        const query = client.models.InventoryItem.observeQuery({
+        const query = client.models.Inventory.observeQuery({
             filter: {
                 tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] }
             }
@@ -60,7 +60,7 @@ export const InventoryDashboard: React.FC = () => {
         if (!validate()) return;
 
         try {
-            await api.execute(client.models.InventoryItem.create({
+            await api.execute(client.models.Inventory.create({
                 tenantId: MOCK_USER.attributes['custom:tenantId'],
                 name: values.name,
                 sku: `SKU-${Date.now().toString().slice(-6)}`,

@@ -34,8 +34,8 @@ const STORE: StoreType = {
         { id: 'm2', patientId: 'p1', name: 'Ácido Fólico', dosage: '5mg', frequency: 'Diario', status: 'ACTIVE' }
     ],
     Task: [
-        { id: 't1', patientId: 'p1', description: 'Revisión de signos vitales', isCompleted: false, dueDate: new Date().toISOString() },
-        { id: 't2', patientId: 'p1', description: 'Curación de herida en mano derecha', isCompleted: false, dueDate: new Date().toISOString() }
+        { id: 't1', patientId: 'p1', description: 'Revisión de signos vitales', completed: false, dueDate: new Date().toISOString() },
+        { id: 't2', patientId: 'p1', description: 'Curación de herida en mano derecha', completed: false, dueDate: new Date().toISOString() }
     ]
 };
 
