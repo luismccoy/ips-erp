@@ -106,7 +106,7 @@ function DashboardView() {
                 const [patientsRes, shiftsRes, inventoryRes] = await Promise.all([
                     (client.models.Patient as any).list(),
                     (client.models.Shift as any).list(),
-                    (client.models.InventoryItem as any).list()
+                    (client.models.Inventory as any).list()
                 ]);
 
                 const lowStockItems = (inventoryRes.data || []).filter(
@@ -252,7 +252,7 @@ function InventoryView() {
             }
 
             try {
-                const response = await (client.models.InventoryItem as any).list();
+                const response = await (client.models.Inventory as any).list();
                 setInventory(response.data || []);
             } catch (error) {
                 console.error('Error fetching inventory:', error);

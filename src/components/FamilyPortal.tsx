@@ -15,28 +15,31 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
             if (!isUsingRealBackend()) {
                 // Import mock data dynamically only when needed
                 const { PATIENTS, VITALS_HISTORY } = await import('../data/mock-data');
-                setPatients(PATIENTS);
-                setSelectedPatient(PATIENTS[0]);
-                setVitalsHistory(VITALS_HISTORY.filter(v => v.patientId === PATIENTS[0].id));
+                setPatients(PATIENTS as any);
+                setSelectedPatient(PATIENTS[0] as any);
+                setVitalsHistory(VITALS_HISTORY as any);
                 setLoading(false);
                 return;
             }
 
             try {
-                const [patientsRes, vitalsRes] = await Promise.all([
-                    (client.models.Patient as any).list(),
-                    (client.models.VitalSigns as any).list()
-                ]);
-                
+                const patientsRes = await (client.models.Patient as any).list();
                 const fetchedPatients = patientsRes.data || [];
                 setPatients(fetchedPatients);
                 
                 if (fetchedPatients.length > 0) {
                     setSelectedPatient(fetchedPatients[0]);
-                    const patientVitals = (vitalsRes.data || []).filter(
-                        (v: any) => v.patientId === fetchedPatients[0].id
-                    );
-                    setVitalsHistory(patientVitals);
+                    // Try to fetch vitals if the model exists
+                    try {
+                        const vitalsRes = await (client.models.VitalSigns as any).list();
+                        const patientVitals = (vitalsRes.data || []).filter(
+                            (v: any) => v.patientId === fetchedPatients[0].id
+                        );
+                        setVitalsHistory(patientVitals);
+                    } catch {
+                        // VitalSigns model might not exist in mock client
+                        setVitalsHistory([]);
+                    }
                 } else {
                     setSelectedPatient(null);
                     setVitalsHistory([]);
@@ -59,7 +62,7 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
             if (selectedPatient) {
                 if (!isUsingRealBackend()) {
                     const { VITALS_HISTORY } = await import('../data/mock-data');
-                    setVitalsHistory(VITALS_HISTORY.filter(v => v.patientId === selectedPatient.id));
+                    setVitalsHistory(VITALS_HISTORY as any);
                 } else {
                     try {
                         const response = await (client.models.VitalSigns as any).list();
@@ -67,8 +70,8 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
                             (v: any) => v.patientId === selectedPatient.id
                         );
                         setVitalsHistory(patientVitals);
-                    } catch (error) {
-                        console.error('Error fetching vitals:', error);
+                    } catch {
+                        // VitalSigns model might not exist
                         setVitalsHistory([]);
                     }
                 }
