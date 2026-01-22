@@ -384,10 +384,14 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "915eb8b55a1125f51842c39a200a48149d4b435b6d46fc388b8c663c757ff4f5.zip"
+     "S3Key": "cf5109c39860653512a2477ae48d1211c99ffc25b63abb2dfc02f186f62a74a4.zip"
     },
     "Environment": {
      "Variables": {
+      "VISIT_TABLE_NAME": "Visit-fxeusr7wzfchtkr7kamke3qnwq-NONE",
+      "NURSE_TABLE_NAME": "Nurse-fxeusr7wzfchtkr7kamke3qnwq-NONE",
+      "PATIENT_TABLE_NAME": "Patient-fxeusr7wzfchtkr7kamke3qnwq-NONE",
+      "SHIFT_TABLE_NAME": "Shift-fxeusr7wzfchtkr7kamke3qnwq-NONE",
       "AMPLIFY_SSM_ENV_CONFIG": "{}"
      }
     },
@@ -426,7 +430,7 @@
    "DeletionPolicy": "Delete",
    "Metadata": {
     "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/list-approved-visit-summaries-lambda/Resource",
-    "aws:asset:path": "asset.915eb8b55a1125f51842c39a200a48149d4b435b6d46fc388b8c663c757ff4f5",
+    "aws:asset:path": "asset.cf5109c39860653512a2477ae48d1211c99ffc25b63abb2dfc02f186f62a74a4",
     "aws:asset:is-bundled": true,
     "aws:asset:property": "Code"
    }
@@ -491,10 +495,13 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "dc09799db535a95c39c4b59e8dfb50b0e1f6f115c1b9f88a6ba8293f643231e5.zip"
+     "S3Key": "178c84b9942a65e9ac86007ad88a43d5f0ee65de765536c5e97f05b56670a28b.zip"
     },
     "Environment": {
      "Variables": {
+      "SHIFT_TABLE_NAME": "Shift-fxeusr7wzfchtkr7kamke3qnwq-NONE",
+      "VISIT_TABLE_NAME": "Visit-fxeusr7wzfchtkr7kamke3qnwq-NONE",
+      "AUDIT_TABLE_NAME": "AuditLog-fxeusr7wzfchtkr7kamke3qnwq-NONE",
       "AMPLIFY_SSM_ENV_CONFIG": "{}"
      }
     },
@@ -533,7 +540,7 @@
    "DeletionPolicy": "Delete",
    "Metadata": {
     "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/create-visit-draft-lambda/Resource",
-    "aws:asset:path": "asset.dc09799db535a95c39c4b59e8dfb50b0e1f6f115c1b9f88a6ba8293f643231e5",
+    "aws:asset:path": "asset.178c84b9942a65e9ac86007ad88a43d5f0ee65de765536c5e97f05b56670a28b",
     "aws:asset:is-bundled": true,
     "aws:asset:property": "Code"
    }
@@ -598,10 +605,14 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "c20599e084690c14448423e7165bc3912440015b75462e7e43e7d626555f8342.zip"
+     "S3Key": "ab1946e67c9071b52399a34126f4fc4e7fce4fe56d92101f3ea16b5a86330b63.zip"
     },
     "Environment": {
      "Variables": {
+      "VISIT_TABLE_NAME": "Visit-fxeusr7wzfchtkr7kamke3qnwq-NONE",
+      "NURSE_TABLE_NAME": "Nurse-fxeusr7wzfchtkr7kamke3qnwq-NONE",
+      "AUDIT_TABLE_NAME": "AuditLog-fxeusr7wzfchtkr7kamke3qnwq-NONE",
+      "NOTIFICATION_TABLE_NAME": "Notification-fxeusr7wzfchtkr7kamke3qnwq-NONE",
       "AMPLIFY_SSM_ENV_CONFIG": "{}"
      }
     },
@@ -640,7 +651,7 @@
    "DeletionPolicy": "Delete",
    "Metadata": {
     "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/submit-visit-lambda/Resource",
-    "aws:asset:path": "asset.c20599e084690c14448423e7165bc3912440015b75462e7e43e7d626555f8342",
+    "aws:asset:path": "asset.ab1946e67c9071b52399a34126f4fc4e7fce4fe56d92101f3ea16b5a86330b63",
     "aws:asset:is-bundled": true,
     "aws:asset:property": "Code"
    }
@@ -705,10 +716,14 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "da98288fd26d4d2a8a2b2c30d036fe947b6ce29f7c7a448765c75a6ab3fbcd6c.zip"
+     "S3Key": "7b1d8e55663d2124c955b2aa34b00602c5346f530db59a8f71b2f7ba957249a8.zip"
     },
     "Environment": {
      "Variables": {
+      "VISIT_TABLE_NAME": "Visit-fxeusr7wzfchtkr7kamke3qnwq-NONE",
+      "NURSE_TABLE_NAME": "Nurse-fxeusr7wzfchtkr7kamke3qnwq-NONE",
+      "AUDIT_TABLE_NAME": "AuditLog-fxeusr7wzfchtkr7kamke3qnwq-NONE",
+      "NOTIFICATION_TABLE_NAME": "Notification-fxeusr7wzfchtkr7kamke3qnwq-NONE",
       "AMPLIFY_SSM_ENV_CONFIG": "{}"
      }
     },
@@ -747,7 +762,7 @@
    "DeletionPolicy": "Delete",
    "Metadata": {
     "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/reject-visit-lambda/Resource",
-    "aws:asset:path": "asset.da98288fd26d4d2a8a2b2c30d036fe947b6ce29f7c7a448765c75a6ab3fbcd6c",
+    "aws:asset:path": "asset.7b1d8e55663d2124c955b2aa34b00602c5346f530db59a8f71b2f7ba957249a8",
     "aws:asset:is-bundled": true,
     "aws:asset:property": "Code"
    }
@@ -812,10 +827,15 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "f87f9ddb2ccb186eb968b2c4fd78321f8a9f9a8d32371e41648199ffa57973d4.zip"
+     "S3Key": "2b0ba45cd583c0765d507fa141a5b8c4b761291d580c0c110c0e1ee55fbf2e26.zip"
     },
     "Environment": {
      "Variables": {
+      "VISIT_TABLE_NAME": "Visit-fxeusr7wzfchtkr7kamke3qnwq-NONE",
+      "NURSE_TABLE_NAME": "Nurse-fxeusr7wzfchtkr7kamke3qnwq-NONE",
+      "PATIENT_TABLE_NAME": "Patient-fxeusr7wzfchtkr7kamke3qnwq-NONE",
+      "AUDIT_TABLE_NAME": "AuditLog-fxeusr7wzfchtkr7kamke3qnwq-NONE",
+      "NOTIFICATION_TABLE_NAME": "Notification-fxeusr7wzfchtkr7kamke3qnwq-NONE",
       "AMPLIFY_SSM_ENV_CONFIG": "{}"
      }
     },
@@ -854,7 +874,7 @@
    "DeletionPolicy": "Delete",
    "Metadata": {
     "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/approve-visit-lambda/Resource",
-    "aws:asset:path": "asset.f87f9ddb2ccb186eb968b2c4fd78321f8a9f9a8d32371e41648199ffa57973d4",
+    "aws:asset:path": "asset.2b0ba45cd583c0765d507fa141a5b8c4b761291d580c0c110c0e1ee55fbf2e26",
     "aws:asset:is-bundled": true,
     "aws:asset:property": "Code"
    }

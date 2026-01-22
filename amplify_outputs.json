@@ -1155,11 +1155,41 @@
               "isRequired": false,
               "attributes": []
             },
+            "invoiceNumber": {
+              "name": "invoiceNumber",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "totalValue": {
+              "name": "totalValue",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": true,
+              "attributes": []
+            },
+            "status": {
+              "name": "status",
+              "isArray": false,
+              "type": {
+                "enum": "BillingStatus"
+              },
+              "isRequired": true,
+              "attributes": []
+            },
+            "radicationDate": {
+              "name": "radicationDate",
+              "isArray": false,
+              "type": "AWSDate",
+              "isRequired": false,
+              "attributes": []
+            },
             "date": {
               "name": "date",
               "isArray": false,
               "type": "String",
-              "isRequired": true,
+              "isRequired": false,
               "attributes": []
             },
             "procedures": {
@@ -1174,21 +1204,14 @@
               "name": "diagnosis",
               "isArray": false,
               "type": "String",
-              "isRequired": true,
+              "isRequired": false,
               "attributes": []
             },
             "eps": {
               "name": "eps",
               "isArray": false,
               "type": "String",
-              "isRequired": true,
-              "attributes": []
-            },
-            "totalAmount": {
-              "name": "totalAmount",
-              "isArray": false,
-              "type": "Float",
-              "isRequired": true,
+              "isRequired": false,
               "attributes": []
             },
             "ripsGenerated": {
@@ -1196,15 +1219,6 @@
               "isArray": false,
               "type": "Boolean",
               "isRequired": true,
-              "attributes": []
-            },
-            "status": {
-              "name": "status",
-              "isArray": false,
-              "type": {
-                "enum": "BillingStatus"
-              },
-              "isRequired": false,
               "attributes": []
             },
             "submittedAt": {
@@ -1812,10 +1826,9 @@
           "name": "BillingStatus",
           "values": [
             "PENDING",
-            "SUBMITTED",
-            "APPROVED",
-            "REJECTED",
-            "PAID"
+            "PAID",
+            "CANCELED",
+            "GLOSED"
           ]
         },
         "VisitStatus": {

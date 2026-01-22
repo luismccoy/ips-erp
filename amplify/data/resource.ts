@@ -75,7 +75,7 @@ const schema = a.schema({
     
     ShiftStatus: a.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']),
     InventoryStatus: a.enum(['IN_STOCK', 'LOW_STOCK', 'OUT_OF_STOCK']),
-    BillingStatus: a.enum(['PENDING', 'SUBMITTED', 'APPROVED', 'REJECTED', 'PAID']),
+    BillingStatus: a.enum(['PENDING', 'PAID', 'CANCELED', 'GLOSED']), // Phase 10: Updated for RIPS module
     
     // Phase 3: Workflow Compliance Enums
     VisitStatus: a.enum(['DRAFT', 'SUBMITTED', 'REJECTED', 'APPROVED']),
@@ -224,24 +224,27 @@ const schema = a.schema({
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')
     ]),
 
-    // 7. BILLING RECORD - RIPS billing data
+    // 7. BILLING RECORD - RIPS billing data (Phase 10: Updated for Billing module)
     BillingRecord: a.model({
         tenantId: a.id().required(),
         tenant: a.belongsTo('Tenant', 'tenantId'),
         
         patientId: a.id().required(),
-        shiftId: a.id(),
+        shiftId: a.id(), // Optional: link to shift
         
-        // RIPS fields
-        date: a.string().required(), // ISO date string - matches test expectations
+        // Phase 10: Core billing fields
+        invoiceNumber: a.string(), // Optional: invoice reference
+        totalValue: a.float().required(), // Renamed from totalAmount
+        status: a.ref('BillingStatus').required(),
+        radicationDate: a.date(), // AWSDate: when submitted to EPS
+        
+        // RIPS fields (legacy, kept for compatibility)
+        date: a.string(), // ISO date string
         procedures: a.string().array(), // CUPS codes
-        diagnosis: a.string().required(), // ICD-10 code
-        eps: a.string().required(), // Health insurance provider
+        diagnosis: a.string(), // ICD-10 code
+        eps: a.string(), // Health insurance provider
         
-        totalAmount: a.float().required(), // Fixed: was 'amount'
-        ripsGenerated: a.boolean().required().default(false), // Added: missing field
-        status: a.ref('BillingStatus'),
-        
+        ripsGenerated: a.boolean().required().default(false),
         submittedAt: a.datetime(),
         approvedAt: a.datetime(),
         rejectionReason: a.string(),
