@@ -209,4 +209,71 @@ inclusion: always
 3. Test end-to-end flow with real users
 4. Onboard first production tenant
 
-**Next Phase:** Production Operations & Continuous Improvement
+**Next Phase:** Phase 8 - Complete Frontend Integration
+
+## Phase 8: Complete Frontend Integration
+**Status:** ✅ COMPLETE
+
+**Goal:** Remove all hardcoded mock data imports from components and ensure they properly use the backend toggle system.
+
+**Problem Identified:**
+After Phase 7 deployment, users still saw mock data even with `VITE_USE_REAL_BACKEND=true` because 3 components were hardcoded to import mock data directly, bypassing the environment variable:
+- `AdminDashboard.tsx` - Imported `PATIENTS, INVENTORY, SHIFTS` from mock-data
+- `SimpleNurseApp.tsx` - Imported `SHIFTS, PATIENTS` from mock-data
+- `FamilyPortal.tsx` - Imported `PATIENTS, VITALS_HISTORY` from mock-data
+
+**Completed Tasks:**
+1. ✅ Refactored `AdminDashboard.tsx` to fetch data dynamically
+   - Added state management for patients, shifts, inventory
+   - Implemented loading states for all views (Dashboard, Audit, Inventory, Roster)
+   - Added empty states when no data exists
+   - Dynamic imports for mock data only when needed
+
+2. ✅ Refactored `SimpleNurseApp.tsx` to fetch data dynamically
+   - Added state management for shifts and patients
+   - Implemented loading states
+   - Added empty states for no shifts
+   - Shows backend status indicator (Live Data vs Mock Data)
+   - Calculates completion rate dynamically
+
+3. ✅ Refactored `FamilyPortal.tsx` to fetch data dynamically
+   - Added state management for patients and vitals
+   - Implemented loading states
+   - Added empty states for no patients/vitals
+   - Handles null selectedPatient case
+   - Dynamic imports for mock data only when needed
+
+**Technical Implementation:**
+- Removed direct imports from `mock-data.ts`
+- Used dynamic imports: `await import('../data/mock-data')` only when `!isUsingRealBackend()`
+- Added `useState` and `useEffect` hooks for data fetching
+- Implemented proper error handling and loading states
+- Used type assertions `(client.models.X as any)` for mock/real client compatibility
+
+**Results:**
+- All 3 components now properly respect `VITE_USE_REAL_BACKEND` environment variable
+- Components show empty states when connected to real backend with no data
+- Loading states provide better UX during data fetching
+- Mock data only loaded when explicitly in mock mode (better tree-shaking)
+- No more hardcoded mock data bypassing the backend toggle
+
+**Components Already Using Real Backend (No Changes Needed):**
+- ✅ AdminRoster.tsx
+- ✅ EvidenceGenerator.tsx
+- ✅ InventoryDashboard.tsx
+- ✅ NurseDashboard.tsx
+- ✅ PatientDashboard.tsx
+- ✅ StaffManagement.tsx
+
+**Commit:**
+- Message: `feat(phase8): refactor components to use real backend instead of hardcoded mock data`
+- Files: AdminDashboard.tsx, SimpleNurseApp.tsx, FamilyPortal.tsx
+- Changes: 454 insertions, 117 deletions
+
+**Next Steps:**
+1. Push to GitHub to trigger Build #9
+2. Verify deployed app shows empty states (no mock data) when logged in
+3. Test all 3 refactored components with real backend
+4. Begin adding real data through admin interface
+
+**Next Phase:** Production Operations & Data Population

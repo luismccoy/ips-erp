@@ -4,7 +4,6 @@ import {
     FileText, LogOut, DollarSign, Sparkles, AlertTriangle
 } from 'lucide-react';
 import { client, isUsingRealBackend } from '../amplify-utils';
-import { PATIENTS, INVENTORY, SHIFTS } from '../data/mock-data';
 import type { AdminDashboardProps, NavItemProps } from '../types/components';
 import type { Patient, InventoryItem, Shift } from '../types';
 
@@ -91,11 +90,12 @@ function DashboardView() {
     useEffect(() => {
         const fetchStats = async () => {
             if (!isUsingRealBackend()) {
-                // Use mock data
+                // Use mock data dynamically
+                const { PATIENTS, INVENTORY, SHIFTS } = await import('../data/mock-data');
                 setStats({
                     patients: PATIENTS.length,
                     shifts: SHIFTS.length,
-                    inventory: INVENTORY.filter(i => i.quantity < i.reorderThreshold).length
+                    inventory: INVENTORY.filter((i: any) => i.quantity < i.reorderThreshold).length
                 });
                 setLoading(false);
                 return;
@@ -110,7 +110,7 @@ function DashboardView() {
                 ]);
 
                 const lowStockItems = (inventoryRes.data || []).filter(
-                    (item: any) => item.quantity < item.reorderThreshold
+                    (item: any) => item.quantity < item.reorderLevel
                 );
 
                 setStats({
@@ -181,7 +181,8 @@ function AuditView() {
     useEffect(() => {
         const fetchPatients = async () => {
             if (!isUsingRealBackend()) {
-                setPatients(PATIENTS);
+                const { PATIENTS } = await import('../data/mock-data');
+                setPatients(PATIENTS as any);
                 setLoading(false);
                 return;
             }
@@ -224,10 +225,11 @@ function AuditView() {
                         <div className="flex justify-between items-start">
                             <div>
                                 <h4 className="font-bold text-slate-900">{patient.name}</h4>
-                                <p className="text-sm text-slate-500">{patient.diagnosis}</p>
+                                <p className="text-sm text-slate-500">{patient.diagnosis || 'No diagnosis'}</p>
                             </div>
-                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${patient.riskLevel === 'High' ? 'bg-red-50 text-red-600' : 'bg-yellow-50 text-yellow-600'
-                                }`}>{patient.riskLevel} Risk</span>
+                            <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-600">
+                                Active
+                            </span>
                         </div>
                     </div>
                 ))}
@@ -243,7 +245,8 @@ function InventoryView() {
     useEffect(() => {
         const fetchInventory = async () => {
             if (!isUsingRealBackend()) {
-                setInventory(INVENTORY);
+                const { INVENTORY } = await import('../data/mock-data');
+                setInventory(INVENTORY as any);
                 setLoading(false);
                 return;
             }
@@ -283,13 +286,13 @@ function InventoryView() {
                     <div key={item.id} className="p-4 border border-slate-100 rounded-xl flex justify-between items-center">
                         <div>
                             <h4 className="font-bold text-slate-900">{item.name}</h4>
-                            <p className="text-sm text-slate-500">{item.unit}</p>
+                            <p className="text-sm text-slate-500">{item.unit || 'Unit'}</p>
                         </div>
                         <div className="text-right">
-                            <div className={`text-lg font-black ${item.quantity < item.reorderThreshold ? 'text-red-600' : 'text-green-600'}`}>
+                            <div className={`text-lg font-black ${item.quantity < item.reorderLevel ? 'text-red-600' : 'text-green-600'}`}>
                                 {item.quantity}
                             </div>
-                            <div className="text-xs text-slate-400">Threshold: {item.reorderThreshold}</div>
+                            <div className="text-xs text-slate-400">Threshold: {item.reorderLevel}</div>
                         </div>
                     </div>
                 ))}
@@ -306,8 +309,9 @@ function RosterView() {
     useEffect(() => {
         const fetchData = async () => {
             if (!isUsingRealBackend()) {
-                setShifts(SHIFTS);
-                setPatients(PATIENTS);
+                const { SHIFTS, PATIENTS } = await import('../data/mock-data');
+                setShifts(SHIFTS as any);
+                setPatients(PATIENTS as any);
                 setLoading(false);
                 return;
             }
@@ -360,7 +364,7 @@ function RosterView() {
                             <div className="flex justify-between items-start">
                                 <div>
                                     <h4 className="font-bold text-slate-900">{patient?.name || 'Unknown Patient'}</h4>
-                                    <p className="text-sm text-slate-500">{shift.date} at {shift.startTime}</p>
+                                    <p className="text-sm text-slate-500">{new Date(shift.scheduledTime).toLocaleString()}</p>
                                 </div>
                                 <span className={`px-3 py-1 rounded-full text-xs font-bold ${shift.status === 'COMPLETED' ? 'bg-green-50 text-green-600' : 'bg-yellow-50 text-yellow-600'
                                     }`}>{shift.status}</span>

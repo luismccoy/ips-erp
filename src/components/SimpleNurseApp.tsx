@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Activity, LogOut } from 'lucide-react';
 import { client, isUsingRealBackend } from '../amplify-utils';
-import { SHIFTS, PATIENTS } from '../data/mock-data';
 import type { SimpleNurseAppProps } from '../types/components';
 import type { Shift, Patient } from '../types';
 
@@ -14,8 +13,9 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
     useEffect(() => {
         const fetchData = async () => {
             if (!isUsingRealBackend()) {
-                setShifts(SHIFTS);
-                setPatients(PATIENTS);
+                const { SHIFTS, PATIENTS } = await import('../data/mock-data');
+                setShifts(SHIFTS as any);
+                setPatients(PATIENTS as any);
                 setLoading(false);
                 return;
             }
@@ -95,7 +95,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                         }`}>{shift.status}</span>
                                                 </div>
                                                 <p className="text-sm text-slate-400 mb-2">{patient?.address || 'Address not available'}</p>
-                                                <p className="text-xs text-slate-500">{shift.startTime}</p>
+                                                <p className="text-xs text-slate-500">{new Date(shift.scheduledTime).toLocaleString()}</p>
                                             </div>
                                         );
                                     })

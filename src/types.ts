@@ -83,6 +83,22 @@ export type Tenant = {
     nit: string;
 };
 
+export type VitalSigns = {
+    id: string;
+    tenantId: string;
+    patientId: string;
+    date: string;
+    sys: number;
+    dia: number;
+    spo2: number;
+    hr: number;
+    temperature?: number | null;
+    weight?: number | null;
+    note?: string | null;
+    createdAt: string;
+    updatedAt: string;
+};
+
 export type AmplifyUser = {
     username: string;
     attributes: {
