@@ -8,7 +8,7 @@ interface ShiftActionProps {
 
 export const ShiftAction: React.FC<ShiftActionProps> = ({ shift, onUpdate }) => {
     const getNextStatus = (current: Shift['status']): Shift['status'] | null => {
-        if (current === 'ASSIGNED') return 'IN_PROGRESS';
+        if (current === 'PENDING') return 'IN_PROGRESS';
         if (current === 'IN_PROGRESS') return 'COMPLETED';
         return null;
     };

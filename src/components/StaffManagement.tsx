@@ -7,12 +7,14 @@ export const StaffManagement: React.FC = () => {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        const sub = client.models.Nurse.observeQuery({
+        const query = client.models.Nurse.observeQuery({
             filter: {
                 tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] }
             }
-        }).subscribe({
-            next: (data: { items: Nurse[] }) => setStaff([...data.items]),
+        });
+        
+        const sub = (query as any).subscribe({
+            next: (data: any) => setStaff([...data.items]),
             error: (err: Error) => console.error('Staff sub error:', err)
         });
 
@@ -23,7 +25,8 @@ export const StaffManagement: React.FC = () => {
         const name = prompt("Nombre completo:");
         if (!name) return;
         const email = prompt("Email:") || undefined;
-        const role = prompt("Rol (ADMIN, NURSE, COORDINATOR):", "NURSE") as 'ADMIN' | 'NURSE' | 'COORDINATOR';
+        const roleInput = prompt("Rol (ADMIN, NURSE, COORDINATOR):", "NURSE") || "NURSE";
+        const role = ['ADMIN', 'NURSE', 'COORDINATOR'].includes(roleInput) ? roleInput : 'NURSE';
 
         setLoading(true);
         try {
@@ -31,7 +34,7 @@ export const StaffManagement: React.FC = () => {
                 tenantId: MOCK_USER.attributes['custom:tenantId'],
                 name,
                 email,
-                role: ['ADMIN', 'NURSE', 'COORDINATOR'].includes(role) ? role : 'NURSE',
+                role: role as any,
                 skills: []
             });
         } catch (err) {

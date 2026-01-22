@@ -10,7 +10,7 @@ export type Shift = {
     patientName: string;
     requiredSkill?: string;
     location: string;
-    status: 'ASSIGNED' | 'IN_PROGRESS' | 'COMPLETED' | 'PENDING' | 'CANCELLED' | null;
+    status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | null;
     scheduledTime: string;
     startedAt?: string | null;
     completedAt?: string | null;
@@ -62,7 +62,7 @@ export type Task = {
     id: string;
     patientId: string;
     description: string;
-    isCompleted: boolean;
+    completed: boolean;
     dueDate?: string | null;
 };
 
@@ -81,6 +81,22 @@ export type Tenant = {
     id: string;
     name: string;
     nit: string;
+};
+
+export type VitalSigns = {
+    id: string;
+    tenantId: string;
+    patientId: string;
+    date: string;
+    sys: number;
+    dia: number;
+    spo2: number;
+    hr: number;
+    temperature?: number | null;
+    weight?: number | null;
+    note?: string | null;
+    createdAt: string;
+    updatedAt: string;
 };
 
 export type AmplifyUser = {

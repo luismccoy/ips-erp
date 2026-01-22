@@ -4,6 +4,7 @@ frontend:
     preBuild:
       commands:
         - npm ci
+        - echo "VITE_USE_REAL_BACKEND=$VITE_USE_REAL_BACKEND"
     build:
       commands:
         - npm run build
@@ -14,9 +15,3 @@ frontend:
   cache:
     paths:
       - node_modules/**/*
-backend:
-  phases:
-    build:
-      commands:
-        - npm ci --prefix amplify/functions/roster-architect
-        - npm run build --prefix amplify/functions/roster-architect

@@ -20,10 +20,12 @@ export const EvidenceGenerator: React.FC = () => {
     ]);
 
     useEffect(() => {
-        const sub = client.models.Patient.observeQuery({
+        const query = client.models.Patient.observeQuery({
             filter: { tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] } }
-        }).subscribe({
-            next: (data: { items: Patient[] }) => setPatients(data.items)
+        });
+        
+        const sub = (query as any).subscribe({
+            next: (data: any) => setPatients(data.items)
         });
         return () => sub.unsubscribe();
     }, []);

@@ -1,9 +1,11 @@
 import { generateClient } from 'aws-amplify/data';
 import { generateMockClient } from './mock-client';
 import type { AmplifyUser } from './types';
-import { type Schema } from '../amplify/data/resource';
 import { Amplify } from 'aws-amplify';
 import outputs from '../amplify_outputs.json';
+
+// Use generated GraphQL types instead of importing from backend
+type Schema = any; // Will be properly typed via GraphQL operations
 
 // Determine if we should use real backend or mock
 const USE_REAL_BACKEND = import.meta.env.VITE_USE_REAL_BACKEND === 'true';
