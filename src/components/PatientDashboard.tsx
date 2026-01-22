@@ -32,40 +32,23 @@ export const PatientDashboard: React.FC = () => {
     useEffect(() => {
         if (!selectedPatient) return;
 
-        // Subscribe to medications for selected patient
-        const medQuery = client.models.Medication.observeQuery({
-            filter: {
-                patientId: { eq: selectedPatient.id }
-            }
-        });
-        
-        const medSub = (medQuery as any).subscribe({
-            next: (data: any) => setMedications([...data.items]),
-            error: (err: Error) => console.error('Medication sub error:', err)
-        });
-
-        // Subscribe to tasks for selected patient
-        const taskQuery = client.models.Task.observeQuery({
-            filter: {
-                patientId: { eq: selectedPatient.id }
-            }
-        });
-        
-        const taskSub = (taskQuery as any).subscribe({
-            next: (data: any) => setTasks([...data.items]),
-            error: (err: Error) => console.error('Task sub error:', err)
-        });
-
-        return () => {
-            medSub.unsubscribe();
-            taskSub.unsubscribe();
-        };
+        // Medications and tasks are nested in Patient model, not separate models
+        // Extract from selectedPatient.medications and selectedPatient.tasks
+        setMedications(selectedPatient.medications || []);
+        setTasks(selectedPatient.tasks || []);
     }, [selectedPatient]);
 
     const handleToggleTask = async (task: Task) => {
-        await client.models.Task.update({
-            id: task.id,
-            isCompleted: !task.isCompleted
+        if (!selectedPatient) return;
+        
+        // Update the tasks array in the Patient model
+        const updatedTasks = selectedPatient.tasks?.map(t => 
+            t.id === task.id ? { ...t, completed: !t.completed } : t
+        ) || [];
+        
+        await client.models.Patient.update({
+            id: selectedPatient.id,
+            tasks: updatedTasks
         });
     };
 
@@ -124,7 +107,7 @@ export const PatientDashboard: React.FC = () => {
 
                     <div className="task-summary-card glass">
                         <div className="summary-stat">
-                            <span className="stat-value">{tasks.filter(t => t.isCompleted).length}/{tasks.length}</span>
+                            <span className="stat-value">{tasks.filter(t => t.completed).length}/{tasks.length}</span>
                             <span className="stat-label">Tareas Completadas</span>
                         </div>
                         <div className="summary-stat">
@@ -167,15 +150,15 @@ export const PatientDashboard: React.FC = () => {
                         <div className="task-list">
                             {tasks.map(task => (
                                 <div key={task.id} className="task-item" onClick={() => handleToggleTask(task)}>
-                                    <div className={`checkbox ${task.isCompleted ? 'checked' : ''}`}>
-                                        {task.isCompleted && (
+                                    <div className={`checkbox ${task.completed ? 'checked' : ''}`}>
+                                        {task.completed && (
                                             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M20 6L9 17l-5-5" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                                             </svg>
                                         )}
                                     </div>
                                     <div className="task-content">
-                                        <span className={`task-desc ${task.isCompleted ? 'completed' : ''}`}>{task.description}</span>
+                                        <span className={`task-desc ${task.completed ? 'completed' : ''}`}>{task.description}</span>
                                         {task.dueDate && <span className="task-date">Vence: {new Date(task.dueDate).toLocaleTimeString()}</span>}
                                     </div>
                                 </div>

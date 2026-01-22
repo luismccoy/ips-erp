@@ -36,7 +36,7 @@ const schema = a.schema({
     // ENUMS
     // ============================================
     
-    ShiftStatus: a.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']),
+    ShiftStatus: a.enum(['PENDING', 'ASSIGNED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']),
     InventoryStatus: a.enum(['IN_STOCK', 'LOW_STOCK', 'OUT_OF_STOCK']),
     BillingStatus: a.enum(['PENDING', 'SUBMITTED', 'APPROVED', 'REJECTED', 'PAID']),
 

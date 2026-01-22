@@ -25,7 +25,8 @@ export const StaffManagement: React.FC = () => {
         const name = prompt("Nombre completo:");
         if (!name) return;
         const email = prompt("Email:") || undefined;
-        const role = prompt("Rol (ADMIN, NURSE, COORDINATOR):", "NURSE") as 'ADMIN' | 'NURSE' | 'COORDINATOR';
+        const roleInput = prompt("Rol (ADMIN, NURSE, COORDINATOR):", "NURSE") || "NURSE";
+        const role = ['ADMIN', 'NURSE', 'COORDINATOR'].includes(roleInput) ? roleInput : 'NURSE';
 
         setLoading(true);
         try {
@@ -33,7 +34,7 @@ export const StaffManagement: React.FC = () => {
                 tenantId: MOCK_USER.attributes['custom:tenantId'],
                 name,
                 email,
-                role: ['ADMIN', 'NURSE', 'COORDINATOR'].includes(role) ? role : 'NURSE',
+                role: role as any,
                 skills: []
             });
         } catch (err) {
