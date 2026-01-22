@@ -293,6 +293,7 @@ export function generateMockClient(): MockClient {
                     type: 'VISIT_PENDING_REVIEW',
                     message: `Nueva visita pendiente de revisión`,
                     entityId: shiftId,
+                    entityType: 'Visit',
                     read: false,
                     createdAt: now
                 };
@@ -333,9 +334,11 @@ export function generateMockClient(): MockClient {
                 // Create notification for nurse
                 const notification: NotificationItem = {
                     id: `notif-${Date.now()}`,
+                    userId: visit.nurseId, // Notify the nurse
                     type: 'VISIT_APPROVED',
                     message: `Su visita ha sido aprobada`,
                     entityId: shiftId,
+                    entityType: 'Visit',
                     read: false,
                     createdAt: now
                 };
@@ -379,9 +382,11 @@ export function generateMockClient(): MockClient {
                 // Create notification for nurse
                 const notification: NotificationItem = {
                     id: `notif-${Date.now()}`,
+                    userId: visit.nurseId, // Notify the nurse
                     type: 'VISIT_REJECTED',
                     message: `Su visita ha sido rechazada: ${reason}`,
                     entityId: shiftId,
+                    entityType: 'Visit',
                     read: false,
                     createdAt: now
                 };

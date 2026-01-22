@@ -207,6 +207,8 @@ export interface NotificationItem {
   message: string;
   /** ID of the related entity (e.g., visitId) */
   entityId: string;
+  /** Type of the related entity (e.g., 'Visit') */
+  entityType: string;
   /** Whether the notification has been read */
   read: boolean;
   /** Timestamp when notification was created (ISO 8601) */
