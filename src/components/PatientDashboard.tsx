@@ -1,33 +1,48 @@
 import React, { useEffect, useState } from 'react';
 import { client, MOCK_USER } from '../amplify-utils';
+import { usePagination } from '../hooks/usePagination';
 import { type Patient, type Medication, type Task } from '../types';
 
 export const PatientDashboard: React.FC = () => {
-    const [patients, setPatients] = useState<Patient[]>([]);
+    const { items: patients, loadMore, hasMore, isLoading, setItems: setPatients } = usePagination<Patient>();
     const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
     const [medications, setMedications] = useState<Medication[]>([]);
     const [tasks, setTasks] = useState<Task[]>([]);
 
     useEffect(() => {
-        // Subscribe to patients for this tenant
-        const patientQuery = client.models.Patient.observeQuery({
-            filter: {
-                tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] }
-            }
-        });
-        
-        const patientSub = (patientQuery as any).subscribe({
-            next: (data: any) => {
-                setPatients([...data.items]);
-                if (data.items.length > 0 && !selectedPatient) {
-                    setSelectedPatient(data.items[0]);
-                }
-            },
-            error: (err: Error) => console.error('Patient sub error:', err)
-        });
+        const fetchPatients = async () => {
+            loadMore(async (token) => {
+                const response = await (client.models.Patient as any).list({
+                    filter: {
+                        tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] }
+                    },
+                    limit: 50,
+                    nextToken: token
+                });
 
-        return () => patientSub.unsubscribe();
-    }, [selectedPatient]);
+                const data = response.data || [];
+                if (data.length > 0 && !selectedPatient) {
+                    setSelectedPatient(data[0]);
+                }
+                return { data, nextToken: response.nextToken };
+            }, true);
+        };
+
+        fetchPatients();
+    }, [loadMore, selectedPatient]);
+
+    const handleLoadMore = () => {
+        loadMore(async (token) => {
+            const response = await (client.models.Patient as any).list({
+                filter: {
+                    tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] }
+                },
+                limit: 50,
+                nextToken: token
+            });
+            return { data: response.data || [], nextToken: response.nextToken };
+        });
+    };
 
     useEffect(() => {
         if (!selectedPatient) return;
@@ -40,12 +55,12 @@ export const PatientDashboard: React.FC = () => {
 
     const handleToggleTask = async (task: Task) => {
         if (!selectedPatient) return;
-        
+
         // Update the tasks array in the Patient model
-        const updatedTasks = selectedPatient.tasks?.map(t => 
+        const updatedTasks = selectedPatient.tasks?.map(t =>
             t.id === task.id ? { ...t, completed: !t.completed } : t
         ) || [];
-        
+
         await client.models.Patient.update({
             id: selectedPatient.id,
             tasks: updatedTasks
@@ -71,6 +86,15 @@ export const PatientDashboard: React.FC = () => {
                             <span className="doc-id-small">{p.documentId}</span>
                         </div>
                     ))}
+                    {hasMore && (
+                        <button
+                            onClick={handleLoadMore}
+                            disabled={isLoading}
+                            className="w-full py-2 text-xs font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-lg transition-all disabled:opacity-50 mt-2"
+                        >
+                            {isLoading ? 'Cargando...' : 'Ver más pacientes'}
+                        </button>
+                    )}
                 </div>
             </aside>
 

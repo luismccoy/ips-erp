@@ -1,5 +1,6 @@
 // import { type Schema } from '../amplify/data/resource';
 import type { Shift, Nurse, InventoryItem, Patient, Medication, Task, VitalSigns } from './types';
+import type { Visit, VisitSummary, NotificationItem } from './types/workflow';
 
 // Simple In-Memory Store
 interface StoreType {
@@ -10,6 +11,8 @@ interface StoreType {
     Medication: Medication[];
     Task: Task[];
     VitalSigns: VitalSigns[];
+    Visit: Visit[];
+    Notification: NotificationItem[];
     [key: string]: unknown[];
 }
 
@@ -41,7 +44,9 @@ const STORE: StoreType = {
     VitalSigns: [
         { id: 'v1', tenantId: 'tenant-bogota-01', patientId: 'p1', date: '2026-01-20', sys: 145, dia: 90, spo2: 95, hr: 78, note: 'Paciente estable con medicación ajustada', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
         { id: 'v2', tenantId: 'tenant-bogota-01', patientId: 'p1', date: '2026-01-18', sys: 150, dia: 95, spo2: 94, hr: 82, note: 'Presión arterial ligeramente elevada', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
-    ]
+    ],
+    Visit: [],
+    Notification: []
 };
 
 // Properly type LISTENERS using a generic function type or unknown
@@ -54,7 +59,9 @@ const LISTENERS: Record<string, ListenerCallback<any>[]> = {
     Patient: [],
     Medication: [],
     Task: [],
-    VitalSigns: []
+    VitalSigns: [],
+    Visit: [],
+    Notification: []
 };
 
 function notify<T>(model: keyof StoreType) {
@@ -81,9 +88,16 @@ export interface MockClient {
         Medication: MockModelClient<Medication>;
         Task: MockModelClient<Task>;
         VitalSigns: MockModelClient<VitalSigns>;
+        Visit: MockModelClient<Visit>;
+        Notification: MockModelClient<NotificationItem>;
     };
     queries: {
         generateRoster: (args: { nurses: string; unassignedShifts: string }) => Promise<{ data: string; errors?: Error[] }>;
+        createVisitDraftFromShift: (args: { shiftId: string }) => Promise<{ data: string; errors?: Error[] }>;
+        submitVisit: (args: { shiftId: string }) => Promise<{ data: string; errors?: Error[] }>;
+        approveVisit: (args: { shiftId: string }) => Promise<{ data: string; errors?: Error[] }>;
+        rejectVisit: (args: { shiftId: string; reason: string }) => Promise<{ data: string; errors?: Error[] }>;
+        listApprovedVisitSummariesForFamily: (args: { patientId: string }) => Promise<{ data: string; errors?: Error[] }>;
     };
 }
 
@@ -133,7 +147,9 @@ export function generateMockClient(): MockClient {
             Patient: createModelHandlers<Patient>('Patient'),
             Medication: createModelHandlers<Medication>('Medication'),
             Task: createModelHandlers<Task>('Task'),
-            VitalSigns: createModelHandlers<VitalSigns>('VitalSigns')
+            VitalSigns: createModelHandlers<VitalSigns>('VitalSigns'),
+            Visit: createModelHandlers<Visit>('Visit'),
+            Notification: createModelHandlers<NotificationItem>('Notification')
         },
         queries: {
             generateRoster: async (args: { nurses: string; unassignedShifts: string }) => {
@@ -156,6 +172,196 @@ export function generateMockClient(): MockClient {
                 return {
                     data: JSON.stringify({ assignments })
                 };
+            },
+
+            // Workflow mutations - Requirement 9.2
+            createVisitDraftFromShift: async (args: { shiftId: string }) => {
+                const { shiftId } = args;
+                const shift = (STORE.Shift as Shift[]).find(s => s.id === shiftId);
+                
+                if (!shift) {
+                    return { data: JSON.stringify({ error: 'Shift not found' }), errors: [new Error('Shift not found')] };
+                }
+
+                // Check if visit already exists
+                const existingVisit = (STORE.Visit as Visit[]).find(v => v.shiftId === shiftId);
+                if (existingVisit) {
+                    return { data: JSON.stringify({ visit: existingVisit }) };
+                }
+
+                const now = new Date().toISOString();
+                const newVisit: Visit = {
+                    id: shiftId, // 1:1 relationship
+                    tenantId: shift.tenantId || 'tenant-bogota-01',
+                    shiftId: shiftId,
+                    patientId: shift.patientId || '',
+                    nurseId: shift.nurseId || '',
+                    status: 'DRAFT',
+                    kardex: {
+                        generalObservations: '',
+                    },
+                    createdAt: now,
+                    updatedAt: now
+                };
+
+                (STORE.Visit as Visit[]).push(newVisit);
+                notify<Visit>('Visit');
+
+                await new Promise(r => setTimeout(r, 500));
+                return { data: JSON.stringify({ visit: newVisit }) };
+            },
+
+            submitVisit: async (args: { shiftId: string }) => {
+                const { shiftId } = args;
+                const visits = STORE.Visit as Visit[];
+                const visitIndex = visits.findIndex(v => v.shiftId === shiftId);
+
+                if (visitIndex === -1) {
+                    return { data: JSON.stringify({ error: 'Visit not found' }), errors: [new Error('Visit not found')] };
+                }
+
+                const visit = visits[visitIndex];
+                if (visit.status !== 'DRAFT' && visit.status !== 'REJECTED') {
+                    return { data: JSON.stringify({ error: 'Visit cannot be submitted from current status' }), errors: [new Error('Invalid status transition')] };
+                }
+
+                const now = new Date().toISOString();
+                visits[visitIndex] = {
+                    ...visit,
+                    status: 'SUBMITTED',
+                    submittedAt: now,
+                    updatedAt: now
+                };
+
+                // Create notification for admin
+                const notification: NotificationItem = {
+                    id: `notif-${Date.now()}`,
+                    type: 'VISIT_PENDING_REVIEW',
+                    message: `Nueva visita pendiente de revisión`,
+                    entityId: shiftId,
+                    read: false,
+                    createdAt: now
+                };
+                (STORE.Notification as NotificationItem[]).push(notification);
+
+                notify<Visit>('Visit');
+                notify<NotificationItem>('Notification');
+
+                await new Promise(r => setTimeout(r, 500));
+                return { data: JSON.stringify({ visit: visits[visitIndex] }) };
+            },
+
+            approveVisit: async (args: { shiftId: string }) => {
+                const { shiftId } = args;
+                const visits = STORE.Visit as Visit[];
+                const visitIndex = visits.findIndex(v => v.shiftId === shiftId);
+
+                if (visitIndex === -1) {
+                    return { data: JSON.stringify({ error: 'Visit not found' }), errors: [new Error('Visit not found')] };
+                }
+
+                const visit = visits[visitIndex];
+                if (visit.status !== 'SUBMITTED') {
+                    return { data: JSON.stringify({ error: 'Only submitted visits can be approved' }), errors: [new Error('Invalid status transition')] };
+                }
+
+                const now = new Date().toISOString();
+                visits[visitIndex] = {
+                    ...visit,
+                    status: 'APPROVED',
+                    approvedAt: now,
+                    approvedBy: 'mock-admin',
+                    reviewedAt: now,
+                    reviewedBy: 'mock-admin',
+                    updatedAt: now
+                };
+
+                // Create notification for nurse
+                const notification: NotificationItem = {
+                    id: `notif-${Date.now()}`,
+                    type: 'VISIT_APPROVED',
+                    message: `Su visita ha sido aprobada`,
+                    entityId: shiftId,
+                    read: false,
+                    createdAt: now
+                };
+                (STORE.Notification as NotificationItem[]).push(notification);
+
+                notify<Visit>('Visit');
+                notify<NotificationItem>('Notification');
+
+                await new Promise(r => setTimeout(r, 500));
+                return { data: JSON.stringify({ visit: visits[visitIndex] }) };
+            },
+
+            rejectVisit: async (args: { shiftId: string; reason: string }) => {
+                const { shiftId, reason } = args;
+                const visits = STORE.Visit as Visit[];
+                const visitIndex = visits.findIndex(v => v.shiftId === shiftId);
+
+                if (visitIndex === -1) {
+                    return { data: JSON.stringify({ error: 'Visit not found' }), errors: [new Error('Visit not found')] };
+                }
+
+                const visit = visits[visitIndex];
+                if (visit.status !== 'SUBMITTED') {
+                    return { data: JSON.stringify({ error: 'Only submitted visits can be rejected' }), errors: [new Error('Invalid status transition')] };
+                }
+
+                if (!reason || reason.trim() === '') {
+                    return { data: JSON.stringify({ error: 'Rejection reason is required' }), errors: [new Error('Rejection reason required')] };
+                }
+
+                const now = new Date().toISOString();
+                visits[visitIndex] = {
+                    ...visit,
+                    status: 'REJECTED',
+                    rejectionReason: reason,
+                    reviewedAt: now,
+                    reviewedBy: 'mock-admin',
+                    updatedAt: now
+                };
+
+                // Create notification for nurse
+                const notification: NotificationItem = {
+                    id: `notif-${Date.now()}`,
+                    type: 'VISIT_REJECTED',
+                    message: `Su visita ha sido rechazada: ${reason}`,
+                    entityId: shiftId,
+                    read: false,
+                    createdAt: now
+                };
+                (STORE.Notification as NotificationItem[]).push(notification);
+
+                notify<Visit>('Visit');
+                notify<NotificationItem>('Notification');
+
+                await new Promise(r => setTimeout(r, 500));
+                return { data: JSON.stringify({ visit: visits[visitIndex] }) };
+            },
+
+            listApprovedVisitSummariesForFamily: async (args: { patientId: string }) => {
+                const { patientId } = args;
+                const visits = STORE.Visit as Visit[];
+                const nurses = STORE.Nurse as Nurse[];
+                
+                const approvedVisits = visits
+                    .filter(v => v.patientId === patientId && v.status === 'APPROVED')
+                    .sort((a, b) => new Date(b.approvedAt || '').getTime() - new Date(a.approvedAt || '').getTime());
+
+                const summaries: VisitSummary[] = approvedVisits.map(visit => {
+                    const nurse = nurses.find(n => n.id === visit.nurseId);
+                    return {
+                        visitDate: visit.approvedAt || visit.createdAt || new Date().toISOString(),
+                        nurseName: nurse?.name || 'Enfermera',
+                        overallStatus: 'Paciente estable',
+                        keyActivities: visit.tasksCompleted?.map(t => t.taskDescription) || ['Visita de rutina'],
+                        nextVisitDate: undefined
+                    };
+                });
+
+                await new Promise(r => setTimeout(r, 500));
+                return { data: JSON.stringify({ summaries }) };
             }
         }
     };

@@ -1,13 +1,44 @@
 import { useState, useEffect } from 'react';
 import {
     Activity, ClipboardCheck, Package, Calendar, ShieldAlert,
-    FileText, LogOut, DollarSign, Sparkles, AlertTriangle
+    FileText, LogOut, DollarSign, Sparkles, AlertTriangle, ClipboardList
 } from 'lucide-react';
-import { client, isUsingRealBackend } from '../amplify-utils';
+import { client, isUsingRealBackend, MOCK_USER } from '../amplify-utils';
+import { usePagination } from '../hooks/usePagination';
 import type { AdminDashboardProps, NavItemProps } from '../types/components';
 import type { Patient, InventoryItem, Shift } from '../types';
+import { PendingReviewsPanel } from './PendingReviewsPanel';
+import { NotificationBell } from './NotificationBell';
+import type { NotificationItem } from '../types/workflow';
 
 export default function AdminDashboard({ view, setView, onLogout, tenant }: AdminDashboardProps) {
+    /**
+     * Handles visit approval from PendingReviewsPanel.
+     * The PendingReviewsPanel handles the approval internally with its own modals.
+     */
+    const handleApproveRequest = (shiftId: string) => {
+        console.log('Approval requested for shift:', shiftId);
+    };
+
+    /**
+     * Handles visit rejection from PendingReviewsPanel.
+     * The PendingReviewsPanel handles the rejection internally with its own modals.
+     */
+    const handleRejectRequest = (shiftId: string, reason: string) => {
+        console.log('Rejection requested for shift:', shiftId, 'Reason:', reason);
+    };
+
+    /**
+     * Handles notification click from NotificationBell.
+     * Navigates to pending reviews for VISIT_PENDING_REVIEW notifications.
+     * Validates: Requirement 4.1
+     */
+    const handleNotificationClick = (notification: NotificationItem) => {
+        if (notification.type === 'VISIT_PENDING_REVIEW') {
+            setView('pending-reviews');
+        }
+    };
+
     return (
         <div className="flex h-screen bg-[#f8fafc]">
             <aside className="w-64 bg-slate-900 text-white flex flex-col">
@@ -24,6 +55,7 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                 </div>
                 <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
                     <NavItem icon={Activity} label="Dashboard" active={view === 'dashboard'} onClick={() => setView('dashboard')} />
+                    <NavItem icon={ClipboardList} label="Revisiones Pendientes" active={view === 'pending-reviews'} onClick={() => setView('pending-reviews')} />
                     <NavItem icon={ClipboardCheck} label="Clinical Audit" active={view === 'audit'} onClick={() => setView('audit')} />
                     <NavItem icon={Package} label="Inventory" active={view === 'inventory'} onClick={() => setView('inventory')} />
                     <NavItem icon={Calendar} label="Rostering" active={view === 'roster'} onClick={() => setView('roster')} />
@@ -45,6 +77,7 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                 <header className="bg-white/80 backdrop-blur-md border-b border-slate-100 px-8 py-4 flex justify-between items-center sticky top-0 z-20">
                     <h2 className="text-2xl font-black text-slate-900">
                         {view === 'dashboard' && 'Business Overview'}
+                        {view === 'pending-reviews' && 'Revisiones Pendientes'}
                         {view === 'audit' && 'Clinical Audit'}
                         {view === 'inventory' && 'Inventory Management'}
                         {view === 'roster' && 'Rostering'}
@@ -53,12 +86,23 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
 
                     </h2>
                     <div className="flex items-center gap-4">
+                        <NotificationBell
+                            userId={tenant?.id || 'admin'}
+                            onNotificationClick={handleNotificationClick}
+                        />
                         <span className="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-xs font-bold">Res 3100 Compliant</span>
                         <div className="h-10 w-10 bg-slate-900 rounded-xl flex items-center justify-center text-white font-bold">A</div>
                     </div>
                 </header>
                 <div className="p-8">
                     {view === 'dashboard' && <DashboardView />}
+                    {view === 'pending-reviews' && (
+                        <PendingReviewsPanel
+                            tenantId={tenant?.id || ''}
+                            onApprove={handleApproveRequest}
+                            onReject={handleRejectRequest}
+                        />
+                    )}
                     {view === 'audit' && <AuditView />}
                     {view === 'inventory' && <InventoryView />}
                     {view === 'roster' && <RosterView />}
@@ -137,6 +181,32 @@ function DashboardView() {
         );
     }
 
+    useEffect(() => {
+        // Dashboard real-time subscriptions
+        const auditSub = (client.models.AuditLog as any)?.onCreate({
+            filter: { tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] } }
+        }).subscribe({
+            next: (log: any) => {
+                console.log('Real-time audit log:', log);
+            },
+            error: (err: any) => console.log('AuditLog sub not available or failed')
+        });
+
+        const shiftSub = (client.models.Shift as any).onUpdate({
+            filter: { tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] } }
+        }).subscribe({
+            next: (shift: any) => {
+                console.log('Real-time shift update:', shift);
+            },
+            error: (err: any) => console.log('Shift update sub failed')
+        });
+
+        return () => {
+            auditSub?.unsubscribe();
+            shiftSub?.unsubscribe();
+        };
+    }, []);
+
     return (
         <div className="space-y-6">
             <div className="grid grid-cols-3 gap-6">
@@ -175,33 +245,39 @@ function DashboardView() {
 }
 
 function AuditView() {
-    const [patients, setPatients] = useState<Patient[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { items: patients, loadMore, hasMore, isLoading } = usePagination<Patient>();
 
     useEffect(() => {
         const fetchPatients = async () => {
             if (!isUsingRealBackend()) {
                 const { PATIENTS } = await import('../data/mock-data');
-                setPatients(PATIENTS as any);
-                setLoading(false);
+                loadMore(async () => ({ data: PATIENTS as any, nextToken: null }), true);
                 return;
             }
 
-            try {
-                const response = await (client.models.Patient as any).list();
-                setPatients(response.data || []);
-            } catch (error) {
-                console.error('Error fetching patients:', error);
-                setPatients([]);
-            } finally {
-                setLoading(false);
-            }
+            loadMore(async (token) => {
+                const response = await (client.models.Patient as any).list({
+                    limit: 50,
+                    nextToken: token
+                });
+                return { data: response.data || [], nextToken: response.nextToken };
+            }, true);
         };
 
         fetchPatients();
     }, []);
 
-    if (loading) {
+    const handleLoadMore = () => {
+        loadMore(async (token) => {
+            const response = await (client.models.Patient as any).list({
+                limit: 50,
+                nextToken: token
+            });
+            return { data: response.data || [], nextToken: response.nextToken };
+        });
+    };
+
+    if (isLoading && patients.length === 0) {
         return <div className="bg-white p-6 rounded-2xl border border-slate-100 text-center text-slate-400">Loading patients...</div>;
     }
 
@@ -233,39 +309,54 @@ function AuditView() {
                         </div>
                     </div>
                 ))}
+                {hasMore && (
+                    <button
+                        onClick={handleLoadMore}
+                        disabled={isLoading}
+                        className="w-full py-2 text-sm font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all disabled:opacity-50"
+                    >
+                        {isLoading ? 'Cargando más...' : 'Cargar Más'}
+                    </button>
+                )}
             </div>
         </div>
     );
 }
 
 function InventoryView() {
-    const [inventory, setInventory] = useState<InventoryItem[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { items: inventory, loadMore, hasMore, isLoading } = usePagination<InventoryItem>();
 
     useEffect(() => {
         const fetchInventory = async () => {
             if (!isUsingRealBackend()) {
                 const { INVENTORY } = await import('../data/mock-data');
-                setInventory(INVENTORY as any);
-                setLoading(false);
+                loadMore(async () => ({ data: INVENTORY as any, nextToken: null }), true);
                 return;
             }
 
-            try {
-                const response = await (client.models.Inventory as any).list();
-                setInventory(response.data || []);
-            } catch (error) {
-                console.error('Error fetching inventory:', error);
-                setInventory([]);
-            } finally {
-                setLoading(false);
-            }
+            loadMore(async (token) => {
+                const response = await (client.models.Inventory as any).list({
+                    limit: 50,
+                    nextToken: token
+                });
+                return { data: response.data || [], nextToken: response.nextToken };
+            }, true);
         };
 
         fetchInventory();
     }, []);
 
-    if (loading) {
+    const handleLoadMore = () => {
+        loadMore(async (token) => {
+            const response = await (client.models.Inventory as any).list({
+                limit: 50,
+                nextToken: token
+            });
+            return { data: response.data || [], nextToken: response.nextToken };
+        });
+    };
+
+    if (isLoading && inventory.length === 0) {
         return <div className="bg-white p-6 rounded-2xl border border-slate-100 text-center text-slate-400">Loading inventory...</div>;
     }
 
@@ -296,46 +387,64 @@ function InventoryView() {
                         </div>
                     </div>
                 ))}
+                {hasMore && (
+                    <button
+                        onClick={handleLoadMore}
+                        disabled={isLoading}
+                        className="w-full py-2 text-sm font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all disabled:opacity-50"
+                    >
+                        {isLoading ? 'Cargando más...' : 'Cargar Más'}
+                    </button>
+                )}
             </div>
         </div>
     );
 }
 
 function RosterView() {
-    const [shifts, setShifts] = useState<Shift[]>([]);
+    const { items: shifts, loadMore, hasMore, isLoading } = usePagination<Shift>();
     const [patients, setPatients] = useState<Patient[]>([]);
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
+            // First fetch patients (not paginated for now as it's a lookup map)
             if (!isUsingRealBackend()) {
-                const { SHIFTS, PATIENTS } = await import('../data/mock-data');
-                setShifts(SHIFTS as any);
+                const { PATIENTS, SHIFTS } = await import('../data/mock-data');
                 setPatients(PATIENTS as any);
-                setLoading(false);
+                loadMore(async () => ({ data: SHIFTS as any, nextToken: null }), true);
                 return;
             }
 
             try {
-                const [shiftsRes, patientsRes] = await Promise.all([
-                    (client.models.Shift as any).list(),
-                    (client.models.Patient as any).list()
-                ]);
-                setShifts(shiftsRes.data || []);
+                const patientsRes = await (client.models.Patient as any).list();
                 setPatients(patientsRes.data || []);
             } catch (error) {
-                console.error('Error fetching roster data:', error);
-                setShifts([]);
-                setPatients([]);
-            } finally {
-                setLoading(false);
+                console.error('Error fetching patients for roster:', error);
             }
+
+            loadMore(async (token) => {
+                const response = await (client.models.Shift as any).list({
+                    limit: 50,
+                    nextToken: token
+                });
+                return { data: response.data || [], nextToken: response.nextToken };
+            }, true);
         };
 
         fetchData();
     }, []);
 
-    if (loading) {
+    const handleLoadMore = () => {
+        loadMore(async (token) => {
+            const response = await (client.models.Shift as any).list({
+                limit: 50,
+                nextToken: token
+            });
+            return { data: response.data || [], nextToken: response.nextToken };
+        });
+    };
+
+    if (isLoading && shifts.length === 0) {
         return <div className="bg-white p-6 rounded-2xl border border-slate-100 text-center text-slate-400">Loading shifts...</div>;
     }
 
@@ -372,6 +481,15 @@ function RosterView() {
                         </div>
                     );
                 })}
+                {hasMore && (
+                    <button
+                        onClick={handleLoadMore}
+                        disabled={isLoading}
+                        className="w-full py-2 text-sm font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all disabled:opacity-50"
+                    >
+                        {isLoading ? 'Cargando más...' : 'Cargar Más'}
+                    </button>
+                )}
             </div>
         </div>
     );

@@ -31,6 +31,43 @@ const schema = a.schema({
         completed: a.boolean().required(), // Fixed: was isCompleted
         dueDate: a.string(), // ISO date string
     }),
+    
+    // Phase 3: Workflow Compliance Custom Types
+    KARDEX: a.customType({
+        generalObservations: a.string().required(),
+        skinCondition: a.string(),
+        mobilityStatus: a.string(),
+        nutritionIntake: a.string(),
+        painLevel: a.integer(),
+        mentalStatus: a.string(),
+        environmentalSafety: a.string(),
+        caregiverSupport: a.string(),
+        internalNotes: a.string(), // Hidden from family
+    }),
+    
+    MedicationAdmin: a.customType({
+        medicationName: a.string().required(),
+        intendedDosage: a.string().required(),
+        dosageGiven: a.string().required(),
+        time: a.datetime().required(),
+        route: a.string(),
+        notes: a.string(),
+    }),
+    
+    TaskCompletion: a.customType({
+        taskDescription: a.string().required(),
+        completedAt: a.datetime().required(),
+        notes: a.string(),
+    }),
+    
+    VisitSummary: a.customType({
+        visitDate: a.string().required(),
+        nurseName: a.string().required(),
+        duration: a.integer(),
+        overallStatus: a.string(),
+        keyActivities: a.string().array(),
+        nextVisitDate: a.string(),
+    }),
 
     // ============================================
     // ENUMS
@@ -39,6 +76,17 @@ const schema = a.schema({
     ShiftStatus: a.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']),
     InventoryStatus: a.enum(['IN_STOCK', 'LOW_STOCK', 'OUT_OF_STOCK']),
     BillingStatus: a.enum(['PENDING', 'SUBMITTED', 'APPROVED', 'REJECTED', 'PAID']),
+    
+    // Phase 3: Workflow Compliance Enums
+    VisitStatus: a.enum(['DRAFT', 'SUBMITTED', 'REJECTED', 'APPROVED']),
+    AuditAction: a.enum([
+        'VISIT_CREATED', 'VISIT_SUBMITTED', 'VISIT_APPROVED', 'VISIT_REJECTED', 'VISIT_EDITED',
+        'PATIENT_VIEWED_BY_FAMILY', 'USER_LOGIN', 'USER_LOGOUT', 'DATA_EXPORT'
+    ]),
+    NotificationType: a.enum([
+        'VISIT_APPROVED', 'VISIT_REJECTED', 'VISIT_PENDING_REVIEW',
+        'VISIT_AVAILABLE_FOR_FAMILY', 'SHIFT_ASSIGNED', 'SHIFT_CANCELLED'
+    ]),
 
     // ============================================
     // MODELS
@@ -56,6 +104,9 @@ const schema = a.schema({
         inventory: a.hasMany('InventoryItem', 'tenantId'),
         vitalSigns: a.hasMany('VitalSigns', 'tenantId'),
         billingRecords: a.hasMany('BillingRecord', 'tenantId'),
+        visits: a.hasMany('Visit', 'tenantId'),
+        auditLogs: a.hasMany('AuditLog', 'tenantId'),
+        notifications: a.hasMany('Notification', 'tenantId'),
     }).authorization(allow => [
         allow.authenticated()
     ]),
@@ -75,9 +126,13 @@ const schema = a.schema({
         medications: a.ref('Medication').array(),
         tasks: a.ref('Task').array(),
         
+        // Phase 3: Family member access control
+        familyMembers: a.id().array(), // Cognito user IDs with read access
+        
         // Relationships
         shifts: a.hasMany('Shift', 'patientId'),
         vitalSigns: a.hasMany('VitalSigns', 'patientId'),
+        visits: a.hasMany('Visit', 'patientId'),
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')
     ]),
@@ -94,8 +149,13 @@ const schema = a.schema({
         locationLat: a.float(),
         locationLng: a.float(),
         
+        // Phase 3: Identity mapping and activation
+        cognitoSub: a.id().required(), // Maps to identity.sub for admin validation
+        isActive: a.boolean().required().default(true),
+        
         // Relationships
         shifts: a.hasMany('Shift', 'nurseId'),
+        visits: a.hasMany('Visit', 'nurseId'),
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')
     ]),
@@ -114,6 +174,9 @@ const schema = a.schema({
         scheduledTime: a.string().required(), // ISO datetime string
         status: a.ref('ShiftStatus'),
         clinicalNote: a.string(),
+        
+        // Phase 3: Link to Visit (null until visit created)
+        visitId: a.id(),
         
         // GPS tracking
         startedAt: a.datetime(),
@@ -186,6 +249,76 @@ const schema = a.schema({
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')
     ]),
+    
+    // 8. VISIT - Phase 3: Clinical documentation workflow
+    Visit: a.model({
+        tenantId: a.id().required(),
+        tenant: a.belongsTo('Tenant', 'tenantId'),
+        
+        // 1:1 relationship with Shift (enforced by setting id=shiftId at creation)
+        shiftId: a.id().required(),
+        
+        patientId: a.id().required(),
+        patient: a.belongsTo('Patient', 'patientId'),
+        
+        nurseId: a.id().required(),
+        nurse: a.belongsTo('Nurse', 'nurseId'),
+        
+        status: a.ref('VisitStatus').required(),
+        
+        // Clinical documentation
+        kardex: a.ref('KARDEX').required(),
+        vitalsRecorded: a.json(), // VitalSigns snapshot
+        medicationsAdministered: a.ref('MedicationAdmin').array(),
+        tasksCompleted: a.ref('TaskCompletion').array(),
+        
+        // Workflow timestamps
+        submittedAt: a.datetime(),
+        reviewedAt: a.datetime(),
+        reviewedBy: a.id(),
+        rejectionReason: a.string(),
+        approvedAt: a.datetime(),
+        approvedBy: a.id(),
+    }).authorization(allow => [
+        // Tenant isolation
+        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
+        // Only admin and assigned nurse can access (enforced in Lambda)
+        allow.authenticated()
+    ]),
+    
+    // 9. AUDIT LOG - Phase 3: Immutable event log
+    AuditLog: a.model({
+        tenantId: a.id().required(),
+        tenant: a.belongsTo('Tenant', 'tenantId'),
+        
+        userId: a.id().required(),
+        userRole: a.string().required(),
+        action: a.ref('AuditAction').required(),
+        entityType: a.string().required(),
+        entityId: a.id().required(),
+        timestamp: a.datetime().required(),
+        details: a.json(),
+        ipAddress: a.string(),
+    }).authorization(allow => [
+        // Only admins can read audit logs
+        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
+        allow.authenticated()
+    ]),
+    
+    // 10. NOTIFICATION - Phase 3: User notifications
+    Notification: a.model({
+        tenantId: a.id().required(),
+        tenant: a.belongsTo('Tenant', 'tenantId'),
+        
+        userId: a.id().required(),
+        type: a.ref('NotificationType').required(),
+        message: a.string().required(),
+        entityType: a.string().required(),
+        entityId: a.id().required(),
+        read: a.boolean().required().default(false),
+    }).authorization(allow => [
+        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')
+    ]),
 
     // ============================================
     // CUSTOM QUERIES (Lambda Functions)
@@ -220,6 +353,56 @@ const schema = a.schema({
         .returns(a.json())
         .authorization(allow => [allow.authenticated()])
         .handler(a.handler.function('glosa-defender')),
+    
+    // ============================================
+    // PHASE 3: WORKFLOW COMPLIANCE QUERIES/MUTATIONS
+    // ============================================
+    
+    // Family-safe query for approved visit summaries
+    listApprovedVisitSummariesForFamily: a.query()
+        .arguments({
+            patientId: a.id().required()
+        })
+        .returns(a.ref('VisitSummary').array())
+        .authorization(allow => [allow.authenticated()])
+        .handler(a.handler.function('list-approved-visit-summaries')),
+    
+    // Create DRAFT visit from completed shift
+    createVisitDraftFromShift: a.mutation()
+        .arguments({
+            shiftId: a.id().required()
+        })
+        .returns(a.json())
+        .authorization(allow => [allow.authenticated()])
+        .handler(a.handler.function('create-visit-draft')),
+    
+    // Submit visit for admin review (DRAFT/REJECTED → SUBMITTED)
+    submitVisit: a.mutation()
+        .arguments({
+            shiftId: a.id().required()
+        })
+        .returns(a.json())
+        .authorization(allow => [allow.authenticated()])
+        .handler(a.handler.function('submit-visit')),
+    
+    // Reject visit (admin only, SUBMITTED → REJECTED)
+    rejectVisit: a.mutation()
+        .arguments({
+            shiftId: a.id().required(),
+            reason: a.string().required()
+        })
+        .returns(a.json())
+        .authorization(allow => [allow.authenticated()])
+        .handler(a.handler.function('reject-visit')),
+    
+    // Approve visit (admin only, SUBMITTED → APPROVED, immutable)
+    approveVisit: a.mutation()
+        .arguments({
+            shiftId: a.id().required()
+        })
+        .returns(a.json())
+        .authorization(allow => [allow.authenticated()])
+        .handler(a.handler.function('approve-visit')),
 });
 
 export type Schema = ClientSchema<typeof schema>;

@@ -1,22 +1,80 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { client, MOCK_USER } from '../amplify-utils';
+import { usePagination } from '../hooks/usePagination';
+import type { BillingRecord, Shift, Patient, Nurse } from '../types';
 
 export const ReportingDashboard: React.FC = () => {
-    const [stats] = useState({
-        totalRevenue: 125000000,
-        completedShifts: 450,
-        activePatients: 85,
-        staffCount: 24
+    const [stats, setStats] = useState({
+        totalRevenue: 0,
+        completedShifts: 0,
+        activePatients: 0,
+        staffCount: 0
     });
+    const [monthlyData, setMonthlyData] = useState<{ month: string, val: number }[]>([]);
 
-    // Monthly revenue mock data
-    const monthlyData = [
-        { month: 'Ene', val: 95 },
-        { month: 'Feb', val: 105 },
-        { month: 'Mar', val: 115 },
-        { month: 'Abr', val: 110 },
-        { month: 'May', val: 125 },
-        { month: 'Jun', val: 130 }
-    ];
+    const { items: bills, loadMore: loadBills } = usePagination<BillingRecord>();
+
+    const fetchData = useCallback(async () => {
+        try {
+            // Fetch multiple datasets in parallel for reporting
+            const [patientsRes, staffRes, shiftsRes] = await Promise.all([
+                (client.models.Patient as any).list({ limit: 100 }),
+                (client.models.Nurse as any).list({ limit: 50 }),
+                (client.models.Shift as any).list({
+                    filter: { status: { eq: 'COMPLETED' } },
+                    limit: 100
+                })
+            ]);
+
+            // Fetch billing data using pagination hook (we'll aggregate all for the dashboard)
+            loadBills(async (token) => {
+                const res = await (client.models.BillingRecord as any).list({
+                    limit: 100,
+                    nextToken: token
+                });
+                return { data: res.data || [], nextToken: res.nextToken };
+            }, true);
+
+            setStats(prev => ({
+                ...prev,
+                staffCount: staffRes.data?.length || 0,
+                activePatients: patientsRes.data?.length || 0,
+                completedShifts: shiftsRes.data?.length || 0
+            }));
+
+        } catch (error) {
+            console.error('Error fetching reporting data:', error);
+        }
+    }, [loadBills]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
+    useEffect(() => {
+        if (bills.length === 0) return;
+
+        // Calculate total revenue and monthly distribution
+        const totalRev = bills.reduce((acc, b) => acc + (b.totalValue || 0), 0);
+
+        // Group by month (simplified)
+        const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        const distribution: Record<string, number> = {};
+
+        bills.forEach(bill => {
+            const date = new Date(bill.radicationDate || Date.now());
+            const monthName = months[date.getMonth()];
+            distribution[monthName] = (distribution[monthName] || 0) + (bill.totalValue || 0);
+        });
+
+        const chartData = Object.entries(distribution).map(([month, val]) => ({
+            month,
+            val: Math.round(val / 1000000) // Convert to Millions for the bar height logic
+        })).sort((a, b) => months.indexOf(a.month) - months.indexOf(b.month));
+
+        setStats(prev => ({ ...prev, totalRevenue: totalRev }));
+        setMonthlyData(chartData);
+    }, [bills]);
 
     return (
         <div className="reporting-container">

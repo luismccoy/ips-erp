@@ -1,25 +1,52 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { client, MOCK_USER } from '../amplify-utils';
+import { usePagination } from '../hooks/usePagination';
 import { type Nurse } from '../types';
 
 export const StaffManagement: React.FC = () => {
-    const [staff, setStaff] = useState<Nurse[]>([]);
-    const [loading, setLoading] = useState(false);
+    const { items: staff, loadMore, hasMore, isLoading, setItems: setStaff } = usePagination<Nurse>();
+    const [addingStaff, setAddingStaff] = useState(false);
+
+    const fetchStaff = useCallback(async (token: string | null = null, isReset = false) => {
+        loadMore(async (t) => {
+            const response = await (client.models.Nurse as any).list({
+                filter: {
+                    tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] }
+                },
+                limit: 50,
+                nextToken: token || t
+            });
+            return { data: response.data || [], nextToken: response.nextToken };
+        }, isReset);
+    }, [loadMore]);
 
     useEffect(() => {
+        fetchStaff(null, true);
+
+        // Use subscription ONLY for real-time updates of EXISTING list items or new additions
+        // But for initial load and pagination, we use the list query.
         const query = client.models.Nurse.observeQuery({
             filter: {
                 tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] }
             }
         });
-        
+
         const sub = (query as any).subscribe({
-            next: (data: any) => setStaff([...data.items]),
+            next: (data: any) => {
+                // If we're in the first page, we can sync with observeQuery
+                // For simplicity in this ERP, we'll just keep the paginated list 
+                // and maybe refresh on significant changes.
+                // setStaff([...data.items]); 
+            },
             error: (err: Error) => console.error('Staff sub error:', err)
         });
 
         return () => sub.unsubscribe();
-    }, []);
+    }, [fetchStaff]);
+
+    const handleLoadMore = () => {
+        fetchStaff();
+    };
 
     const handleAddStaff = async () => {
         const name = prompt("Nombre completo:");
@@ -91,6 +118,16 @@ export const StaffManagement: React.FC = () => {
                     </div>
                 ))}
             </div>
+
+            {hasMore && (
+                <button
+                    onClick={handleLoadMore}
+                    disabled={isLoading}
+                    className="w-full py-4 text-sm font-bold text-slate-500 bg-white border border-slate-100 rounded-2xl hover:bg-slate-50 hover:border-slate-200 transition-all disabled:opacity-50 shadow-sm"
+                >
+                    {isLoading ? 'Cargando más...' : 'Cargar Más Personal'}
+                </button>
+            )}
 
             <style>{`
                 .staff-management-container {

@@ -1017,6 +1017,28 @@
     "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/Nurse/MutationcreateNurseinit0Function/MutationcreateNurseinit0Function.AppSyncFunction"
    }
   },
+  "MutationcreateNurseinit1FunctionMutationcreateNurseinit1FunctionAppSyncFunctionAF7C488C": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPI2EA0F806ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPINONEDS93E553E0Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationcreateNurseinit1Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/b1be6d02e18b84ba5f4e99e0120038fb39b33fb4cbec71d9bf3b96f2c0ab1f62.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/Nurse/MutationcreateNurseinit1Function/MutationcreateNurseinit1Function.AppSyncFunction"
+   }
+  },
   "MutationcreateNurseauth0FunctionMutationcreateNurseauth0FunctionAppSyncFunction2A7416AF": {
    "Type": "AWS::AppSync::FunctionConfiguration",
    "Properties": {
@@ -1029,7 +1051,7 @@
     "FunctionVersion": "2018-05-29",
     "Name": "MutationcreateNurseauth0Function",
     "RequestMappingTemplateS3Location": {
-     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/7287163d5dcd286a3a703605014b4cf4a9994090268767173c237045cbf72d94.vtl"
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/b85c9aac4363a5192cb6e508c3d0c27dcd04d5431e5b1ba6ffb3f168b664eb2f.vtl"
     },
     "ResponseMappingTemplate": "$util.toJson({})"
    },
@@ -1104,6 +1126,12 @@
       {
        "Fn::GetAtt": [
         "MutationcreateNurseinit0FunctionMutationcreateNurseinit0FunctionAppSyncFunction2F14B2A7",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "MutationcreateNurseinit1FunctionMutationcreateNurseinit1FunctionAppSyncFunctionAF7C488C",
         "FunctionId"
        ]
       },
@@ -1243,7 +1271,7 @@
      "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/1f5fed297da9c32ae3af922bf3a38ccf23b956078887d16891ec06c20c64722c.vtl"
     },
     "ResponseMappingTemplateS3Location": {
-     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/a74f6b017509f61f2711ae8670c4ca82b4f841f5f038a8cb43abdef5615f0b0e.vtl"
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/2c688155c92146fbc5dba04be4a9c076a7628588e09c25244abb1f6ec9456c93.vtl"
     }
    },
    "DependsOn": [
