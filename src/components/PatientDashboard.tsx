@@ -8,6 +8,7 @@ export const PatientDashboard: React.FC = () => {
     const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
     const [medications, setMedications] = useState<Medication[]>([]);
     const [tasks, setTasks] = useState<Task[]>([]);
+    // Note: setPatients is not used directly as patients are managed by usePagination hook
 
     useEffect(() => {
         const fetchPatients = async () => {

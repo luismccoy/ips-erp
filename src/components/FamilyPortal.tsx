@@ -67,10 +67,10 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
                         const dateB = new Date(b.visitDate).getTime();
                         return dateB - dateA; // Descending order
                     });
-                    return { data: sortedSummaries, nextToken: null }; // Mocking no more pages since API is limited
+                    return { data: sortedSummaries, nextToken: undefined }; // Mocking no more pages since API is limited
                 } else {
                     console.error('Error fetching visit summaries:', response.error);
-                    return { data: [], nextToken: null };
+                    return { data: [], nextToken: undefined };
                 }
             }, true);
         };

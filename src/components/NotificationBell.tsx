@@ -50,12 +50,6 @@ import type { NotificationBellProps, NotificationItem, NotificationType } from '
 // ============================================================================
 
 /**
- * Simulates network delay for mock mode.
- */
-// simulateNetworkDelay removed
-
-
-/**
  * Formats a timestamp to a relative time string.
  */
 function formatRelativeTime(isoString: string): string {
