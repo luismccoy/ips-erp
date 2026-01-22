@@ -11,7 +11,7 @@ interface PaginationOptions<T> {
 }
 
 export function usePagination<T>(options: PaginationOptions<T> = {}) {
-    const { limit = 50, initialItems = [] } = options;
+    const { initialItems = [] } = options;
     const [items, setItems] = useState<T[]>(initialItems);
     const [nextToken, setNextToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);

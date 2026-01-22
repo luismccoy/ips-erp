@@ -4,8 +4,8 @@ import { usePagination } from '../hooks/usePagination';
 import { type Nurse } from '../types';
 
 export const StaffManagement: React.FC = () => {
-    const { items: staff, loadMore, hasMore, isLoading, setItems: setStaff } = usePagination<Nurse>();
-    const [addingStaff, setAddingStaff] = useState(false);
+    const { items: staff, loadMore, hasMore, isLoading } = usePagination<Nurse>();
+    const [localLoading, setLocalLoading] = useState(false);
 
     const fetchStaff = useCallback(async (token: string | null = null, isReset = false) => {
         loadMore(async (t) => {
@@ -32,11 +32,10 @@ export const StaffManagement: React.FC = () => {
         });
 
         const sub = (query as any).subscribe({
-            next: (data: any) => {
+            next: () => {
                 // If we're in the first page, we can sync with observeQuery
                 // For simplicity in this ERP, we'll just keep the paginated list 
                 // and maybe refresh on significant changes.
-                // setStaff([...data.items]); 
             },
             error: (err: Error) => console.error('Staff sub error:', err)
         });
@@ -55,7 +54,7 @@ export const StaffManagement: React.FC = () => {
         const roleInput = prompt("Rol (ADMIN, NURSE, COORDINATOR):", "NURSE") || "NURSE";
         const role = ['ADMIN', 'NURSE', 'COORDINATOR'].includes(roleInput) ? roleInput : 'NURSE';
 
-        setLoading(true);
+        setLocalLoading(true);
         try {
             await client.models.Nurse.create({
                 tenantId: MOCK_USER.attributes['custom:tenantId'],
@@ -67,7 +66,7 @@ export const StaffManagement: React.FC = () => {
         } catch (err) {
             console.error('Add staff error:', err);
         } finally {
-            setLoading(false);
+            setLocalLoading(false);
         }
     };
 
@@ -83,7 +82,7 @@ export const StaffManagement: React.FC = () => {
                     <h2>Gestión de Personal & RBAC</h2>
                     <p>Manejo de roles, habilidades y permisos de acceso.</p>
                 </div>
-                <button className="btn-primary" onClick={handleAddStaff} disabled={loading}>
+                <button className="btn-primary" onClick={handleAddStaff} disabled={isLoading || localLoading}>
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>

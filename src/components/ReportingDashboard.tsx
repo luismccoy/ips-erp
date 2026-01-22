@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { client, MOCK_USER } from '../amplify-utils';
+import { client } from '../amplify-utils';
 import { usePagination } from '../hooks/usePagination';
-import type { BillingRecord, Shift, Patient, Nurse } from '../types';
+import type { BillingRecord } from '../types';
 
 export const ReportingDashboard: React.FC = () => {
     const [stats, setStats] = useState({

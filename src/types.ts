@@ -99,6 +99,33 @@ export type VitalSigns = {
     updatedAt: string;
 };
 
+export type AuditLog = {
+    id: string;
+    tenantId: string;
+    userId: string;
+    action: string;
+    entityType: string;
+    entityId: string;
+    details: string; // JSON string
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type BillingStatus = 'PENDING' | 'PAID' | 'CANCELED' | 'GLOSED';
+
+export type BillingRecord = {
+    id: string;
+    tenantId: string;
+    patientId: string;
+    shiftId?: string | null;
+    invoiceNumber?: string | null;
+    totalValue: number;
+    status: BillingStatus;
+    radicationDate?: string | null;
+    createdAt: string;
+    updatedAt: string;
+};
+
 export type AmplifyUser = {
     username: string;
     attributes: {
@@ -108,3 +135,4 @@ export type AmplifyUser = {
         [key: string]: string;
     };
 };
+

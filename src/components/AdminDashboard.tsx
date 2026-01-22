@@ -1,31 +1,48 @@
 import { useState, useEffect } from 'react';
 import {
     Activity, ClipboardCheck, Package, Calendar, ShieldAlert,
-    FileText, LogOut, DollarSign, Sparkles, AlertTriangle, ClipboardList
+    FileText, LogOut, DollarSign, ClipboardList
 } from 'lucide-react';
+
 import { client, isUsingRealBackend, MOCK_USER } from '../amplify-utils';
-import { usePagination } from '../hooks/usePagination';
 import type { AdminDashboardProps, NavItemProps } from '../types/components';
-import type { Patient, InventoryItem, Shift } from '../types';
+
 import { PendingReviewsPanel } from './PendingReviewsPanel';
 import { NotificationBell } from './NotificationBell';
+
 import type { NotificationItem } from '../types/workflow';
+import { AuditLogViewer } from './AuditLogViewer';
+import { BillingDashboard } from './BillingDashboard';
+import { InventoryDashboard } from './InventoryDashboard';
+import { RosterDashboard } from './RosterDashboard';
+import { ComplianceDashboard } from './ComplianceDashboard';
+
+
+
 
 export default function AdminDashboard({ view, setView, onLogout, tenant }: AdminDashboardProps) {
     /**
      * Handles visit approval from PendingReviewsPanel.
      * The PendingReviewsPanel handles the approval internally with its own modals.
      */
-    const handleApproveRequest = (shiftId: string) => {
-        console.log('Approval requested for shift:', shiftId);
+    const handleApproveRequest = async (shiftId: string) => {
+        try {
+            await (client.mutations as any).approveVisit({ shiftId });
+            console.log('Successfully approved visit:', shiftId);
+        } catch (error) {
+            console.error('Failed to approve visit:', error);
+            alert('Error al aprobar la visita. Verifique los registros.');
+        }
     };
 
-    /**
-     * Handles visit rejection from PendingReviewsPanel.
-     * The PendingReviewsPanel handles the rejection internally with its own modals.
-     */
-    const handleRejectRequest = (shiftId: string, reason: string) => {
-        console.log('Rejection requested for shift:', shiftId, 'Reason:', reason);
+    const handleRejectRequest = async (shiftId: string, reason: string) => {
+        try {
+            await (client.mutations as any).rejectVisit({ shiftId, reason });
+            console.log('Successfully rejected visit:', shiftId);
+        } catch (error) {
+            console.error('Failed to reject visit:', error);
+            alert('Error al rechazar la visita.');
+        }
     };
 
     /**
@@ -103,11 +120,13 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                             onReject={handleRejectRequest}
                         />
                     )}
-                    {view === 'audit' && <AuditView />}
-                    {view === 'inventory' && <InventoryView />}
-                    {view === 'roster' && <RosterView />}
-                    {view === 'compliance' && <ComplianceView />}
-                    {view === 'billing' && <BillingView />}
+                    {view === 'audit' && <AuditLogViewer />}
+                    {view === 'inventory' && <InventoryDashboard />}
+                    {view === 'roster' && <RosterDashboard />}
+                    {view === 'compliance' && <ComplianceDashboard />}
+                    {view === 'billing' && <BillingDashboard />}
+
+
                 </div>
             </main>
         </div>
@@ -189,7 +208,7 @@ function DashboardView() {
             next: (log: any) => {
                 console.log('Real-time audit log:', log);
             },
-            error: (err: any) => console.log('AuditLog sub not available or failed')
+            error: () => console.log('AuditLog sub not available or failed')
         });
 
         const shiftSub = (client.models.Shift as any).onUpdate({
@@ -198,7 +217,7 @@ function DashboardView() {
             next: (shift: any) => {
                 console.log('Real-time shift update:', shift);
             },
-            error: (err: any) => console.log('Shift update sub failed')
+            error: () => console.log('Shift update sub failed')
         });
 
         return () => {
@@ -237,356 +256,6 @@ function DashboardView() {
                         <span className="text-sm text-slate-700 font-medium">
                             {isUsingRealBackend() ? 'Connected to AWS Backend' : 'Using Mock Data (Development Mode)'}
                         </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function AuditView() {
-    const { items: patients, loadMore, hasMore, isLoading } = usePagination<Patient>();
-
-    useEffect(() => {
-        const fetchPatients = async () => {
-            if (!isUsingRealBackend()) {
-                const { PATIENTS } = await import('../data/mock-data');
-                loadMore(async () => ({ data: PATIENTS as any, nextToken: null }), true);
-                return;
-            }
-
-            loadMore(async (token) => {
-                const response = await (client.models.Patient as any).list({
-                    limit: 50,
-                    nextToken: token
-                });
-                return { data: response.data || [], nextToken: response.nextToken };
-            }, true);
-        };
-
-        fetchPatients();
-    }, []);
-
-    const handleLoadMore = () => {
-        loadMore(async (token) => {
-            const response = await (client.models.Patient as any).list({
-                limit: 50,
-                nextToken: token
-            });
-            return { data: response.data || [], nextToken: response.nextToken };
-        });
-    };
-
-    if (isLoading && patients.length === 0) {
-        return <div className="bg-white p-6 rounded-2xl border border-slate-100 text-center text-slate-400">Loading patients...</div>;
-    }
-
-    if (patients.length === 0) {
-        return (
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 text-center">
-                <p className="text-slate-400 mb-4">No patients registered yet</p>
-                <p className="text-xs text-slate-500">Add patients to see clinical audit data</p>
-            </div>
-        );
-    }
-
-    return (
-        <div className="bg-white p-6 rounded-2xl border border-slate-100">
-            <h3 className="font-black text-slate-900 mb-4 flex items-center gap-2">
-                Clinical Audit <span className="bg-indigo-50 text-indigo-600 px-2 py-1 rounded text-xs font-bold">AI Analysis</span>
-            </h3>
-            <div className="space-y-4">
-                {patients.map(patient => (
-                    <div key={patient.id} className="p-4 border border-slate-100 rounded-xl hover:shadow-md transition-all">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <h4 className="font-bold text-slate-900">{patient.name}</h4>
-                                <p className="text-sm text-slate-500">{patient.diagnosis || 'No diagnosis'}</p>
-                            </div>
-                            <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-600">
-                                Active
-                            </span>
-                        </div>
-                    </div>
-                ))}
-                {hasMore && (
-                    <button
-                        onClick={handleLoadMore}
-                        disabled={isLoading}
-                        className="w-full py-2 text-sm font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all disabled:opacity-50"
-                    >
-                        {isLoading ? 'Cargando más...' : 'Cargar Más'}
-                    </button>
-                )}
-            </div>
-        </div>
-    );
-}
-
-function InventoryView() {
-    const { items: inventory, loadMore, hasMore, isLoading } = usePagination<InventoryItem>();
-
-    useEffect(() => {
-        const fetchInventory = async () => {
-            if (!isUsingRealBackend()) {
-                const { INVENTORY } = await import('../data/mock-data');
-                loadMore(async () => ({ data: INVENTORY as any, nextToken: null }), true);
-                return;
-            }
-
-            loadMore(async (token) => {
-                const response = await (client.models.Inventory as any).list({
-                    limit: 50,
-                    nextToken: token
-                });
-                return { data: response.data || [], nextToken: response.nextToken };
-            }, true);
-        };
-
-        fetchInventory();
-    }, []);
-
-    const handleLoadMore = () => {
-        loadMore(async (token) => {
-            const response = await (client.models.Inventory as any).list({
-                limit: 50,
-                nextToken: token
-            });
-            return { data: response.data || [], nextToken: response.nextToken };
-        });
-    };
-
-    if (isLoading && inventory.length === 0) {
-        return <div className="bg-white p-6 rounded-2xl border border-slate-100 text-center text-slate-400">Loading inventory...</div>;
-    }
-
-    if (inventory.length === 0) {
-        return (
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 text-center">
-                <p className="text-slate-400 mb-4">No inventory items yet</p>
-                <p className="text-xs text-slate-500">Add items to track pharmacy inventory</p>
-            </div>
-        );
-    }
-
-    return (
-        <div className="bg-white p-6 rounded-2xl border border-slate-100">
-            <h3 className="font-black text-slate-900 mb-4">Inventory (Farmacia)</h3>
-            <div className="space-y-3">
-                {inventory.map(item => (
-                    <div key={item.id} className="p-4 border border-slate-100 rounded-xl flex justify-between items-center">
-                        <div>
-                            <h4 className="font-bold text-slate-900">{item.name}</h4>
-                            <p className="text-sm text-slate-500">{item.unit || 'Unit'}</p>
-                        </div>
-                        <div className="text-right">
-                            <div className={`text-lg font-black ${item.quantity < item.reorderLevel ? 'text-red-600' : 'text-green-600'}`}>
-                                {item.quantity}
-                            </div>
-                            <div className="text-xs text-slate-400">Threshold: {item.reorderLevel}</div>
-                        </div>
-                    </div>
-                ))}
-                {hasMore && (
-                    <button
-                        onClick={handleLoadMore}
-                        disabled={isLoading}
-                        className="w-full py-2 text-sm font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all disabled:opacity-50"
-                    >
-                        {isLoading ? 'Cargando más...' : 'Cargar Más'}
-                    </button>
-                )}
-            </div>
-        </div>
-    );
-}
-
-function RosterView() {
-    const { items: shifts, loadMore, hasMore, isLoading } = usePagination<Shift>();
-    const [patients, setPatients] = useState<Patient[]>([]);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            // First fetch patients (not paginated for now as it's a lookup map)
-            if (!isUsingRealBackend()) {
-                const { PATIENTS, SHIFTS } = await import('../data/mock-data');
-                setPatients(PATIENTS as any);
-                loadMore(async () => ({ data: SHIFTS as any, nextToken: null }), true);
-                return;
-            }
-
-            try {
-                const patientsRes = await (client.models.Patient as any).list();
-                setPatients(patientsRes.data || []);
-            } catch (error) {
-                console.error('Error fetching patients for roster:', error);
-            }
-
-            loadMore(async (token) => {
-                const response = await (client.models.Shift as any).list({
-                    limit: 50,
-                    nextToken: token
-                });
-                return { data: response.data || [], nextToken: response.nextToken };
-            }, true);
-        };
-
-        fetchData();
-    }, []);
-
-    const handleLoadMore = () => {
-        loadMore(async (token) => {
-            const response = await (client.models.Shift as any).list({
-                limit: 50,
-                nextToken: token
-            });
-            return { data: response.data || [], nextToken: response.nextToken };
-        });
-    };
-
-    if (isLoading && shifts.length === 0) {
-        return <div className="bg-white p-6 rounded-2xl border border-slate-100 text-center text-slate-400">Loading shifts...</div>;
-    }
-
-    if (shifts.length === 0) {
-        return (
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 text-center">
-                <p className="text-slate-400 mb-4">No shifts scheduled yet</p>
-                <p className="text-xs text-slate-500">Create shifts to manage nurse assignments</p>
-            </div>
-        );
-    }
-
-    return (
-        <div className="bg-white p-6 rounded-2xl border border-slate-100">
-            <div className="flex justify-between items-center mb-4">
-                <h3 className="font-black text-slate-900">Shift Management</h3>
-                <button className="bg-[#2563eb] text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-blue-700 transition-all flex items-center gap-2">
-                    <Sparkles size={16} /> Optimize Routes (AI)
-                </button>
-            </div>
-            <div className="space-y-3">
-                {shifts.map(shift => {
-                    const patient = patients.find(p => p.id === shift.patientId);
-                    return (
-                        <div key={shift.id} className="p-4 border border-slate-100 rounded-xl">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <h4 className="font-bold text-slate-900">{patient?.name || 'Unknown Patient'}</h4>
-                                    <p className="text-sm text-slate-500">{new Date(shift.scheduledTime).toLocaleString()}</p>
-                                </div>
-                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${shift.status === 'COMPLETED' ? 'bg-green-50 text-green-600' : 'bg-yellow-50 text-yellow-600'
-                                    }`}>{shift.status}</span>
-                            </div>
-                        </div>
-                    );
-                })}
-                {hasMore && (
-                    <button
-                        onClick={handleLoadMore}
-                        disabled={isLoading}
-                        className="w-full py-2 text-sm font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all disabled:opacity-50"
-                    >
-                        {isLoading ? 'Cargando más...' : 'Cargar Más'}
-                    </button>
-                )}
-            </div>
-        </div>
-    );
-}
-
-function ComplianceView() {
-    return (
-        <div className="space-y-6">
-            <div className="bg-white p-6 rounded-2xl border border-slate-100">
-                <h3 className="font-black text-slate-900 mb-4">Resolución 3100 Compliance</h3>
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 bg-green-50 border border-green-100 rounded-xl">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center text-green-600">
-                                <ShieldAlert size={20} />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-black text-green-900">98%</div>
-                                <div className="text-xs text-green-600 font-bold">Audit Score</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="p-4 bg-red-50 border border-red-100 rounded-xl">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="h-10 w-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
-                                <AlertTriangle size={20} />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-black text-red-900">2</div>
-                                <div className="text-xs text-red-600 font-bold">Critical Alerts</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div className="bg-white p-6 rounded-2xl border border-slate-100">
-                <h4 className="font-bold text-slate-900 mb-3">Equipment Status</h4>
-                <div className="space-y-2">
-                    {['Tensiómetro Digital', 'Oxímetro de Pulso', 'Termómetro'].map((item, i) => (
-                        <div key={i} className="p-3 bg-slate-50 rounded-xl flex justify-between items-center">
-                            <span className="text-sm font-medium text-slate-700">{item}</span>
-                            <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">Calibrated</span>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function BillingView() {
-    return (
-        <div className="space-y-6">
-            <div className="bg-white p-6 rounded-2xl border border-slate-100">
-                <h3 className="font-black text-slate-900 mb-4">Billing Batches</h3>
-                <div className="space-y-3">
-                    {[1025, 1026].map(id => (
-                        <div key={id} className="p-4 border border-slate-100 rounded-xl flex justify-between items-center">
-                            <div>
-                                <h4 className="font-bold text-slate-900">EPS Sanitas (Batch FE-{id})</h4>
-                                <p className="text-xs text-emerald-600 font-bold">✓ Validation Passed</p>
-                            </div>
-                            <button className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold hover:bg-slate-900 hover:text-white transition-all">
-                                Inspect Packet
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            </div>
-            <div className="grid grid-cols-2 gap-6">
-                <div className="bg-white p-6 rounded-2xl border border-red-100">
-                    <h4 className="font-bold text-slate-900 mb-3 flex items-center gap-2">
-                        <Sparkles className="text-purple-500" size={18} /> Glosa Defense Engine
-                    </h4>
-                    <div className="p-4 bg-rose-50 border border-rose-100 rounded-xl">
-                        <div className="mb-2">
-                            <span className="text-xs font-bold text-red-600">Glosa: $4.2M COP</span>
-                            <span className="text-xs text-rose-400 ml-2">EPS SURA</span>
-                        </div>
-                        <h5 className="font-black text-rose-950 text-sm mb-2">Rejection Code: 402</h5>
-                        <p className="text-xs text-rose-900 mb-3">Claims rejected due to "unjustified home care extension"</p>
-                        <button className="bg-rose-900 text-white px-4 py-2 rounded-xl text-xs font-black hover:bg-rose-800 transition-all w-full">
-                            Generate Rebuttal (AI)
-                        </button>
-                    </div>
-                </div>
-                <div className="bg-white p-6 rounded-2xl border border-slate-100">
-                    <h4 className="font-bold text-slate-900 mb-3">RIPS 2275 Validator</h4>
-                    <div className="p-8 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200 text-center">
-                        <div className="h-16 w-16 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 mx-auto mb-3">
-                            <ClipboardCheck size={32} />
-                        </div>
-                        <p className="font-bold text-slate-800 mb-2">Drop RIPS Bundle</p>
-                        <p className="text-xs text-slate-400">JSON validation vs MinSalud API</p>
-                        <button className="mt-4 bg-[#2563eb] text-white px-6 py-2 rounded-xl text-xs font-bold hover:bg-blue-700 transition-all">
-                            Select Files
-                        </button>
                     </div>
                 </div>
             </div>

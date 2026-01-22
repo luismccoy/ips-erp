@@ -26,8 +26,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { generateClient } from 'aws-amplify/data';
-import { isUsingRealBackend } from '../amplify-utils';
+import { client } from '../amplify-utils';
 import { usePagination } from '../hooks/usePagination';
 import { LoadingSpinner } from './ui/LoadingSpinner';
 import type {
@@ -51,117 +50,15 @@ interface PendingReviewsPanelExtendedProps extends PendingReviewsPanelProps {
 }
 
 
-// ============================================================================
-// GraphQL Operations
-// ============================================================================
+// listSubmittedVisitsQuery removed
 
-/**
- * Query to list SUBMITTED visits for a tenant.
- */
-const listSubmittedVisitsQuery = /* GraphQL */ `
-  query ListSubmittedVisits($tenantId: ID!, $limit: Int, $nextToken: String) {
-    listVisits(filter: { tenantId: { eq: $tenantId }, status: { eq: "SUBMITTED" } }, limit: $limit, nextToken: $nextToken) {
-      items {
-        id
-        shiftId
-        patientId
-        nurseId
-        status
-        kardex
-        vitalsRecorded
-        medicationsAdministered
-        tasksCompleted
-        submittedAt
-        createdAt
-      }
-    }
-  }
-`;
 
 // ============================================================================
 // Mock Data for Development Mode
 // ============================================================================
 
-const MOCK_PENDING_VISITS: PendingVisit[] = [
-  {
-    id: 'visit-001',
-    shiftId: 'shift-001',
-    patientName: 'Juan Carlos Pérez',
-    nurseName: 'María Rodríguez',
-    visitDate: '2026-01-20',
-    submittedAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
-    kardex: {
-      generalObservations: 'Paciente estable, consciente y orientado. Se observa mejoría en movilidad.',
-      skinCondition: 'Piel íntegra, sin lesiones visibles.',
-      mobilityStatus: 'Deambula con apoyo de bastón.',
-      nutritionIntake: 'Buena ingesta oral, hidratación adecuada.',
-      painLevel: 3,
-      mentalStatus: 'Alerta, orientado en tiempo, espacio y persona.',
-      environmentalSafety: 'Hogar seguro, sin riesgos identificados.',
-      caregiverSupport: 'Cuidador presente y capacitado.',
-      internalNotes: 'Continuar con plan de cuidados actual.',
-    },
-    vitals: { sys: 120, dia: 80, spo2: 98, hr: 72, temperature: 36.5, weight: 70 },
-    medications: [
-      { medicationName: 'Acetaminofén', intendedDosage: '500mg', dosageGiven: '500mg', time: '2026-01-20T10:00:00Z', route: 'oral', notes: '' },
-    ],
-    tasks: [
-      { taskDescription: 'Control de signos vitales', completedAt: '2026-01-20T09:30:00Z', notes: 'Sin novedades' },
-      { taskDescription: 'Curación de herida', completedAt: '2026-01-20T10:15:00Z', notes: 'Herida en proceso de cicatrización' },
-    ],
-  },
-  {
-    id: 'visit-002',
-    shiftId: 'shift-002',
-    patientName: 'Ana María García',
-    nurseName: 'Pedro Claver',
-    visitDate: '2026-01-19',
-    submittedAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), // 2 days ago
-    kardex: {
-      generalObservations: 'Paciente con dolor moderado en rodilla derecha. Se administró analgésico.',
-      skinCondition: 'Edema leve en miembros inferiores.',
-      mobilityStatus: 'Limitación de movimiento por dolor.',
-      nutritionIntake: 'Apetito disminuido.',
-      painLevel: 6,
-      mentalStatus: 'Consciente, algo ansiosa por el dolor.',
-      environmentalSafety: 'Se recomienda instalar barras de apoyo en baño.',
-      caregiverSupport: 'Familiar presente durante la visita.',
-      internalNotes: 'Evaluar necesidad de ajuste en medicación para dolor.',
-    },
-    vitals: { sys: 135, dia: 85, spo2: 96, hr: 78, temperature: 36.8, weight: 65 },
-    medications: [
-      { medicationName: 'Ibuprofeno', intendedDosage: '400mg', dosageGiven: '400mg', time: '2026-01-19T14:00:00Z', route: 'oral', notes: 'Para dolor' },
-    ],
-    tasks: [
-      { taskDescription: 'Terapia física pasiva', completedAt: '2026-01-19T14:30:00Z', notes: 'Ejercicios de rango de movimiento' },
-    ],
-  },
-  {
-    id: 'visit-003',
-    shiftId: 'shift-003',
-    patientName: 'Carlos López Martínez',
-    nurseName: 'María Rodríguez',
-    visitDate: '2026-01-18',
-    submittedAt: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(), // 3 days ago
-    kardex: {
-      generalObservations: 'Primera visita de evaluación. Paciente post-operatorio de cadera.',
-      skinCondition: 'Herida quirúrgica limpia, sin signos de infección.',
-      mobilityStatus: 'En cama, movilización asistida.',
-      nutritionIntake: 'Dieta blanda tolerada.',
-      painLevel: 4,
-      mentalStatus: 'Orientado, colaborador.',
-      environmentalSafety: 'Cama hospitalaria instalada en domicilio.',
-      caregiverSupport: 'Esposa como cuidadora principal, requiere capacitación.',
-      internalNotes: 'Programar visita de fisioterapia.',
-    },
-    vitals: { sys: 118, dia: 75, spo2: 97, hr: 68, temperature: 36.6, weight: 82 },
-    medications: [],
-    tasks: [
-      { taskDescription: 'Evaluación integral inicial', completedAt: '2026-01-18T11:00:00Z', notes: 'Plan de cuidados establecido' },
-      { taskDescription: 'Educación al cuidador', completedAt: '2026-01-18T11:45:00Z', notes: 'Técnicas de movilización' },
-    ],
-  },
-];
+// MOCK_PENDING_VISITS removed
+
 
 
 // ============================================================================
@@ -171,10 +68,8 @@ const MOCK_PENDING_VISITS: PendingVisit[] = [
 /**
  * Simulates network delay for mock mode.
  */
-async function simulateNetworkDelay(minMs: number = 300, maxMs: number = 800): Promise<void> {
-  const delay = Math.random() * (maxMs - minMs) + minMs;
-  await new Promise(resolve => setTimeout(resolve, delay));
-}
+// simulateNetworkDelay removed
+
 
 /**
  * Formats a date string to a localized display format.
@@ -573,7 +468,6 @@ const RejectionModal: React.FC<RejectionModalInternalProps> = ({ visit, onConfir
 // ============================================================================
 
 export const PendingReviewsPanel: React.FC<PendingReviewsPanelExtendedProps> = ({
-  tenantId,
   onApprove,
   onReject,
 }) => {
@@ -593,62 +487,49 @@ export const PendingReviewsPanel: React.FC<PendingReviewsPanelExtendedProps> = (
     setError(null);
 
     try {
-      if (!isUsingRealBackend()) {
-        // Mock mode: return mock pending visits
-        console.log('[Mock] Fetching pending visits for tenant:', tenantId);
-        await simulateNetworkDelay();
+      loadMore(async (token) => {
+        const response = await client.models.Visit.list({
+          filter: { status: { eq: 'SUBMITTED' } },
+          limit: 50,
+          nextToken: token
+        });
+
+        const items = response.data || [];
+
+        const mappedVisits: PendingVisit[] = items.map((item: any) => ({
+          id: item.id,
+          shiftId: item.shiftId,
+          patientName: item.patientName || `Paciente ${item.patientId}`,
+          nurseName: item.nurseName || `Enfermero ${item.nurseId}`,
+          visitDate: item.createdAt?.split('T')[0] || '',
+          submittedAt: item.submittedAt || item.createdAt,
+          kardex: typeof item.kardex === 'string' ? JSON.parse(item.kardex) : item.kardex || {},
+          vitals: typeof item.vitalsRecorded === 'string' ? JSON.parse(item.vitalsRecorded) : item.vitalsRecorded || { sys: 0, dia: 0, spo2: 0, hr: 0 },
+          medications: typeof item.medicationsAdministered === 'string' ? JSON.parse(item.medicationsAdministered) : item.medicationsAdministered || [],
+          tasks: typeof item.tasksCompleted === 'string' ? JSON.parse(item.tasksCompleted) : item.tasksCompleted || [],
+        }));
 
         // Sort by submittedAt ascending (oldest first) - Requirement 5.5
-        const sorted = [...MOCK_PENDING_VISITS].sort(
+        const sorted = mappedVisits.sort(
           (a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime()
         );
-        loadMore(async () => ({ data: sorted, nextToken: null }), true);
-      } else {
-        // Real backend mode
-        loadMore(async (token) => {
-          const client = generateClient({ authMode: 'userPool' });
-          const response = await client.graphql({
-            query: listSubmittedVisitsQuery,
-            variables: { tenantId, limit: 50, nextToken: token }
-          });
-
-          const items = (response as any).data?.listVisits?.items || [];
-
-          const mappedVisits: PendingVisit[] = items.map((item: any) => ({
-            id: item.id,
-            shiftId: item.shiftId,
-            patientName: item.patientName || `Paciente ${item.patientId}`,
-            nurseName: item.nurseName || `Enfermero ${item.nurseId}`,
-            visitDate: item.createdAt?.split('T')[0] || '',
-            submittedAt: item.submittedAt || item.createdAt,
-            kardex: typeof item.kardex === 'string' ? JSON.parse(item.kardex) : item.kardex || {},
-            vitals: typeof item.vitalsRecorded === 'string' ? JSON.parse(item.vitalsRecorded) : item.vitalsRecorded || { sys: 0, dia: 0, spo2: 0, hr: 0 },
-            medications: typeof item.medicationsAdministered === 'string' ? JSON.parse(item.medicationsAdministered) : item.medicationsAdministered || [],
-            tasks: typeof item.tasksCompleted === 'string' ? JSON.parse(item.tasksCompleted) : item.tasksCompleted || [],
-          }));
-
-          // Sort by submittedAt ascending (oldest first) - Requirement 5.5
-          const sorted = mappedVisits.sort(
-            (a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime()
-          );
-          return { data: sorted, nextToken: (response as any).data?.listVisits?.nextToken };
-        }, true);
-      }
+        return { data: sorted, nextToken: response.nextToken };
+      }, true);
     } catch (err) {
       console.error('Error fetching pending visits:', err);
       setError('Error al cargar las visitas pendientes. Por favor, intente de nuevo.');
     }
-  }, [tenantId, loadMore]);
+  }, [loadMore]);
 
   const handleLoadMore = useCallback(() => {
     loadMore(async (token) => {
-      const client = generateClient({ authMode: 'userPool' });
-      const response = await client.graphql({
-        query: listSubmittedVisitsQuery,
-        variables: { tenantId, limit: 50, nextToken: token }
+      const response = await client.models.Visit.list({
+        filter: { status: { eq: 'SUBMITTED' } },
+        limit: 50,
+        nextToken: token
       });
 
-      const items = (response as any).data?.listVisits?.items || [];
+      const items = response.data || [];
       const mappedVisits: PendingVisit[] = items.map((item: any) => ({
         id: item.id,
         shiftId: item.shiftId,
@@ -662,9 +543,9 @@ export const PendingReviewsPanel: React.FC<PendingReviewsPanelExtendedProps> = (
         tasks: typeof item.tasksCompleted === 'string' ? JSON.parse(item.tasksCompleted) : item.tasksCompleted || [],
       }));
 
-      return { data: mappedVisits, nextToken: (response as any).data?.listVisits?.nextToken };
+      return { data: mappedVisits, nextToken: response.nextToken };
     });
-  }, [tenantId, loadMore]);
+  }, [loadMore]);
 
   // Fetch on mount
   useEffect(() => {

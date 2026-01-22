@@ -1,6 +1,6 @@
 // import { type Schema } from '../amplify/data/resource';
-import type { Shift, Nurse, InventoryItem, Patient, Medication, Task, VitalSigns } from './types';
-import type { Visit, VisitSummary, NotificationItem } from './types/workflow';
+import type { Shift, Nurse, InventoryItem, Patient, Medication, Task, VitalSigns, AuditLog, BillingRecord } from './types';
+import type { Visit, NotificationItem } from './types/workflow';
 
 // Simple In-Memory Store
 interface StoreType {
@@ -12,7 +12,10 @@ interface StoreType {
     Task: Task[];
     VitalSigns: VitalSigns[];
     Visit: Visit[];
+    AuditLog: AuditLog[];
+    BillingRecord: BillingRecord[];
     Notification: NotificationItem[];
+
     [key: string]: unknown[];
 }
 
@@ -46,6 +49,8 @@ const STORE: StoreType = {
         { id: 'v2', tenantId: 'tenant-bogota-01', patientId: 'p1', date: '2026-01-18', sys: 150, dia: 95, spo2: 94, hr: 82, note: 'Presión arterial ligeramente elevada', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
     ],
     Visit: [],
+    AuditLog: [],
+    BillingRecord: [],
     Notification: []
 };
 
@@ -61,6 +66,8 @@ const LISTENERS: Record<string, ListenerCallback<any>[]> = {
     Task: [],
     VitalSigns: [],
     Visit: [],
+    AuditLog: [],
+    BillingRecord: [],
     Notification: []
 };
 
@@ -74,6 +81,8 @@ interface MockModelClient<T> {
     observeQuery: (options?: unknown) => {
         subscribe: (observer: { next: (data: { items: T[] }) => void; error?: (err: Error) => void }) => { unsubscribe: () => void };
     };
+    list: (args?: { filter?: any; limit?: number; nextToken?: string | null }) => Promise<{ data: T[]; nextToken: string | null }>;
+    get: (args: { id: string }) => Promise<{ data: T | null }>;
     create: (item: Partial<T>) => Promise<{ data: T }>;
     update: (item: Partial<T>) => Promise<{ data: T }>;
     delete: (item: { id: string }) => Promise<{ data: T | null }>;
@@ -89,15 +98,22 @@ export interface MockClient {
         Task: MockModelClient<Task>;
         VitalSigns: MockModelClient<VitalSigns>;
         Visit: MockModelClient<Visit>;
+        AuditLog: MockModelClient<AuditLog>;
+        BillingRecord: MockModelClient<BillingRecord>;
         Notification: MockModelClient<NotificationItem>;
+
     };
     queries: {
         generateRoster: (args: { nurses: string; unassignedShifts: string }) => Promise<{ data: string; errors?: Error[] }>;
+        listApprovedVisitSummariesForFamily: (args: { patientId: string }) => Promise<{ data: string; errors?: Error[] }>;
+        validateRIPS: (args: { invoiceId: string }) => Promise<{ data: string; errors?: Error[] }>;
+        glosaDefender: (args: { glosaId: string }) => Promise<{ data: string; errors?: Error[] }>;
+    };
+    mutations: {
         createVisitDraftFromShift: (args: { shiftId: string }) => Promise<{ data: string; errors?: Error[] }>;
         submitVisit: (args: { shiftId: string }) => Promise<{ data: string; errors?: Error[] }>;
         approveVisit: (args: { shiftId: string }) => Promise<{ data: string; errors?: Error[] }>;
         rejectVisit: (args: { shiftId: string; reason: string }) => Promise<{ data: string; errors?: Error[] }>;
-        listApprovedVisitSummariesForFamily: (args: { patientId: string }) => Promise<{ data: string; errors?: Error[] }>;
     };
 }
 
@@ -110,6 +126,23 @@ export function generateMockClient(): MockClient {
                 return { unsubscribe: () => { /* No-op */ } };
             }
         }),
+        list: async (args) => {
+            let items = [...(STORE[model] as T[])];
+            if (args?.filter) {
+                // Simplified mock filter: only handles eq for status or tenantId
+                if (args.filter.status?.eq) items = items.filter((i: any) => i.status === args.filter.status.eq);
+                if (args.filter.tenantId?.eq) items = items.filter((i: any) => i.tenantId === args.filter.tenantId.eq);
+            }
+            const limit = args?.limit || 50;
+            const start = args?.nextToken ? parseInt(args.nextToken) : 0;
+            const paginated = items.slice(start, start + limit);
+            const nextToken = start + limit < items.length ? (start + limit).toString() : null;
+            return { data: paginated, nextToken };
+        },
+        get: async ({ id }) => {
+            const item = (STORE[model] as T[]).find(i => i.id === id);
+            return { data: item || null };
+        },
         create: async (item: Partial<T>) => {
             const newItem = { ...item, id: Math.random().toString(36).substr(2, 9) } as T;
             (STORE[model] as T[]).push(newItem);
@@ -149,9 +182,13 @@ export function generateMockClient(): MockClient {
             Task: createModelHandlers<Task>('Task'),
             VitalSigns: createModelHandlers<VitalSigns>('VitalSigns'),
             Visit: createModelHandlers<Visit>('Visit'),
+            AuditLog: createModelHandlers<AuditLog>('AuditLog'),
+            BillingRecord: createModelHandlers<BillingRecord>('BillingRecord'),
             Notification: createModelHandlers<NotificationItem>('Notification')
+
         },
         queries: {
+
             generateRoster: async (args: { nurses: string; unassignedShifts: string }) => {
                 const nurses = JSON.parse(args.nurses) as Nurse[];
                 const shifts = JSON.parse(args.unassignedShifts) as Shift[];
@@ -173,12 +210,28 @@ export function generateMockClient(): MockClient {
                     data: JSON.stringify({ assignments })
                 };
             },
-
+            validateRIPS: async (args: { invoiceId: string }) => {
+                console.log('Mocking RIPS validation for:', args.invoiceId);
+                await new Promise(r => setTimeout(r, 1500));
+                return { data: JSON.stringify({ status: 'VALID', message: 'RIPS documentation is complete and valid.' }) };
+            },
+            glosaDefender: async (args: { glosaId: string }) => {
+                console.log('Mocking glosa defense for:', args.glosaId);
+                await new Promise(r => setTimeout(r, 2000));
+                return { data: JSON.stringify({ defenseLetter: 'AI generated defense letter text here...' }) };
+            },
+            listApprovedVisitSummariesForFamily: async (args: { patientId: string }) => {
+                const visits = (STORE.Visit as Visit[]).filter(v => v.patientId === args.patientId && v.status === 'APPROVED');
+                return { data: JSON.stringify({ visits }) };
+            }
+        },
+        mutations: {
             // Workflow mutations - Requirement 9.2
             createVisitDraftFromShift: async (args: { shiftId: string }) => {
+
                 const { shiftId } = args;
                 const shift = (STORE.Shift as Shift[]).find(s => s.id === shiftId);
-                
+
                 if (!shift) {
                     return { data: JSON.stringify({ error: 'Shift not found' }), errors: [new Error('Shift not found')] };
                 }
@@ -338,31 +391,8 @@ export function generateMockClient(): MockClient {
 
                 await new Promise(r => setTimeout(r, 500));
                 return { data: JSON.stringify({ visit: visits[visitIndex] }) };
-            },
-
-            listApprovedVisitSummariesForFamily: async (args: { patientId: string }) => {
-                const { patientId } = args;
-                const visits = STORE.Visit as Visit[];
-                const nurses = STORE.Nurse as Nurse[];
-                
-                const approvedVisits = visits
-                    .filter(v => v.patientId === patientId && v.status === 'APPROVED')
-                    .sort((a, b) => new Date(b.approvedAt || '').getTime() - new Date(a.approvedAt || '').getTime());
-
-                const summaries: VisitSummary[] = approvedVisits.map(visit => {
-                    const nurse = nurses.find(n => n.id === visit.nurseId);
-                    return {
-                        visitDate: visit.approvedAt || visit.createdAt || new Date().toISOString(),
-                        nurseName: nurse?.name || 'Enfermera',
-                        overallStatus: 'Paciente estable',
-                        keyActivities: visit.tasksCompleted?.map(t => t.taskDescription) || ['Visita de rutina'],
-                        nextVisitDate: undefined
-                    };
-                });
-
-                await new Promise(r => setTimeout(r, 500));
-                return { data: JSON.stringify({ summaries }) };
             }
         }
     };
 }
+

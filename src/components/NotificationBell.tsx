@@ -35,83 +35,15 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { generateClient } from 'aws-amplify/data';
-import { isUsingRealBackend } from '../amplify-utils';
+import { client, isUsingRealBackend } from '../amplify-utils';
 import { LoadingSpinner } from './ui/LoadingSpinner';
 import type { NotificationBellProps, NotificationItem, NotificationType } from '../types/workflow';
 
-// ============================================================================
-// GraphQL Operations
-// ============================================================================
+// GraphQL Operations removed in favor of client.models
 
-/**
- * Query to list notifications for a user.
- */
-const listNotificationsQuery = /* GraphQL */ `
-  query ListNotifications($userId: ID!) {
-    listNotifications(filter: { recipientId: { eq: $userId } }) {
-      items {
-        id
-        type
-        message
-        entityId
-        read
-        createdAt
-      }
-    }
-  }
-`;
 
-/**
- * Mutation to mark a notification as read.
- */
-const markNotificationReadMutation = /* GraphQL */ `
-  mutation MarkNotificationRead($id: ID!) {
-    updateNotification(input: { id: $id, read: true }) {
-      id
-      read
-    }
-  }
-`;
+// Mock data removed in favor of real backend integration
 
-// ============================================================================
-// Mock Data for Development Mode
-// ============================================================================
-
-const MOCK_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: 'notif-1',
-    type: 'VISIT_APPROVED',
-    message: 'Tu visita del 20/01/2026 para Juan Pérez ha sido aprobada',
-    entityId: 'shift-123',
-    read: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 min ago
-  },
-  {
-    id: 'notif-2',
-    type: 'VISIT_REJECTED',
-    message: 'Tu visita del 19/01/2026 para María García fue rechazada: Falta documentación de signos vitales',
-    entityId: 'shift-456',
-    read: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
-  },
-  {
-    id: 'notif-3',
-    type: 'VISIT_PENDING_REVIEW',
-    message: 'Nueva visita pendiente de revisión para Carlos López',
-    entityId: 'shift-789',
-    read: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), // 5 hours ago
-  },
-  {
-    id: 'notif-4',
-    type: 'VISIT_APPROVED',
-    message: 'Tu visita del 18/01/2026 para Ana Martínez ha sido aprobada',
-    entityId: 'shift-101',
-    read: true,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
-  },
-];
 
 // ============================================================================
 // Helper Functions
@@ -215,61 +147,48 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ userId, onNo
   const unreadCount = notifications.filter(n => !n.read).length;
 
   /**
-   * Fetches notifications from backend or mock data.
+   * Fetches notifications using observeQuery for real-time updates.
    */
-  const fetchNotifications = useCallback(async () => {
+  useEffect(() => {
     setIsLoading(true);
-    setError(null);
 
-    try {
-      if (!isUsingRealBackend()) {
-        // Mock mode: return mock notifications
-        console.log('[Mock] Fetching notifications for user:', userId);
-        await simulateNetworkDelay();
-        setNotifications(MOCK_NOTIFICATIONS);
-      } else {
-        // Real backend mode
-        const client = generateClient({ authMode: 'userPool' });
-        const response = await client.graphql({
-          query: listNotificationsQuery,
-          variables: { userId }
-        });
-
-        const items = (response as any).data?.listNotifications?.items || [];
-        // Map backend response to NotificationItem interface
-        const mappedNotifications: NotificationItem[] = items.map((item: any) => ({
-          id: item.id,
-          type: item.type as NotificationType,
-          message: item.message,
-          entityId: item.entityId,
-          read: item.read,
-          createdAt: item.createdAt,
-        }));
-        setNotifications(mappedNotifications);
+    const sub = (client.models.Notification.observeQuery({
+      filter: { recipientId: { eq: userId } }
+    }) as any).subscribe({
+      next: ({ items }: any) => {
+        setNotifications(items as NotificationItem[]);
+        setIsLoading(false);
+      },
+      error: (err: any) => {
+        console.error('Error in notifications subscription:', err);
+        setError('Error al cargar notificaciones');
+        setIsLoading(false);
       }
-    } catch (err) {
-      console.error('Error fetching notifications:', err);
-      setError('Error al cargar notificaciones');
-    } finally {
-      setIsLoading(false);
-    }
+    });
+
+    return () => sub.unsubscribe();
   }, [userId]);
+
+  const fetchNotifications = useCallback(async () => {
+    // No longer needed as observeQuery handles it, but kept if needed for manual refresh
+  }, []);
 
   /**
    * Marks a notification as read.
    */
   const markAsRead = useCallback(async (notificationId: string) => {
     try {
-      if (!isUsingRealBackend()) {
-        // Mock mode: update local state
-        console.log('[Mock] Marking notification as read:', notificationId);
-        await simulateNetworkDelay(100, 200);
+      if (isUsingRealBackend()) {
+        await client.models.Notification.update({
+          id: notificationId,
+          read: true
+        });
       } else {
-        // Real backend mode
-        const client = generateClient({ authMode: 'userPool' });
-        await client.graphql({
-          query: markNotificationReadMutation,
-          variables: { id: notificationId }
+        // In mock mode, the STORE update will trigger observeQuery's next 
+        // if observeQuery is implemented to watch STORE (which it is)
+        await (client.models.Notification as any).update({
+          id: notificationId,
+          read: true
         });
       }
 
@@ -293,7 +212,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ userId, onNo
   const handleNotificationDismiss = useCallback((e: React.MouseEvent, notificationId: string) => {
     // Prevent the click from bubbling to the notification item
     e.stopPropagation();
-    
+
     // Mark as read (Requirement 4.5)
     markAsRead(notificationId);
   }, [markAsRead]);
@@ -320,10 +239,10 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ userId, onNo
     } else {
       // Fallback logging when no callback is provided
       console.log('Notification clicked:', notification.type, notification.entityId);
-      
+
       // Log specific action for VISIT_REJECTED
       if (notification.type === 'VISIT_REJECTED') {
-        console.log('VISIT_REJECTED clicked - entityId:', notification.entityId, 
+        console.log('VISIT_REJECTED clicked - entityId:', notification.entityId,
           '- Parent should navigate to rejected visit for correction');
       }
     }
@@ -334,7 +253,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ userId, onNo
    */
   const markAllAsRead = useCallback(async () => {
     const unreadNotifications = notifications.filter(n => !n.read);
-    
+
     for (const notification of unreadNotifications) {
       await markAsRead(notification.id);
     }
@@ -439,9 +358,8 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ userId, onNo
                     <li key={notification.id}>
                       <button
                         onClick={() => handleNotificationClick(notification)}
-                        className={`w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors ${
-                          !notification.read ? 'bg-indigo-50/50' : ''
-                        }`}
+                        className={`w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors ${!notification.read ? 'bg-indigo-50/50' : ''
+                          }`}
                       >
                         <div className="flex gap-3">
                           {/* Icon */}
