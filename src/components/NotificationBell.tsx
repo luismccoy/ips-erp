@@ -171,7 +171,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ userId, onNo
   const markAsRead = useCallback(async (notificationId: string) => {
     try {
       if (isUsingRealBackend()) {
-        await client.models.Notification.update({
+        await (client.models.Notification as any).update({
           id: notificationId,
           read: true
         });

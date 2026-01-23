@@ -22,7 +22,7 @@ export const NurseDashboard: React.FC = () => {
                 tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] }
             }
         });
-        
+
         const sub = (query as any).subscribe({
             next: (data: any) => setShifts([...data.items]),
             error: (err: Error) => console.error('Subscription error:', err)
@@ -34,7 +34,7 @@ export const NurseDashboard: React.FC = () => {
     const handleUpdateStatus = async (id: string, newStatus: Shift['status']) => {
         try {
             await api.execute((async () => {
-                await client.models.Shift.update({
+                await (client.models.Shift as any).update({
                     id,
                     status: newStatus,
                     ...(newStatus === 'IN_PROGRESS' ? { startedAt: new Date().toISOString() } : {}),
@@ -48,7 +48,7 @@ export const NurseDashboard: React.FC = () => {
 
     const handleCreateMockShift = async () => {
         try {
-            await api.execute(client.models.Shift.create({
+            await api.execute((client.models.Shift as any).create({
                 tenantId: MOCK_USER.attributes['custom:tenantId'],
                 status: 'PENDING',
                 patientName: 'Test Patient',

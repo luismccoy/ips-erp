@@ -56,7 +56,7 @@ export const StaffManagement: React.FC = () => {
 
         setLocalLoading(true);
         try {
-            await client.models.Nurse.create({
+            await (client.models.Nurse as any).create({
                 tenantId: MOCK_USER.attributes['custom:tenantId'],
                 name,
                 email,

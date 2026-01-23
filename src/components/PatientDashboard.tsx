@@ -62,7 +62,7 @@ export const PatientDashboard: React.FC = () => {
             t.id === task.id ? { ...t, completed: !t.completed } : t
         ) || [];
 
-        await client.models.Patient.update({
+        await (client.models.Patient as any).update({
             id: selectedPatient.id,
             tasks: updatedTasks
         });
