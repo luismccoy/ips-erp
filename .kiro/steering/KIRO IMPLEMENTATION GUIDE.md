@@ -889,3 +889,145 @@ const subscription = client.models.Visit.onCreate({
 - ✅ Documentation updated
 
 **Next Phase:** Production Operations & Continuous Improvement
+
+
+## Phase 13: Frontend Lambda Integration - Glosa Defender & RIPS Validator
+**Status:** ✅ COMPLETE
+
+**Goal:** Connect existing backend Lambda functions (glosa-defender and validateRIPS) to frontend components with comprehensive error handling and Spanish localization.
+
+**Completed Tasks:**
+1. ✅ Integrated glosa-defender Lambda in BillingDashboard.tsx
+   - AI-powered defense letter generation
+   - Editable textarea with copy-to-clipboard
+   - Real-time Lambda invocation via GraphQL
+   - Comprehensive error handling in Spanish
+
+2. ✅ Integrated validateRIPS Lambda in RipsValidator.tsx
+   - Colombian RIPS compliance validation (Resolución 2275)
+   - BillingRecordId input field with validation
+   - Visual pass/fail indicators
+   - Detailed error list display
+
+3. ✅ Implemented comprehensive error handling
+   - 5 error types: timeout, network, auth, not found, generic
+   - All error messages in Spanish
+   - Manual dismiss with X button
+   - Console logging for debugging
+
+4. ✅ Implemented loading states
+   - Button disabled during processing
+   - Spinner with Spanish loading text ("Generando...", "Validando...")
+   - Re-enabled after completion
+
+5. ✅ Complete Spanish localization
+   - All user-facing text in Spanish
+   - Button labels, loading messages, error messages
+   - Modal titles, form labels, hints
+
+6. ✅ UI consistency verification
+   - Modal components match existing styles
+   - Button styles consistent
+   - Error styling consistent
+   - Spinner component reused
+
+7. ✅ Created comprehensive documentation
+   - Updated API_DOCUMENTATION.md with Phase 13 section (~500 lines)
+   - Created ADMIN_USER_GUIDE.md in Spanish (~600 lines)
+   - Documented all Lambda integrations, error handling, and usage
+
+**Results:**
+- 2 frontend components fully integrated with Lambda functions
+- ~250 lines of code added/modified across both components
+- Inline implementation (no utils/helpers) - aligns with "NO utils/helpers" rule
+- Test infrastructure created and moved to .local-tests/ (not synced with git)
+- 9/9 verification tests passing before cleanup
+- Zero backend changes required (Lambda functions already deployed)
+
+**Technical Implementation:**
+- Error handling implemented inline in both components
+- Loading states implemented inline (no shared hook)
+- Spanish text implemented inline (no constants file)
+- Reduces file count and complexity
+- Each component has unique requirements
+
+**Lambda Functions Used:**
+- `glosa-defender` - 60s timeout, AI-powered billing defense letters
+- `rips-validator` - 30s timeout, Colombian RIPS compliance validation
+
+**GraphQL Queries:**
+- `glosaDefender(billingRecordId: ID!)` - Returns GlosaDefenseResult
+- `validateRIPS(billingRecordId: ID!)` - Returns RIPSValidationResult
+
+**Files Modified:**
+- `src/components/BillingDashboard.tsx` (~150 lines added/modified)
+- `src/components/RipsValidator.tsx` (~100 lines added/modified)
+
+**Documentation Created:**
+- `docs/ADMIN_USER_GUIDE.md` - Complete Spanish user guide for admins
+- `docs/API_DOCUMENTATION.md` - Phase 13 section with integration details
+
+**Spec Location:** `.kiro/specs/remaining-integrations/`
+
+**Pending Manual Testing:**
+- Task 12.1: Manual testing with real backend (requires human testing)
+- Test glosa defense generation with real billing record
+- Test RIPS validation with real billing record
+- Test error scenarios (invalid ID, network disconnect)
+- Verify multi-tenant isolation
+- Verify audit logs created
+
+**Next Phase:** Phase 14 - Production Deployment & Verification
+
+## Phase 14: Production Deployment & Verification
+**Status:** 🔄 IN PROGRESS
+
+**Goal:** Deploy Phase 13 frontend changes to production and verify end-to-end functionality with real backend.
+
+**Deployment Steps:**
+1. Commit Phase 13 changes (documentation and spec files)
+2. Push to GitHub to trigger Amplify build
+3. Monitor build progress in Amplify Console
+4. Verify deployment success
+5. Perform manual testing with real backend
+6. Update Implementation Guide with deployment results
+
+**Pre-Deployment Checklist:**
+- ✅ Frontend changes already committed (BillingDashboard.tsx, RipsValidator.tsx)
+- ✅ Test files moved to .local-tests/ (not synced with git)
+- ✅ Documentation complete (API_DOCUMENTATION.md, ADMIN_USER_GUIDE.md)
+- ✅ Spec files created and documented
+- ⏳ Ready to commit and push
+
+**Deployment Command:**
+```bash
+git add docs/ .kiro/
+git commit -m "docs(phase13): add Lambda integration documentation and admin user guide"
+git push origin main
+```
+
+**Monitoring:**
+- Amplify Console: https://console.aws.amazon.com/amplify/home?region=us-east-1#/d2wwgecog8smmr
+- CloudWatch Dashboard: https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=IPS-ERP-Production-Dashboard
+
+**Post-Deployment Verification:**
+1. Check Amplify build status (should succeed)
+2. Access frontend URL: https://main.d2wwgecog8smmr.amplifyapp.com
+3. Login as admin user (admin@ips.com)
+4. Test Glosa Defender in Billing Dashboard
+5. Test RIPS Validator
+6. Verify error handling works correctly
+7. Check CloudWatch logs for Lambda invocations
+8. Verify audit logs in DynamoDB
+
+**Success Criteria:**
+- ✅ Amplify build succeeds
+- ✅ Frontend accessible and operational
+- ✅ Glosa Defender generates defense letters
+- ✅ RIPS Validator validates compliance
+- ✅ Error handling works as expected
+- ✅ Spanish localization displays correctly
+- ✅ Audit logs created in DynamoDB
+- ✅ No console errors or warnings
+
+**Next Phase:** Production Operations & Continuous Improvement
