@@ -4,6 +4,7 @@ import { Package, Plus, X, AlertTriangle, Check, RefreshCw } from 'lucide-react'
 import { client, isUsingRealBackend, MOCK_USER } from '../amplify-utils';
 import { usePagination } from '../hooks/usePagination';
 import type { InventoryItem } from '../types';
+import { graphqlToFrontendSafe, frontendToGraphQLSafe } from '../utils/inventory-transforms';
 
 export function InventoryDashboard() {
     const { items: inventory, setItems, loadMore, hasMore, isLoading } = usePagination<InventoryItem>();
@@ -21,17 +22,31 @@ export function InventoryDashboard() {
     useEffect(() => {
         const fetchInventory = async () => {
             if (!isUsingRealBackend()) {
+                // Mock backend already uses lowercase format (no transformation needed)
                 const { INVENTORY } = await import('../data/mock-data');
                 loadMore(async () => ({ data: INVENTORY as any, nextToken: null }), true);
                 return;
             }
 
+            // Real backend: fetch and transform status from GraphQL format to frontend format
             loadMore(async (token) => {
-                const response = await (client.models.InventoryItem as any).list({
-                    limit: 50,
-                    nextToken: token
-                });
-                return { data: response.data || [], nextToken: response.nextToken };
+                try {
+                    const response = await (client.models.InventoryItem as any).list({
+                        limit: 50,
+                        nextToken: token
+                    });
+                    
+                    // Transform status from GraphQL format (IN_STOCK) to frontend format (in-stock)
+                    const transformedData = (response.data || []).map((item: any) => ({
+                        ...item,
+                        status: graphqlToFrontendSafe(item.status) || 'in-stock' // Fallback to safe default
+                    }));
+                    
+                    return { data: transformedData, nextToken: response.nextToken };
+                } catch (error) {
+                    console.error('Failed to fetch inventory:', error);
+                    return { data: [], nextToken: null };
+                }
             }, true);
         };
 
@@ -39,12 +54,29 @@ export function InventoryDashboard() {
     }, [loadMore]);
 
     const handleLoadMore = () => {
+        if (!isUsingRealBackend()) {
+            // Mock backend doesn't support pagination
+            return;
+        }
+        
         loadMore(async (token) => {
-            const response = await (client.models.InventoryItem as any).list({
-                limit: 50,
-                nextToken: token
-            });
-            return { data: response.data || [], nextToken: response.nextToken };
+            try {
+                const response = await (client.models.InventoryItem as any).list({
+                    limit: 50,
+                    nextToken: token
+                });
+                
+                // Transform status from GraphQL format (IN_STOCK) to frontend format (in-stock)
+                const transformedData = (response.data || []).map((item: any) => ({
+                    ...item,
+                    status: graphqlToFrontendSafe(item.status) || 'in-stock' // Fallback to safe default
+                }));
+                
+                return { data: transformedData, nextToken: response.nextToken };
+            } catch (error) {
+                console.error('Failed to load more inventory:', error);
+                return { data: [], nextToken: null };
+            }
         });
     };
 
@@ -52,10 +84,28 @@ export function InventoryDashboard() {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            // Placeholder for real mutation:
-            // await client.models.InventoryItem.create({ ... });
+            // Calculate frontend status based on quantity
+            const frontendStatus = newItemQuantity > 0 ? 'in-stock' : 'out-of-stock';
+            
+            if (isUsingRealBackend()) {
+                // Transform status to GraphQL format before sending to backend
+                const graphqlStatus = frontendToGraphQLSafe(frontendStatus);
+                
+                // TODO: Uncomment when backend permissions are fixed
+                // await client.models.InventoryItem.create({
+                //     name: newItemName,
+                //     quantity: newItemQuantity,
+                //     unit: newItemUnit,
+                //     reorderLevel: newItemReorder,
+                //     sku: newItemSku,
+                //     status: graphqlStatus,
+                //     tenantId: MOCK_USER.attributes['custom:tenantId']
+                // });
+                
+                console.log('Would create item with GraphQL status:', graphqlStatus);
+            }
 
-            // Optimistic update for UI testing
+            // Optimistic update for UI testing (uses frontend format)
             const tempItem: any = {
                 id: `temp-${Date.now()}`,
                 name: newItemName,
@@ -63,7 +113,7 @@ export function InventoryDashboard() {
                 unit: newItemUnit,
                 reorderLevel: newItemReorder,
                 sku: newItemSku,
-                status: newItemQuantity > 0 ? 'in-stock' : 'out-of-stock',
+                status: frontendStatus, // Frontend format for display
                 tenantId: MOCK_USER.attributes['custom:tenantId']
             };
 
@@ -84,13 +134,31 @@ export function InventoryDashboard() {
         if (!editingItem) return;
         setIsSubmitting(true);
         try {
-            // Placeholder for real mutation:
-            // await client.models.InventoryItem.update({ id: editingItem.id, quantity: newItemQuantity });
+            // Calculate frontend status based on quantity and reorder level
+            const frontendStatus = newItemQuantity <= 0 
+                ? 'out-of-stock' 
+                : newItemQuantity <= editingItem.reorderLevel 
+                    ? 'low-stock' 
+                    : 'in-stock';
+            
+            if (isUsingRealBackend()) {
+                // Transform status to GraphQL format before sending to backend
+                const graphqlStatus = frontendToGraphQLSafe(frontendStatus);
+                
+                // TODO: Uncomment when backend permissions are fixed
+                // await client.models.InventoryItem.update({
+                //     id: editingItem.id,
+                //     quantity: newItemQuantity,
+                //     status: graphqlStatus
+                // });
+                
+                console.log('Would update item with GraphQL status:', graphqlStatus);
+            }
 
-            // Optimistic update
+            // Optimistic update (uses frontend format)
             setItems(prev => prev.map(item =>
                 item.id === editingItem.id
-                    ? { ...item, quantity: newItemQuantity, status: newItemQuantity <= 0 ? 'out-of-stock' : 'in-stock' }
+                    ? { ...item, quantity: newItemQuantity, status: frontendStatus }
                     : item
             ));
             setEditingItem(null);

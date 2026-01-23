@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import {
     Activity, ClipboardCheck, Package, Calendar, ShieldAlert,
-    FileText, LogOut, DollarSign, ClipboardList
+    FileText, LogOut, DollarSign, ClipboardList, BarChart
 } from 'lucide-react';
 
 import { client, isUsingRealBackend, MOCK_USER } from '../amplify-utils';
 import type { AdminDashboardProps, NavItemProps } from '../types/components';
+import { graphqlToFrontendSafe } from '../utils/inventory-transforms';
 
 import { PendingReviewsPanel } from './PendingReviewsPanel';
 import { NotificationBell } from './NotificationBell';
@@ -16,6 +17,7 @@ import { BillingDashboard } from './BillingDashboard';
 import { InventoryDashboard } from './InventoryDashboard';
 import { RosterDashboard } from './RosterDashboard';
 import { ComplianceDashboard } from './ComplianceDashboard';
+import { ReportingDashboard } from './ReportingDashboard';
 
 
 
@@ -78,6 +80,7 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                     <NavItem icon={Calendar} label="Rostering" active={view === 'roster'} onClick={() => setView('roster')} />
                     <NavItem icon={ShieldAlert} label="Compliance" active={view === 'compliance'} onClick={() => setView('compliance')} />
                     <NavItem icon={FileText} label="Billing & RIPS" active={view === 'billing'} onClick={() => setView('billing')} />
+                    <NavItem icon={BarChart} label="Reporting & Analytics" active={view === 'reporting'} onClick={() => setView('reporting')} />
 
                 </nav>
                 <div className="p-4 border-t border-slate-800">
@@ -100,6 +103,7 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                         {view === 'roster' && 'Rostering'}
                         {view === 'compliance' && 'Compliance (Res 3100)'}
                         {view === 'billing' && 'Billing & RIPS'}
+                        {view === 'reporting' && 'Reporting & Analytics'}
 
                     </h2>
                     <div className="flex items-center gap-4">
@@ -125,6 +129,7 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                     {view === 'roster' && <RosterDashboard />}
                     {view === 'compliance' && <ComplianceDashboard />}
                     {view === 'billing' && <BillingDashboard />}
+                    {view === 'reporting' && <ReportingDashboard />}
 
 
                 </div>
@@ -172,8 +177,26 @@ function DashboardView() {
                     (client.models.InventoryItem as any).list()
                 ]);
 
-                const lowStockItems = (inventoryRes.data || []).filter(
-                    (item: any) => item.quantity < item.reorderLevel
+                // Transform inventory status from GraphQL format to frontend format
+                const transformedInventory = (inventoryRes.data || []).map((item: any) => {
+                    try {
+                        return {
+                            ...item,
+                            status: graphqlToFrontendSafe(item.status) || 'in-stock'
+                        };
+                    } catch (error) {
+                        console.error('Error transforming inventory status:', error, item);
+                        // Fallback to safe default if transformation fails
+                        return {
+                            ...item,
+                            status: 'in-stock'
+                        };
+                    }
+                });
+
+                // Calculate low stock items using transformed status
+                const lowStockItems = transformedInventory.filter(
+                    (item: any) => item.status === 'low-stock' || item.status === 'out-of-stock'
                 );
 
                 setStats({
@@ -194,23 +217,35 @@ function DashboardView() {
 
     useEffect(() => {
         // Dashboard real-time subscriptions
-        const auditSub = (client.models.AuditLog as any)?.onCreate({
-            filter: { tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] } }
-        }).subscribe({
-            next: (log: any) => {
-                console.log('Real-time audit log:', log);
-            },
-            error: () => console.log('AuditLog sub not available or failed')
-        });
+        let auditSub: any;
+        let shiftSub: any;
 
-        const shiftSub = (client.models.Shift as any).onUpdate({
-            filter: { tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] } }
-        }).subscribe({
-            next: (shift: any) => {
-                console.log('Real-time shift update:', shift);
-            },
-            error: () => console.log('Shift update sub failed')
-        });
+        const setupSubscriptions = () => {
+            // Safe check for mock backend compatibility
+            if ((client.models.AuditLog as any)?.onCreate) {
+                auditSub = (client.models.AuditLog as any).onCreate({
+                    filter: { tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] } }
+                }).subscribe({
+                    next: (log: any) => {
+                        console.log('Real-time audit log:', log);
+                    },
+                    error: () => console.log('AuditLog sub not available or failed')
+                });
+            }
+
+            if ((client.models.Shift as any)?.onUpdate) {
+                shiftSub = (client.models.Shift as any).onUpdate({
+                    filter: { tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] } }
+                }).subscribe({
+                    next: (shift: any) => {
+                        console.log('Real-time shift update:', shift);
+                    },
+                    error: () => console.log('Shift update sub failed')
+                });
+            }
+        };
+
+        setupSubscriptions();
 
         return () => {
             auditSub?.unsubscribe();

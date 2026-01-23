@@ -30,7 +30,62 @@ export type InventoryItem = {
     reorderLevel: number;
     reorderThreshold?: number | null;
     expiryDate?: string | null;
+    
+    /**
+     * Inventory status indicating stock availability
+     * 
+     * **Dual Format System:**
+     * - **Backend (GraphQL):** `IN_STOCK` | `LOW_STOCK` | `OUT_OF_STOCK`
+     * - **Frontend (Display):** `in-stock` | `low-stock` | `out-of-stock`
+     * 
+     * **Why Two Formats?**
+     * GraphQL enum values cannot contain hyphens (syntax constraint), so the backend
+     * uses uppercase with underscores. The frontend uses lowercase with hyphens for
+     * better readability and consistency with CSS class names.
+     * 
+     * **Transformation Functions:**
+     * Use the utility functions from `src/utils/inventory-transforms.ts`:
+     * 
+     * - `graphqlToFrontend()` - Convert backend format to frontend format
+     * - `frontendToGraphQL()` - Convert frontend format to backend format
+     * - `graphqlToFrontendSafe()` - Safe conversion with null handling
+     * - `frontendToGraphQLSafe()` - Safe conversion with null handling
+     * 
+     * **Usage Examples:**
+     * 
+     * ```typescript
+     * // Reading from backend (GraphQL → Frontend)
+     * import { graphqlToFrontendSafe } from '../utils/inventory-transforms';
+     * 
+     * const response = await client.models.InventoryItem.list();
+     * const items = response.data.map(item => ({
+     *   ...item,
+     *   status: graphqlToFrontendSafe(item.status) // 'IN_STOCK' → 'in-stock'
+     * }));
+     * ```
+     * 
+     * ```typescript
+     * // Writing to backend (Frontend → GraphQL)
+     * import { frontendToGraphQLSafe } from '../utils/inventory-transforms';
+     * 
+     * await client.models.InventoryItem.create({
+     *   ...itemData,
+     *   status: frontendToGraphQLSafe(formStatus) // 'in-stock' → 'IN_STOCK'
+     * });
+     * ```
+     * 
+     * **Mock Backend Note:**
+     * When using mock backend (`VITE_USE_REAL_BACKEND=false`), the data already
+     * uses lowercase format, so no transformation is needed. Always check
+     * `isUsingRealBackend()` before applying transformations.
+     * 
+     * **Type Safety:**
+     * The transformation functions are fully type-safe and will throw descriptive
+     * errors if invalid values are provided. Use the safe variants (`*Safe()`) when
+     * dealing with potentially null/undefined values.
+     */
     status: 'in-stock' | 'low-stock' | 'out-of-stock' | null;
+    
     createdAt: string;
     updatedAt: string;
 };
