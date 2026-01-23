@@ -4,11 +4,20 @@ import type { AmplifyUser } from './types';
 
 import type { Schema } from '../amplify/data/resource';
 
+import { Amplify } from 'aws-amplify';
+import outputs from '../amplify_outputs.json';
+
 // Determine if we should use real backend or mock
 const USE_REAL_BACKEND = import.meta.env.VITE_USE_REAL_BACKEND === 'true';
 
-// Note: Amplify.configure() is called in main.tsx, not here
-// This avoids duplicate configuration which can cause errors
+// Ensure Amplify is configured early
+if (USE_REAL_BACKEND) {
+    try {
+        Amplify.configure(outputs);
+    } catch (e) {
+        console.warn('Amplify configuration warning:', e);
+    }
+}
 
 // Export the typed client (real or mock based on environment)
 export const client = USE_REAL_BACKEND
