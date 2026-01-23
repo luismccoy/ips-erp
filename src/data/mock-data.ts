@@ -15,6 +15,11 @@ export const SHIFTS = [
     { id: 's2', patientId: 'p2', nurseId: 'n2', date: '2026-01-21', startTime: '14:00', status: 'Completed' }
 ];
 
+export const NURSES = [
+    { id: 'n1', name: 'Maria Gonzalez', role: 'NURSE', locationLat: 4.6097, locationLng: -74.0817 },
+    { id: 'n2', name: 'Carlos Rodriguez', role: 'NURSE', locationLat: 4.6200, locationLng: -74.0900 }
+];
+
 export const INVENTORY = [
     { id: 'i1', name: 'Jeringa 5cc', quantity: 45, reorderThreshold: 20, unit: 'Unidad' },
     { id: 'i2', name: 'Guantes Nitrilo', quantity: 120, reorderThreshold: 50, unit: 'Par' },

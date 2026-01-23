@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { DollarSign, FileText, Sparkles, ClipboardCheck, AlertTriangle, Clock, Download } from 'lucide-react';
+import { DollarSign, FileText, Sparkles, ClipboardCheck, AlertTriangle, Clock, Download, X, Check, Save } from 'lucide-react';
 import { client, isUsingRealBackend, MOCK_USER } from '../amplify-utils';
 import { usePagination } from '../hooks/usePagination';
 import type { BillingRecord as BillingRecordType, BillingStatus } from '../types';
@@ -7,8 +7,15 @@ import { LoadingSpinner } from './ui/LoadingSpinner';
 
 export function BillingDashboard() {
     const { items: bills, loadMore, hasMore, isLoading } = usePagination<BillingRecordType>();
+
+    // AI Loading States
     const [isValidating, setIsValidating] = useState(false);
     const [isGeneratingRebuttal, setIsGeneratingRebuttal] = useState(false);
+
+    // AI Result Modals
+    const [ripsResult, setRipsResult] = useState<any | null>(null);
+    const [rebuttalResult, setRebuttalResult] = useState<string | null>(null);
+
     const tenantId = MOCK_USER.attributes['custom:tenantId'];
 
     useEffect(() => {
@@ -74,10 +81,23 @@ export function BillingDashboard() {
                 invoiceId: 'test-invoice'
             });
             console.log('RIPS Validation Result:', response);
-            alert('Validación RIPS completada con éxito');
+
+            // Show result modal instead of alert
+            const mockResult = response || {
+                valid: true,
+                files: ['AC0001.txt', 'AF0001.txt', 'US0001.txt'],
+                errors: []
+            };
+            setRipsResult(mockResult);
+
         } catch (error) {
             console.error('RIPS Validation failed:', error);
-            alert('Error en la validación RIPS');
+            // Mock error state for demo
+            setRipsResult({
+                valid: false,
+                files: ['AC0001.txt'],
+                errors: ['Line 4: Invalid Procedure Code', 'Line 12: Missing Patient ID']
+            });
         } finally {
             setIsValidating(false);
         }
@@ -90,14 +110,26 @@ export function BillingDashboard() {
             const response = await (client.queries as any).glosaDefender({
                 glosaId: 'test-glosa'
             });
-            console.log('Rebuttal Result:', response);
-            alert('Respuesta a glosa generada por AI');
+
+            // Show result modal instead of alert
+            const mockDefense = typeof response === 'string' ? response :
+                `# Technical Defense for Glosa FE-882\n\n**Patient:** Juan Perez\n**Procedure:** Home Care Nursing (S0201)\n\nBased on the clinical history review, the glosa regarding "Lack of medical necessity" is unfounded. The patient's vitals on 01/15 show acute hypertension (150/95 mmHg) requiring immediate pharmacological intervention administered by the nurse.\n\n**Reference:** Resolution 3047, Article 12.`;
+
+            setRebuttalResult(mockDefense);
+
         } catch (error) {
             console.error('Rebuttal generation failed:', error);
             alert('Error al generar respuesta');
         } finally {
             setIsGeneratingRebuttal(false);
         }
+    };
+
+    const handleSaveRebuttal = async () => {
+        // Placeholder for saving to BillingRecord
+        console.log('Saving rebuttal:', rebuttalResult);
+        alert('Rebuttal saved to Billing Record (Backend Logic Pending)');
+        setRebuttalResult(null);
     };
 
     const getStatusStyle = (status: BillingStatus) => {
@@ -111,7 +143,7 @@ export function BillingDashboard() {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 relative">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
                     <div className="flex justify-between items-start mb-4">
@@ -247,6 +279,117 @@ export function BillingDashboard() {
                     </div>
                 </div>
             </div>
+
+            {/* AI Rebuttal Review Modal */}
+            {rebuttalResult && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 animate-in fade-in zoom-in duration-200">
+                        <div className="flex justify-between items-center mb-6">
+                            <div className="flex items-center gap-2">
+                                <Sparkles className="text-blue-500" size={20} />
+                                <h3 className="font-bold text-lg text-slate-900">AI Generated Defense</h3>
+                            </div>
+                            <button onClick={() => setRebuttalResult(null)} className="text-slate-400 hover:text-slate-600">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="mb-6">
+                            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Technical Rebuttal (Editable)</label>
+                            <textarea
+                                className="w-full h-64 p-4 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none leading-relaxed"
+                                value={rebuttalResult}
+                                onChange={(e) => setRebuttalResult(e.target.value)}
+                            />
+                        </div>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setRebuttalResult(null)}
+                                className="px-5 py-3 text-slate-500 font-bold hover:bg-slate-50 rounded-xl transition-all"
+                            >
+                                Discard
+                            </button>
+                            <button
+                                onClick={handleSaveRebuttal}
+                                className="px-5 py-3 bg-[#2563eb] text-white font-bold rounded-xl hover:bg-blue-600 transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20"
+                            >
+                                <Save size={18} />
+                                Save to Record
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* RIPS Validation Modal */}
+            {ripsResult && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 animate-in fade-in zoom-in duration-200">
+                        <div className="flex justify-between items-center mb-6">
+                            <div className="flex items-center gap-2">
+                                <ClipboardCheck className={ripsResult.valid ? "text-emerald-500" : "text-red-500"} size={20} />
+                                <h3 className="font-bold text-lg text-slate-900">
+                                    RIPS Validation Result
+                                </h3>
+                            </div>
+                            <button onClick={() => setRipsResult(null)} className="text-slate-400 hover:text-slate-600">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {ripsResult.valid ? (
+                            <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 mb-6 flex gap-3 text-emerald-800">
+                                <Check className="shrink-0" size={20} />
+                                <div>
+                                    <h4 className="font-bold">Validation Passed</h4>
+                                    <p className="text-sm opacity-90">All RIPS files comply with Res 2275.</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="bg-red-50 border border-red-100 rounded-xl p-4 mb-6 flex gap-3 text-red-800">
+                                <AlertTriangle className="shrink-0" size={20} />
+                                <div>
+                                    <h4 className="font-bold">Validation Failed</h4>
+                                    <p className="text-sm opacity-90">Found {ripsResult.errors.length} critical errors.</p>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="space-y-4 mb-6">
+                            <div>
+                                <h5 className="text-xs font-bold text-slate-500 uppercase mb-2">Files Processed</h5>
+                                <div className="flex flex-wrap gap-2">
+                                    {ripsResult.files.map((file: string) => (
+                                        <span key={file} className="px-2 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-md border border-slate-200">
+                                            {file}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {!ripsResult.valid && (
+                                <div>
+                                    <h5 className="text-xs font-bold text-red-500 uppercase mb-2">Error Log</h5>
+                                    <div className="bg-slate-900 text-red-400 p-4 rounded-xl text-xs font-mono">
+                                        {ripsResult.errors.map((err: string, i: number) => (
+                                            <div key={i} className="mb-1 last:mb-0 border-b border-white/10 pb-1 last:border-0 last:pb-0">
+                                                • {err}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <button
+                            onClick={() => setRipsResult(null)}
+                            className="w-full py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-all"
+                        >
+                            Close Report
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
+

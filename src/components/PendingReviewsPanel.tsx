@@ -479,6 +479,9 @@ export const PendingReviewsPanel: React.FC<PendingReviewsPanelExtendedProps> = (
   const [isApproving, setIsApproving] = useState(false);
   const [isRejecting, setIsRejecting] = useState(false);
 
+  // UX Polish: Persistent local filter to prevent "zombie" items from reappearing during race conditions
+  const [hiddenVisitIds, setHiddenVisitIds] = useState<Set<string>>(new Set());
+
   /**
    * Fetches pending visits from backend or mock data.
    * Sorts by submittedAt ascending (oldest first) per Requirement 5.5.
@@ -507,7 +510,9 @@ export const PendingReviewsPanel: React.FC<PendingReviewsPanelExtendedProps> = (
           vitals: typeof item.vitalsRecorded === 'string' ? JSON.parse(item.vitalsRecorded) : item.vitalsRecorded || { sys: 0, dia: 0, spo2: 0, hr: 0 },
           medications: typeof item.medicationsAdministered === 'string' ? JSON.parse(item.medicationsAdministered) : item.medicationsAdministered || [],
           tasks: typeof item.tasksCompleted === 'string' ? JSON.parse(item.tasksCompleted) : item.tasksCompleted || [],
-        }));
+        }))
+          // Filter out items that we know are hidden/rejected locally
+          .filter(visit => !hiddenVisitIds.has(visit.id));
 
         // Sort by submittedAt ascending (oldest first) - Requirement 5.5
         const sorted = mappedVisits.sort(
@@ -519,7 +524,7 @@ export const PendingReviewsPanel: React.FC<PendingReviewsPanelExtendedProps> = (
       console.error('Error fetching pending visits:', err);
       setError('Error al cargar las visitas pendientes. Por favor, intente de nuevo.');
     }
-  }, [loadMore]);
+  }, [loadMore, hiddenVisitIds]);
 
   const handleLoadMore = useCallback(() => {
     loadMore(async (token) => {
@@ -541,11 +546,12 @@ export const PendingReviewsPanel: React.FC<PendingReviewsPanelExtendedProps> = (
         vitals: typeof item.vitalsRecorded === 'string' ? JSON.parse(item.vitalsRecorded) : item.vitalsRecorded || { sys: 0, dia: 0, spo2: 0, hr: 0 },
         medications: typeof item.medicationsAdministered === 'string' ? JSON.parse(item.medicationsAdministered) : item.medicationsAdministered || [],
         tasks: typeof item.tasksCompleted === 'string' ? JSON.parse(item.tasksCompleted) : item.tasksCompleted || [],
-      }));
+      }))
+        .filter(visit => !hiddenVisitIds.has(visit.id));
 
       return { data: mappedVisits, nextToken: response.nextToken };
     });
-  }, [loadMore]);
+  }, [loadMore, hiddenVisitIds]);
 
   // Fetch on mount
   useEffect(() => {
@@ -564,8 +570,12 @@ export const PendingReviewsPanel: React.FC<PendingReviewsPanelExtendedProps> = (
       await onApprove(selectedVisit.shiftId);
 
       // Remove from list after successful approval - Requirement 6.3
-      setPendingVisits(prev => prev.filter(v => v.id !== selectedVisit.id));
+      const idToRemove = selectedVisit.id;
+      setHiddenVisitIds(prev => new Set(prev).add(idToRemove)); // Add to persistent hidden set
+      setPendingVisits(prev => prev.filter(v => v.id !== idToRemove));
+
       setSelectedVisit(null);
+      // alert('Visita Aprobada Correctamente'); // Optional feedback
     } catch (err) {
       console.error('Error approving visit:', err);
       // Error handling is done by parent component
@@ -586,9 +596,13 @@ export const PendingReviewsPanel: React.FC<PendingReviewsPanelExtendedProps> = (
       await onReject(selectedVisit.shiftId, reason);
 
       // Remove from list after successful rejection - Requirement 7.4
-      setPendingVisits(prev => prev.filter(v => v.id !== selectedVisit.id));
+      const idToRemove = selectedVisit.id;
+      setHiddenVisitIds(prev => new Set(prev).add(idToRemove)); // Add to persistent hidden set
+      setPendingVisits(prev => prev.filter(v => v.id !== idToRemove));
+
       setSelectedVisit(null);
       setShowRejectionModal(false);
+      alert('Visita rechazada y enviada a corrección.'); // UX Feedback
     } catch (err) {
       console.error('Error rejecting visit:', err);
       // Error handling is done by parent component

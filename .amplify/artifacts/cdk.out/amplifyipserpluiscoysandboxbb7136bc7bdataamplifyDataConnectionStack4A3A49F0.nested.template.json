@@ -298,7 +298,7 @@
     "FunctionVersion": "2018-05-29",
     "Name": "Tenantshiftsauth0Function",
     "RequestMappingTemplateS3Location": {
-     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/90e9303569aaa04ffaa62ecfae9423055b97a223cf65ef40ecf8e645c4de91b6.vtl"
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/9fc2e6cebee8e8a4905b29db8a616250f885aacc3c9168c5b1c2fc3cdc4c52e7.vtl"
     },
     "ResponseMappingTemplate": "$util.toJson({})"
    },
@@ -441,7 +441,7 @@
     "FunctionVersion": "2018-05-29",
     "Name": "Tenantinventoryauth0Function",
     "RequestMappingTemplateS3Location": {
-     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/90e9303569aaa04ffaa62ecfae9423055b97a223cf65ef40ecf8e645c4de91b6.vtl"
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/9fc2e6cebee8e8a4905b29db8a616250f885aacc3c9168c5b1c2fc3cdc4c52e7.vtl"
     },
     "ResponseMappingTemplate": "$util.toJson({})"
    },
@@ -727,7 +727,7 @@
     "FunctionVersion": "2018-05-29",
     "Name": "TenantbillingRecordsauth0Function",
     "RequestMappingTemplateS3Location": {
-     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/90e9303569aaa04ffaa62ecfae9423055b97a223cf65ef40ecf8e645c4de91b6.vtl"
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/b6d1bbc3b2b1005f8877f41aad26d83bf3b1fb883928c83989d8204f10363c43.vtl"
     },
     "ResponseMappingTemplate": "$util.toJson({})"
    },
@@ -1299,7 +1299,7 @@
     "FunctionVersion": "2018-05-29",
     "Name": "Patientshiftsauth0Function",
     "RequestMappingTemplateS3Location": {
-     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/90e9303569aaa04ffaa62ecfae9423055b97a223cf65ef40ecf8e645c4de91b6.vtl"
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/9fc2e6cebee8e8a4905b29db8a616250f885aacc3c9168c5b1c2fc3cdc4c52e7.vtl"
     },
     "ResponseMappingTemplate": "$util.toJson({})"
    },
@@ -1728,7 +1728,7 @@
     "FunctionVersion": "2018-05-29",
     "Name": "Nurseshiftsauth0Function",
     "RequestMappingTemplateS3Location": {
-     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/90e9303569aaa04ffaa62ecfae9423055b97a223cf65ef40ecf8e645c4de91b6.vtl"
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/9fc2e6cebee8e8a4905b29db8a616250f885aacc3c9168c5b1c2fc3cdc4c52e7.vtl"
     },
     "ResponseMappingTemplate": "$util.toJson({})"
    },

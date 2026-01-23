@@ -74,7 +74,7 @@ const schema = a.schema({
     // ============================================
     
     ShiftStatus: a.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']),
-    InventoryStatus: a.enum(['IN_STOCK', 'LOW_STOCK', 'OUT_OF_STOCK']),
+    InventoryStatus: a.enum(['IN_STOCK', 'LOW_STOCK', 'OUT_OF_STOCK']), // Phase 12: GraphQL standard (uppercase with underscores)
     BillingStatus: a.enum(['PENDING', 'PAID', 'CANCELED', 'GLOSED']), // Phase 10: Updated for RIPS module
     
     // Phase 3: Workflow Compliance Enums
@@ -120,6 +120,7 @@ const schema = a.schema({
         documentId: a.string().required(),
         age: a.integer(),
         address: a.string(),
+        eps: a.string(), // Phase 12: Health insurance provider (EPS)
         diagnosis: a.string(),
         
         // Nested arrays (not separate models)
@@ -128,6 +129,7 @@ const schema = a.schema({
         
         // Phase 3: Family member access control
         familyMembers: a.id().array(), // Cognito user IDs with read access
+        accessCode: a.string(), // Phase 12: Family portal access code
         
         // Relationships
         shifts: a.hasMany('Shift', 'patientId'),
@@ -184,7 +186,9 @@ const schema = a.schema({
         startLat: a.float(),
         startLng: a.float(),
     }).authorization(allow => [
-        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')
+        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
+        allow.groups(['ADMIN']).to(['create', 'read', 'update', 'delete']),
+        allow.groups(['NURSE']).to(['read'])
     ]),
 
     // 5. INVENTORY ITEM - Medical supplies
@@ -200,7 +204,9 @@ const schema = a.schema({
         status: a.ref('InventoryStatus'),
         expiryDate: a.string(), // ISO date string
     }).authorization(allow => [
-        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')
+        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
+        allow.groups(['ADMIN']).to(['create', 'read', 'update', 'delete']),
+        allow.groups(['NURSE']).to(['read'])
     ]),
 
     // 6. VITAL SIGNS - Patient health metrics
@@ -248,9 +254,15 @@ const schema = a.schema({
         submittedAt: a.datetime(),
         approvedAt: a.datetime(),
         rejectionReason: a.string(),
-        glosaDefense: a.string(), // AI-generated defense
+        glosaDefense: a.string(), // AI-generated defense (legacy)
+        
+        // Phase 12: AI Output Persistence
+        ripsValidationResult: a.json(), // Stores validateRIPS JSON output
+        glosaDefenseText: a.string(), // Stores glosaDefender markdown output
+        glosaDefenseGeneratedAt: a.datetime(), // Timestamp of AI generation
     }).authorization(allow => [
-        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')
+        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
+        allow.groups(['ADMIN']).to(['create', 'read', 'update', 'delete'])
     ]),
     
     // 8. VISIT - Phase 3: Clinical documentation workflow

@@ -1,5 +1,12 @@
 import { type Schema } from '../../data/resource';
 import { AIClient } from './ai-client';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, UpdateCommand } from '@aws-sdk/lib-dynamodb';
+
+const ddbClient = new DynamoDBClient({});
+const docClient = DynamoDBDocumentClient.from(ddbClient);
+
+const BILLING_RECORD_TABLE = process.env.BILLING_RECORD_TABLE_NAME!;
 
 /**
  * Glosa Defender - AI-Powered Billing Defense
@@ -110,11 +117,31 @@ Devuelve ÚNICAMENTE el texto de la carta, sin comentarios adicionales.
 
         // 3. Extract defense letter
         const defenseLetter = responseBody.content[0].text;
+        const generatedAt = new Date().toISOString();
+
+        // Phase 12: Persist defense text to BillingRecord
+        if (input.billingRecord.id) {
+            try {
+                await docClient.send(new UpdateCommand({
+                    TableName: BILLING_RECORD_TABLE,
+                    Key: { id: input.billingRecord.id },
+                    UpdateExpression: 'SET glosaDefenseText = :text, glosaDefenseGeneratedAt = :timestamp, updatedAt = :updatedAt',
+                    ExpressionAttributeValues: {
+                        ':text': defenseLetter,
+                        ':timestamp': generatedAt,
+                        ':updatedAt': generatedAt
+                    }
+                }));
+            } catch (error) {
+                console.error('Failed to persist defense text:', error);
+                // Don't fail the generation if persistence fails
+            }
+        }
 
         return {
             success: true,
             defenseLetter,
-            generatedAt: new Date().toISOString(),
+            generatedAt,
             model: process.env.MODEL_ID
         };
 

@@ -326,6 +326,13 @@
               "isRequired": false,
               "attributes": []
             },
+            "eps": {
+              "name": "eps",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
             "diagnosis": {
               "name": "diagnosis",
               "isArray": false,
@@ -360,6 +367,13 @@
               "isRequired": false,
               "attributes": [],
               "isArrayNullable": true
+            },
+            "accessCode": {
+              "name": "accessCode",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
             },
             "shifts": {
               "name": "shifts",
@@ -805,6 +819,31 @@
                       "delete",
                       "read"
                     ]
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update",
+                      "delete"
+                    ],
+                    "groups": [
+                      "ADMIN"
+                    ]
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "read"
+                    ],
+                    "groups": [
+                      "NURSE"
+                    ]
                   }
                 ]
               }
@@ -937,6 +976,31 @@
                       "update",
                       "delete",
                       "read"
+                    ]
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update",
+                      "delete"
+                    ],
+                    "groups": [
+                      "ADMIN"
+                    ]
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "read"
+                    ],
+                    "groups": [
+                      "NURSE"
                     ]
                   }
                 ]
@@ -1249,6 +1313,27 @@
               "isRequired": false,
               "attributes": []
             },
+            "ripsValidationResult": {
+              "name": "ripsValidationResult",
+              "isArray": false,
+              "type": "AWSJSON",
+              "isRequired": false,
+              "attributes": []
+            },
+            "glosaDefenseText": {
+              "name": "glosaDefenseText",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "glosaDefenseGeneratedAt": {
+              "name": "glosaDefenseGeneratedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": []
+            },
             "createdAt": {
               "name": "createdAt",
               "isArray": false,
@@ -1287,6 +1372,20 @@
                       "update",
                       "delete",
                       "read"
+                    ]
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update",
+                      "delete"
+                    ],
+                    "groups": [
+                      "ADMIN"
                     ]
                   }
                 ]

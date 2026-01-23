@@ -1,4 +1,11 @@
 import { type Schema } from '../../data/resource';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, UpdateCommand } from '@aws-sdk/lib-dynamodb';
+
+const ddbClient = new DynamoDBClient({});
+const docClient = DynamoDBDocumentClient.from(ddbClient);
+
+const BILLING_RECORD_TABLE = process.env.BILLING_RECORD_TABLE_NAME!;
 
 /**
  * RIPS Validator - Colombian Health Ministry Compliance
@@ -145,6 +152,24 @@ export const handler: Schema["validateRIPS"]["functionHandler"] = async (event) 
         errors,
         warnings
     };
+
+    // Phase 12: Persist validation result to BillingRecord if billingRecordId provided
+    if (billingRecord.id) {
+        try {
+            await docClient.send(new UpdateCommand({
+                TableName: BILLING_RECORD_TABLE,
+                Key: { id: billingRecord.id },
+                UpdateExpression: 'SET ripsValidationResult = :result, updatedAt = :updatedAt',
+                ExpressionAttributeValues: {
+                    ':result': result,
+                    ':updatedAt': new Date().toISOString()
+                }
+            }));
+        } catch (error) {
+            console.error('Failed to persist validation result:', error);
+            // Don't fail the validation if persistence fails
+        }
+    }
 
     return result;
 };
