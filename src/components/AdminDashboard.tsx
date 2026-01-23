@@ -169,7 +169,7 @@ function DashboardView() {
                 const [patientsRes, shiftsRes, inventoryRes] = await Promise.all([
                     (client.models.Patient as any).list(),
                     (client.models.Shift as any).list(),
-                    (client.models.Inventory as any).list()
+                    (client.models.InventoryItem as any).list()
                 ]);
 
                 const lowStockItems = (inventoryRes.data || []).filter(

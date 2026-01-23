@@ -6,7 +6,7 @@ import type { Visit, NotificationItem } from './types/workflow';
 interface StoreType {
     Shift: Shift[];
     Nurse: Nurse[];
-    Inventory: InventoryItem[];
+    InventoryItem: InventoryItem[];
     Patient: Patient[];
     Medication: Medication[];
     Task: Task[];
@@ -28,7 +28,7 @@ const STORE: StoreType = {
         { id: 'nurse-maria', name: 'Maria Rodriguez', email: 'maria@example.com', role: 'NURSE', skills: ['Wound Care', 'Signos Vitales'], locationLat: 4.609, locationLng: -74.08, tenantId: 'tenant-bogota-01' },
         { id: 'nurse-pedro', name: 'Pedro Claver', email: 'pedro@example.com', role: 'ADMIN', skills: ['Artritis', 'Palliativos'], locationLat: 4.612, locationLng: -74.07, tenantId: 'tenant-bogota-01' }
     ],
-    Inventory: [
+    InventoryItem: [
         { id: '1', sku: 'SKU-GLOVE-01', name: 'Surgical Gloves', quantity: 50, stockCount: 50, unit: 'Box', reorderLevel: 20, reorderThreshold: 20, expiryDate: '2026-12-31', tenantId: 'tenant-bogota-01', status: 'in-stock', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
         { id: '2', sku: 'SKU-SYR-05', name: 'Syringe 5ml', quantity: 15, stockCount: 15, unit: 'Unidad', reorderLevel: 30, reorderThreshold: 30, expiryDate: '2025-06-15', tenantId: 'tenant-bogota-01', status: 'low-stock', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
         { id: '3', sku: 'SKU-MASK-N95', name: 'N95 Masks', quantity: 5, stockCount: 5, unit: 'Box', reorderLevel: 10, reorderThreshold: 10, expiryDate: '2027-01-01', tenantId: 'tenant-bogota-01', status: 'out-of-stock', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
@@ -60,7 +60,7 @@ type ListenerCallback<T> = (data: { items: T[] }) => void;
 const LISTENERS: Record<string, ListenerCallback<any>[]> = {
     Shift: [],
     Nurse: [],
-    Inventory: [],
+    InventoryItem: [],
     Patient: [],
     Medication: [],
     Task: [],
@@ -92,7 +92,7 @@ export interface MockClient {
     models: {
         Shift: MockModelClient<Shift>;
         Nurse: MockModelClient<Nurse>;
-        Inventory: MockModelClient<InventoryItem>;
+        InventoryItem: MockModelClient<InventoryItem>;
         Patient: MockModelClient<Patient>;
         Medication: MockModelClient<Medication>;
         Task: MockModelClient<Task>;
@@ -176,7 +176,7 @@ export function generateMockClient(): MockClient {
         models: {
             Shift: createModelHandlers<Shift>('Shift'),
             Nurse: createModelHandlers<Nurse>('Nurse'),
-            Inventory: createModelHandlers<InventoryItem>('Inventory'),
+            InventoryItem: createModelHandlers<InventoryItem>('InventoryItem'),
             Patient: createModelHandlers<Patient>('Patient'),
             Medication: createModelHandlers<Medication>('Medication'),
             Task: createModelHandlers<Task>('Task'),
