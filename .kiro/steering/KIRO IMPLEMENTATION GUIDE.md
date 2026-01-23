@@ -1352,3 +1352,46 @@ type Query {
 **Spec Location:** `.kiro/specs/ux-audit-fixes/` (if created)
 
 **Next Phase:** Production Operations & Continuous Improvement
+
+## Phase 17: Front-End UX Audit Fixes
+**Status:** ✅ COMPLETE
+
+**Goal:** Implement critical front-end UI components identified in the UX Audit to enable Patient and Staff management and Nurse billing workflows.
+
+**Completed Tasks:**
+1. ✅ Created `PatientManager.tsx`
+   - Full CRUD functionality for Patients
+   - Integrated into Admin Dashboard
+   - Supports both mock and real backend modes
+
+2. ✅ Created `StaffManager.tsx`
+   - Full CRUD functionality for Nurses/Staff
+   - Handles Role (ADMIN, NURSE, COORDINATOR) and Skills
+   - Generates placeholder `cognitoSub` for internal consistency
+
+3. ✅ Enhanced `AdminDashboard.tsx`
+   - Added "Administration" section to sidebar
+   - Integrated new Patient and Staff managers
+   - Fixed missing icon imports
+
+4. ✅ Enhanced `SimpleNurseApp.tsx`
+   - Added "Generate Billing Packet" button
+   - Validates visit status (must be APPROVED)
+   - Visual feedback for nurses
+
+5. ✅ Verified Type Safety & Build
+   - Updated `Nurse` type in `src/types.ts` to include `isActive`
+   - Validated build success (`npm run build`)
+
+**Results:**
+- Admin users can now create and manage Patients and Staff directly in the UI.
+- Nurses can trigger the billing packet generation flow.
+- Deployment verified on production URL.
+
+**Artifacts:**
+- Walkthrough: `walkthrough.md` (Check brain directory)
+- Component Code: `src/components/PatientManager.tsx`, `src/components/StaffManager.tsx`
+
+**Next Steps:**
+- Complete backend integration for "Generate Packet" (currently mocked).
+- Manual creation of Cognito users for new Staff members.
