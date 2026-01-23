@@ -8,7 +8,7 @@ import { Amplify } from 'aws-amplify';
 import outputs from '../amplify_outputs.json';
 
 // Determine if we should use real backend or mock
-const USE_REAL_BACKEND = import.meta.env.VITE_USE_REAL_BACKEND === 'true';
+const USE_REAL_BACKEND = import.meta.env.PROD || import.meta.env.VITE_USE_REAL_BACKEND === 'true';
 
 // Ensure Amplify is configured early
 if (USE_REAL_BACKEND) {

@@ -106,8 +106,8 @@ export interface MockClient {
     queries: {
         generateRoster: (args: { nurses: string; unassignedShifts: string }) => Promise<{ data: string; errors?: Error[] }>;
         listApprovedVisitSummariesForFamily: (args: { patientId: string }) => Promise<{ data: string; errors?: Error[] }>;
-        validateRIPS: (args: { invoiceId: string }) => Promise<{ data: string; errors?: Error[] }>;
-        glosaDefender: (args: { glosaId: string }) => Promise<{ data: string; errors?: Error[] }>;
+        validateRIPS: (args: { billingRecordId: string }) => Promise<{ data: { isValid: boolean; errors: string[]; details: any; billingRecordId: string } | null; errors?: Error[] }>;
+        glosaDefender: (args: { billingRecordId: string }) => Promise<{ data: { defenseText: string; generatedAt: string; billingRecordId: string } | null; errors?: Error[] }>;
     };
     mutations: {
         createVisitDraftFromShift: (args: { shiftId: string }) => Promise<{ data: string; errors?: Error[] }>;
@@ -210,15 +210,83 @@ export function generateMockClient(): MockClient {
                     data: JSON.stringify({ assignments })
                 };
             },
-            validateRIPS: async (args: { invoiceId: string }) => {
-                console.log('Mocking RIPS validation for:', args.invoiceId);
+            validateRIPS: async (args: { billingRecordId: string }) => {
+                console.log('Mocking RIPS validation for:', args.billingRecordId);
+                
+                // Find the billing record
+                const billingRecord = (STORE.BillingRecord as BillingRecord[]).find(
+                    b => b.id === args.billingRecordId
+                );
+                
+                if (!billingRecord) {
+                    return { 
+                        data: null, 
+                        errors: [new Error('BillingRecord not found')] 
+                    };
+                }
+                
+                // Simulate validation logic
                 await new Promise(r => setTimeout(r, 1500));
-                return { data: JSON.stringify({ status: 'VALID', message: 'RIPS documentation is complete and valid.' }) };
+                
+                // Mock validation result
+                const isValid = Math.random() > 0.3; // 70% success rate
+                const errors = isValid ? [] : [
+                    'Campo RIPS AC incompleto',
+                    'Falta información del paciente'
+                ];
+                
+                return { 
+                    data: {
+                        isValid,
+                        errors,
+                        details: {
+                            billingRecordId: args.billingRecordId,
+                            validatedAt: new Date().toISOString(),
+                            validationRules: ['AC', 'AP', 'US']
+                        },
+                        billingRecordId: args.billingRecordId
+                    }
+                };
             },
-            glosaDefender: async (args: { glosaId: string }) => {
-                console.log('Mocking glosa defense for:', args.glosaId);
+            glosaDefender: async (args: { billingRecordId: string }) => {
+                console.log('Mocking glosa defense for:', args.billingRecordId);
+                
+                // Find the billing record
+                const billingRecord = (STORE.BillingRecord as BillingRecord[]).find(
+                    b => b.id === args.billingRecordId
+                );
+                
+                if (!billingRecord) {
+                    return { 
+                        data: null, 
+                        errors: [new Error('BillingRecord not found')] 
+                    };
+                }
+                
+                // Simulate AI generation
                 await new Promise(r => setTimeout(r, 2000));
-                return { data: JSON.stringify({ defenseLetter: 'AI generated defense letter text here...' }) };
+                
+                const defenseText = `Estimados señores de la EPS,
+
+En respuesta a la glosa presentada sobre la factura ${billingRecord.invoiceNumber || 'N/A'}, 
+nos permitimos presentar los siguientes argumentos de defensa:
+
+1. Los servicios prestados están debidamente documentados en el sistema RIPS.
+2. El paciente recibió atención médica necesaria y oportuna.
+3. Todos los procedimientos fueron realizados por personal calificado.
+
+Solicitamos respetuosamente la revisión y aprobación de esta factura.
+
+Atentamente,
+Departamento de Facturación`;
+                
+                return { 
+                    data: {
+                        defenseText,
+                        generatedAt: new Date().toISOString(),
+                        billingRecordId: args.billingRecordId
+                    }
+                };
             },
             listApprovedVisitSummariesForFamily: async (args: { patientId: string }) => {
                 const visits = (STORE.Visit as Visit[]).filter(v => v.patientId === args.patientId && v.status === 'APPROVED');
