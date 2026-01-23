@@ -144,21 +144,31 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ userId, onNo
   useEffect(() => {
     setIsLoading(true);
 
-    const sub = (client.models.Notification.observeQuery({
-      filter: { userId: { eq: userId } }
-    }) as any).subscribe({
-      next: ({ items }: any) => {
-        setNotifications(items as NotificationItem[]);
-        setIsLoading(false);
-      },
-      error: (err: any) => {
-        console.error('Error in notifications subscription:', err);
-        setError('Error al cargar notificaciones');
-        setIsLoading(false);
-      }
-    });
+    try {
+      // Safe subscription with error handling
+      const query = (client.models.Notification.observeQuery({
+        filter: { userId: { eq: userId } }
+      }) as any);
 
-    return () => sub.unsubscribe();
+      const sub = query.subscribe({
+        next: ({ items }: any) => {
+          setNotifications(items as NotificationItem[]);
+          setIsLoading(false);
+        },
+        error: (err: any) => {
+          console.error('Error in notifications subscription:', JSON.stringify(err, null, 2));
+          // Don't set error state to prevent UI crash, just log it
+          // setError('Live updates unavailable'); 
+          setIsLoading(false);
+        }
+      });
+
+      return () => sub.unsubscribe();
+    } catch (e) {
+      console.error('Failed to setup notification subscription:', e);
+      setIsLoading(false);
+      return () => { };
+    }
   }, [userId]);
 
   const fetchNotifications = useCallback(async () => {
