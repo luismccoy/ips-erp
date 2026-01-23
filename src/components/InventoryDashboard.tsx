@@ -16,7 +16,7 @@ export function InventoryDashboard() {
             }
 
             loadMore(async (token) => {
-                const response = await (client.models.Inventory as any).list({
+                const response = await (client.models.InventoryItem as any).list({
                     limit: 50,
                     nextToken: token
                 });
@@ -29,7 +29,7 @@ export function InventoryDashboard() {
 
     const handleLoadMore = () => {
         loadMore(async (token) => {
-            const response = await (client.models.Inventory as any).list({
+            const response = await (client.models.InventoryItem as any).list({
                 limit: 50,
                 nextToken: token
             });

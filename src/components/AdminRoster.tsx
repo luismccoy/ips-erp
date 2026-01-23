@@ -31,7 +31,7 @@ export const AdminRoster: React.FC = () => {
         const nurseQuery = client.models.Nurse.observeQuery({
             filter: { tenantId: { eq: tenantId } }
         });
-        
+
         const nurseSub = (nurseQuery as any).subscribe({
             next: (data: any) => setNurses(data.items)
         });
@@ -42,7 +42,7 @@ export const AdminRoster: React.FC = () => {
                 status: { eq: 'PENDING' }
             }
         });
-        
+
         const shiftSub = (shiftQuery as any).subscribe({
             next: (data: any) => setShifts(data.items)
         });
@@ -85,7 +85,7 @@ export const AdminRoster: React.FC = () => {
             await api.execute((async () => {
                 for (const assignment of assignments) {
                     if (assignment.nurseId !== 'UNASSIGNED') {
-                        await client.models.Shift.update({
+                        await (client.models.Shift as any).update({
                             id: assignment.shiftId,
                             nurseId: assignment.nurseId,
                             status: 'PENDING'
