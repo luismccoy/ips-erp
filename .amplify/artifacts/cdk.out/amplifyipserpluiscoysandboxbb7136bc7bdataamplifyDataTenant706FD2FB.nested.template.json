@@ -535,6 +535,14 @@
       "Value": "amplifyData"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }

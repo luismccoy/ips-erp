@@ -332,7 +332,9 @@ const schema = a.schema({
         entityId: a.id().required(),
         read: a.boolean().required().default(false),
     }).authorization(allow => [
-        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')
+        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
+        // Phase 16: Explicit group permissions for subscriptions
+        allow.groups(['ADMIN', 'NURSE']).to(['read', 'update'])
     ]),
 
     // ============================================
@@ -372,6 +374,16 @@ const schema = a.schema({
     // ============================================
     // PHASE 3: WORKFLOW COMPLIANCE QUERIES/MUTATIONS
     // ============================================
+    
+    // Phase 16: Family Portal access code verification
+    verifyFamilyAccessCode: a.query()
+        .arguments({
+            patientId: a.id().required(),
+            accessCode: a.string().required()
+        })
+        .returns(a.json())
+        .authorization(allow => [allow.authenticated()])
+        .handler(a.handler.function('verify-family-access')),
     
     // Family-safe query for approved visit summaries
     listApprovedVisitSummariesForFamily: a.query()

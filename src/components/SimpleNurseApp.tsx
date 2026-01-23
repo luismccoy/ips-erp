@@ -12,7 +12,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { Activity, LogOut, FileText, Edit3, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Activity, LogOut, FileText, Edit3, Clock, CheckCircle, XCircle, AlertCircle, FileCheck } from 'lucide-react';
 import { client, isUsingRealBackend } from '../amplify-utils';
 import { createVisitDraft } from '../api/workflow-api';
 import { usePagination } from '../hooks/usePagination';
@@ -153,6 +153,7 @@ interface DocumentationButtonProps {
     onStartDocumentation: (shiftId: string) => void;
     onContinueDocumentation: (shiftId: string) => void;
     isLoading: boolean;
+    onGeneratePacket: (shiftId: string) => void;
 }
 
 const DocumentationButton: React.FC<DocumentationButtonProps> = ({
@@ -160,6 +161,7 @@ const DocumentationButton: React.FC<DocumentationButtonProps> = ({
     onStartDocumentation,
     onContinueDocumentation,
     isLoading,
+    onGeneratePacket
 }) => {
     // Only show button for COMPLETED shifts
     if (shift.status !== 'COMPLETED') {
@@ -168,9 +170,27 @@ const DocumentationButton: React.FC<DocumentationButtonProps> = ({
 
     const visit = shift.visit;
 
-    // If visit exists and is SUBMITTED or APPROVED, don't show edit button
-    if (visit && (visit.status === 'SUBMITTED' || visit.status === 'APPROVED')) {
-        return null;
+    // If visit APPROVED, show "Generate Packet" (New Feature from UX Audit)
+    if (visit && visit.status === 'APPROVED') {
+        return (
+            <button
+                onClick={() => onGeneratePacket(shift.id)}
+                className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+                <FileCheck size={16} />
+                Generar Paquete de Facturación
+            </button>
+        );
+    }
+
+    // If visit exists and is SUBMITTED, show "Pending Review" (disabled)
+    if (visit && visit.status === 'SUBMITTED') {
+        return (
+            <div className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 bg-yellow-500/10 text-yellow-500 text-sm font-medium rounded-lg border border-yellow-500/20">
+                <Clock size={16} />
+                Esperando Revisión
+            </div>
+        );
     }
 
     // If visit exists and is DRAFT or REJECTED, show "Continue Documentation"
@@ -447,6 +467,15 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
     }, []);
 
     /**
+     * Handles Billing Packet Generation (Mock)
+     */
+    const handleGeneratePacket = useCallback((shiftId: string) => {
+        // In backend, this would check if a BillingRecord exists or create one
+        console.log('Generating packet for shift:', shiftId);
+        alert('Packet Generated! It has been sent to the Billing Department.');
+    }, []);
+
+    /**
      * Handles successful visit submission.
      * Refreshes data and closes the form.
      */
@@ -612,6 +641,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                     shift={shift}
                                                     onStartDocumentation={handleStartDocumentation}
                                                     onContinueDocumentation={handleContinueDocumentation}
+                                                    onGeneratePacket={handleGeneratePacket}
                                                     isLoading={isCreatingThisDraft}
                                                 />
                                             </div>

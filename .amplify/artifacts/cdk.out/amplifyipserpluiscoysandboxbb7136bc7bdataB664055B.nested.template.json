@@ -21,6 +21,14 @@
       "Value": "amplifyData"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -99,6 +107,14 @@
       "Value": "amplifyData"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -119,7 +135,7 @@
        {
         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
        },
-       "/a6d2539d257bdc502e1a56dc3e86912d39e46e6f47a55c8aba7eb7c83e8a7204.json"
+       "/553e4690cc73bf6d115a98a521e190c853b784521c651b26de44d14d8d060d96.json"
       ]
      ]
     }
@@ -189,6 +205,14 @@
       "Value": "amplifyData"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -209,7 +233,7 @@
        {
         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
        },
-       "/daf4e9e8808746756bc104017d61039053de0d2c84deb9eb86190da2db5d8969.json"
+       "/9d2ab750da9430035ae0dad0a0becc20e2c08cc45ad903f7b28d67eefc7be10a.json"
       ]
      ]
     }
@@ -282,6 +306,14 @@
       "Value": "amplifyData"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -302,7 +334,7 @@
        {
         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
        },
-       "/3c48a803e66c74fad124fd3c93d40fb4d7db3db09a044f4a045afa1cbf2c38a8.json"
+       "/283df630956a6a8ec7869a172e1cedb0b8c7d2a036d208fb97e9cbde8e55555b.json"
       ]
      ]
     }
@@ -375,6 +407,14 @@
       "Value": "amplifyData"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -395,7 +435,7 @@
        {
         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
        },
-       "/96f93e11cf07808b31a3a9cda907b71f77c6af017050e82bc07fb9776df73652.json"
+       "/202b80e16ed2ce38976257647caf9044f5309b365b83adf5260e5e9d627f4178.json"
       ]
      ]
     }
@@ -468,6 +508,14 @@
       "Value": "amplifyData"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -488,7 +536,7 @@
        {
         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
        },
-       "/eac12bd7512981a13717d92825c316d2cae7b6e893c951b2b8546891d6ee64c5.json"
+       "/afeaed8a4819699c97992a1774099263a122c04d07e6f82775398f7b4cc8a3e8.json"
       ]
      ]
     }
@@ -561,6 +609,14 @@
       "Value": "amplifyData"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -581,7 +637,7 @@
        {
         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
        },
-       "/bd63bee036286d670ba1e26562e02a4ab7a0e460c9f9e35152e6073801cb7343.json"
+       "/443500abe55bdacca2364658c49f703c37f617cd69f4785a8452d7ab1b64b6e9.json"
       ]
      ]
     }
@@ -654,6 +710,14 @@
       "Value": "amplifyData"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -674,7 +738,7 @@
        {
         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
        },
-       "/8fdae188e780efc1895d2acd400a40c63b4ef929f259d026b3175aa1759ac3ac.json"
+       "/adaa7b3e47651ab76b54c9fa9308abd0dcd35845e39169ee23c5eb68aa8f3398.json"
       ]
      ]
     }
@@ -747,6 +811,14 @@
       "Value": "amplifyData"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -767,7 +839,7 @@
        {
         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
        },
-       "/a29c471419e5af487eef85100b7c4d041c318de4b3310a6fdefde89f2998e35a.json"
+       "/973412b0f5782f2b7a76982e00994c663b06e62cd63fb047d49d9c8c3dfcd6a2.json"
       ]
      ]
     }
@@ -840,6 +912,14 @@
       "Value": "amplifyData"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -860,7 +940,7 @@
        {
         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
        },
-       "/396b38547f4f02bd95fc06b014f857c75fdfee89cf78156f278ec2cba3e647ff.json"
+       "/0a1618d373daaf037f96f80430a046041c1282dcdb4b8ae63bea670d84e6b04d.json"
       ]
      ]
     }
@@ -933,6 +1013,14 @@
       "Value": "amplifyData"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -953,7 +1041,7 @@
        {
         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
        },
-       "/6cc12ee056156a35c8af0ae14d18a99d8b491c33e00c0dcb6147925f3e38b9b6.json"
+       "/b9484a94f2eac491aee00070d05ca2b7dfc7d02958bd1111cb2e221bd3b078e8.json"
       ]
      ]
     }
@@ -1026,6 +1114,14 @@
       "Value": "amplifyData"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -1046,7 +1142,7 @@
        {
         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
        },
-       "/7ab64172872324cda426131ca5789eae35044344486236a7c1a0e89747187dd9.json"
+       "/8d10f116fea750ae62bd03021d05b63fafe9362e962f117fd540afddefacc22b.json"
       ]
      ]
     }
@@ -1098,6 +1194,14 @@
       "Value": "amplifyData"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -1118,7 +1222,7 @@
        {
         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
        },
-       "/56d5dc8a6b8d59555177584be6da03adbbfe5c400dcf62c764fbec28de8a366d.json"
+       "/719342c2278927eb12ce1326654bebcb7942d19a2a47b7d231bb150e2caf646e.json"
       ]
      ]
     }
@@ -1290,6 +1394,14 @@
       "Value": "amplifyData"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -1374,6 +1486,14 @@
      {
       "Key": "amplify:friendly-name",
       "Value": "amplifyData"
+     },
+     {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
      },
      {
       "Key": "aws-cdk:auto-delete-objects",
@@ -1638,6 +1758,14 @@
       "Value": "sandbox"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -1819,6 +1947,14 @@
       "Value": "sandbox"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -1845,6 +1981,14 @@
      {
       "Key": "amplify:deployment-type",
       "Value": "sandbox"
+     },
+     {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
      },
      {
       "Key": "aws-cdk:auto-delete-objects",
@@ -2038,6 +2182,8 @@
     "Name": "/amplify/resource_reference/ipserp/luiscoy-sandbox-bb7136bc7b/AMPLIFY_DATA_GRAPHQL_ENDPOINT",
     "Tags": {
      "amplify:deployment-type": "sandbox",
+     "application": "EPS",
+     "auto-delete": "no",
      "created-by": "amplify"
     },
     "Type": "String",
@@ -2060,6 +2206,8 @@
     "Name": "/amplify/resource_reference/ipserp/luiscoy-sandbox-bb7136bc7b/AMPLIFY_DATA_MODEL_INTROSPECTION_SCHEMA_BUCKET_NAME",
     "Tags": {
      "amplify:deployment-type": "sandbox",
+     "application": "EPS",
+     "auto-delete": "no",
      "created-by": "amplify"
     },
     "Type": "String",
@@ -2079,6 +2227,8 @@
     "Name": "/amplify/resource_reference/ipserp/luiscoy-sandbox-bb7136bc7b/AMPLIFY_DATA_MODEL_INTROSPECTION_SCHEMA_KEY",
     "Tags": {
      "amplify:deployment-type": "sandbox",
+     "application": "EPS",
+     "auto-delete": "no",
      "created-by": "amplify"
     },
     "Type": "String",
@@ -2096,6 +2246,8 @@
     "Name": "/amplify/resource_reference/ipserp/luiscoy-sandbox-bb7136bc7b/AMPLIFY_DATA_DEFAULT_NAME",
     "Tags": {
      "amplify:deployment-type": "sandbox",
+     "application": "EPS",
+     "auto-delete": "no",
      "created-by": "amplify"
     },
     "Type": "String",

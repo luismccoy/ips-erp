@@ -11,10 +11,19 @@ export function BillingDashboard() {
     // AI Loading States
     const [isValidating, setIsValidating] = useState(false);
     const [isGeneratingRebuttal, setIsGeneratingRebuttal] = useState(false);
+    const [isGeneratingDefense, setIsGeneratingDefense] = useState(false);
 
     // AI Result Modals
     const [ripsResult, setRipsResult] = useState<any | null>(null);
     const [rebuttalResult, setRebuttalResult] = useState<string | null>(null);
+    const [defenseLetterModal, setDefenseLetterModal] = useState<{
+        isOpen: boolean;
+        content: string;
+        billingRecordId: string;
+    }>({ isOpen: false, content: '', billingRecordId: '' });
+
+    // Error Message State
+    const [errorMessage, setErrorMessage] = useState<string>('');
 
     const tenantId = MOCK_USER.attributes['custom:tenantId'];
 
@@ -122,6 +131,69 @@ export function BillingDashboard() {
             alert('Error al generar respuesta');
         } finally {
             setIsGeneratingRebuttal(false);
+        }
+    };
+
+    const handleGenerateDefense = async (billingRecordId: string) => {
+        setIsGeneratingDefense(true);
+        setErrorMessage('');
+        
+        try {
+            // Call the glosaDefender Lambda via GraphQL custom query
+            const response = await (client.queries as any).glosaDefender({
+                billingRecordId
+            });
+
+            console.log('Glosa Defense Response:', response);
+
+            // Handle success response
+            if (response.data) {
+                const defenseText = response.data.defenseText || response.data;
+                setDefenseLetterModal({
+                    isOpen: true,
+                    content: typeof defenseText === 'string' ? defenseText : JSON.stringify(defenseText, null, 2),
+                    billingRecordId
+                });
+            } else if (response.errors && response.errors.length > 0) {
+                // Handle GraphQL errors
+                const error = response.errors[0];
+                console.error('GraphQL Error:', error);
+                
+                // Map error types to Spanish messages
+                let errorMsg = 'Error al generar respuesta AI. Por favor intente nuevamente.';
+                
+                if (error.message.includes('timeout') || error.message.includes('timed out')) {
+                    errorMsg = 'La operación tardó demasiado. Por favor intente nuevamente.';
+                } else if (error.message.includes('authorization') || error.message.includes('unauthorized')) {
+                    errorMsg = 'No tiene permisos para realizar esta operación.';
+                } else if (error.message.includes('not found')) {
+                    errorMsg = 'No se encontró el registro de facturación especificado.';
+                } else if (error.message) {
+                    // Pass through specific error messages from Lambda
+                    errorMsg = error.message;
+                }
+                
+                setErrorMessage(errorMsg);
+            } else {
+                // Unexpected response format
+                console.error('Unexpected response format:', response);
+                setErrorMessage('Error al generar respuesta AI. Por favor intente nuevamente.');
+            }
+        } catch (error) {
+            // Handle network and client-side errors
+            console.error('Defense generation failed:', error);
+            
+            let errorMsg = 'Error al generar respuesta AI. Por favor intente nuevamente.';
+            
+            if (error instanceof TypeError && error.message.includes('fetch')) {
+                errorMsg = 'Error de conexión. Verifique su conexión a internet.';
+            } else if (error instanceof Error) {
+                errorMsg = error.message;
+            }
+            
+            setErrorMessage(errorMsg);
+        } finally {
+            setIsGeneratingDefense(false);
         }
     };
 
@@ -242,13 +314,31 @@ export function BillingDashboard() {
                         </div>
 
                         <div className="space-y-4">
-                            <div className="p-4 bg-white/5 rounded-xl border border-white/10 hover:border-blue-500/50 transition-all cursor-pointer group" onClick={handleGenerateRebuttal}>
+                            <div 
+                                className={`p-4 bg-white/5 rounded-xl border border-white/10 transition-all ${
+                                    isGeneratingDefense 
+                                        ? 'opacity-60 cursor-not-allowed' 
+                                        : 'hover:border-blue-500/50 cursor-pointer group'
+                                }`}
+                                onClick={() => {
+                                    if (isGeneratingDefense) return; // Prevent clicks while processing
+                                    
+                                    // For demo purposes, use the first billing record if available
+                                    if (bills.length > 0) {
+                                        handleGenerateDefense(bills[0].id);
+                                    } else {
+                                        setErrorMessage('No hay registros de facturación disponibles.');
+                                    }
+                                }}
+                            >
                                 <div className="flex justify-between items-start mb-2">
                                     <span className="text-[10px] font-black uppercase text-blue-400 tracking-wider">Glosa Defender</span>
-                                    {isGeneratingRebuttal && <LoadingSpinner size="sm" />}
+                                    {isGeneratingDefense && <LoadingSpinner size="sm" />}
                                 </div>
-                                <h4 className="font-bold mb-1 group-hover:text-blue-400">Contestación de Glosa Automática</h4>
-                                <p className="text-xs text-slate-400 italic">Generar sustento técnico basado en historia clínica para la glosa FE-882 de EPS Sanitas.</p>
+                                <h4 className={`font-bold mb-1 ${!isGeneratingDefense && 'group-hover:text-blue-400'}`}>
+                                    {isGeneratingDefense ? 'Generando...' : 'Generar Respuesta AI'}
+                                </h4>
+                                <p className="text-xs text-slate-400 italic">Generar sustento técnico basado en historia clínica para contestación de glosa.</p>
                             </div>
 
                             <div className="p-4 bg-white/5 rounded-xl border border-white/10 hover:border-emerald-500/50 transition-all cursor-pointer group" onClick={handleValidateRIPS}>
@@ -261,6 +351,23 @@ export function BillingDashboard() {
                             </div>
                         </div>
                     </div>
+
+                    {/* Error Message Display */}
+                    {errorMessage && (
+                        <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex gap-3 text-red-800 animate-in fade-in duration-200">
+                            <AlertTriangle className="shrink-0" size={20} />
+                            <div className="flex-1">
+                                <h4 className="font-bold mb-1">Error</h4>
+                                <p className="text-sm">{errorMessage}</p>
+                            </div>
+                            <button 
+                                onClick={() => setErrorMessage('')}
+                                className="text-red-400 hover:text-red-600 transition-colors"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+                    )}
 
                     <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
                         <h3 className="font-black text-slate-900 mb-4 flex items-center gap-2">
@@ -386,6 +493,57 @@ export function BillingDashboard() {
                         >
                             Close Report
                         </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Defense Letter Modal */}
+            {defenseLetterModal.isOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 animate-in fade-in zoom-in duration-200">
+                        <div className="flex justify-between items-center mb-6">
+                            <div className="flex items-center gap-2">
+                                <Sparkles className="text-blue-500" size={20} />
+                                <h3 className="font-bold text-lg text-slate-900">Carta de Defensa Generada</h3>
+                            </div>
+                            <button 
+                                onClick={() => setDefenseLetterModal({ ...defenseLetterModal, isOpen: false })} 
+                                className="text-slate-400 hover:text-slate-600"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        
+                        <div className="mb-6">
+                            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">
+                                Contenido de la Defensa (Editable)
+                            </label>
+                            <textarea
+                                className="w-full h-64 p-4 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none leading-relaxed"
+                                value={defenseLetterModal.content}
+                                onChange={(e) => setDefenseLetterModal({ ...defenseLetterModal, content: e.target.value })}
+                            />
+                        </div>
+                        
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setDefenseLetterModal({ ...defenseLetterModal, isOpen: false })}
+                                className="px-5 py-3 text-slate-500 font-bold hover:bg-slate-50 rounded-xl transition-all"
+                            >
+                                Cerrar
+                            </button>
+                            <button
+                                onClick={() => {
+                                    navigator.clipboard.writeText(defenseLetterModal.content);
+                                    // Show success feedback (could add a toast notification here)
+                                    console.log('Defense letter copied to clipboard');
+                                }}
+                                className="px-5 py-3 bg-[#2563eb] text-white font-bold rounded-xl hover:bg-blue-600 transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20"
+                            >
+                                <ClipboardCheck size={18} />
+                                Copiar al Portapapeles
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

@@ -303,6 +303,14 @@
       "Value": "amplifyData"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -530,6 +538,14 @@
      {
       "Key": "amplify:friendly-name",
       "Value": "amplifyData"
+     },
+     {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
      },
      {
       "Key": "created-by",
@@ -761,6 +777,14 @@
       "Value": "amplifyData"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -988,6 +1012,14 @@
      {
       "Key": "amplify:friendly-name",
       "Value": "amplifyData"
+     },
+     {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
      },
      {
       "Key": "created-by",
@@ -1219,6 +1251,14 @@
       "Value": "amplifyData"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -1446,6 +1486,14 @@
      {
       "Key": "amplify:friendly-name",
       "Value": "amplifyData"
+     },
+     {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
      },
      {
       "Key": "created-by",
@@ -1677,6 +1725,14 @@
       "Value": "amplifyData"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -1904,6 +1960,14 @@
      {
       "Key": "amplify:friendly-name",
       "Value": "amplifyData"
+     },
+     {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
      },
      {
       "Key": "created-by",
