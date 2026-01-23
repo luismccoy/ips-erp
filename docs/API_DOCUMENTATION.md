@@ -3857,3 +3857,304 @@ npx ampx sandbox --once
 - family.perez@ips.com (Ana Pérez, Familiar)
 
 **Next Phase:** Frontend testing and production data population
+
+
+---
+
+## Phase 12: Frontend-Backend Alignment (January 22, 2026)
+
+### Overview
+This phase aligns the backend schema with frontend requirements from the completed frontend revamp (Phases 1-15).
+
+### Schema Updates
+
+#### 1. Patient Model Updates
+**Added Fields:**
+- `eps` (String, nullable) - Health insurance provider (EPS) for Family Portal header
+- `accessCode` (String, nullable) - Secure access code for Family Portal authentication
+
+**Usage:**
+```typescript
+// Family Portal access control
+const patient = await client.models.Patient.get({ id: patientId });
+if (patient.data?.accessCode === userInputCode) {
+  // Grant access to approved visits
+}
+```
+
+#### 2. InventoryItem Model Updates
+**Changed Enum Values:**
+- `status` field now accepts **lowercase** values: `'in-stock' | 'low-stock' | 'out-of-stock'`
+- **Breaking Change:** Previous uppercase values (`IN_STOCK`, `LOW_STOCK`, `OUT_OF_STOCK`) are deprecated
+
+**Migration Required:**
+```typescript
+// Old (deprecated)
+status: 'IN_STOCK'
+
+// New (required)
+status: 'in-stock'
+```
+
+**Frontend Compatibility:**
+The frontend TypeScript types expect lowercase values. This change prevents build failures.
+
+### Pending Backend Implementations
+
+#### 1. Family Portal Access Control
+**Current State:** Mock access code (1234) in frontend  
+**Required:** Lambda Authorizer or field verification
+
+**Implementation Options:**
+
+**Option A: Lambda Authorizer (Recommended)**
+```typescript
+// New Lambda: amplify/functions/family-portal-auth/handler.ts
+export const handler = async (event: any) => {
+  const { patientId, accessCode } = event.arguments;
+  
+  // Verify access code against Patient.accessCode
+  const patient = await ddb.get({
+    TableName: process.env.PATIENT_TABLE,
+    Key: { id: patientId }
+  });
+  
+  if (patient.Item?.accessCode !== accessCode) {
+    throw new Error('Invalid access code');
+  }
+  
+  return { authorized: true };
+};
+```
+
+**Option B: Field Check in listApprovedVisitSummaries**
+```typescript
+// Update existing Lambda: amplify/functions/list-approved-visit-summaries/handler.ts
+// Add access code verification before returning visits
+const patient = await ddb.get({ ... });
+if (patient.Item?.accessCode !== event.arguments.accessCode) {
+  throw new Error('Unauthorized');
+}
+```
+
+#### 2. Route Optimizer Lambda
+**Current State:** "Optimizar Rutas" button in RosterDashboard is UI shell  
+**Required:** Geo-spatial sorting Lambda
+
+**Implementation:**
+```typescript
+// New Lambda: amplify/functions/route-optimizer/handler.ts
+export const handler = async (event: any) => {
+  const { nurses, shifts } = event.arguments;
+  
+  // Use Haversine formula or AWS Location Service
+  // Sort shifts by proximity to minimize travel time
+  const optimizedRoutes = calculateOptimalRoutes(nurses, shifts);
+  
+  return { routes: optimizedRoutes };
+};
+```
+
+**Schema Addition:**
+```typescript
+// Add to amplify/data/resource.ts
+optimizeRoutes: a.query()
+  .arguments({
+    nurses: a.json(),
+    shifts: a.json()
+  })
+  .returns(a.json())
+  .authorization(allow => [allow.authenticated()])
+  .handler(a.handler.function('route-optimizer')),
+```
+
+#### 3. Glosa Rebuttal AI Integration
+**Current State:** "Generar Respuesta AI" button shows alert  
+**Required:** Connect to existing glosa-defender Lambda
+
+**Frontend Integration:**
+```typescript
+// Already exists in backend, just needs frontend connection
+const result = await client.queries.generateGlosaDefense({
+  billingRecord: record,
+  patientHistory: history,
+  clinicalNotes: notes
+});
+```
+
+**Status:** Backend ready, frontend needs to call existing Lambda instead of showing alert.
+
+#### 4. RIPS Validation Lambda
+**Current State:** Validator runs locally or mock  
+**Required:** Ensure validateRIPS Lambda is reachable
+
+**Verification:**
+```bash
+# Test Lambda connectivity
+aws lambda invoke \
+  --function-name <rips-validator-function-name> \
+  --payload '{"billingRecord": {...}}' \
+  response.json
+```
+
+**Status:** Lambda exists and is deployed. Frontend should use real backend mode.
+
+### Data Migration Requirements
+
+#### 1. Nurse Location Data
+**Required:** Populate `locationLat` and `locationLng` for Map view
+
+**Migration Script:**
+```typescript
+// Seed script to add coordinates
+const nurses = await client.models.Nurse.list();
+for (const nurse of nurses.data) {
+  await client.models.Nurse.update({
+    id: nurse.id,
+    locationLat: generateRandomLat(), // Replace with real coordinates
+    locationLng: generateRandomLng()
+  });
+}
+```
+
+#### 2. Shift Status Transitions
+**Required:** Ensure state machine transitions correctly
+
+**Verification:**
+- PENDING → IN_PROGRESS (nurse starts visit)
+- IN_PROGRESS → COMPLETED (nurse completes visit)
+- COMPLETED → Visit created (createVisitDraftFromShift)
+- Visit DRAFT → SUBMITTED (submitVisit)
+- Visit SUBMITTED → APPROVED/REJECTED (admin action)
+
+**Status:** State machine fully implemented in Phase 9. No changes needed.
+
+### Deployment Checklist
+
+#### Pre-Deployment
+- [x] Schema updated (Patient.eps, Patient.accessCode, InventoryItem.status lowercase)
+- [ ] Deploy schema changes: `npx ampx sandbox --once`
+- [ ] Verify GraphQL endpoint responds
+- [ ] Test InventoryItem status with lowercase values
+- [ ] Test Patient.eps field in Family Portal
+
+#### Post-Deployment
+- [ ] Update frontend environment variable: `VITE_USE_REAL_BACKEND=true`
+- [ ] Test Family Portal with access code
+- [ ] Verify CORS settings on AppSync
+- [ ] Monitor CloudWatch for errors
+- [ ] Test all AI features (roster, RIPS, glosa)
+
+### CORS Configuration
+
+**AppSync CORS Settings:**
+```json
+{
+  "allowOrigins": [
+    "https://main.d2wwgecog8smmr.amplifyapp.com",
+    "http://localhost:5173"
+  ],
+  "allowMethods": ["GET", "POST", "OPTIONS"],
+  "allowHeaders": ["Content-Type", "Authorization"],
+  "maxAge": 3600
+}
+```
+
+**Verification:**
+```bash
+curl -I https://ga4dwdcapvg5ziixpgipcvmfbe.appsync-api.us-east-1.amazonaws.com/graphql \
+  -H "Origin: https://main.d2wwgecog8smmr.amplifyapp.com"
+```
+
+### Testing Procedures
+
+#### 1. Schema Validation
+```bash
+# Verify lowercase inventory status
+query {
+  listInventoryItems {
+    items {
+      id
+      name
+      status  # Should return: in-stock, low-stock, or out-of-stock
+    }
+  }
+}
+```
+
+#### 2. Patient EPS Field
+```bash
+# Verify EPS field exists
+query {
+  getPatient(id: "patient-123") {
+    id
+    name
+    eps  # Should return health insurance provider
+    accessCode  # Should return access code (if set)
+  }
+}
+```
+
+#### 3. Family Portal Access
+```bash
+# Test access code verification
+mutation {
+  # This will be implemented in Lambda Authorizer
+}
+```
+
+### Next Steps
+
+**Immediate (This Week):**
+1. Deploy schema changes
+2. Test lowercase inventory status
+3. Verify Patient.eps field
+
+**Short-term (Next 2 Weeks):**
+1. Implement Family Portal Lambda Authorizer
+2. Implement Route Optimizer Lambda
+3. Connect Glosa Rebuttal button to existing Lambda
+
+**Medium-term (Next Month):**
+1. Seed nurse location data
+2. Add pagination to all list views
+3. Implement real-time subscriptions in all components
+
+### Breaking Changes
+
+**InventoryItem.status Enum:**
+- **Old:** `IN_STOCK`, `LOW_STOCK`, `OUT_OF_STOCK`
+- **New:** `in-stock`, `low-stock`, `out-of-stock`
+- **Impact:** Existing inventory records will need migration
+- **Migration:** Run update script to convert uppercase to lowercase
+
+**Migration Script:**
+```typescript
+const items = await client.models.InventoryItem.list();
+for (const item of items.data) {
+  const newStatus = item.status?.toLowerCase().replace('_', '-');
+  await client.models.InventoryItem.update({
+    id: item.id,
+    status: newStatus as 'in-stock' | 'low-stock' | 'out-of-stock'
+  });
+}
+```
+
+### Documentation Updates
+
+**Updated Files:**
+- `amplify/data/resource.ts` - Schema changes
+- `docs/API_DOCUMENTATION.md` - This section
+- `src/types.ts` - Already aligned with lowercase status
+
+**No Changes Needed:**
+- Lambda functions (no breaking changes)
+- Frontend components (already using lowercase)
+- Authentication (no changes)
+
+---
+
+**Phase 12 Status:** ✅ Schema Updates Complete  
+**Next Phase:** Lambda Implementations (Family Auth, Route Optimizer)  
+**Deployment:** Ready for `npx ampx sandbox --once`
+

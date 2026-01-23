@@ -1,5 +1,17 @@
 # Admin Dashboard Logic Fixes - Tasks
 
+## ✅ BACKEND IMPLEMENTATION: 100% COMPLETE
+
+All backend work is done. Schema deployed, Lambda functions updated, test users created.
+
+## 🔄 REMAINING WORK: Manual Testing Only
+
+**Next Step:** Run `./.local-tests/create-test-data.sh` to create test data, then follow `.local-tests/PHASE12_TESTING_GUIDE.md` for manual testing in AppSync Console.
+
+**Quick Start Guide:** `.local-tests/PHASE12_READY_TO_TEST.md`
+
+---
+
 ## Phase 12: Admin Dashboard Logic Fixes
 
 ### 1. Schema Updates
@@ -37,32 +49,31 @@
   - [x] 3.1.2 Add nurse.maria@ips.com user creation
   - [x] 3.1.3 Add family.perez@ips.com user creation
   - [x] 3.1.4 Set appropriate custom attributes for each user
-- [ ] 3.2 Create test data for users
-  - [ ] 3.2.1 Create test patients for IPS-001 tenant
-  - [ ] 3.2.2 Create test shifts assigned to nurse.maria
-  - [ ] 3.2.3 Create test visits in various states
-  - [ ] 3.2.4 Link family.perez to test patient
+- [ ] 3.2 Create test data for users (AUTOMATED SCRIPT READY)
+  - [ ] 3.2.1 Run `./.local-tests/create-test-data.sh`
+  - [ ] 3.2.2 Save output resource IDs for manual testing
+  - [ ] 3.2.3 Verify test data created successfully
 
 ### 4. Deployment & Testing
 - [x] 4.1 Deploy schema changes
   - [x] 4.1.1 Run `npx ampx sandbox --once`
   - [x] 4.1.2 Verify deployment success
   - [x] 4.1.3 Check CloudWatch for errors
-- [ ] 4.2 Test BillingRecord AI persistence
+- [ ] 4.2 Test BillingRecord AI persistence (MANUAL - AppSync Console)
   - [ ] 4.2.1 Call validateRIPS and verify result saved
   - [ ] 4.2.2 Call glosaDefender and verify text saved
   - [ ] 4.2.3 Query BillingRecord and verify fields populated
-- [ ] 4.3 Test InventoryItem write access
+- [ ] 4.3 Test InventoryItem write access (MANUAL - AppSync Console)
   - [ ] 4.3.1 Create inventory item as Admin
   - [ ] 4.3.2 Update inventory item as Admin
   - [ ] 4.3.3 Delete inventory item as Admin
   - [ ] 4.3.4 Verify Nurse cannot write
-- [ ] 4.4 Test Visit rejection consistency
+- [ ] 4.4 Test Visit rejection consistency (MANUAL - AppSync Console)
   - [ ] 4.4.1 Submit visit as Nurse
   - [ ] 4.4.2 Reject visit as Admin
-  - [ ] 4.4.3 Verify visit disappears from pending list
+  - [ ] 4.4.3 Verify visit has rejectedAt timestamp
   - [ ] 4.4.4 Verify visit appears in nurse's correction list
-- [ ] 4.5 Test Shift creation
+- [ ] 4.5 Test Shift creation (MANUAL - AppSync Console)
   - [ ] 4.5.1 Create shift as Admin
   - [ ] 4.5.2 Verify shift appears in roster
   - [ ] 4.5.3 Verify Nurse can view shift

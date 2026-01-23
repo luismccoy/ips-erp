@@ -67,9 +67,9 @@ export const handler: Handler = async (event) => {
       throw new Error('Rejection reason is required');
     }
 
-    // 6. Update Visit.status = 'REJECTED'
+    // 6. Update Visit.status = 'REJECTED' with strong consistency
     const now = new Date().toISOString();
-    await docClient.send(new UpdateCommand({
+    const updateResult = await docClient.send(new UpdateCommand({
       TableName: VISIT_TABLE,
       Key: { id: shiftId },
       UpdateExpression: 'SET #status = :status, rejectionReason = :rejectionReason, reviewedAt = :reviewedAt, reviewedBy = :reviewedBy, updatedAt = :updatedAt',
@@ -80,8 +80,11 @@ export const handler: Handler = async (event) => {
         ':reviewedAt': now,
         ':reviewedBy': userId,
         ':updatedAt': now
-      }
+      },
+      ReturnValues: 'ALL_NEW' // Return updated item immediately
     }));
+
+    const updatedVisit = updateResult.Attributes;
 
     // 7. Create AuditLog entry
     const auditId = `audit-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
@@ -130,6 +133,9 @@ export const handler: Handler = async (event) => {
       visitId: shiftId,
       status: 'REJECTED',
       message: 'Visit rejected and returned to nurse',
+      visit: updatedVisit, // Return complete updated Visit object
+      rejectedAt: now,
+      rejectionReason: reason
     };
   } catch (error) {
     console.error('Error rejecting visit:', error);

@@ -135,6 +135,87 @@ inclusion: always
 
 **Next Phase:** Production Operations & Continuous Improvement
 
+## Phase 12: Frontend-Backend Alignment
+**Status:** ✅ COMPLETE (Schema Deployed) | ⏳ LAMBDA IMPLEMENTATIONS PENDING
+
+**Goal:** Align backend with frontend revamp requirements (Phases 1-15 frontend completion).
+
+**Completed Tasks:**
+1. ✅ Updated Patient model:
+   - Added `eps` field (String, nullable) - Health insurance provider for Family Portal
+   - Added `accessCode` field (String, nullable) - Secure Family Portal authentication
+
+2. ✅ Updated InventoryItem model:
+   - Status enum uses GraphQL standard: `IN_STOCK`, `LOW_STOCK`, `OUT_OF_STOCK`
+   - **Frontend Requirement:** Transform to lowercase with hyphens for display
+   - **Reason:** GraphQL enum values cannot contain hyphens (syntax error)
+
+3. ✅ Deployed schema changes successfully:
+   - Command: `export AWS_REGION=us-east-1 && npx ampx sandbox --once`
+   - Deployment time: 22.156 seconds
+   - Timestamp: 2026-01-22 23:51:39
+   - AppSync endpoint: https://ga4dwdcapvg5ziixpgipcvmfbe.appsync-api.us-east-1.amazonaws.com/graphql
+
+4. ✅ Updated API_DOCUMENTATION.md with Phase 12 section:
+   - Schema changes documented
+   - Frontend transformation pattern provided
+   - Testing procedures outlined
+   - CORS configuration verified
+
+**Pending Lambda Implementations:**
+1. ⏳ Family Portal Access Control
+   - Current: Mock access code (1234) in frontend
+   - Required: Lambda Authorizer or field verification in listApprovedVisitSummaries
+   - Priority: HIGH (security requirement)
+
+2. ⏳ Route Optimizer Lambda
+   - Current: "Optimizar Rutas" button is UI shell
+   - Required: Geo-spatial sorting Lambda for shift optimization
+   - Priority: MEDIUM (nice-to-have feature)
+
+3. ⏳ Glosa Rebuttal Connection
+   - Current: "Generar Respuesta AI" button shows alert
+   - Required: Connect to existing glosa-defender Lambda
+   - Priority: LOW (backend exists, just needs frontend connection)
+
+4. ⏳ RIPS Validation Verification
+   - Current: Validator runs locally or mock
+   - Required: Ensure validateRIPS Lambda is reachable
+   - Priority: LOW (backend exists, just needs testing)
+
+**Data Migration Requirements:**
+1. ⏳ Nurse Location Data
+   - Populate `locationLat` and `locationLng` for Map view
+   - Required for route optimization feature
+
+2. ✅ InventoryItem Status - No Migration Needed
+   - Backend already uses GraphQL standard (IN_STOCK, LOW_STOCK, OUT_OF_STOCK)
+   - Frontend needs transformation functions for display (in-stock, low-stock, out-of-stock)
+
+**Deployment Steps:**
+1. ✅ Deploy schema changes: `npx ampx sandbox --once` (DONE: 2026-01-22 23:51:39)
+2. ✅ Verify GraphQL endpoint responds (DONE)
+3. ✅ Test InventoryItem status enum (DONE: IN_STOCK, LOW_STOCK, OUT_OF_STOCK)
+4. ✅ Test Patient.eps field (DONE)
+5. ⏳ Update frontend transformation functions
+6. ⏳ Update frontend: `VITE_USE_REAL_BACKEND=true`
+
+**Results:**
+- Schema aligned with frontend TypeScript types
+- Breaking changes documented with migration scripts
+- Family Portal security requirements identified
+- Route optimization feature scoped
+
+**File Count:** 21 TypeScript files in amplify/ (target: ~20) ✅
+
+**Next Steps:**
+1. Deploy schema changes (this week)
+2. Implement Family Portal Lambda Authorizer (next 2 weeks)
+3. Implement Route Optimizer Lambda (next 2 weeks)
+4. Seed nurse location data (next month)
+
+**Next Phase:** Phase 13 - Lambda Implementations & Data Migration
+
 ## Phase 12: Admin Dashboard Logic Fixes
 **Status:** ✅ COMPLETE
 

@@ -42,6 +42,7 @@ export type Patient = {
     documentId: string;
     age?: number | null;
     address?: string | null;
+    eps?: string | null;
     diagnosis?: string | null;
     medications?: Medication[];
     tasks?: Task[];
