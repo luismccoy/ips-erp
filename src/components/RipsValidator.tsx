@@ -87,17 +87,20 @@ export const RipsValidator: React.FC = () => {
             console.log('✅ validateRIPS Lambda response:', result);
             
             if (result.data) {
+                // Type guard to ensure result.data has the expected structure
+                const data = result.data as any;
+                
                 // Success - display validation results
                 setValidationResult({
-                    isValid: result.data.isValid,
-                    errors: result.data.errors || [],
-                    details: result.data.details || {}
+                    isValid: data.isValid || false,
+                    errors: data.errors || [],
+                    details: data.details || {}
                 });
                 
-                if (result.data.isValid) {
+                if (data.isValid) {
                     console.log('✅ RIPS validation passed');
                 } else {
-                    console.log('❌ RIPS validation failed with errors:', result.data.errors);
+                    console.log('❌ RIPS validation failed with errors:', data.errors);
                 }
             } else if (result.errors && result.errors.length > 0) {
                 // GraphQL errors
