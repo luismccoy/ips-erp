@@ -192,14 +192,6 @@ function DashboardView() {
         fetchStats();
     }, []);
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <div className="text-slate-400">Loading dashboard...</div>
-            </div>
-        );
-    }
-
     useEffect(() => {
         // Dashboard real-time subscriptions
         const auditSub = (client.models.AuditLog as any)?.onCreate({
@@ -225,6 +217,14 @@ function DashboardView() {
             shiftSub?.unsubscribe();
         };
     }, []);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="text-slate-400">Loading dashboard...</div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
