@@ -53,6 +53,8 @@
     "UserPoolTags": {
      "amplify:deployment-type": "sandbox",
      "amplify:friendly-name": "amplifyAuth",
+     "application": "EPS",
+     "auto-delete": "no",
      "created-by": "amplify"
     },
     "UsernameAttributes": [
@@ -146,6 +148,14 @@
       "Value": "amplifyAuth"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -193,6 +203,14 @@
       "Value": "amplifyAuth"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -237,6 +255,14 @@
      {
       "Key": "amplify:friendly-name",
       "Value": "amplifyAuth"
+     },
+     {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
      },
      {
       "Key": "created-by",
@@ -341,6 +367,14 @@
       "Value": "amplifyAuth"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -408,6 +442,14 @@
       "Value": "amplifyAuth"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -473,6 +515,14 @@
      {
       "Key": "amplify:friendly-name",
       "Value": "amplifyAuth"
+     },
+     {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
      },
      {
       "Key": "created-by",

@@ -10,6 +10,7 @@ import { createVisitDraft } from './functions/create-visit-draft/resource';
 import { submitVisit } from './functions/submit-visit/resource';
 import { rejectVisit } from './functions/reject-visit/resource';
 import { approveVisit } from './functions/approve-visit/resource';
+import { verifyFamilyAccess } from './functions/verify-family-access/resource';
 
 /**
  * @see https://docs.amplify.aws/react/build-a-backend/
@@ -25,9 +26,16 @@ const backend = defineBackend({
     submitVisit,
     rejectVisit,
     approveVisit,
+    verifyFamilyAccess,
 });
 
 // Apply AWS resource tags to prevent Spring cleaning deletion
 // These tags are inherited by all resources in the stack (DynamoDB, Lambda, Cognito, AppSync, etc.)
-Tags.of(backend.stack).add('auto-delete', 'no');        // Prevents nightly Spring cleaning deletion
-Tags.of(backend.stack).add('application', 'IPS-ERP');   // Identifies resource ownership for tracking and cost allocation
+try {
+    Tags.of(backend.stack).add('auto-delete', 'no');        // Prevents nightly Spring cleaning deletion
+    Tags.of(backend.stack).add('application', 'EPS');       // Identifies resource ownership for tracking and cost allocation
+} catch (error) {
+    console.error('⚠️  Failed to apply tags to backend stack:', error);
+    console.log('📝 Manual remediation required - add tags via AWS Console or CLI');
+    console.log('   aws resourcegroupstaggingapi tag-resources --resource-arn-list <arn> --tags auto-delete=no,application=EPS');
+}

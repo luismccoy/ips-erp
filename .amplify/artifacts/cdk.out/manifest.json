@@ -17,12 +17,14 @@
         "terminationProtection": false,
         "tags": {
           "amplify:deployment-type": "sandbox",
+          "application": "EPS",
+          "auto-delete": "no",
           "created-by": "amplify"
         },
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-${AWS::Region}",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-${AWS::Region}",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/90c3045a2a67b199bb0a8b840b8549bb6093d852ba5b0bf326dda0fa1224d782.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/704d5aac266e24953374ea6e776d430697ca50c0f85c3da1bdff374fa251976e.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -45,6 +47,14 @@
               {
                 "Key": "amplify:deployment-type",
                 "Value": "sandbox"
+              },
+              {
+                "Key": "application",
+                "Value": "EPS"
+              },
+              {
+                "Key": "auto-delete",
+                "Value": "no"
               },
               {
                 "Key": "created-by",

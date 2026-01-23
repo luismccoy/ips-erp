@@ -287,6 +287,14 @@
       "Value": "sandbox"
      },
      {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
       "Key": "created-by",
       "Value": "amplify"
      }
@@ -307,7 +315,7 @@
        {
         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
        },
-       "/e04d860b74d5ee7be0609cd367a612f82b2367be5ce405198465354ca2a22937.json"
+       "/4cd6498c0e50417f26b255ae94eeb10d82046c6a12f0f8711de3a58fdd76cea9.json"
       ]
      ]
     }
@@ -355,46 +363,12 @@
       "Value": "sandbox"
      },
      {
-      "Key": "created-by",
-      "Value": "amplify"
-     }
-    ],
-    "TemplateURL": {
-     "Fn::Join": [
-      "",
-      [
-       "https://s3.",
-       {
-        "Ref": "AWS::Region"
-       },
-       ".",
-       {
-        "Ref": "AWS::URLSuffix"
-       },
-       "/",
-       {
-        "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
-       },
-       "/d2ba70653af14fcb794093fccc7dc092b928ed053449915af024eaabad03fa56.json"
-      ]
-     ]
-    }
-   },
-   "UpdateReplacePolicy": "Delete",
-   "DeletionPolicy": "Delete",
-   "Metadata": {
-    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data.NestedStack/data.NestedStackResource",
-    "aws:asset:path": "amplifyipserpluiscoysandboxbb7136bc7bdataB664055B.nested.template.json",
-    "aws:asset:property": "TemplateURL"
-   }
-  },
-  "function1351588B": {
-   "Type": "AWS::CloudFormation::Stack",
-   "Properties": {
-    "Tags": [
+      "Key": "application",
+      "Value": "EPS"
+     },
      {
-      "Key": "amplify:deployment-type",
-      "Value": "sandbox"
+      "Key": "auto-delete",
+      "Value": "no"
      },
      {
       "Key": "created-by",
@@ -417,7 +391,57 @@
        {
         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
        },
-       "/edac958e9f52f0ffd0bcf3833bd44dfad00376a1c3f5085af1dd5b6b2a639ada.json"
+       "/f9e553dba7f318caf00fa1066897c01586211ed02bdf2d1bb9f21b4bb83d8b02.json"
+      ]
+     ]
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data.NestedStack/data.NestedStackResource",
+    "aws:asset:path": "amplifyipserpluiscoysandboxbb7136bc7bdataB664055B.nested.template.json",
+    "aws:asset:property": "TemplateURL"
+   }
+  },
+  "function1351588B": {
+   "Type": "AWS::CloudFormation::Stack",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "amplify:deployment-type",
+      "Value": "sandbox"
+     },
+     {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
+      "Key": "created-by",
+      "Value": "amplify"
+     }
+    ],
+    "TemplateURL": {
+     "Fn::Join": [
+      "",
+      [
+       "https://s3.",
+       {
+        "Ref": "AWS::Region"
+       },
+       ".",
+       {
+        "Ref": "AWS::URLSuffix"
+       },
+       "/",
+       {
+        "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+       },
+       "/5507ebc270fbc6899c0362764059bb688d8667b3ee855b695c4f1ac0ce332ddc.json"
       ]
      ]
     }

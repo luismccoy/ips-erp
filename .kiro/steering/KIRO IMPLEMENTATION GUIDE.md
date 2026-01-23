@@ -1030,4 +1030,157 @@ git push origin main
 - ✅ Audit logs created in DynamoDB
 - ✅ No console errors or warnings
 
+**Next Phase:** Phase 15 - AWS Resource Tagging (Spring Cleaning Protection)
+
+## Phase 15: AWS Resource Tagging (Spring Cleaning Protection)
+**Status:** ✅ COMPLETE
+
+**Goal:** Implement mandatory AWS resource tagging to prevent automatic deletion by Spring cleaning CloudFormation process.
+
+**Problem Identified:**
+All AWS resources in the IPS ERP project were at risk of deletion by Amazon's automated Spring cleaning process, which runs nightly and removes untagged resources. Without proper tags, the entire production system (DynamoDB tables, Lambda functions, Cognito, AppSync) could be deleted, causing complete application downtime and data loss.
+
+**Completed Tasks:**
+1. ✅ Updated `amplify/backend.ts` with CDK tagging
+   - Added `import { Tags } from 'aws-cdk-lib';`
+   - Captured backend instance: `const backend = defineBackend({...})`
+   - Applied two critical tags: `auto-delete=no` and `application=EPS`
+   - Added try-catch error handling around tag application
+   - Tags automatically propagate to all CloudFormation-managed resources
+
+2. ✅ Created comprehensive tag verification script
+   - Script: `.local-tests/verify-tags.sh`
+   - Queries 9 AWS resource types (CloudFormation, DynamoDB, Lambda, Cognito, AppSync, IAM, CloudWatch, S3, Amplify)
+   - Validates tag presence and exact values (case-sensitive)
+   - Distinguishes between missing vs incorrect tags
+   - Provides detailed reporting with resource counts
+   - Supports --fix flag for future remediation automation
+   - Exit codes: 0 (success), 1 (missing tags), 2 (incorrect tags)
+
+3. ✅ Created Amplify app tagging script
+   - Script: `.local-tests/tag-amplify-app.sh`
+   - Tags Amplify Hosting app (d2wwgecog8smmr) separately
+   - Amplify apps not in CloudFormation stack, require separate tagging
+   - Applies required tags: `auto-delete=no` and `application=EPS`
+   - Verifies tags were applied correctly
+   - Color-coded output with clear error handling
+
+4. ✅ Deployed backend with tags
+   - Command: `export AWS_REGION=us-east-1 && npx ampx sandbox --once`
+   - Deployment time: 212.615 seconds (~3.5 minutes)
+   - All Lambda functions updated with new schema types
+   - Zero errors during deployment
+
+5. ✅ Verified tag implementation
+   - Ran verification script: `.local-tests/verify-tags.sh`
+   - Tagged Amplify app: `.local-tests/tag-amplify-app.sh d2wwgecog8smmr`
+   - Verification results: 100% pass rate - all 70 resources properly tagged
+   - Resources protected: 17 CloudFormation stacks, 11 DynamoDB tables, 11 Lambda functions, 1 Cognito User Pool, 1 AppSync API, 26 IAM roles, 2 S3 buckets, 1 Amplify app
+
+6. ✅ Implemented error handling and logging
+   - Added try-catch around tag application in `amplify/backend.ts`
+   - Logs errors with resource details
+   - Provides manual remediation guidance in console output
+   - Deployment continues on tagging failure (non-blocking)
+
+7. ✅ Updated documentation
+   - Added comprehensive Phase 15 section to `docs/API_DOCUMENTATION.md`
+   - Implementation approach and code examples
+   - Verification results (70 resources tagged)
+   - Protected resources list
+   - Deployment steps and troubleshooting guide
+   - Tag persistence information
+   - Monitoring recommendations
+
+**Results:**
+- All 70 AWS resources properly tagged and protected from deletion
+- Automated verification script for ongoing compliance
+- Zero backend code changes required (only 7 lines added to backend.ts)
+- Comprehensive documentation for future maintenance
+- File count: 21 TypeScript files in amplify/ (within target of ~20)
+
+**Technical Implementation:**
+
+**Backend Tagging (amplify/backend.ts):**
+```typescript
+import { Tags } from 'aws-cdk-lib';
+
+const backend = defineBackend({
+  auth,
+  data,
+  // ... other resources
+});
+
+// Apply tags to all resources (prevents Spring cleaning deletion)
+try {
+  Tags.of(backend.stack).add('auto-delete', 'no');
+  Tags.of(backend.stack).add('application', 'EPS');
+  console.log('✅ Successfully applied tags to all backend resources');
+} catch (error) {
+  console.error('❌ Error applying tags:', error);
+  console.log('⚠️  Manual remediation required - add tags via AWS Console');
+}
+```
+
+**Tag Verification:**
+```bash
+# Verify all resources tagged
+.local-tests/verify-tags.sh
+
+# Tag Amplify app separately
+.local-tests/tag-amplify-app.sh d2wwgecog8smmr
+```
+
+**Protected Resources:**
+- 17 CloudFormation stacks (amplify-*, AmplifyBackend-*)
+- 11 DynamoDB tables (Patient, Nurse, Shift, Visit, BillingRecord, etc.)
+- 11 Lambda functions (rips-validator, glosa-defender, roster-architect, etc.)
+- 1 Cognito User Pool (authentication)
+- 1 AppSync GraphQL API
+- 26 IAM roles (Lambda execution roles, Amplify roles)
+- 2 S3 buckets (deployment artifacts)
+- 1 Amplify Hosting app (d2wwgecog8smmr)
+
+**Required Tags:**
+- `auto-delete: no` - Prevents automatic deletion by Spring cleaning
+- `application: EPS` - Application identifier for tracking and cost allocation
+
+**Tag Persistence:**
+- Tags applied at CDK stack level automatically propagate to all resources
+- Tags persist across deployments and stack updates
+- New resources automatically inherit tags from parent stack
+- Amplify app requires separate tagging (not in CloudFormation)
+
+**Verification Results:**
+```
+=== IPS ERP Resource Tagging Verification ===
+Date: 2026-01-23
+
+CloudFormation Stacks: 17/17 ✅
+DynamoDB Tables: 11/11 ✅
+Lambda Functions: 11/11 ✅
+Cognito User Pools: 1/1 ✅
+AppSync APIs: 1/1 ✅
+IAM Roles: 26/26 ✅
+S3 Buckets: 2/2 ✅
+Amplify Apps: 1/1 ✅
+
+Total Resources: 70/70 ✅
+Pass Rate: 100%
+```
+
+**Monitoring Recommendations:**
+1. Run verification script weekly: `.local-tests/verify-tags.sh`
+2. Set up CloudWatch alarm for untagged resources (future enhancement)
+3. Include tag verification in CI/CD pipeline (future enhancement)
+4. Document any new resource types that require tagging
+
+**File Count Impact:**
+- Backend files: 21 TypeScript files (within target of ~20)
+- Test scripts: 3 files in `.local-tests/` (not synced with git)
+- Documentation: 1 section added to `docs/API_DOCUMENTATION.md`
+- Policy: 1 file in `.kiro/steering/` (AWS Resource Tagging Policy.md)
+
+**Spec Location:** `.kiro/specs/aws-resource-tagging/`
+
 **Next Phase:** Production Operations & Continuous Improvement

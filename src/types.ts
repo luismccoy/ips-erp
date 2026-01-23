@@ -30,7 +30,7 @@ export type InventoryItem = {
     reorderLevel: number;
     reorderThreshold?: number | null;
     expiryDate?: string | null;
-    
+
     /**
      * Inventory status indicating stock availability
      * 
@@ -85,7 +85,7 @@ export type InventoryItem = {
      * dealing with potentially null/undefined values.
      */
     status: 'in-stock' | 'low-stock' | 'out-of-stock' | null;
-    
+
     createdAt: string;
     updatedAt: string;
 };
@@ -131,6 +131,7 @@ export type Nurse = {
     skills?: string[];
     locationLat?: number;
     locationLng?: number;
+    isActive?: boolean;
 };
 
 export type Tenant = {

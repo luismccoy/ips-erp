@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import {
     Activity, ClipboardCheck, Package, Calendar, ShieldAlert,
-    FileText, LogOut, DollarSign, ClipboardList, BarChart
+    FileText, LogOut, DollarSign, ClipboardList, BarChart,
+    Users, Stethoscope
 } from 'lucide-react';
 
 import { client, isUsingRealBackend, MOCK_USER } from '../amplify-utils';
@@ -18,6 +19,8 @@ import { InventoryDashboard } from './InventoryDashboard';
 import { RosterDashboard } from './RosterDashboard';
 import { ComplianceDashboard } from './ComplianceDashboard';
 import { ReportingDashboard } from './ReportingDashboard';
+import { PatientManager } from './PatientManager';
+import { StaffManager } from './StaffManager';
 
 
 
@@ -82,6 +85,12 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                     <NavItem icon={FileText} label="Billing & RIPS" active={view === 'billing'} onClick={() => setView('billing')} />
                     <NavItem icon={BarChart} label="Reporting & Analytics" active={view === 'reporting'} onClick={() => setView('reporting')} />
 
+                    <div className="pt-4 mt-4 border-t border-slate-800">
+                        <p className="px-4 text-xs font-bold text-slate-500 uppercase mb-2">Administration</p>
+                        <NavItem icon={Users} label="Patients" active={view === 'patients'} onClick={() => setView('patients')} />
+                        <NavItem icon={Stethoscope} label="Staff / Nurses" active={view === 'staff'} onClick={() => setView('staff')} />
+                    </div>
+
                 </nav>
                 <div className="p-4 border-t border-slate-800">
                     <div className="p-4 bg-slate-800/40 rounded-2xl mb-4">
@@ -104,6 +113,8 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                         {view === 'compliance' && 'Compliance (Res 3100)'}
                         {view === 'billing' && 'Billing & RIPS'}
                         {view === 'reporting' && 'Reporting & Analytics'}
+                        {view === 'patients' && 'Patient Management'}
+                        {view === 'staff' && 'Staff Management'}
 
                     </h2>
                     <div className="flex items-center gap-4">
@@ -130,6 +141,8 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                     {view === 'compliance' && <ComplianceDashboard />}
                     {view === 'billing' && <BillingDashboard />}
                     {view === 'reporting' && <ReportingDashboard />}
+                    {view === 'patients' && <PatientManager />}
+                    {view === 'staff' && <StaffManager />}
 
 
                 </div>
