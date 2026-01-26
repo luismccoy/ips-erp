@@ -7,18 +7,20 @@ export const StaffManagement: React.FC = () => {
     const { items: staff, loadMore, hasMore, isLoading } = usePagination<Nurse>();
     const [localLoading, setLocalLoading] = useState(false);
 
+    const tenantId = MOCK_USER.attributes['custom:tenantId'];
+
     const fetchStaff = useCallback(async (token: string | null = null, isReset = false) => {
         loadMore(async (t) => {
             const response = await (client.models.Nurse as any).list({
                 filter: {
-                    tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] }
+                    tenantId: { eq: tenantId }
                 },
                 limit: 50,
                 nextToken: token || t
             });
             return { data: response.data || [], nextToken: response.nextToken };
         }, isReset);
-    }, [loadMore]);
+    }, [loadMore, tenantId]);
 
     useEffect(() => {
         fetchStaff(null, true);
@@ -27,7 +29,7 @@ export const StaffManagement: React.FC = () => {
         // But for initial load and pagination, we use the list query.
         const query = client.models.Nurse.observeQuery({
             filter: {
-                tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] }
+                tenantId: { eq: tenantId }
             }
         });
 
@@ -41,7 +43,7 @@ export const StaffManagement: React.FC = () => {
         });
 
         return () => sub.unsubscribe();
-    }, [fetchStaff]);
+    }, [fetchStaff, tenantId]);
 
     const handleLoadMore = () => {
         fetchStaff();
@@ -57,7 +59,7 @@ export const StaffManagement: React.FC = () => {
         setLocalLoading(true);
         try {
             await (client.models.Nurse as any).create({
-                tenantId: MOCK_USER.attributes['custom:tenantId'],
+                tenantId: tenantId,
                 name,
                 email,
                 role: role as any,

@@ -10,12 +10,14 @@ export const PatientDashboard: React.FC = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
     // Note: setPatients is not used directly as patients are managed by usePagination hook
 
+    const tenantId = MOCK_USER.attributes['custom:tenantId'];
+
     useEffect(() => {
         const fetchPatients = async () => {
             loadMore(async (token) => {
                 const response = await (client.models.Patient as any).list({
                     filter: {
-                        tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] }
+                        tenantId: { eq: tenantId }
                     },
                     limit: 50,
                     nextToken: token
@@ -30,13 +32,13 @@ export const PatientDashboard: React.FC = () => {
         };
 
         fetchPatients();
-    }, [loadMore, selectedPatient]);
+    }, [loadMore, selectedPatient, tenantId]);
 
     const handleLoadMore = () => {
         loadMore(async (token) => {
             const response = await (client.models.Patient as any).list({
                 filter: {
-                    tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] }
+                    tenantId: { eq: tenantId }
                 },
                 limit: 50,
                 nextToken: token
