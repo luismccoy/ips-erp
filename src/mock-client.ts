@@ -8,7 +8,7 @@ import type { Visit, NotificationItem } from './types/workflow';
 // This data is designed to showcase all features of IPS ERP
 // when prospects click "View Demo" from the landing page.
 
-const TENANT_ID = 'tenant-bogota-01';
+const TENANT_ID = 'ips-vida'; // Must match TENANTS[0].id in mock-data.ts
 const NOW = new Date();
 
 // Helper to create dates relative to now

@@ -121,7 +121,7 @@ export const MOCK_USER: AmplifyUser = {
     attributes: {
         sub: 'demo-admin-user-001',
         email: 'admin@demo.ipserp.com',
-        'custom:tenantId': 'tenant-bogota-01'
+        'custom:tenantId': 'ips-vida'
     }
 };
 
@@ -133,7 +133,7 @@ export const DEMO_PERSONAS = {
         attributes: {
             sub: 'demo-admin-user-001',
             email: 'admin@demo.ipserp.com',
-            'custom:tenantId': 'tenant-bogota-01'
+            'custom:tenantId': 'ips-vida'
         }
     },
     nurse: {
@@ -142,7 +142,7 @@ export const DEMO_PERSONAS = {
         attributes: {
             sub: 'demo-nurse-user-001',
             email: 'maria@demo.ipserp.com',
-            'custom:tenantId': 'tenant-bogota-01'
+            'custom:tenantId': 'ips-vida'
         }
     },
     family: {
@@ -151,7 +151,7 @@ export const DEMO_PERSONAS = {
         attributes: {
             sub: 'demo-family-user-001',
             email: 'familia@demo.ipserp.com',
-            'custom:tenantId': 'tenant-bogota-01'
+            'custom:tenantId': 'ips-vida'
         }
     }
 };
