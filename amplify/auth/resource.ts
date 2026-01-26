@@ -19,7 +19,11 @@ export const auth = defineAuth({
     },
     
     // User groups for role-based access control
-    groups: ['Admin', 'Nurse', 'Family'],
+    // SuperAdmin: Platform administrators (no tenant restriction)
+    // Admin: IPS business owners (scoped to their tenant)
+    // Nurse: Healthcare workers (scoped to tenant, assigned shifts only)
+    // Family: Patient family members (read-only access to patient data)
+    groups: ['SuperAdmin', 'Admin', 'Nurse', 'Family'],
     
     // Custom user attributes for multi-tenancy
     userAttributes: {
