@@ -107,11 +107,14 @@ export function getClient() {
     return getMockClient();
 }
 
-// For backwards compatibility - static export
-// Components should migrate to getClient() for demo mode support
-export const client = shouldUseRealBackend() 
-    ? getRealClient() 
-    : getMockClient();
+// Dynamic client proxy - checks demo mode on EVERY access
+// This ensures components always get the right client even after demo mode toggle
+export const client = new Proxy({} as ReturnType<typeof generateMockClient>, {
+    get(_, prop) {
+        const activeClient = getClient();
+        return (activeClient as any)[prop];
+    }
+});
 
 // ============================================
 // MOCK USER FOR DEMO MODE
