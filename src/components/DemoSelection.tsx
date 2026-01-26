@@ -12,17 +12,20 @@ export default function DemoSelection({ onSelectAdmin, onSelectNurse, onSelectFa
     
     const handleSelectAdmin = () => {
         enableDemoMode();
-        onSelectAdmin();
+        // Force page reload to reinitialize client with demo mode
+        window.location.href = '/?demo=admin';
     };
 
     const handleSelectNurse = () => {
         enableDemoMode();
-        onSelectNurse();
+        // Force page reload to reinitialize client with demo mode
+        window.location.href = '/?demo=nurse';
     };
 
     const handleSelectFamily = () => {
         enableDemoMode();
-        onSelectFamily();
+        // Force page reload to reinitialize client with demo mode
+        window.location.href = '/?demo=family';
     };
 
     return (
