@@ -46,7 +46,20 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
     const [visitedPanels, setVisitedPanels] = useState<Set<string>>(new Set(['dashboard']));
     
     // Guided tour state (only show in demo mode)
-    const [showTour, setShowTour] = useState(isDemoMode() && !sessionStorage.getItem('ips-demo-tour-completed'));
+    const [showTour, setShowTour] = useState(false);
+    
+    // Check for demo mode after mount (enableDemoMode runs after component mounts)
+    useEffect(() => {
+        const checkDemoMode = () => {
+            if (isDemoMode() && !sessionStorage.getItem('ips-demo-tour-completed')) {
+                setShowTour(true);
+            }
+        };
+        // Check immediately and after a short delay (in case enableDemoMode is async)
+        checkDemoMode();
+        const timer = setTimeout(checkDemoMode, 100);
+        return () => clearTimeout(timer);
+    }, []);
     
     // Mark current view as visited
     useEffect(() => {
