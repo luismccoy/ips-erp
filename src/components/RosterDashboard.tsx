@@ -193,6 +193,7 @@ export function RosterDashboard() {
                     <button
                         onClick={handleOptimizeRoutes}
                         disabled={isOptimizing}
+                        data-tour="ai-optimizer"
                         className="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-xl font-bold text-xs hover:bg-indigo-100 transition-all flex items-center gap-2 border border-indigo-100"
                     >
                         {isOptimizing ? <LoadingSpinner size="sm" /> : <Sparkles size={14} />}

@@ -5,7 +5,8 @@ import {
     Users, Stethoscope, Menu, X
 } from 'lucide-react';
 
-import { client, isUsingRealBackend, MOCK_USER } from '../amplify-utils';
+import { client, isUsingRealBackend, isDemoMode, MOCK_USER } from '../amplify-utils';
+import { GuidedTour, RestartTourButton } from './GuidedTour';
 import type { AdminDashboardProps, NavItemProps } from '../types/components';
 import { graphqlToFrontendSafe } from '../utils/inventory-transforms';
 
@@ -43,6 +44,9 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
     
     // Track visited panels for lazy mounting (only load when first visited, then keep mounted)
     const [visitedPanels, setVisitedPanels] = useState<Set<string>>(new Set(['dashboard']));
+    
+    // Guided tour state (only show in demo mode)
+    const [showTour, setShowTour] = useState(isDemoMode() && !sessionStorage.getItem('ips-demo-tour-completed'));
     
     // Mark current view as visited
     useEffect(() => {
@@ -115,19 +119,19 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                     </div>
                 </div>
                 <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-                    <NavItem icon={Activity} label="Panel Principal" active={view === 'dashboard'} onClick={() => { setView('dashboard'); setSidebarOpen(false); }} />
-                    <NavItem icon={ClipboardList} label="Revisiones Pendientes" active={view === 'pending-reviews'} onClick={() => { setView('pending-reviews'); setSidebarOpen(false); }} />
-                    <NavItem icon={ClipboardCheck} label="Auditoría Clínica" active={view === 'audit'} onClick={() => { setView('audit'); setSidebarOpen(false); }} />
-                    <NavItem icon={Package} label="Inventario" active={view === 'inventory'} onClick={() => { setView('inventory'); setSidebarOpen(false); }} />
-                    <NavItem icon={Calendar} label="Programación de Turnos" active={view === 'roster'} onClick={() => { setView('roster'); setSidebarOpen(false); }} />
-                    <NavItem icon={ShieldAlert} label="Cumplimiento" active={view === 'compliance'} onClick={() => { setView('compliance'); setSidebarOpen(false); }} />
-                    <NavItem icon={FileText} label="Facturación y RIPS" active={view === 'billing'} onClick={() => { setView('billing'); setSidebarOpen(false); }} />
-                    <NavItem icon={BarChart} label="Reportes y Análisis" active={view === 'reporting'} onClick={() => { setView('reporting'); setSidebarOpen(false); }} />
+                    <NavItem icon={Activity} label="Panel Principal" active={view === 'dashboard'} onClick={() => { setView('dashboard'); setSidebarOpen(false); }} dataTour="nav-dashboard" />
+                    <NavItem icon={ClipboardList} label="Revisiones Pendientes" active={view === 'pending-reviews'} onClick={() => { setView('pending-reviews'); setSidebarOpen(false); }} dataTour="nav-pending" />
+                    <NavItem icon={ClipboardCheck} label="Auditoría Clínica" active={view === 'audit'} onClick={() => { setView('audit'); setSidebarOpen(false); }} dataTour="nav-audit" />
+                    <NavItem icon={Package} label="Inventario" active={view === 'inventory'} onClick={() => { setView('inventory'); setSidebarOpen(false); }} dataTour="nav-inventory" />
+                    <NavItem icon={Calendar} label="Programación de Turnos" active={view === 'roster'} onClick={() => { setView('roster'); setSidebarOpen(false); }} dataTour="nav-roster" />
+                    <NavItem icon={ShieldAlert} label="Cumplimiento" active={view === 'compliance'} onClick={() => { setView('compliance'); setSidebarOpen(false); }} dataTour="nav-compliance" />
+                    <NavItem icon={FileText} label="Facturación y RIPS" active={view === 'billing'} onClick={() => { setView('billing'); setSidebarOpen(false); }} dataTour="nav-billing" />
+                    <NavItem icon={BarChart} label="Reportes y Análisis" active={view === 'reporting'} onClick={() => { setView('reporting'); setSidebarOpen(false); }} dataTour="nav-reporting" />
 
                     <div className="pt-4 mt-4 border-t border-slate-800">
                         <p className="px-4 text-xs font-bold text-slate-500 uppercase mb-2">Administración</p>
-                        <NavItem icon={Users} label="Pacientes" active={view === 'patients'} onClick={() => { setView('patients'); setSidebarOpen(false); }} />
-                        <NavItem icon={Stethoscope} label="Personal / Enfermeras" active={view === 'staff'} onClick={() => { setView('staff'); setSidebarOpen(false); }} />
+                        <NavItem icon={Users} label="Pacientes" active={view === 'patients'} onClick={() => { setView('patients'); setSidebarOpen(false); }} dataTour="nav-patients" />
+                        <NavItem icon={Stethoscope} label="Personal / Enfermeras" active={view === 'staff'} onClick={() => { setView('staff'); setSidebarOpen(false); }} dataTour="nav-staff" />
                     </div>
 
                 </nav>
@@ -238,14 +242,24 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
 
                 </div>
             </main>
+            
+            {/* Guided Tour (Demo Mode Only) */}
+            {showTour && (
+                <GuidedTour
+                    currentView={view}
+                    onViewChange={setView}
+                    autoStart={true}
+                />
+            )}
         </div>
     );
 }
 
-function NavItem({ icon: Icon, label, active, onClick }: NavItemProps) {
+function NavItem({ icon: Icon, label, active, onClick, dataTour }: NavItemProps) {
     return (
         <button
             onClick={onClick}
+            data-tour={dataTour}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${active ? 'bg-[#2563eb] text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
                 }`}
         >
@@ -355,7 +369,7 @@ function DashboardView() {
 
     return (
         <div className="space-y-6">
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-3 gap-6" data-tour="dashboard-stats">
                 {[
                     { label: 'Pacientes', value: stats.patients.toString(), change: 'Activos', color: 'blue' },
                     { label: 'Turnos', value: stats.shifts.toString(), change: 'Total', color: 'purple' },

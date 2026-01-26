@@ -341,6 +341,7 @@ export function BillingDashboard() {
 
                         <div className="space-y-4">
                             <div
+                                data-tour="ai-glosa"
                                 className={`p-4 bg-white/5 rounded-xl border border-white/10 transition-all ${isGeneratingDefense
                                         ? 'opacity-60 cursor-not-allowed'
                                         : 'hover:border-blue-500/50 cursor-pointer group'
