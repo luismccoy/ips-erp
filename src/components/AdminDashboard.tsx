@@ -12,6 +12,7 @@ import { graphqlToFrontendSafe } from '../utils/inventory-transforms';
 
 import { NotificationBell } from './NotificationBell';
 import type { NotificationItem } from '../types/workflow';
+import { ErrorBoundary } from './ErrorBoundary';
 
 // Lazy load heavy sub-panels for faster initial render
 // Once loaded, they stay mounted (hidden) for instant tab switching
@@ -221,7 +222,9 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                     )}
                     {visitedPanels.has('inventory') && (
                         <Suspense fallback={<PanelLoader />}>
-                            <div className={view === 'inventory' ? '' : 'hidden'}><InventoryDashboard /></div>
+                            <div className={view === 'inventory' ? '' : 'hidden'}>
+                                <ErrorBoundary><InventoryDashboard /></ErrorBoundary>
+                            </div>
                         </Suspense>
                     )}
                     {visitedPanels.has('roster') && (
@@ -236,7 +239,9 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                     )}
                     {visitedPanels.has('billing') && (
                         <Suspense fallback={<PanelLoader />}>
-                            <div className={view === 'billing' ? '' : 'hidden'}><BillingDashboard /></div>
+                            <div className={view === 'billing' ? '' : 'hidden'}>
+                                <ErrorBoundary><BillingDashboard /></ErrorBoundary>
+                            </div>
                         </Suspense>
                     )}
                     {visitedPanels.has('reporting') && (

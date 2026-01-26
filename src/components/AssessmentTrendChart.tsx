@@ -170,13 +170,15 @@ export function AssessmentTrendChart({
     );
   }
 
-  if (assessments.length === 0) {
+  if (assessments.length < 2) {
     return (
       <div className="text-center p-8 bg-gray-50 rounded-lg">
         <Activity className="mx-auto h-12 w-12 text-gray-400" />
         <h3 className="mt-2 text-sm font-medium text-gray-900">Sin Datos de Tendencia</h3>
         <p className="mt-1 text-sm text-gray-500">
-          Se necesitan al menos 2 valoraciones para mostrar tendencias.
+          {assessments.length === 0
+            ? 'No hay valoraciones registradas para este paciente.'
+            : 'Se necesita al menos 1 valoración adicional para mostrar tendencias.'}
         </p>
       </div>
     );

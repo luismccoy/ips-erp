@@ -14,6 +14,7 @@ interface HistoryItem {
 export const EvidenceGenerator: React.FC = () => {
     const { showToast } = useToast();
     const [patients, setPatients] = useState<Patient[]>([]);
+    const [loadingPatients, setLoadingPatients] = useState(true);
     const [selectedPatient, setSelectedPatient] = useState<string>('');
     const [isGenerating, setIsGenerating] = useState(false);
     const [history, setHistory] = useState<HistoryItem[]>([
@@ -22,12 +23,17 @@ export const EvidenceGenerator: React.FC = () => {
     ]);
 
     useEffect(() => {
+        setLoadingPatients(true);
         const query = client.models.Patient.observeQuery({
             filter: { tenantId: { eq: MOCK_USER.attributes['custom:tenantId'] } }
         });
         
         const sub = (query as any).subscribe({
-            next: (data: any) => setPatients(data.items)
+            next: (data: any) => {
+                setPatients(data.items);
+                setLoadingPatients(false);
+            },
+            error: () => setLoadingPatients(false)
         });
         return () => sub.unsubscribe();
     }, []);
@@ -66,16 +72,26 @@ export const EvidenceGenerator: React.FC = () => {
                     <h3>Nuevo Paquete</h3>
                     <div className="form-group">
                         <label>Seleccionar Paciente</label>
-                        <select
-                            value={selectedPatient}
-                            onChange={(e) => setSelectedPatient(e.target.value)}
-                            className="select-input"
-                        >
-                            <option value="">-- Seleccione un paciente --</option>
-                            {patients.map(p => (
-                                <option key={p.id} value={p.id}>{p.name} ({p.documentId})</option>
-                            ))}
-                        </select>
+                        <div className="select-wrapper">
+                            <select
+                                value={selectedPatient}
+                                onChange={(e) => setSelectedPatient(e.target.value)}
+                                className="select-input"
+                                disabled={loadingPatients}
+                            >
+                                {loadingPatients ? (
+                                    <option value="">Cargando pacientes...</option>
+                                ) : (
+                                    <>
+                                        <option value="">-- Seleccione un paciente --</option>
+                                        {patients.map(p => (
+                                            <option key={p.id} value={p.id}>{p.name} ({p.documentId})</option>
+                                        ))}
+                                    </>
+                                )}
+                            </select>
+                            {loadingPatients && <div className="select-spinner"></div>}
+                        </div>
                     </div>
 
                     <div className="form-group">
@@ -163,6 +179,9 @@ export const EvidenceGenerator: React.FC = () => {
                 .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
                 .form-group label { font-size: 0.75rem; font-weight: 700; color: var(--neutral-500); text-transform: uppercase; }
 
+                .select-wrapper {
+                    position: relative;
+                }
                 .select-input, .date-input {
                     padding: 0.75rem;
                     border-radius: var(--radius-md);
@@ -170,7 +189,25 @@ export const EvidenceGenerator: React.FC = () => {
                     background: white;
                     font-size: 0.95rem;
                     color: var(--neutral-800);
+                    width: 100%;
                 }
+                .select-input:disabled {
+                    background: var(--neutral-50);
+                    cursor: wait;
+                }
+                .select-spinner {
+                    position: absolute;
+                    right: 2.5rem;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    width: 16px;
+                    height: 16px;
+                    border: 2px solid var(--neutral-200);
+                    border-top-color: var(--primary-500);
+                    border-radius: 50%;
+                    animation: spin 0.8s linear infinite;
+                }
+                @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
 
                 .date-range { display: flex; align-items: center; gap: 0.5rem; }
                 .date-range span { color: var(--neutral-400); font-weight: 600; }

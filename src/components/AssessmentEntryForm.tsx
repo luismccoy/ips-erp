@@ -5,12 +5,12 @@
  * Auto-calculates totals and generates risk alerts.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { 
   Save, X, AlertTriangle, CheckCircle, Brain, Activity,
   Shield, Heart, User, ChevronDown, ChevronUp
 } from 'lucide-react';
-import { client } from '../amplify-utils';
+import { client, MOCK_USER } from '../amplify-utils';
 import type { PatientAssessment } from '../types/clinical-scales';
 import {
   calculateGlasgowTotal,
@@ -133,15 +133,41 @@ export function AssessmentEntryForm({
     });
   };
 
+  // Check if at least one scale has been modified from defaults
+  const hasModifiedScales = useCallback(() => {
+    const isGlasgowModified = glasgow.eye !== DEFAULT_GLASGOW.eye || 
+                              glasgow.verbal !== DEFAULT_GLASGOW.verbal || 
+                              glasgow.motor !== DEFAULT_GLASGOW.motor;
+    const isPainModified = painScore !== 0;
+    const isBradenModified = JSON.stringify(braden) !== JSON.stringify({ ...DEFAULT_BRADEN, total: braden.total });
+    const isMorseModified = JSON.stringify(morse) !== JSON.stringify({ ...DEFAULT_MORSE, total: morse.total });
+    const isNewsModified = JSON.stringify(news) !== JSON.stringify({ ...DEFAULT_NEWS, total: news.total });
+    const isBarthelModified = JSON.stringify(barthel) !== JSON.stringify({ ...DEFAULT_BARTHEL, total: barthel.total });
+    const isNortonModified = JSON.stringify(norton) !== JSON.stringify({ ...DEFAULT_NORTON, total: norton.total });
+    const isRassModified = rassScore !== 0;
+
+    return isGlasgowModified || isPainModified || isBradenModified || isMorseModified || 
+           isNewsModified || isBarthelModified || isNortonModified || isRassModified;
+  }, [glasgow, painScore, braden, morse, news, barthel, norton, rassScore]);
+
+  const [validationError, setValidationError] = useState<string | null>(null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate that at least one scale has been modified
+    if (!hasModifiedScales()) {
+      setValidationError('Debe modificar al menos una escala antes de guardar.');
+      return;
+    }
+    setValidationError(null);
     setSaving(true);
 
     try {
       const assessment: Partial<PatientAssessment> = {
         patientId,
         nurseId,
-        tenantId: 'ips-vida', // TODO: Get from context
+        tenantId: MOCK_USER.attributes['custom:tenantId'],
         assessedAt: new Date().toISOString(),
         glasgowScore: glasgow,
         painScore,
@@ -192,6 +218,16 @@ export function AssessmentEntryForm({
           <X size={24} />
         </button>
       </div>
+
+      {/* Validation Error */}
+      {validationError && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-center gap-2 text-red-800 font-medium">
+            <AlertTriangle size={18} />
+            <span>{validationError}</span>
+          </div>
+        </div>
+      )}
 
       {/* Alert Preview */}
       {previewAlerts.length > 0 && (

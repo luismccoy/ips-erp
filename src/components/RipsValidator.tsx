@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { client } from '../amplify-utils';
+import { useLoadingTimeout } from '../hooks/useLoadingTimeout';
 
 /**
  * RIPS Validator Component - Implementation Status
@@ -50,7 +51,10 @@ import { client } from '../amplify-utils';
 export const RipsValidator: React.FC = () => {
     const [file, setFile] = useState<File | null>(null);
     const [billingRecordId, setBillingRecordId] = useState<string>('');
-    const [isValidating, setIsValidating] = useState(false);
+    const { isLoading: isValidating, hasTimedOut, timeoutError, startLoading, stopLoading, retry } = useLoadingTimeout({
+        timeoutMs: 30000, // 30 second timeout for validation
+        onTimeout: () => console.warn('RIPS validation timed out')
+    });
     const [validationResult, setValidationResult] = useState<{
         isValid: boolean;
         errors: string[];
@@ -72,7 +76,7 @@ export const RipsValidator: React.FC = () => {
             return;
         }
         
-        setIsValidating(true);
+        startLoading();
         setErrorMessage('');
         setValidationResult(null);
         
@@ -134,7 +138,7 @@ export const RipsValidator: React.FC = () => {
                 setErrorMessage(`Error inesperado: ${error.message || 'Error desconocido'}`);
             }
         } finally {
-            setIsValidating(false);
+            stopLoading();
         }
     };
 
@@ -207,7 +211,7 @@ export const RipsValidator: React.FC = () => {
                         </div>
                     )}
 
-                    {errorMessage && !isValidating && (
+                    {(errorMessage || hasTimedOut) && !isValidating && (
                         <div className="error-message animate-fade-in">
                             <div className="error-header">
                                 <svg className="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -215,7 +219,15 @@ export const RipsValidator: React.FC = () => {
                                 </svg>
                                 <span>Error</span>
                             </div>
-                            <p>{errorMessage}</p>
+                            <p>{hasTimedOut ? timeoutError : errorMessage}</p>
+                            {hasTimedOut && (
+                                <button
+                                    onClick={retry}
+                                    className="retry-button"
+                                >
+                                    Reintentar
+                                </button>
+                            )}
                         </div>
                     )}
 
@@ -393,6 +405,19 @@ export const RipsValidator: React.FC = () => {
                 }
                 .error-message .icon { width: 20px; height: 20px; }
                 .error-message p { margin: 0; font-size: 0.875rem; }
+                .retry-button {
+                    margin-top: 0.75rem;
+                    padding: 0.5rem 1rem;
+                    background: #991b1b;
+                    color: white;
+                    border: none;
+                    border-radius: var(--radius-md);
+                    font-size: 0.875rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                }
+                .retry-button:hover { background: #7f1d1d; }
 
                 .details-grid {
                     display: flex;
