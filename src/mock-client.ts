@@ -499,6 +499,99 @@ const DEMO_VITALS: VitalSigns[] = [
 ];
 
 // ============================================
+// DEMO VISITS (for Pending Reviews panel)
+// ============================================
+const DEMO_VISITS: Visit[] = [
+    {
+        id: 'visit-001',
+        shiftId: 'shift-001',
+        patientId: 'p1',
+        nurseId: 'n1',
+        tenantId: TENANT_ID,
+        status: 'SUBMITTED',
+        kardex: {
+            generalObservations: 'Paciente estable, sin signos de alarma. Se realizó curación de herida en pierna derecha.',
+            skinCondition: 'Herida en proceso de cicatrización, sin signos de infección',
+            mobilityStatus: 'Deambula con apoyo',
+            nutritionIntake: 'Dieta blanda tolerada',
+        },
+        vitalsRecorded: { sys: 128, dia: 82, spo2: 96, hr: 72, temperature: 36.5 },
+        medicationsAdministered: [
+            { medicationName: 'Losartán 50mg', intendedDosage: '50mg', dosageGiven: '50mg', time: '08:00', notes: '' },
+            { medicationName: 'Aspirina 100mg', intendedDosage: '100mg', dosageGiven: '100mg', time: '08:00', notes: '' }
+        ],
+        tasksCompleted: [
+            { taskDescription: 'Curación de herida', completedAt: daysAgo(1), notes: 'Realizado sin complicaciones' },
+            { taskDescription: 'Toma de signos vitales', completedAt: daysAgo(1), notes: '' }
+        ],
+        createdAt: daysAgo(1),
+        updatedAt: daysAgo(1)
+    },
+    {
+        id: 'visit-002',
+        shiftId: 'shift-003',
+        patientId: 'p2',
+        nurseId: 'n2',
+        tenantId: TENANT_ID,
+        status: 'SUBMITTED',
+        kardex: {
+            generalObservations: 'Paciente con glicemia controlada. Se refuerza educación sobre dieta.',
+            skinCondition: 'Sin lesiones',
+            mobilityStatus: 'Independiente',
+            nutritionIntake: 'Sigue dieta para diabéticos',
+        },
+        vitalsRecorded: { sys: 135, dia: 88, spo2: 97, hr: 78, temperature: 36.8 },
+        medicationsAdministered: [
+            { medicationName: 'Metformina 850mg', intendedDosage: '850mg', dosageGiven: '850mg', time: '07:30', notes: '' }
+        ],
+        tasksCompleted: [
+            { taskDescription: 'Control de glicemia', completedAt: daysAgo(0), notes: 'Resultado: 110 mg/dL' },
+            { taskDescription: 'Educación nutricional', completedAt: daysAgo(0), notes: '' }
+        ],
+        createdAt: daysAgo(0),
+        updatedAt: daysAgo(0)
+    },
+    {
+        id: 'visit-003',
+        shiftId: 'shift-005',
+        patientId: 'p3',
+        nurseId: 'n1',
+        tenantId: TENANT_ID,
+        status: 'APPROVED',
+        kardex: {
+            generalObservations: 'Visita de seguimiento. Paciente sin novedades.',
+            skinCondition: 'Normal',
+            mobilityStatus: 'Limitada por osteoporosis',
+            nutritionIntake: 'Adecuada',
+        },
+        vitalsRecorded: { sys: 118, dia: 75, spo2: 98, hr: 68, temperature: 36.2 },
+        medicationsAdministered: [
+            { medicationName: 'Calcio + Vitamina D', intendedDosage: '600mg', dosageGiven: '600mg', time: '09:00', notes: '' }
+        ],
+        tasksCompleted: [
+            { taskDescription: 'Evaluación de movilidad', completedAt: daysAgo(3), notes: '' },
+            { taskDescription: 'Administración de suplementos', completedAt: daysAgo(3), notes: '' }
+        ],
+        createdAt: daysAgo(3),
+        updatedAt: daysAgo(2)
+    }
+];
+
+// ============================================
+// DEMO AUDIT LOGS (for Clinical Audit panel)
+// ============================================
+const DEMO_AUDIT_LOGS: AuditLog[] = [
+    { id: 'audit-001', tenantId: TENANT_ID, action: 'VISIT_SUBMITTED', entityType: 'Visit', entityId: 'visit-001', userId: 'n1', details: JSON.stringify({ userName: 'María Rodríguez', message: 'Visita documentada para Roberto Gómez' }), createdAt: daysAgo(1), updatedAt: daysAgo(1) },
+    { id: 'audit-002', tenantId: TENANT_ID, action: 'VISIT_APPROVED', entityType: 'Visit', entityId: 'visit-003', userId: 'admin', details: JSON.stringify({ userName: 'Dr. Alejandra Mendez', message: 'Visita aprobada para Pedro Sánchez' }), createdAt: daysAgo(2), updatedAt: daysAgo(2) },
+    { id: 'audit-003', tenantId: TENANT_ID, action: 'SHIFT_CREATED', entityType: 'Shift', entityId: 'shift-001', userId: 'admin', details: JSON.stringify({ userName: 'Dr. Alejandra Mendez', message: 'Turno programado: María Rodríguez → Roberto Gómez' }), createdAt: daysAgo(5), updatedAt: daysAgo(5) },
+    { id: 'audit-004', tenantId: TENANT_ID, action: 'INVENTORY_LOW_STOCK', entityType: 'InventoryItem', entityId: 'inv-006', userId: 'system', details: JSON.stringify({ userName: 'Sistema', message: 'Alerta: Jeringa 5ml bajo stock (25 unidades)' }), createdAt: daysAgo(1), updatedAt: daysAgo(1) },
+    { id: 'audit-005', tenantId: TENANT_ID, action: 'PATIENT_UPDATED', entityType: 'Patient', entityId: 'p1', userId: 'admin', details: JSON.stringify({ userName: 'Dr. Alejandra Mendez', message: 'Actualización de medicamentos para Roberto Gómez' }), createdAt: daysAgo(3), updatedAt: daysAgo(3) },
+    { id: 'audit-006', tenantId: TENANT_ID, action: 'VISIT_SUBMITTED', entityType: 'Visit', entityId: 'visit-002', userId: 'n2', details: JSON.stringify({ userName: 'Carlos Méndez', message: 'Visita documentada para Ana María Martínez' }), createdAt: daysAgo(0), updatedAt: daysAgo(0) },
+    { id: 'audit-007', tenantId: TENANT_ID, action: 'BILLING_GENERATED', entityType: 'BillingRecord', entityId: 'bill-001', userId: 'admin', details: JSON.stringify({ userName: 'Dr. Alejandra Mendez', message: 'Factura generada: $450,000 COP' }), createdAt: daysAgo(7), updatedAt: daysAgo(7) },
+    { id: 'audit-008', tenantId: TENANT_ID, action: 'NURSE_ASSIGNED', entityType: 'Shift', entityId: 'shift-008', userId: 'admin', details: JSON.stringify({ userName: 'Dr. Alejandra Mendez', message: 'Asignación: Carlos Méndez → María García' }), createdAt: daysAgo(2), updatedAt: daysAgo(2) }
+];
+
+// ============================================
 // DEMO NOTIFICATIONS
 // ============================================
 const DEMO_NOTIFICATIONS: NotificationItem[] = [
@@ -542,8 +635,8 @@ const STORE: StoreType = {
     Medication: [...DEMO_MEDICATIONS],
     Task: [...DEMO_TASKS],
     VitalSigns: [...DEMO_VITALS],
-    Visit: [],
-    AuditLog: [],
+    Visit: [...DEMO_VISITS],
+    AuditLog: [...DEMO_AUDIT_LOGS],
     BillingRecord: [...DEMO_BILLING],
     Notification: [...DEMO_NOTIFICATIONS]
 };
