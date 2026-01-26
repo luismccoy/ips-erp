@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
     Activity, ClipboardCheck, Package, Calendar, ShieldAlert,
     FileText, LogOut, DollarSign, ClipboardList, BarChart,
-    Users, Stethoscope
+    Users, Stethoscope, Menu, X
 } from 'lucide-react';
 
 import { client, isUsingRealBackend, MOCK_USER } from '../amplify-utils';
@@ -26,6 +26,9 @@ import { StaffManager } from './StaffManager';
 
 
 export default function AdminDashboard({ view, setView, onLogout, tenant }: AdminDashboardProps) {
+    // Mobile sidebar toggle
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    
     /**
      * Handles visit approval from PendingReviewsPanel.
      * The PendingReviewsPanel handles the approval internally with its own modals.
@@ -63,7 +66,21 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
 
     return (
         <div className="flex h-screen bg-[#f8fafc]">
-            <aside className="w-64 bg-slate-900 text-white flex flex-col">
+            {/* Mobile sidebar overlay */}
+            {sidebarOpen && (
+                <div 
+                    className="fixed inset-0 bg-black/50 z-40 md:hidden"
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
+            
+            {/* Sidebar - hidden on mobile, slide in when open */}
+            <aside className={`
+                fixed md:static inset-y-0 left-0 z-50
+                w-64 bg-slate-900 text-white flex flex-col
+                transform transition-transform duration-200 ease-in-out
+                ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+            `}>
                 <div className="p-6 border-b border-slate-800">
                     <div className="flex items-center gap-2">
                         <div className="h-10 w-10 bg-[#2563eb] rounded-xl flex items-center justify-center">
@@ -76,19 +93,19 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                     </div>
                 </div>
                 <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-                    <NavItem icon={Activity} label="Dashboard" active={view === 'dashboard'} onClick={() => setView('dashboard')} />
-                    <NavItem icon={ClipboardList} label="Revisiones Pendientes" active={view === 'pending-reviews'} onClick={() => setView('pending-reviews')} />
-                    <NavItem icon={ClipboardCheck} label="Clinical Audit" active={view === 'audit'} onClick={() => setView('audit')} />
-                    <NavItem icon={Package} label="Inventory" active={view === 'inventory'} onClick={() => setView('inventory')} />
-                    <NavItem icon={Calendar} label="Rostering" active={view === 'roster'} onClick={() => setView('roster')} />
-                    <NavItem icon={ShieldAlert} label="Compliance" active={view === 'compliance'} onClick={() => setView('compliance')} />
-                    <NavItem icon={FileText} label="Billing & RIPS" active={view === 'billing'} onClick={() => setView('billing')} />
-                    <NavItem icon={BarChart} label="Reporting & Analytics" active={view === 'reporting'} onClick={() => setView('reporting')} />
+                    <NavItem icon={Activity} label="Dashboard" active={view === 'dashboard'} onClick={() => { setView('dashboard'); setSidebarOpen(false); }} />
+                    <NavItem icon={ClipboardList} label="Revisiones Pendientes" active={view === 'pending-reviews'} onClick={() => { setView('pending-reviews'); setSidebarOpen(false); }} />
+                    <NavItem icon={ClipboardCheck} label="Clinical Audit" active={view === 'audit'} onClick={() => { setView('audit'); setSidebarOpen(false); }} />
+                    <NavItem icon={Package} label="Inventory" active={view === 'inventory'} onClick={() => { setView('inventory'); setSidebarOpen(false); }} />
+                    <NavItem icon={Calendar} label="Rostering" active={view === 'roster'} onClick={() => { setView('roster'); setSidebarOpen(false); }} />
+                    <NavItem icon={ShieldAlert} label="Compliance" active={view === 'compliance'} onClick={() => { setView('compliance'); setSidebarOpen(false); }} />
+                    <NavItem icon={FileText} label="Billing & RIPS" active={view === 'billing'} onClick={() => { setView('billing'); setSidebarOpen(false); }} />
+                    <NavItem icon={BarChart} label="Reporting & Analytics" active={view === 'reporting'} onClick={() => { setView('reporting'); setSidebarOpen(false); }} />
 
                     <div className="pt-4 mt-4 border-t border-slate-800">
                         <p className="px-4 text-xs font-bold text-slate-500 uppercase mb-2">Administration</p>
-                        <NavItem icon={Users} label="Patients" active={view === 'patients'} onClick={() => setView('patients')} />
-                        <NavItem icon={Stethoscope} label="Staff / Nurses" active={view === 'staff'} onClick={() => setView('staff')} />
+                        <NavItem icon={Users} label="Patients" active={view === 'patients'} onClick={() => { setView('patients'); setSidebarOpen(false); }} />
+                        <NavItem icon={Stethoscope} label="Staff / Nurses" active={view === 'staff'} onClick={() => { setView('staff'); setSidebarOpen(false); }} />
                     </div>
 
                 </nav>
@@ -103,8 +120,15 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                 </div>
             </aside>
             <main className="flex-1 overflow-y-auto">
-                <header className="bg-white/80 backdrop-blur-md border-b border-slate-100 px-8 py-4 flex justify-between items-center sticky top-0 z-20">
-                    <h2 className="text-2xl font-black text-slate-900">
+                <header className="bg-white/80 backdrop-blur-md border-b border-slate-100 px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-20">
+                    {/* Mobile hamburger menu */}
+                    <button 
+                        onClick={() => setSidebarOpen(!sidebarOpen)}
+                        className="md:hidden p-2 -ml-2 mr-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg"
+                    >
+                        {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+                    </button>
+                    <h2 className="text-xl md:text-2xl font-black text-slate-900 truncate">
                         {view === 'dashboard' && 'Business Overview'}
                         {view === 'pending-reviews' && 'Revisiones Pendientes'}
                         {view === 'audit' && 'Clinical Audit'}
