@@ -16,7 +16,19 @@ const DEMO_MODE_KEY = 'ips-erp-demo-mode';
 
 export function isDemoMode(): boolean {
     if (typeof window === 'undefined') return false;
-    return sessionStorage.getItem(DEMO_MODE_KEY) === 'true';
+    
+    // Check sessionStorage
+    if (sessionStorage.getItem(DEMO_MODE_KEY) === 'true') return true;
+    
+    // Also check for ?demo= query param (handles fresh page load after redirect)
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('demo')) {
+        // Auto-enable demo mode if we see the query param
+        sessionStorage.setItem(DEMO_MODE_KEY, 'true');
+        return true;
+    }
+    
+    return false;
 }
 
 export function enableDemoMode(): void {
