@@ -7,6 +7,7 @@ import { useAnalytics } from './hooks/useAnalytics';
 import { TENANTS } from './data/mock-data';
 import { ToastProvider } from './components/ui/Toast';
 import { isDemoMode } from './amplify-utils';
+import { FeedbackWidget } from './components/FeedbackWidget';
 
 // Lazy loaded components for performance
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
@@ -213,6 +214,8 @@ export default function App() {
         {role === 'family' && <FamilyPortal onLogout={handleLogout} />}
         {role === 'admin' && <AdminDashboard view={view} setView={setView} onLogout={handleLogout} tenant={tenant} />}
       </Suspense>
+      {/* Floating feedback button - always visible for beta testers */}
+      <FeedbackWidget />
     </ToastProvider>
   );
 }
