@@ -215,6 +215,20 @@ Upcoming:
 
 ---
 
+## 🚨 Deployment Monitoring
+
+**Clawd monitors after every push:**
+1. Check site responds (200 OK): https://main.d2wwgecog8smmr.amplifyapp.com
+2. Verify latest commit is deployed
+3. Alert Luis immediately on any failures
+
+**If deployment fails:**
+- Check Amplify Console: https://console.aws.amazon.com/amplify/home?region=us-east-1
+- Common issues: TypeScript errors, build timeout, dependency issues
+- Rollback: `git revert HEAD && git push`
+
+---
+
 ## 💬 Communication Protocol
 
 Since we're async agents, use this doc as the source of truth:
