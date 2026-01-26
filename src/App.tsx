@@ -5,6 +5,8 @@ import DemoSelection from './components/DemoSelection';
 import { useAuth } from './hooks/useAuth';
 import { useAnalytics } from './hooks/useAnalytics';
 import { TENANTS } from './data/mock-data';
+import { ToastProvider } from './components/ui/Toast';
+import { isDemoMode } from './amplify-utils';
 
 // Lazy loaded components for performance
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
@@ -32,6 +34,29 @@ export default function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSigningIn, setIsSigningIn] = useState(false);
+
+  // Handle demo query param on page load (after demo mode redirect)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const demoParam = params.get('demo');
+    
+    if (demoParam && isDemoMode()) {
+      // Clear the query param from URL (clean URL)
+      window.history.replaceState({}, '', window.location.pathname);
+      
+      // Auto-login to the requested demo portal
+      if (demoParam === 'admin') {
+        setDemoState('admin', TENANTS[0]);
+        trackEvent('Demo Login Used', { role: 'admin', source: 'redirect' });
+      } else if (demoParam === 'nurse') {
+        setDemoState('nurse', TENANTS[0]);
+        trackEvent('Demo Login Used', { role: 'nurse', source: 'redirect' });
+      } else if (demoParam === 'family') {
+        setDemoState('family', TENANTS[0]);
+        trackEvent('Demo Login Used', { role: 'family', source: 'redirect' });
+      }
+    }
+  }, [setDemoState, trackEvent]);
 
   useEffect(() => {
     if (role === 'admin') setView('dashboard');
@@ -180,11 +205,14 @@ export default function App() {
   }
 
   // Use Suspense to handle loading state of lazy components
+  // Wrap everything with ToastProvider for global notifications
   return (
-    <Suspense fallback={<PageLoader />}>
-      {role === 'nurse' && <SimpleNurseApp onLogout={handleLogout} />}
-      {role === 'family' && <FamilyPortal onLogout={handleLogout} />}
-      {role === 'admin' && <AdminDashboard view={view} setView={setView} onLogout={handleLogout} tenant={tenant} />}
-    </Suspense>
+    <ToastProvider>
+      <Suspense fallback={<PageLoader />}>
+        {role === 'nurse' && <SimpleNurseApp onLogout={handleLogout} />}
+        {role === 'family' && <FamilyPortal onLogout={handleLogout} />}
+        {role === 'admin' && <AdminDashboard view={view} setView={setView} onLogout={handleLogout} tenant={tenant} />}
+      </Suspense>
+    </ToastProvider>
   );
 }

@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react';
 import { Calendar, Sparkles, Clock, MapPin, Plus, User, Check, X, Users, RefreshCw } from 'lucide-react';
 import { client, isUsingRealBackend, MOCK_USER } from '../amplify-utils';
 import { usePagination } from '../hooks/usePagination';
+import { useLoadingTimeout } from '../hooks/useLoadingTimeout';
+import { ErrorState } from './ui/ErrorState';
 import type { Shift, Patient, Nurse } from '../types';
 import { LoadingSpinner } from './ui/LoadingSpinner';
 
 export function RosterDashboard() {
-    const { items: shifts, setItems, loadMore, hasMore, isLoading } = usePagination<Shift>();
+    const { items: shifts, setItems, loadMore, hasMore, isLoading: isPaginationLoading } = usePagination<Shift>();
+    const { isLoading, hasTimedOut, startLoading, stopLoading } = useLoadingTimeout();
     const [patients, setPatients] = useState<Patient[]>([]);
     const [nurses, setNurses] = useState<Nurse[]>([]); // Added for assignment
 
@@ -22,37 +25,38 @@ export function RosterDashboard() {
     const [newShiftTime, setNewShiftTime] = useState('');
     const [newShiftLocation, setNewShiftLocation] = useState('');
 
-    useEffect(() => {
-        const fetchData = async () => {
-            if (!isUsingRealBackend()) {
-                const { PATIENTS, SHIFTS, NURSES } = await import('../data/mock-data');
-                setPatients(PATIENTS as any);
-                setNurses(NURSES as any || []); // Handle missing mock nurses safely
-                loadMore(async () => ({ data: SHIFTS as any, nextToken: null }), true);
-                return;
-            }
+    const fetchData = async () => {
+        startLoading();
+        
+        try {
+            // Always use the client - it returns mock data in demo mode
+            const [patientsRes, nursesRes] = await Promise.all([
+                (client.models.Patient as any).list(),
+                (client.models.Nurse as any).list()
+            ]);
+            setPatients(patientsRes.data || []);
+            setNurses(nursesRes.data || []);
+        } catch (error) {
+            console.error('Error fetching dropdown data:', error);
+        }
 
+        await loadMore(async (token) => {
             try {
-                // Fetch basic lists for dropdowns
-                const [patientsRes, nursesRes] = await Promise.all([
-                    (client.models.Patient as any).list(),
-                    (client.models.Nurse as any).list()
-                ]);
-                setPatients(patientsRes.data || []);
-                setNurses(nursesRes.data || []);
-            } catch (error) {
-                console.error('Error fetching dropdown data:', error);
-            }
-
-            loadMore(async (token) => {
                 const response = await (client.models.Shift as any).list({
                     limit: 50,
                     nextToken: token
                 });
+                stopLoading();
                 return { data: response.data || [], nextToken: response.nextToken };
-            }, true);
-        };
+            } catch (error) {
+                console.error('Failed to fetch shifts:', error);
+                stopLoading();
+                return { data: [], nextToken: null };
+            }
+        }, true);
+    };
 
+    useEffect(() => {
         fetchData();
     }, [loadMore]);
 
@@ -119,7 +123,21 @@ export function RosterDashboard() {
     };
 
     if (isLoading && shifts.length === 0) {
-        return <LoadingSpinner size="lg" label="Loading Roster..." />;
+        return (
+            <div className="flex flex-col items-center justify-center py-12 bg-white rounded-2xl border border-slate-100 border-dashed animate-pulse">
+                <LoadingSpinner size="lg" label="Sincronizando Roster..." />
+            </div>
+        );
+    }
+
+    if (hasTimedOut && shifts.length === 0) {
+        return (
+            <ErrorState
+                title="Roster Connection Unstable"
+                message="We couldn't load the shift schedule. This usually happens if the rostering engine is scaling or if there are permission gaps in AWS AppSync."
+                onRetry={fetchData}
+            />
+        );
     }
 
     return (
@@ -127,7 +145,7 @@ export function RosterDashboard() {
             <div className="flex justify-between items-center mb-6">
                 <h3 className="font-black text-slate-900 flex items-center gap-2">
                     <Calendar size={18} className="text-slate-400" />
-                    Shift Management
+                    Gestión de Turnos
                 </h3>
                 <div className="flex gap-3">
                     <button
@@ -136,13 +154,13 @@ export function RosterDashboard() {
                         className="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-xl font-bold text-xs hover:bg-indigo-100 transition-all flex items-center gap-2 border border-indigo-100"
                     >
                         {isOptimizing ? <LoadingSpinner size="sm" /> : <Sparkles size={14} />}
-                        {isOptimizing ? 'Optimizing...' : 'Optimize Routes (AI)'}
+                        {isOptimizing ? 'Optimizando...' : 'Optimizar Rutas (IA)'}
                     </button>
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
                         className="bg-[#2563eb] text-white px-4 py-2 rounded-xl font-bold text-xs hover:bg-blue-700 transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20"
                     >
-                        <Plus size={16} /> New Shift
+                        <Plus size={16} /> Nuevo Turno
                     </button>
                 </div>
             </div>
@@ -150,12 +168,12 @@ export function RosterDashboard() {
             {shifts.length === 0 && !isLoading && (
                 <div className="text-center py-12 bg-slate-50 rounded-2xl border border-slate-100 border-dashed">
                     <Calendar className="mx-auto text-slate-300 mb-4" size={48} />
-                    <p className="text-slate-400 mb-4 font-medium">No shifts scheduled yet</p>
+                    <p className="text-slate-400 mb-4 font-medium">No hay turnos programados</p>
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
                         className="text-[#2563eb] font-bold text-sm hover:underline"
                     >
-                        Create your first shift
+                        Crear su primer turno
                     </button>
                 </div>
             )}
@@ -180,7 +198,7 @@ export function RosterDashboard() {
                                         </p>
                                         <p className="text-xs text-slate-400 flex items-center gap-1 font-medium">
                                             <User size={10} />
-                                            {nurse?.name || 'Unassigned'}
+                                            {nurse?.name || 'Sin Asignar'}
                                         </p>
                                     </div>
                                 </div>

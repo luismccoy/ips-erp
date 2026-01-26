@@ -24,7 +24,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-${AWS::Region}",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-${AWS::Region}",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/704d5aac266e24953374ea6e776d430697ca50c0f85c3da1bdff374fa251976e.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/f689711e030aac71d035916c7f3db3e59ba553508b134ee35890adcb18802df2.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -6009,6 +6009,54 @@
             "data": "Query.generateGlosaDefense"
           }
         ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/VerifyFamilyAccessLambdaDataSource": [
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "VerifyFamilyAccessLambdaDataSource"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/VerifyFamilyAccessLambdaDataSource/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VerifyFamilyAccessLambdaDataSourceServiceRole117F68F0"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/VerifyFamilyAccessLambdaDataSource/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VerifyFamilyAccessLambdaDataSourceServiceRoleDefaultPolicyD1DFA581"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/VerifyFamilyAccessLambdaDataSource/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VerifyFamilyAccessLambdaDataSource"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "VerifyFamilyAccessLambdaDataSource"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/InvokeVerifyFamilyAccessLambdaDataSource/InvokeVerifyFamilyAccessLambdaDataSource.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "InvokeVerifyFamilyAccessLambdaDataSourceInvokeVerifyFamilyAccessLambdaDataSourceAppSyncFunctionE76319EC"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "InvokeVerifyFamilyAccessLambdaDataSource"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/queryVerifyFamilyAccessCodeResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QueryverifyFamilyAccessCodeResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Query.verifyFamilyAccessCode"
+          }
+        ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/ListApprovedVisitSummariesLambdaDataSource": [
           {
             "type": "graphqltransformer:resourceName",
@@ -6125,6 +6173,16 @@
           {
             "type": "graphqltransformer:resourceName",
             "data": "QueryGenerateGlosaDefenseAuthFN"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/QueryVerifyFamilyAccessCodeAuthFN/QueryVerifyFamilyAccessCodeAuthFN.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QueryVerifyFamilyAccessCodeAuthFNQueryVerifyFamilyAccessCodeAuthFNAppSyncFunction22151B19"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QueryVerifyFamilyAccessCodeAuthFN"
           }
         ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/QueryListApprovedVisitSummariesForFamilyAuthFN/QueryListApprovedVisitSummariesForFamilyAuthFN.AppSyncFunction": [
@@ -7553,6 +7611,18 @@
             "data": "approvevisitlambdaF91E5D0A"
           }
         ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/verify-family-access-lambda/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "verifyfamilyaccesslambdaServiceRoleCB3B8210"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/verify-family-access-lambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "verifyfamilyaccesslambdaA0E8B3E0"
+          }
+        ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/CDKMetadata/Default": [
           {
             "type": "aws:cdk:logicalId",
@@ -7611,6 +7681,12 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "amplifyipserpluiscoysandboxbb7136bc7bfunctionapprovevisitlambdaA75308DDRef"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/amplifyipserpluiscoysandboxbb7136bc7bfunctionverifyfamilyaccesslambda3589BA81Ref": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "amplifyipserpluiscoysandboxbb7136bc7bfunctionverifyfamilyaccesslambda3589BA81Ref"
           }
         ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function.NestedStack/function.NestedStackResource": [

@@ -6,8 +6,10 @@ import {
 import { client, isUsingRealBackend } from '../amplify-utils';
 import type { Patient } from '../types';
 import { LoadingSpinner } from './ui/LoadingSpinner';
+import { useToast } from './ui/Toast';
 
 export function PatientManager() {
+    const { showToast } = useToast();
     const [patients, setPatients] = useState<Patient[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -33,27 +35,9 @@ export function PatientManager() {
     const fetchPatients = async () => {
         setLoading(true);
         try {
-            if (isUsingRealBackend()) {
-                const response = await (client.models.Patient as any).list();
-                setPatients(response.data || []);
-            } else {
-                // Mock behavior
-                const { PATIENTS } = await import('../data/mock-data');
-                // Transform mock data to match Patient type if needed
-                const transformed: Patient[] = PATIENTS.map((p: any) => ({
-                    id: p.id,
-                    tenantId: 'tenant-1',
-                    name: p.name,
-                    documentId: 'DOC-' + Math.floor(Math.random() * 10000),
-                    age: p.age || 70,
-                    address: p.address,
-                    diagnosis: p.diagnosis,
-                    eps: p.eps || 'Sura',
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                }));
-                setPatients(transformed);
-            }
+            // Always use the client - it returns mock data in demo mode
+            const response = await (client.models.Patient as any).list();
+            setPatients(response.data || []);
         } catch (err) {
             console.error('Error fetching patients:', err);
             setError('Failed to load patients');
@@ -101,22 +85,49 @@ export function PatientManager() {
                         id: selectedPatient.id,
                         ...formData
                     });
+                    showToast('success', `Patient "${formData.name}" updated successfully`);
                 } else {
-                    // Create
-                    await (client.models.Patient as any).create({
-                        tenantId: 'tenant-bogota-01', // Default per Audit
-                        ...formData
-                    });
+                    // Create with optimistic update
+                    const tempId = 'temp-' + Date.now();
+                    const optimisticPatient: Patient = {
+                        id: tempId,
+                        tenantId: 'tenant-bogota-01',
+                        ...formData,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    };
+
+                    // Optimistically add to list
+                    setPatients(prev => [...prev, optimisticPatient]);
+                    setShowModal(false);
+
+                    try {
+                        const result = await (client.models.Patient as any).create({
+                            tenantId: 'tenant-bogota-01',
+                            ...formData
+                        });
+
+                        // Replace temp with real data
+                        setPatients(prev => prev.map(p => p.id === tempId ? result.data : p));
+                        showToast('success', `Patient "${formData.name}" created successfully`);
+                    } catch (createErr) {
+                        // Revert optimistic update on error
+                        setPatients(prev => prev.filter(p => p.id !== tempId));
+                        throw createErr;
+                    }
+                    return; // Exit early for optimistic flow
                 }
                 await fetchPatients();
                 setShowModal(false);
             } else {
-                alert('Mock Mode: Changes specific to session only.');
+                showToast('info', 'Mock Mode: Changes are session-only');
                 setShowModal(false);
             }
         } catch (err) {
             console.error('Error saving patient:', err);
-            setError('Failed to save patient. Please check your permissions.');
+            const errorMsg = 'Failed to save patient. Please check your permissions.';
+            setError(errorMsg);
+            showToast('error', errorMsg);
         } finally {
             setFormLoading(false);
         }
@@ -136,7 +147,7 @@ export function PatientManager() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                     <input
                         type="text"
-                        placeholder="Search patients by name or ID..."
+                        placeholder="Buscar pacientes por nombre o documento..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
@@ -146,7 +157,7 @@ export function PatientManager() {
                     onClick={handleCreate}
                     className="flex items-center gap-2 px-4 py-2 bg-[#2563eb] text-white font-bold rounded-lg hover:bg-blue-600 transition-colors"
                 >
-                    <Plus size={20} /> Add Patient
+                    <Plus size={20} /> Agregar Paciente
                 </button>
             </div>
 
@@ -154,18 +165,18 @@ export function PatientManager() {
                 <table className="w-full">
                     <thead className="bg-slate-50 border-b border-slate-200">
                         <tr>
-                            <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Patient Name</th>
-                            <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Document ID</th>
-                            <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Contact & Location</th>
-                            <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Diagnosis / EPS</th>
-                            <th className="px-6 py-4 text-right text-xs font-bold text-slate-500 uppercase">Actions</th>
+                            <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Nombre del Paciente</th>
+                            <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Documento</th>
+                            <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Contacto y Ubicación</th>
+                            <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Diagnóstico / EPS</th>
+                            <th className="px-6 py-4 text-right text-xs font-bold text-slate-500 uppercase">Acciones</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                         {filteredPatients.length === 0 ? (
                             <tr>
                                 <td colSpan={5} className="px-6 py-12 text-center text-slate-400">
-                                    No patients found. Create one to get started.
+                                    No se encontraron pacientes. Cree uno para comenzar.
                                 </td>
                             </tr>
                         ) : (
@@ -178,7 +189,7 @@ export function PatientManager() {
                                             </div>
                                             <div>
                                                 <div className="font-bold text-slate-900">{patient.name}</div>
-                                                <div className="text-xs text-slate-500">{patient.age} years old</div>
+                                                <div className="text-xs text-slate-500">{patient.age} años</div>
                                             </div>
                                         </div>
                                     </td>

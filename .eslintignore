@@ -1,0 +1,3 @@
+# Ignore test harness and coverage
+.local-tests/
+coverage/

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
     Activity, ClipboardCheck, Package, Calendar, ShieldAlert,
     FileText, LogOut, DollarSign, ClipboardList, BarChart,
-    Users, Stethoscope
+    Users, Stethoscope, Menu, X
 } from 'lucide-react';
 
 import { client, isUsingRealBackend, MOCK_USER } from '../amplify-utils';
@@ -26,6 +26,9 @@ import { StaffManager } from './StaffManager';
 
 
 export default function AdminDashboard({ view, setView, onLogout, tenant }: AdminDashboardProps) {
+    // Mobile sidebar toggle
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    
     /**
      * Handles visit approval from PendingReviewsPanel.
      * The PendingReviewsPanel handles the approval internally with its own modals.
@@ -63,7 +66,21 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
 
     return (
         <div className="flex h-screen bg-[#f8fafc]">
-            <aside className="w-64 bg-slate-900 text-white flex flex-col">
+            {/* Mobile sidebar overlay */}
+            {sidebarOpen && (
+                <div 
+                    className="fixed inset-0 bg-black/50 z-40 md:hidden"
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
+            
+            {/* Sidebar - hidden on mobile, slide in when open */}
+            <aside className={`
+                fixed md:static inset-y-0 left-0 z-50
+                w-64 bg-slate-900 text-white flex flex-col
+                transform transition-transform duration-200 ease-in-out
+                ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+            `}>
                 <div className="p-6 border-b border-slate-800">
                     <div className="flex items-center gap-2">
                         <div className="h-10 w-10 bg-[#2563eb] rounded-xl flex items-center justify-center">
@@ -76,45 +93,52 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                     </div>
                 </div>
                 <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-                    <NavItem icon={Activity} label="Dashboard" active={view === 'dashboard'} onClick={() => setView('dashboard')} />
-                    <NavItem icon={ClipboardList} label="Revisiones Pendientes" active={view === 'pending-reviews'} onClick={() => setView('pending-reviews')} />
-                    <NavItem icon={ClipboardCheck} label="Clinical Audit" active={view === 'audit'} onClick={() => setView('audit')} />
-                    <NavItem icon={Package} label="Inventory" active={view === 'inventory'} onClick={() => setView('inventory')} />
-                    <NavItem icon={Calendar} label="Rostering" active={view === 'roster'} onClick={() => setView('roster')} />
-                    <NavItem icon={ShieldAlert} label="Compliance" active={view === 'compliance'} onClick={() => setView('compliance')} />
-                    <NavItem icon={FileText} label="Billing & RIPS" active={view === 'billing'} onClick={() => setView('billing')} />
-                    <NavItem icon={BarChart} label="Reporting & Analytics" active={view === 'reporting'} onClick={() => setView('reporting')} />
+                    <NavItem icon={Activity} label="Panel Principal" active={view === 'dashboard'} onClick={() => { setView('dashboard'); setSidebarOpen(false); }} />
+                    <NavItem icon={ClipboardList} label="Revisiones Pendientes" active={view === 'pending-reviews'} onClick={() => { setView('pending-reviews'); setSidebarOpen(false); }} />
+                    <NavItem icon={ClipboardCheck} label="Auditoría Clínica" active={view === 'audit'} onClick={() => { setView('audit'); setSidebarOpen(false); }} />
+                    <NavItem icon={Package} label="Inventario" active={view === 'inventory'} onClick={() => { setView('inventory'); setSidebarOpen(false); }} />
+                    <NavItem icon={Calendar} label="Programación de Turnos" active={view === 'roster'} onClick={() => { setView('roster'); setSidebarOpen(false); }} />
+                    <NavItem icon={ShieldAlert} label="Cumplimiento" active={view === 'compliance'} onClick={() => { setView('compliance'); setSidebarOpen(false); }} />
+                    <NavItem icon={FileText} label="Facturación y RIPS" active={view === 'billing'} onClick={() => { setView('billing'); setSidebarOpen(false); }} />
+                    <NavItem icon={BarChart} label="Reportes y Análisis" active={view === 'reporting'} onClick={() => { setView('reporting'); setSidebarOpen(false); }} />
 
                     <div className="pt-4 mt-4 border-t border-slate-800">
-                        <p className="px-4 text-xs font-bold text-slate-500 uppercase mb-2">Administration</p>
-                        <NavItem icon={Users} label="Patients" active={view === 'patients'} onClick={() => setView('patients')} />
-                        <NavItem icon={Stethoscope} label="Staff / Nurses" active={view === 'staff'} onClick={() => setView('staff')} />
+                        <p className="px-4 text-xs font-bold text-slate-500 uppercase mb-2">Administración</p>
+                        <NavItem icon={Users} label="Pacientes" active={view === 'patients'} onClick={() => { setView('patients'); setSidebarOpen(false); }} />
+                        <NavItem icon={Stethoscope} label="Personal / Enfermeras" active={view === 'staff'} onClick={() => { setView('staff'); setSidebarOpen(false); }} />
                     </div>
 
                 </nav>
                 <div className="p-4 border-t border-slate-800">
                     <div className="p-4 bg-slate-800/40 rounded-2xl mb-4">
-                        <p className="text-xs font-black text-slate-500 uppercase">License</p>
+                        <p className="text-xs font-black text-slate-500 uppercase">Licencia</p>
                         <p className="text-sm text-white font-bold truncate">{tenant?.name}</p>
                     </div>
                     <button onClick={onLogout} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all">
-                        <LogOut size={16} /> Logout
+                        <LogOut size={16} /> Cerrar Sesión
                     </button>
                 </div>
             </aside>
             <main className="flex-1 overflow-y-auto">
-                <header className="bg-white/80 backdrop-blur-md border-b border-slate-100 px-8 py-4 flex justify-between items-center sticky top-0 z-20">
-                    <h2 className="text-2xl font-black text-slate-900">
-                        {view === 'dashboard' && 'Business Overview'}
+                <header className="bg-white/80 backdrop-blur-md border-b border-slate-100 px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-20">
+                    {/* Mobile hamburger menu */}
+                    <button 
+                        onClick={() => setSidebarOpen(!sidebarOpen)}
+                        className="md:hidden p-2 -ml-2 mr-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg"
+                    >
+                        {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+                    </button>
+                    <h2 className="text-xl md:text-2xl font-black text-slate-900 truncate">
+                        {view === 'dashboard' && 'Resumen General'}
                         {view === 'pending-reviews' && 'Revisiones Pendientes'}
-                        {view === 'audit' && 'Clinical Audit'}
-                        {view === 'inventory' && 'Inventory Management'}
-                        {view === 'roster' && 'Rostering'}
-                        {view === 'compliance' && 'Compliance (Res 3100)'}
-                        {view === 'billing' && 'Billing & RIPS'}
-                        {view === 'reporting' && 'Reporting & Analytics'}
-                        {view === 'patients' && 'Patient Management'}
-                        {view === 'staff' && 'Staff Management'}
+                        {view === 'audit' && 'Auditoría Clínica'}
+                        {view === 'inventory' && 'Gestión de Inventario'}
+                        {view === 'roster' && 'Programación de Turnos'}
+                        {view === 'compliance' && 'Cumplimiento (Res 3100)'}
+                        {view === 'billing' && 'Facturación y RIPS'}
+                        {view === 'reporting' && 'Reportes y Análisis'}
+                        {view === 'patients' && 'Gestión de Pacientes'}
+                        {view === 'staff' && 'Gestión de Personal'}
 
                     </h2>
                     <div className="flex items-center gap-4">
@@ -170,20 +194,8 @@ function DashboardView() {
 
     useEffect(() => {
         const fetchStats = async () => {
-            if (!isUsingRealBackend()) {
-                // Use mock data dynamically
-                const { PATIENTS, INVENTORY, SHIFTS } = await import('../data/mock-data');
-                setStats({
-                    patients: PATIENTS.length,
-                    shifts: SHIFTS.length,
-                    inventory: INVENTORY.filter((i: any) => i.quantity < i.reorderThreshold).length
-                });
-                setLoading(false);
-                return;
-            }
-
             try {
-                // Fetch real data
+                // Always use the client - it returns mock data in demo mode
                 const [patientsRes, shiftsRes, inventoryRes] = await Promise.all([
                     (client.models.Patient as any).list(),
                     (client.models.Shift as any).list(),
@@ -278,9 +290,9 @@ function DashboardView() {
         <div className="space-y-6">
             <div className="grid grid-cols-3 gap-6">
                 {[
-                    { label: 'Patients', value: stats.patients.toString(), change: 'Active', color: 'blue' },
-                    { label: 'Shifts', value: stats.shifts.toString(), change: 'Total', color: 'purple' },
-                    { label: 'Stock Alerts', value: `${stats.inventory} Items`, change: stats.inventory > 0 ? 'Low' : 'OK', color: stats.inventory > 0 ? 'red' : 'green' }
+                    { label: 'Pacientes', value: stats.patients.toString(), change: 'Activos', color: 'blue' },
+                    { label: 'Turnos', value: stats.shifts.toString(), change: 'Total', color: 'purple' },
+                    { label: 'Alertas de Stock', value: `${stats.inventory} Items`, change: stats.inventory > 0 ? 'Bajo' : 'OK', color: stats.inventory > 0 ? 'red' : 'green' }
                 ].map((kpi, i) => (
                     <div key={i} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
                         <div className="flex justify-between items-start mb-4">
@@ -295,14 +307,14 @@ function DashboardView() {
                 ))}
             </div>
             <div className="bg-white p-6 rounded-2xl border border-slate-100">
-                <h3 className="font-black text-slate-900 mb-4">System Status</h3>
+                <h3 className="font-black text-slate-900 mb-4">Estado del Sistema</h3>
                 <div className="space-y-3">
                     <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
                         <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold text-xs">
                             ✓
                         </div>
                         <span className="text-sm text-slate-700 font-medium">
-                            {isUsingRealBackend() ? 'Connected to AWS Backend' : 'Using Mock Data (Development Mode)'}
+                            {isUsingRealBackend() ? 'Conectado a AWS Backend' : 'Usando Datos de Prueba (Modo Demo)'}
                         </span>
                     </div>
                 </div>

@@ -2,11 +2,16 @@ import { useEffect, useState } from 'react';
 import { DollarSign, FileText, Sparkles, ClipboardCheck, AlertTriangle, Clock, Download, X, Check, Save } from 'lucide-react';
 import { client, isUsingRealBackend, MOCK_USER } from '../amplify-utils';
 import { usePagination } from '../hooks/usePagination';
+import { useLoadingTimeout } from '../hooks/useLoadingTimeout';
+import { useToast } from './ui/Toast';
+import { ErrorState } from './ui/ErrorState';
 import type { BillingRecord as BillingRecordType, BillingStatus } from '../types';
 import { LoadingSpinner } from './ui/LoadingSpinner';
 
 export function BillingDashboard() {
-    const { items: bills, loadMore, hasMore, isLoading } = usePagination<BillingRecordType>();
+    const { items: bills, loadMore, hasMore, isLoading: isPaginationLoading } = usePagination<BillingRecordType>();
+    const { isLoading, hasTimedOut, startLoading, stopLoading } = useLoadingTimeout();
+    const { showToast } = useToast();
 
     // AI Loading States
     const [isValidating, setIsValidating] = useState(false);
@@ -27,47 +32,56 @@ export function BillingDashboard() {
 
     const tenantId = MOCK_USER.attributes['custom:tenantId'];
 
-    useEffect(() => {
-        const fetchBills = async () => {
-            if (!isUsingRealBackend()) {
-                // Mock data
-                const mockBills: BillingRecordType[] = [
-                    {
-                        id: 'bill-1',
-                        tenantId,
-                        patientId: 'patient-1',
-                        invoiceNumber: 'FE-1025',
-                        totalValue: 1250000,
-                        status: 'PAID',
-                        radicationDate: '2026-01-15',
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
-                    },
-                    {
-                        id: 'bill-2',
-                        tenantId,
-                        patientId: 'patient-2',
-                        invoiceNumber: 'FE-1026',
-                        totalValue: 850000,
-                        status: 'PENDING',
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
-                    }
-                ];
-                loadMore(async () => ({ data: mockBills, nextToken: null }), true);
-                return;
-            }
+    const fetchBills = async () => {
+        startLoading();
+        if (!isUsingRealBackend()) {
+            // Mock data
+            const mockBills: BillingRecordType[] = [
+                {
+                    id: 'bill-1',
+                    tenantId,
+                    patientId: 'patient-1',
+                    invoiceNumber: 'FE-1025',
+                    totalValue: 1250000,
+                    status: 'PAID',
+                    radicationDate: '2026-01-15',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                },
+                {
+                    id: 'bill-2',
+                    tenantId,
+                    patientId: 'patient-2',
+                    invoiceNumber: 'FE-1026',
+                    totalValue: 850000,
+                    status: 'PENDING',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                }
+            ];
+            await loadMore(async () => ({ data: mockBills, nextToken: null }), true);
+            stopLoading();
+            return;
+        }
 
-            loadMore(async (token) => {
+        await loadMore(async (token) => {
+            try {
                 const response = await (client.models.BillingRecord as any).list({
                     filter: { tenantId: { eq: tenantId } },
                     limit: 50,
                     nextToken: token
                 });
+                stopLoading();
                 return { data: response.data || [], nextToken: response.nextToken };
-            }, true);
-        };
+            } catch (err) {
+                console.error('Billing fetch failed:', err);
+                stopLoading();
+                return { data: [], nextToken: null };
+            }
+        }, true);
+    };
 
+    useEffect(() => {
         fetchBills();
     }, [tenantId, loadMore]);
 
@@ -89,7 +103,7 @@ export function BillingDashboard() {
             const response = await (client.queries as any).validateRIPS({
                 invoiceId: 'test-invoice'
             });
-            console.log('RIPS Validation Result:', response);
+            console.log('Resultado de Validación RIPS:', response);
 
             // Show result modal instead of alert
             const mockResult = response || {
@@ -137,7 +151,7 @@ export function BillingDashboard() {
     const handleGenerateDefense = async (billingRecordId: string) => {
         setIsGeneratingDefense(true);
         setErrorMessage('');
-        
+
         try {
             // Call the glosaDefender Lambda via GraphQL custom query
             const response = await (client.queries as any).glosaDefender({
@@ -158,10 +172,10 @@ export function BillingDashboard() {
                 // Handle GraphQL errors
                 const error = response.errors[0];
                 console.error('GraphQL Error:', error);
-                
+
                 // Map error types to Spanish messages
                 let errorMsg = 'Error al generar respuesta AI. Por favor intente nuevamente.';
-                
+
                 if (error.message.includes('timeout') || error.message.includes('timed out')) {
                     errorMsg = 'La operación tardó demasiado. Por favor intente nuevamente.';
                 } else if (error.message.includes('authorization') || error.message.includes('unauthorized')) {
@@ -172,7 +186,7 @@ export function BillingDashboard() {
                     // Pass through specific error messages from Lambda
                     errorMsg = error.message;
                 }
-                
+
                 setErrorMessage(errorMsg);
             } else {
                 // Unexpected response format
@@ -182,15 +196,15 @@ export function BillingDashboard() {
         } catch (error) {
             // Handle network and client-side errors
             console.error('Defense generation failed:', error);
-            
+
             let errorMsg = 'Error al generar respuesta AI. Por favor intente nuevamente.';
-            
+
             if (error instanceof TypeError && error.message.includes('fetch')) {
                 errorMsg = 'Error de conexión. Verifique su conexión a internet.';
             } else if (error instanceof Error) {
                 errorMsg = error.message;
             }
-            
+
             setErrorMessage(errorMsg);
         } finally {
             setIsGeneratingDefense(false);
@@ -267,7 +281,15 @@ export function BillingDashboard() {
 
                     <div className="space-y-3">
                         {isLoading && bills.length === 0 ? (
-                            <LoadingSpinner size="sm" label="Cargando facturas..." />
+                            <div className="py-12 flex flex-col items-center justify-center bg-slate-50 rounded-xl border border-slate-100 border-dashed animate-pulse">
+                                <LoadingSpinner size="sm" label="Cargando facturas..." />
+                            </div>
+                        ) : hasTimedOut && bills.length === 0 ? (
+                            <ErrorState
+                                title="Error de Facturación"
+                                message="No se pudo conectar con el módulo de facturas. Verifique la latencia de red."
+                                onRetry={fetchBills}
+                            />
                         ) : bills.length === 0 ? (
                             <div className="text-center py-8 text-slate-400">No hay facturas registradas</div>
                         ) : (
@@ -314,15 +336,14 @@ export function BillingDashboard() {
                         </div>
 
                         <div className="space-y-4">
-                            <div 
-                                className={`p-4 bg-white/5 rounded-xl border border-white/10 transition-all ${
-                                    isGeneratingDefense 
-                                        ? 'opacity-60 cursor-not-allowed' 
+                            <div
+                                className={`p-4 bg-white/5 rounded-xl border border-white/10 transition-all ${isGeneratingDefense
+                                        ? 'opacity-60 cursor-not-allowed'
                                         : 'hover:border-blue-500/50 cursor-pointer group'
-                                }`}
+                                    }`}
                                 onClick={() => {
                                     if (isGeneratingDefense) return; // Prevent clicks while processing
-                                    
+
                                     // For demo purposes, use the first billing record if available
                                     if (bills.length > 0) {
                                         handleGenerateDefense(bills[0].id);
@@ -360,7 +381,7 @@ export function BillingDashboard() {
                                 <h4 className="font-bold mb-1">Error</h4>
                                 <p className="text-sm">{errorMessage}</p>
                             </div>
-                            <button 
+                            <button
                                 onClick={() => setErrorMessage('')}
                                 className="text-red-400 hover:text-red-600 transition-colors"
                             >
@@ -394,14 +415,14 @@ export function BillingDashboard() {
                         <div className="flex justify-between items-center mb-6">
                             <div className="flex items-center gap-2">
                                 <Sparkles className="text-blue-500" size={20} />
-                                <h3 className="font-bold text-lg text-slate-900">AI Generated Defense</h3>
+                                <h3 className="font-bold text-lg text-slate-900">Defensa Generada por IA</h3>
                             </div>
                             <button onClick={() => setRebuttalResult(null)} className="text-slate-400 hover:text-slate-600">
                                 <X size={20} />
                             </button>
                         </div>
                         <div className="mb-6">
-                            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Technical Rebuttal (Editable)</label>
+                            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Respuesta Técnica (Editable)</label>
                             <textarea
                                 className="w-full h-64 p-4 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none leading-relaxed"
                                 value={rebuttalResult}
@@ -435,7 +456,7 @@ export function BillingDashboard() {
                             <div className="flex items-center gap-2">
                                 <ClipboardCheck className={ripsResult.valid ? "text-emerald-500" : "text-red-500"} size={20} />
                                 <h3 className="font-bold text-lg text-slate-900">
-                                    RIPS Validation Result
+                                    Resultado de Validación RIPS
                                 </h3>
                             </div>
                             <button onClick={() => setRipsResult(null)} className="text-slate-400 hover:text-slate-600">
@@ -447,23 +468,23 @@ export function BillingDashboard() {
                             <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 mb-6 flex gap-3 text-emerald-800">
                                 <Check className="shrink-0" size={20} />
                                 <div>
-                                    <h4 className="font-bold">Validation Passed</h4>
-                                    <p className="text-sm opacity-90">All RIPS files comply with Res 2275.</p>
+                                    <h4 className="font-bold">Validación Exitosa</h4>
+                                    <p className="text-sm opacity-90">Todos los archivos RIPS cumplen con la Res 2275.</p>
                                 </div>
                             </div>
                         ) : (
                             <div className="bg-red-50 border border-red-100 rounded-xl p-4 mb-6 flex gap-3 text-red-800">
                                 <AlertTriangle className="shrink-0" size={20} />
                                 <div>
-                                    <h4 className="font-bold">Validation Failed</h4>
-                                    <p className="text-sm opacity-90">Found {ripsResult.errors.length} critical errors.</p>
+                                    <h4 className="font-bold">Validación Fallida</h4>
+                                    <p className="text-sm opacity-90">Se encontraron errores críticos.</p>
                                 </div>
                             </div>
                         )}
 
                         <div className="space-y-4 mb-6">
                             <div>
-                                <h5 className="text-xs font-bold text-slate-500 uppercase mb-2">Files Processed</h5>
+                                <h5 className="text-xs font-bold text-slate-500 uppercase mb-2">Archivos Procesados</h5>
                                 <div className="flex flex-wrap gap-2">
                                     {ripsResult.files.map((file: string) => (
                                         <span key={file} className="px-2 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-md border border-slate-200">
@@ -506,14 +527,14 @@ export function BillingDashboard() {
                                 <Sparkles className="text-blue-500" size={20} />
                                 <h3 className="font-bold text-lg text-slate-900">Carta de Defensa Generada</h3>
                             </div>
-                            <button 
-                                onClick={() => setDefenseLetterModal({ ...defenseLetterModal, isOpen: false })} 
+                            <button
+                                onClick={() => setDefenseLetterModal({ ...defenseLetterModal, isOpen: false })}
                                 className="text-slate-400 hover:text-slate-600"
                             >
                                 <X size={20} />
                             </button>
                         </div>
-                        
+
                         <div className="mb-6">
                             <label className="block text-xs font-bold text-slate-500 uppercase mb-2">
                                 Contenido de la Defensa (Editable)
@@ -524,7 +545,7 @@ export function BillingDashboard() {
                                 onChange={(e) => setDefenseLetterModal({ ...defenseLetterModal, content: e.target.value })}
                             />
                         </div>
-                        
+
                         <div className="flex justify-end gap-3">
                             <button
                                 onClick={() => setDefenseLetterModal({ ...defenseLetterModal, isOpen: false })}

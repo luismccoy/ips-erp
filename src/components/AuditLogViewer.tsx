@@ -2,55 +2,67 @@ import { useEffect } from 'react';
 import { Shield, Clock, User, Activity } from 'lucide-react';
 import { client, isUsingRealBackend, MOCK_USER } from '../amplify-utils';
 import { usePagination } from '../hooks/usePagination';
+import { useLoadingTimeout } from '../hooks/useLoadingTimeout';
+import { ErrorState } from './ui/ErrorState';
 import type { AuditLog } from '../types';
 import { LoadingSpinner } from './ui/LoadingSpinner';
 
 export function AuditLogViewer() {
-    const { items: logs, loadMore, hasMore, isLoading } = usePagination<AuditLog>();
+    const { items: logs, loadMore, hasMore, isLoading: isPaginationLoading } = usePagination<AuditLog>();
+    const { isLoading, hasTimedOut, startLoading, stopLoading } = useLoadingTimeout();
     const tenantId = MOCK_USER.attributes['custom:tenantId'];
 
-    useEffect(() => {
-        const fetchLogs = async () => {
-            if (!isUsingRealBackend()) {
-                // Mock logs
-                const mockLogs: AuditLog[] = [
-                    {
-                        id: 'log-1',
-                        tenantId,
-                        userId: 'admin-1',
-                        action: 'APPROVE_VISIT',
-                        entityType: 'VISIT',
-                        entityId: 'visit-123',
-                        details: JSON.stringify({ reason: 'Documentation complete' }),
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
-                    },
-                    {
-                        id: 'log-2',
-                        tenantId,
-                        userId: 'nurse-maria',
-                        action: 'SUBMIT_VISIT',
-                        entityType: 'VISIT',
-                        entityId: 'visit-123',
-                        details: JSON.stringify({ items: 5 }),
-                        createdAt: new Date(Date.now() - 3600000).toISOString(),
-                        updatedAt: new Date(Date.now() - 3600000).toISOString()
-                    }
-                ];
-                loadMore(async () => ({ data: mockLogs, nextToken: null }), true);
-                return;
-            }
+    const fetchLogs = async () => {
+        startLoading();
+        if (!isUsingRealBackend()) {
+            // Mock logs
+            const mockLogs: AuditLog[] = [
+                {
+                    id: 'log-1',
+                    tenantId,
+                    userId: 'admin-1',
+                    action: 'APPROVE_VISIT',
+                    entityType: 'VISIT',
+                    entityId: 'visit-123',
+                    details: JSON.stringify({ reason: 'Documentation complete' }),
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                },
+                {
+                    id: 'log-2',
+                    tenantId,
+                    userId: 'nurse-maria',
+                    action: 'SUBMIT_VISIT',
+                    entityType: 'VISIT',
+                    entityId: 'visit-123',
+                    details: JSON.stringify({ items: 5 }),
+                    createdAt: new Date(Date.now() - 3600000).toISOString(),
+                    updatedAt: new Date(Date.now() - 3600000).toISOString()
+                }
+            ];
+            await loadMore(async () => ({ data: mockLogs, nextToken: null }), true);
+            stopLoading();
+            return;
+        }
 
-            loadMore(async (token) => {
+        await loadMore(async (token) => {
+            try {
                 const response = await (client.models.AuditLog as any).list({
                     filter: { tenantId: { eq: tenantId } },
                     limit: 50,
                     nextToken: token
                 });
+                stopLoading();
                 return { data: response.data || [], nextToken: response.nextToken };
-            }, true);
-        };
+            } catch (error) {
+                console.error('AuditLog fetch failed:', error);
+                stopLoading();
+                return { data: [], nextToken: null };
+            }
+        }, true);
+    };
 
+    useEffect(() => {
         fetchLogs();
     }, [tenantId, loadMore]);
 
@@ -67,9 +79,19 @@ export function AuditLogViewer() {
 
     if (isLoading && logs.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-12">
+            <div className="flex flex-col items-center justify-center py-12 bg-white rounded-2xl border border-slate-100 border-dashed animate-pulse">
                 <LoadingSpinner size="lg" label="Cargando registros de auditoría..." />
             </div>
+        );
+    }
+
+    if (hasTimedOut && logs.length === 0) {
+        return (
+            <ErrorState
+                title="Consola de Auditoría Fuera de Línea"
+                message="No se pudo sincronizar con el registro de auditoría. Verifique los permisos de administrador en AWS AppSync."
+                onRetry={fetchLogs}
+            />
         );
     }
 
