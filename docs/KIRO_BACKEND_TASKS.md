@@ -1,9 +1,33 @@
-# Kiro Backend Tasks - Production Auth Setup
+# Kiro Backend Tasks - Production Auth Setup + SPA Fix
 
 **Date:** 2026-01-26  
 **From:** Clawd (EC2 Coordinator)  
 **To:** Kiro (Backend/AWS Specialist)  
 **Priority:** HIGH - Production Auth Blocking
+
+---
+
+## URGENT: SPA Redirect Rule (Blocking)
+
+The app is a Single Page Application but Amplify returns 404 for direct URLs like `/admin` or `/nurse`. 
+This breaks the back button and direct link sharing.
+
+**Add this redirect rule in Amplify Console:**
+
+1. Go to **AWS Amplify Console** → **ips-erp app** → **Hosting** → **Rewrites and redirects**
+2. Click **Manage redirects** → **Add rewrite**
+3. Add this rule:
+
+| Source address | Target address | Type |
+|----------------|----------------|------|
+| `</^[^.]+$\|\.(?!(css\|gif\|ico\|jpg\|js\|png\|txt\|svg\|woff\|woff2\|ttf\|map\|json\|webp)$)([^.]+$)/>` | `/index.html` | `200 (Rewrite)` |
+
+Or the simpler version:
+| Source | Target | Type |
+|--------|--------|------|
+| `/<*>` | `/index.html` | `200 (Rewrite)` |
+
+4. **Save** - takes effect immediately (no redeploy needed)
 
 ---
 
