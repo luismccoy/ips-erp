@@ -14,37 +14,7 @@ export function AuditLogViewer() {
 
     const fetchLogs = async () => {
         startLoading();
-        if (!isUsingRealBackend()) {
-            // Mock logs
-            const mockLogs: AuditLog[] = [
-                {
-                    id: 'log-1',
-                    tenantId,
-                    userId: 'admin-1',
-                    action: 'APPROVE_VISIT',
-                    entityType: 'VISIT',
-                    entityId: 'visit-123',
-                    details: JSON.stringify({ reason: 'Documentation complete' }),
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                },
-                {
-                    id: 'log-2',
-                    tenantId,
-                    userId: 'nurse-maria',
-                    action: 'SUBMIT_VISIT',
-                    entityType: 'VISIT',
-                    entityId: 'visit-123',
-                    details: JSON.stringify({ items: 5 }),
-                    createdAt: new Date(Date.now() - 3600000).toISOString(),
-                    updatedAt: new Date(Date.now() - 3600000).toISOString()
-                }
-            ];
-            await loadMore(async () => ({ data: mockLogs, nextToken: null }), true);
-            stopLoading();
-            return;
-        }
-
+        // Always use the client - it returns demo data in demo mode
         await loadMore(async (token) => {
             try {
                 const response = await (client.models.AuditLog as any).list({
