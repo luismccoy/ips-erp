@@ -1,0 +1,1542 @@
+enum ShiftStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum InventoryStatus {
+  IN_STOCK
+  LOW_STOCK
+  OUT_OF_STOCK
+}
+
+enum BillingStatus {
+  PENDING
+  PAID
+  CANCELED
+  GLOSED
+}
+
+enum VisitStatus {
+  DRAFT
+  SUBMITTED
+  REJECTED
+  APPROVED
+}
+
+enum AuditAction {
+  VISIT_CREATED
+  VISIT_SUBMITTED
+  VISIT_APPROVED
+  VISIT_REJECTED
+  VISIT_EDITED
+  PATIENT_VIEWED_BY_FAMILY
+  USER_LOGIN
+  USER_LOGOUT
+  DATA_EXPORT
+}
+
+enum NotificationType {
+  VISIT_APPROVED
+  VISIT_REJECTED
+  VISIT_PENDING_REVIEW
+  VISIT_AVAILABLE_FOR_FAMILY
+  SHIFT_ASSIGNED
+  SHIFT_CANCELLED
+}
+
+type Tenant @aws_iam @aws_cognito_user_pools {
+  name: String!
+  nit: String!
+  nurses(filter: ModelNurseFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelNurseConnection
+  patients(filter: ModelPatientFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelPatientConnection
+  shifts(filter: ModelShiftFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelShiftConnection
+  inventory(filter: ModelInventoryItemFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelInventoryItemConnection
+  vitalSigns(filter: ModelVitalSignsFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelVitalSignsConnection
+  billingRecords(filter: ModelBillingRecordFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelBillingRecordConnection
+  visits(filter: ModelVisitFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelVisitConnection
+  auditLogs(filter: ModelAuditLogFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelAuditLogConnection
+  notifications(filter: ModelNotificationFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelNotificationConnection
+  id: ID!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Patient @aws_iam @aws_cognito_user_pools {
+  tenantId: ID!
+  tenant: Tenant
+  name: String!
+  documentId: String!
+  age: Int
+  address: String
+  eps: String
+  diagnosis: String
+  medications: [Medication]
+  tasks: [Task]
+  familyMembers: [ID]
+  accessCode: String
+  shifts(filter: ModelShiftFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelShiftConnection
+  vitalSigns(filter: ModelVitalSignsFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelVitalSignsConnection
+  visits(filter: ModelVisitFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelVisitConnection
+  id: ID!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Nurse @aws_iam @aws_cognito_user_pools {
+  tenantId: ID!
+  tenant: Tenant
+  name: String!
+  email: String
+  role: NurseRole
+  skills: [String]
+  locationLat: Float
+  locationLng: Float
+  cognitoSub: ID!
+  isActive: Boolean!
+  shifts(filter: ModelShiftFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelShiftConnection
+  visits(filter: ModelVisitFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelVisitConnection
+  id: ID!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Shift @aws_iam @aws_cognito_user_pools {
+  tenantId: ID!
+  tenant: Tenant
+  nurseId: ID!
+  nurse: Nurse
+  patientId: ID!
+  patient: Patient
+  scheduledTime: String!
+  status: ShiftStatus
+  clinicalNote: String
+  visitId: ID
+  startedAt: AWSDateTime
+  completedAt: AWSDateTime
+  startLat: Float
+  startLng: Float
+  id: ID!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type InventoryItem @aws_iam @aws_cognito_user_pools {
+  tenantId: ID!
+  tenant: Tenant
+  name: String!
+  sku: String
+  quantity: Int!
+  unit: String
+  reorderLevel: Int!
+  status: InventoryStatus
+  expiryDate: String
+  id: ID!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type VitalSigns @aws_iam @aws_cognito_user_pools {
+  tenantId: ID!
+  tenant: Tenant
+  patientId: ID!
+  patient: Patient
+  date: String!
+  sys: Int!
+  dia: Int!
+  spo2: Int!
+  hr: Int!
+  temperature: Float
+  weight: Float
+  note: String
+  id: ID!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type BillingRecord @aws_iam @aws_cognito_user_pools {
+  tenantId: ID!
+  tenant: Tenant
+  patientId: ID!
+  shiftId: ID
+  invoiceNumber: String
+  totalValue: Float!
+  status: BillingStatus!
+  radicationDate: AWSDate
+  date: String
+  procedures: [String]
+  diagnosis: String
+  eps: String
+  ripsGenerated: Boolean!
+  submittedAt: AWSDateTime
+  approvedAt: AWSDateTime
+  rejectionReason: String
+  glosaDefense: String
+  ripsValidationResult: AWSJSON
+  glosaDefenseText: String
+  glosaDefenseGeneratedAt: AWSDateTime
+  id: ID!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Visit @aws_iam @aws_cognito_user_pools {
+  tenantId: ID!
+  tenant: Tenant
+  shiftId: ID!
+  patientId: ID!
+  patient: Patient
+  nurseId: ID!
+  nurse: Nurse
+  status: VisitStatus!
+  kardex: KARDEX!
+  vitalsRecorded: AWSJSON
+  medicationsAdministered: [MedicationAdmin]
+  tasksCompleted: [TaskCompletion]
+  submittedAt: AWSDateTime
+  reviewedAt: AWSDateTime
+  reviewedBy: ID
+  rejectionReason: String
+  approvedAt: AWSDateTime
+  approvedBy: ID
+  id: ID!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type AuditLog @aws_iam @aws_cognito_user_pools {
+  tenantId: ID!
+  tenant: Tenant
+  userId: ID!
+  userRole: String!
+  action: AuditAction!
+  entityType: String!
+  entityId: ID!
+  timestamp: AWSDateTime!
+  details: AWSJSON
+  ipAddress: String
+  id: ID!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Notification @aws_iam @aws_cognito_user_pools {
+  tenantId: ID!
+  tenant: Tenant
+  userId: ID!
+  type: NotificationType!
+  message: String!
+  entityType: String!
+  entityId: ID!
+  read: Boolean!
+  id: ID!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Medication @aws_iam @aws_cognito_user_pools {
+  id: ID!
+  name: String!
+  dosage: String!
+  frequency: String!
+  prescribedBy: String
+  status: MedicationStatus
+}
+
+type Task @aws_iam @aws_cognito_user_pools {
+  id: ID!
+  patientId: ID!
+  description: String!
+  completed: Boolean!
+  dueDate: String
+}
+
+type KARDEX @aws_iam @aws_cognito_user_pools {
+  generalObservations: String!
+  skinCondition: String
+  mobilityStatus: String
+  nutritionIntake: String
+  painLevel: Int
+  mentalStatus: String
+  environmentalSafety: String
+  caregiverSupport: String
+  internalNotes: String
+}
+
+type MedicationAdmin @aws_iam @aws_cognito_user_pools {
+  medicationName: String!
+  intendedDosage: String!
+  dosageGiven: String!
+  time: AWSDateTime!
+  route: String
+  notes: String
+}
+
+type TaskCompletion @aws_iam @aws_cognito_user_pools {
+  taskDescription: String!
+  completedAt: AWSDateTime!
+  notes: String
+}
+
+type VisitSummary @aws_cognito_user_pools @aws_iam {
+  visitDate: String!
+  nurseName: String!
+  duration: Int
+  overallStatus: String
+  keyActivities: [String]
+  nextVisitDate: String
+}
+
+enum NurseRole {
+  ADMIN
+  NURSE
+  COORDINATOR
+}
+
+enum MedicationStatus {
+  ACTIVE
+  DISCONTINUED
+}
+
+type Mutation @aws_iam {
+  createTenant(input: CreateTenantInput!, condition: ModelTenantConditionInput): Tenant @aws_iam @aws_cognito_user_pools
+  updateTenant(input: UpdateTenantInput!, condition: ModelTenantConditionInput): Tenant @aws_iam @aws_cognito_user_pools
+  deleteTenant(input: DeleteTenantInput!, condition: ModelTenantConditionInput): Tenant @aws_iam @aws_cognito_user_pools
+  createPatient(input: CreatePatientInput!, condition: ModelPatientConditionInput): Patient @aws_iam @aws_cognito_user_pools
+  updatePatient(input: UpdatePatientInput!, condition: ModelPatientConditionInput): Patient @aws_iam @aws_cognito_user_pools
+  deletePatient(input: DeletePatientInput!, condition: ModelPatientConditionInput): Patient @aws_iam @aws_cognito_user_pools
+  createNurse(input: CreateNurseInput!, condition: ModelNurseConditionInput): Nurse @aws_iam @aws_cognito_user_pools
+  updateNurse(input: UpdateNurseInput!, condition: ModelNurseConditionInput): Nurse @aws_iam @aws_cognito_user_pools
+  deleteNurse(input: DeleteNurseInput!, condition: ModelNurseConditionInput): Nurse @aws_iam @aws_cognito_user_pools
+  createShift(input: CreateShiftInput!, condition: ModelShiftConditionInput): Shift @aws_iam @aws_cognito_user_pools
+  updateShift(input: UpdateShiftInput!, condition: ModelShiftConditionInput): Shift @aws_iam @aws_cognito_user_pools
+  deleteShift(input: DeleteShiftInput!, condition: ModelShiftConditionInput): Shift @aws_iam @aws_cognito_user_pools
+  createInventoryItem(input: CreateInventoryItemInput!, condition: ModelInventoryItemConditionInput): InventoryItem @aws_iam @aws_cognito_user_pools
+  updateInventoryItem(input: UpdateInventoryItemInput!, condition: ModelInventoryItemConditionInput): InventoryItem @aws_iam @aws_cognito_user_pools
+  deleteInventoryItem(input: DeleteInventoryItemInput!, condition: ModelInventoryItemConditionInput): InventoryItem @aws_iam @aws_cognito_user_pools
+  createVitalSigns(input: CreateVitalSignsInput!, condition: ModelVitalSignsConditionInput): VitalSigns @aws_iam @aws_cognito_user_pools
+  updateVitalSigns(input: UpdateVitalSignsInput!, condition: ModelVitalSignsConditionInput): VitalSigns @aws_iam @aws_cognito_user_pools
+  deleteVitalSigns(input: DeleteVitalSignsInput!, condition: ModelVitalSignsConditionInput): VitalSigns @aws_iam @aws_cognito_user_pools
+  createBillingRecord(input: CreateBillingRecordInput!, condition: ModelBillingRecordConditionInput): BillingRecord @aws_iam @aws_cognito_user_pools
+  updateBillingRecord(input: UpdateBillingRecordInput!, condition: ModelBillingRecordConditionInput): BillingRecord @aws_iam @aws_cognito_user_pools
+  deleteBillingRecord(input: DeleteBillingRecordInput!, condition: ModelBillingRecordConditionInput): BillingRecord @aws_iam @aws_cognito_user_pools
+  createVisit(input: CreateVisitInput!, condition: ModelVisitConditionInput): Visit @aws_iam @aws_cognito_user_pools
+  updateVisit(input: UpdateVisitInput!, condition: ModelVisitConditionInput): Visit @aws_iam @aws_cognito_user_pools
+  deleteVisit(input: DeleteVisitInput!, condition: ModelVisitConditionInput): Visit @aws_iam @aws_cognito_user_pools
+  createAuditLog(input: CreateAuditLogInput!, condition: ModelAuditLogConditionInput): AuditLog @aws_iam @aws_cognito_user_pools
+  updateAuditLog(input: UpdateAuditLogInput!, condition: ModelAuditLogConditionInput): AuditLog @aws_iam @aws_cognito_user_pools
+  deleteAuditLog(input: DeleteAuditLogInput!, condition: ModelAuditLogConditionInput): AuditLog @aws_iam @aws_cognito_user_pools
+  createNotification(input: CreateNotificationInput!, condition: ModelNotificationConditionInput): Notification @aws_iam @aws_cognito_user_pools
+  updateNotification(input: UpdateNotificationInput!, condition: ModelNotificationConditionInput): Notification @aws_iam @aws_cognito_user_pools
+  deleteNotification(input: DeleteNotificationInput!, condition: ModelNotificationConditionInput): Notification @aws_iam @aws_cognito_user_pools
+  createVisitDraftFromShift(shiftId: ID!): AWSJSON @aws_iam @aws_cognito_user_pools
+  submitVisit(shiftId: ID!): AWSJSON @aws_iam @aws_cognito_user_pools
+  rejectVisit(shiftId: ID!, reason: String!): AWSJSON @aws_iam @aws_cognito_user_pools
+  approveVisit(shiftId: ID!): AWSJSON @aws_iam @aws_cognito_user_pools
+}
+
+type Query @aws_iam {
+  getTenant(id: ID!): Tenant @aws_iam @aws_cognito_user_pools
+  listTenants(filter: ModelTenantFilterInput, limit: Int, nextToken: String): ModelTenantConnection @aws_iam @aws_cognito_user_pools
+  getPatient(id: ID!): Patient @aws_iam @aws_cognito_user_pools
+  listPatients(filter: ModelPatientFilterInput, limit: Int, nextToken: String): ModelPatientConnection @aws_iam @aws_cognito_user_pools
+  getNurse(id: ID!): Nurse @aws_iam @aws_cognito_user_pools
+  listNurses(filter: ModelNurseFilterInput, limit: Int, nextToken: String): ModelNurseConnection @aws_iam @aws_cognito_user_pools
+  getShift(id: ID!): Shift @aws_iam @aws_cognito_user_pools
+  listShifts(filter: ModelShiftFilterInput, limit: Int, nextToken: String): ModelShiftConnection @aws_iam @aws_cognito_user_pools
+  getInventoryItem(id: ID!): InventoryItem @aws_iam @aws_cognito_user_pools
+  listInventoryItems(filter: ModelInventoryItemFilterInput, limit: Int, nextToken: String): ModelInventoryItemConnection @aws_iam @aws_cognito_user_pools
+  getVitalSigns(id: ID!): VitalSigns @aws_iam @aws_cognito_user_pools
+  listVitalSigns(filter: ModelVitalSignsFilterInput, limit: Int, nextToken: String): ModelVitalSignsConnection @aws_iam @aws_cognito_user_pools
+  getBillingRecord(id: ID!): BillingRecord @aws_iam @aws_cognito_user_pools
+  listBillingRecords(filter: ModelBillingRecordFilterInput, limit: Int, nextToken: String): ModelBillingRecordConnection @aws_iam @aws_cognito_user_pools
+  getVisit(id: ID!): Visit @aws_iam @aws_cognito_user_pools
+  listVisits(filter: ModelVisitFilterInput, limit: Int, nextToken: String): ModelVisitConnection @aws_iam @aws_cognito_user_pools
+  getAuditLog(id: ID!): AuditLog @aws_iam @aws_cognito_user_pools
+  listAuditLogs(filter: ModelAuditLogFilterInput, limit: Int, nextToken: String): ModelAuditLogConnection @aws_iam @aws_cognito_user_pools
+  getNotification(id: ID!): Notification @aws_iam @aws_cognito_user_pools
+  listNotifications(filter: ModelNotificationFilterInput, limit: Int, nextToken: String): ModelNotificationConnection @aws_iam @aws_cognito_user_pools
+  generateRoster(nurses: AWSJSON, unassignedShifts: AWSJSON): AWSJSON @aws_iam @aws_cognito_user_pools
+  validateRIPS(billingRecord: AWSJSON): AWSJSON @aws_iam @aws_cognito_user_pools
+  generateGlosaDefense(billingRecord: AWSJSON, patientHistory: AWSJSON, clinicalNotes: AWSJSON): AWSJSON @aws_iam @aws_cognito_user_pools
+  verifyFamilyAccessCode(patientId: ID!, accessCode: String!): AWSJSON @aws_iam @aws_cognito_user_pools
+  listApprovedVisitSummariesForFamily(patientId: ID!): [VisitSummary] @aws_iam @aws_cognito_user_pools
+}
+
+input AmplifyAIConversationTurnErrorInput {
+  errorType: String!
+  message: String!
+}
+
+input ModelStringInput {
+  ne: String
+  eq: String
+  le: String
+  lt: String
+  ge: String
+  gt: String
+  contains: String
+  notContains: String
+  between: [String]
+  beginsWith: String
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+  size: ModelSizeInput
+}
+
+input ModelIntInput {
+  ne: Int
+  eq: Int
+  le: Int
+  lt: Int
+  ge: Int
+  gt: Int
+  between: [Int]
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+}
+
+input ModelFloatInput {
+  ne: Float
+  eq: Float
+  le: Float
+  lt: Float
+  ge: Float
+  gt: Float
+  between: [Float]
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+}
+
+input ModelBooleanInput {
+  ne: Boolean
+  eq: Boolean
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+}
+
+input ModelIDInput {
+  ne: ID
+  eq: ID
+  le: ID
+  lt: ID
+  ge: ID
+  gt: ID
+  contains: ID
+  notContains: ID
+  between: [ID]
+  beginsWith: ID
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+  size: ModelSizeInput
+}
+
+input ModelSubscriptionStringInput {
+  ne: String
+  eq: String
+  le: String
+  lt: String
+  ge: String
+  gt: String
+  contains: String
+  notContains: String
+  between: [String]
+  beginsWith: String
+  in: [String]
+  notIn: [String]
+}
+
+input ModelSubscriptionIntInput {
+  ne: Int
+  eq: Int
+  le: Int
+  lt: Int
+  ge: Int
+  gt: Int
+  between: [Int]
+  in: [Int]
+  notIn: [Int]
+}
+
+input ModelSubscriptionFloatInput {
+  ne: Float
+  eq: Float
+  le: Float
+  lt: Float
+  ge: Float
+  gt: Float
+  between: [Float]
+  in: [Float]
+  notIn: [Float]
+}
+
+input ModelSubscriptionBooleanInput {
+  ne: Boolean
+  eq: Boolean
+}
+
+input ModelSubscriptionIDInput {
+  ne: ID
+  eq: ID
+  le: ID
+  lt: ID
+  ge: ID
+  gt: ID
+  contains: ID
+  notContains: ID
+  between: [ID]
+  beginsWith: ID
+  in: [ID]
+  notIn: [ID]
+}
+
+enum ModelAttributeTypes {
+  binary
+  binarySet
+  bool
+  list
+  map
+  number
+  numberSet
+  string
+  stringSet
+  _null
+}
+
+input ModelSizeInput {
+  ne: Int
+  eq: Int
+  le: Int
+  lt: Int
+  ge: Int
+  gt: Int
+  between: [Int]
+}
+
+enum ModelSortDirection {
+  ASC
+  DESC
+}
+
+type ModelTenantConnection @aws_iam @aws_cognito_user_pools {
+  items: [Tenant]!
+  nextToken: String
+}
+
+input ModelTenantFilterInput {
+  name: ModelStringInput
+  nit: ModelStringInput
+  id: ModelIDInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelTenantFilterInput]
+  or: [ModelTenantFilterInput]
+  not: ModelTenantFilterInput
+}
+
+input ModelTenantConditionInput {
+  name: ModelStringInput
+  nit: ModelStringInput
+  and: [ModelTenantConditionInput]
+  or: [ModelTenantConditionInput]
+  not: ModelTenantConditionInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+}
+
+input CreateTenantInput {
+  name: String!
+  nit: String!
+  id: ID
+}
+
+input UpdateTenantInput {
+  name: String
+  nit: String
+  id: ID!
+}
+
+input DeleteTenantInput {
+  id: ID!
+}
+
+input ModelSubscriptionTenantFilterInput {
+  name: ModelSubscriptionStringInput
+  nit: ModelSubscriptionStringInput
+  id: ModelSubscriptionIDInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionTenantFilterInput]
+  or: [ModelSubscriptionTenantFilterInput]
+}
+
+type Subscription {
+  onCreateTenant(filter: ModelSubscriptionTenantFilterInput): Tenant @aws_subscribe(mutations: ["createTenant"]) @aws_iam @aws_cognito_user_pools
+  onUpdateTenant(filter: ModelSubscriptionTenantFilterInput): Tenant @aws_subscribe(mutations: ["updateTenant"]) @aws_iam @aws_cognito_user_pools
+  onDeleteTenant(filter: ModelSubscriptionTenantFilterInput): Tenant @aws_subscribe(mutations: ["deleteTenant"]) @aws_iam @aws_cognito_user_pools
+  onCreatePatient(filter: ModelSubscriptionPatientFilterInput, tenantId: String): Patient @aws_subscribe(mutations: ["createPatient"]) @aws_iam @aws_cognito_user_pools
+  onUpdatePatient(filter: ModelSubscriptionPatientFilterInput, tenantId: String): Patient @aws_subscribe(mutations: ["updatePatient"]) @aws_iam @aws_cognito_user_pools
+  onDeletePatient(filter: ModelSubscriptionPatientFilterInput, tenantId: String): Patient @aws_subscribe(mutations: ["deletePatient"]) @aws_iam @aws_cognito_user_pools
+  onCreateNurse(filter: ModelSubscriptionNurseFilterInput, tenantId: String): Nurse @aws_subscribe(mutations: ["createNurse"]) @aws_iam @aws_cognito_user_pools
+  onUpdateNurse(filter: ModelSubscriptionNurseFilterInput, tenantId: String): Nurse @aws_subscribe(mutations: ["updateNurse"]) @aws_iam @aws_cognito_user_pools
+  onDeleteNurse(filter: ModelSubscriptionNurseFilterInput, tenantId: String): Nurse @aws_subscribe(mutations: ["deleteNurse"]) @aws_iam @aws_cognito_user_pools
+  onCreateShift(filter: ModelSubscriptionShiftFilterInput, tenantId: String): Shift @aws_subscribe(mutations: ["createShift"]) @aws_iam @aws_cognito_user_pools
+  onUpdateShift(filter: ModelSubscriptionShiftFilterInput, tenantId: String): Shift @aws_subscribe(mutations: ["updateShift"]) @aws_iam @aws_cognito_user_pools
+  onDeleteShift(filter: ModelSubscriptionShiftFilterInput, tenantId: String): Shift @aws_subscribe(mutations: ["deleteShift"]) @aws_iam @aws_cognito_user_pools
+  onCreateInventoryItem(filter: ModelSubscriptionInventoryItemFilterInput, tenantId: String): InventoryItem @aws_subscribe(mutations: ["createInventoryItem"]) @aws_iam @aws_cognito_user_pools
+  onUpdateInventoryItem(filter: ModelSubscriptionInventoryItemFilterInput, tenantId: String): InventoryItem @aws_subscribe(mutations: ["updateInventoryItem"]) @aws_iam @aws_cognito_user_pools
+  onDeleteInventoryItem(filter: ModelSubscriptionInventoryItemFilterInput, tenantId: String): InventoryItem @aws_subscribe(mutations: ["deleteInventoryItem"]) @aws_iam @aws_cognito_user_pools
+  onCreateVitalSigns(filter: ModelSubscriptionVitalSignsFilterInput, tenantId: String): VitalSigns @aws_subscribe(mutations: ["createVitalSigns"]) @aws_iam @aws_cognito_user_pools
+  onUpdateVitalSigns(filter: ModelSubscriptionVitalSignsFilterInput, tenantId: String): VitalSigns @aws_subscribe(mutations: ["updateVitalSigns"]) @aws_iam @aws_cognito_user_pools
+  onDeleteVitalSigns(filter: ModelSubscriptionVitalSignsFilterInput, tenantId: String): VitalSigns @aws_subscribe(mutations: ["deleteVitalSigns"]) @aws_iam @aws_cognito_user_pools
+  onCreateBillingRecord(filter: ModelSubscriptionBillingRecordFilterInput, tenantId: String): BillingRecord @aws_subscribe(mutations: ["createBillingRecord"]) @aws_iam @aws_cognito_user_pools
+  onUpdateBillingRecord(filter: ModelSubscriptionBillingRecordFilterInput, tenantId: String): BillingRecord @aws_subscribe(mutations: ["updateBillingRecord"]) @aws_iam @aws_cognito_user_pools
+  onDeleteBillingRecord(filter: ModelSubscriptionBillingRecordFilterInput, tenantId: String): BillingRecord @aws_subscribe(mutations: ["deleteBillingRecord"]) @aws_iam @aws_cognito_user_pools
+  onCreateVisit(filter: ModelSubscriptionVisitFilterInput, tenantId: String): Visit @aws_subscribe(mutations: ["createVisit"]) @aws_iam @aws_cognito_user_pools
+  onUpdateVisit(filter: ModelSubscriptionVisitFilterInput, tenantId: String): Visit @aws_subscribe(mutations: ["updateVisit"]) @aws_iam @aws_cognito_user_pools
+  onDeleteVisit(filter: ModelSubscriptionVisitFilterInput, tenantId: String): Visit @aws_subscribe(mutations: ["deleteVisit"]) @aws_iam @aws_cognito_user_pools
+  onCreateAuditLog(filter: ModelSubscriptionAuditLogFilterInput, tenantId: String): AuditLog @aws_subscribe(mutations: ["createAuditLog"]) @aws_iam @aws_cognito_user_pools
+  onUpdateAuditLog(filter: ModelSubscriptionAuditLogFilterInput, tenantId: String): AuditLog @aws_subscribe(mutations: ["updateAuditLog"]) @aws_iam @aws_cognito_user_pools
+  onDeleteAuditLog(filter: ModelSubscriptionAuditLogFilterInput, tenantId: String): AuditLog @aws_subscribe(mutations: ["deleteAuditLog"]) @aws_iam @aws_cognito_user_pools
+  onCreateNotification(filter: ModelSubscriptionNotificationFilterInput, tenantId: String): Notification @aws_subscribe(mutations: ["createNotification"]) @aws_iam @aws_cognito_user_pools
+  onUpdateNotification(filter: ModelSubscriptionNotificationFilterInput, tenantId: String): Notification @aws_subscribe(mutations: ["updateNotification"]) @aws_iam @aws_cognito_user_pools
+  onDeleteNotification(filter: ModelSubscriptionNotificationFilterInput, tenantId: String): Notification @aws_subscribe(mutations: ["deleteNotification"]) @aws_iam @aws_cognito_user_pools
+}
+
+input MedicationInput {
+  id: ID!
+  name: String!
+  dosage: String!
+  frequency: String!
+  prescribedBy: String
+  status: MedicationStatus
+}
+
+input TaskInput {
+  id: ID!
+  patientId: ID!
+  description: String!
+  completed: Boolean!
+  dueDate: String
+}
+
+type ModelPatientConnection @aws_iam @aws_cognito_user_pools {
+  items: [Patient]!
+  nextToken: String
+}
+
+input ModelPatientFilterInput {
+  tenantId: ModelIDInput
+  name: ModelStringInput
+  documentId: ModelStringInput
+  age: ModelIntInput
+  address: ModelStringInput
+  eps: ModelStringInput
+  diagnosis: ModelStringInput
+  familyMembers: ModelIDInput
+  accessCode: ModelStringInput
+  id: ModelIDInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelPatientFilterInput]
+  or: [ModelPatientFilterInput]
+  not: ModelPatientFilterInput
+}
+
+input ModelPatientConditionInput {
+  tenantId: ModelIDInput
+  name: ModelStringInput
+  documentId: ModelStringInput
+  age: ModelIntInput
+  address: ModelStringInput
+  eps: ModelStringInput
+  diagnosis: ModelStringInput
+  familyMembers: ModelIDInput
+  accessCode: ModelStringInput
+  and: [ModelPatientConditionInput]
+  or: [ModelPatientConditionInput]
+  not: ModelPatientConditionInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+}
+
+input CreatePatientInput {
+  tenantId: ID!
+  name: String!
+  documentId: String!
+  age: Int
+  address: String
+  eps: String
+  diagnosis: String
+  medications: [MedicationInput]
+  tasks: [TaskInput]
+  familyMembers: [ID]
+  accessCode: String
+  id: ID
+}
+
+input UpdatePatientInput {
+  tenantId: ID
+  name: String
+  documentId: String
+  age: Int
+  address: String
+  eps: String
+  diagnosis: String
+  medications: [MedicationInput]
+  tasks: [TaskInput]
+  familyMembers: [ID]
+  accessCode: String
+  id: ID!
+}
+
+input DeletePatientInput {
+  id: ID!
+}
+
+input ModelSubscriptionPatientFilterInput {
+  name: ModelSubscriptionStringInput
+  documentId: ModelSubscriptionStringInput
+  age: ModelSubscriptionIntInput
+  address: ModelSubscriptionStringInput
+  eps: ModelSubscriptionStringInput
+  diagnosis: ModelSubscriptionStringInput
+  familyMembers: ModelSubscriptionIDInput
+  accessCode: ModelSubscriptionStringInput
+  id: ModelSubscriptionIDInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionPatientFilterInput]
+  or: [ModelSubscriptionPatientFilterInput]
+  tenantId: ModelStringInput
+}
+
+type ModelNurseConnection @aws_iam @aws_cognito_user_pools {
+  items: [Nurse]!
+  nextToken: String
+}
+
+input ModelNurseRoleInput {
+  eq: NurseRole
+  ne: NurseRole
+}
+
+input ModelNurseFilterInput {
+  tenantId: ModelIDInput
+  name: ModelStringInput
+  email: ModelStringInput
+  role: ModelNurseRoleInput
+  skills: ModelStringInput
+  locationLat: ModelFloatInput
+  locationLng: ModelFloatInput
+  cognitoSub: ModelIDInput
+  isActive: ModelBooleanInput
+  id: ModelIDInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelNurseFilterInput]
+  or: [ModelNurseFilterInput]
+  not: ModelNurseFilterInput
+}
+
+input ModelNurseConditionInput {
+  tenantId: ModelIDInput
+  name: ModelStringInput
+  email: ModelStringInput
+  role: ModelNurseRoleInput
+  skills: ModelStringInput
+  locationLat: ModelFloatInput
+  locationLng: ModelFloatInput
+  cognitoSub: ModelIDInput
+  isActive: ModelBooleanInput
+  and: [ModelNurseConditionInput]
+  or: [ModelNurseConditionInput]
+  not: ModelNurseConditionInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+}
+
+input CreateNurseInput {
+  tenantId: ID!
+  name: String!
+  email: String
+  role: NurseRole
+  skills: [String]
+  locationLat: Float
+  locationLng: Float
+  cognitoSub: ID!
+  isActive: Boolean!
+  id: ID
+}
+
+input UpdateNurseInput {
+  tenantId: ID
+  name: String
+  email: String
+  role: NurseRole
+  skills: [String]
+  locationLat: Float
+  locationLng: Float
+  cognitoSub: ID
+  isActive: Boolean
+  id: ID!
+}
+
+input DeleteNurseInput {
+  id: ID!
+}
+
+input ModelSubscriptionNurseFilterInput {
+  name: ModelSubscriptionStringInput
+  email: ModelSubscriptionStringInput
+  role: ModelSubscriptionStringInput
+  skills: ModelSubscriptionStringInput
+  locationLat: ModelSubscriptionFloatInput
+  locationLng: ModelSubscriptionFloatInput
+  cognitoSub: ModelSubscriptionIDInput
+  isActive: ModelSubscriptionBooleanInput
+  id: ModelSubscriptionIDInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionNurseFilterInput]
+  or: [ModelSubscriptionNurseFilterInput]
+  tenantId: ModelStringInput
+}
+
+type ModelShiftConnection @aws_iam @aws_cognito_user_pools {
+  items: [Shift]!
+  nextToken: String
+}
+
+input ModelShiftStatusInput {
+  eq: ShiftStatus
+  ne: ShiftStatus
+}
+
+input ModelShiftFilterInput {
+  tenantId: ModelIDInput
+  nurseId: ModelIDInput
+  patientId: ModelIDInput
+  scheduledTime: ModelStringInput
+  status: ModelShiftStatusInput
+  clinicalNote: ModelStringInput
+  visitId: ModelIDInput
+  startedAt: ModelStringInput
+  completedAt: ModelStringInput
+  startLat: ModelFloatInput
+  startLng: ModelFloatInput
+  id: ModelIDInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelShiftFilterInput]
+  or: [ModelShiftFilterInput]
+  not: ModelShiftFilterInput
+}
+
+input ModelShiftConditionInput {
+  tenantId: ModelIDInput
+  nurseId: ModelIDInput
+  patientId: ModelIDInput
+  scheduledTime: ModelStringInput
+  status: ModelShiftStatusInput
+  clinicalNote: ModelStringInput
+  visitId: ModelIDInput
+  startedAt: ModelStringInput
+  completedAt: ModelStringInput
+  startLat: ModelFloatInput
+  startLng: ModelFloatInput
+  and: [ModelShiftConditionInput]
+  or: [ModelShiftConditionInput]
+  not: ModelShiftConditionInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+}
+
+input CreateShiftInput {
+  tenantId: ID!
+  nurseId: ID!
+  patientId: ID!
+  scheduledTime: String!
+  status: ShiftStatus
+  clinicalNote: String
+  visitId: ID
+  startedAt: AWSDateTime
+  completedAt: AWSDateTime
+  startLat: Float
+  startLng: Float
+  id: ID
+}
+
+input UpdateShiftInput {
+  tenantId: ID
+  nurseId: ID
+  patientId: ID
+  scheduledTime: String
+  status: ShiftStatus
+  clinicalNote: String
+  visitId: ID
+  startedAt: AWSDateTime
+  completedAt: AWSDateTime
+  startLat: Float
+  startLng: Float
+  id: ID!
+}
+
+input DeleteShiftInput {
+  id: ID!
+}
+
+input ModelSubscriptionShiftFilterInput {
+  nurseId: ModelSubscriptionIDInput
+  patientId: ModelSubscriptionIDInput
+  scheduledTime: ModelSubscriptionStringInput
+  status: ModelSubscriptionStringInput
+  clinicalNote: ModelSubscriptionStringInput
+  visitId: ModelSubscriptionIDInput
+  startedAt: ModelSubscriptionStringInput
+  completedAt: ModelSubscriptionStringInput
+  startLat: ModelSubscriptionFloatInput
+  startLng: ModelSubscriptionFloatInput
+  id: ModelSubscriptionIDInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionShiftFilterInput]
+  or: [ModelSubscriptionShiftFilterInput]
+  tenantId: ModelStringInput
+}
+
+type ModelInventoryItemConnection @aws_iam @aws_cognito_user_pools {
+  items: [InventoryItem]!
+  nextToken: String
+}
+
+input ModelInventoryStatusInput {
+  eq: InventoryStatus
+  ne: InventoryStatus
+}
+
+input ModelInventoryItemFilterInput {
+  tenantId: ModelIDInput
+  name: ModelStringInput
+  sku: ModelStringInput
+  quantity: ModelIntInput
+  unit: ModelStringInput
+  reorderLevel: ModelIntInput
+  status: ModelInventoryStatusInput
+  expiryDate: ModelStringInput
+  id: ModelIDInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelInventoryItemFilterInput]
+  or: [ModelInventoryItemFilterInput]
+  not: ModelInventoryItemFilterInput
+}
+
+input ModelInventoryItemConditionInput {
+  tenantId: ModelIDInput
+  name: ModelStringInput
+  sku: ModelStringInput
+  quantity: ModelIntInput
+  unit: ModelStringInput
+  reorderLevel: ModelIntInput
+  status: ModelInventoryStatusInput
+  expiryDate: ModelStringInput
+  and: [ModelInventoryItemConditionInput]
+  or: [ModelInventoryItemConditionInput]
+  not: ModelInventoryItemConditionInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+}
+
+input CreateInventoryItemInput {
+  tenantId: ID!
+  name: String!
+  sku: String
+  quantity: Int!
+  unit: String
+  reorderLevel: Int!
+  status: InventoryStatus
+  expiryDate: String
+  id: ID
+}
+
+input UpdateInventoryItemInput {
+  tenantId: ID
+  name: String
+  sku: String
+  quantity: Int
+  unit: String
+  reorderLevel: Int
+  status: InventoryStatus
+  expiryDate: String
+  id: ID!
+}
+
+input DeleteInventoryItemInput {
+  id: ID!
+}
+
+input ModelSubscriptionInventoryItemFilterInput {
+  name: ModelSubscriptionStringInput
+  sku: ModelSubscriptionStringInput
+  quantity: ModelSubscriptionIntInput
+  unit: ModelSubscriptionStringInput
+  reorderLevel: ModelSubscriptionIntInput
+  status: ModelSubscriptionStringInput
+  expiryDate: ModelSubscriptionStringInput
+  id: ModelSubscriptionIDInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionInventoryItemFilterInput]
+  or: [ModelSubscriptionInventoryItemFilterInput]
+  tenantId: ModelStringInput
+}
+
+type ModelVitalSignsConnection @aws_iam @aws_cognito_user_pools {
+  items: [VitalSigns]!
+  nextToken: String
+}
+
+input ModelVitalSignsFilterInput {
+  tenantId: ModelIDInput
+  patientId: ModelIDInput
+  date: ModelStringInput
+  sys: ModelIntInput
+  dia: ModelIntInput
+  spo2: ModelIntInput
+  hr: ModelIntInput
+  temperature: ModelFloatInput
+  weight: ModelFloatInput
+  note: ModelStringInput
+  id: ModelIDInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelVitalSignsFilterInput]
+  or: [ModelVitalSignsFilterInput]
+  not: ModelVitalSignsFilterInput
+}
+
+input ModelVitalSignsConditionInput {
+  tenantId: ModelIDInput
+  patientId: ModelIDInput
+  date: ModelStringInput
+  sys: ModelIntInput
+  dia: ModelIntInput
+  spo2: ModelIntInput
+  hr: ModelIntInput
+  temperature: ModelFloatInput
+  weight: ModelFloatInput
+  note: ModelStringInput
+  and: [ModelVitalSignsConditionInput]
+  or: [ModelVitalSignsConditionInput]
+  not: ModelVitalSignsConditionInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+}
+
+input CreateVitalSignsInput {
+  tenantId: ID!
+  patientId: ID!
+  date: String!
+  sys: Int!
+  dia: Int!
+  spo2: Int!
+  hr: Int!
+  temperature: Float
+  weight: Float
+  note: String
+  id: ID
+}
+
+input UpdateVitalSignsInput {
+  tenantId: ID
+  patientId: ID
+  date: String
+  sys: Int
+  dia: Int
+  spo2: Int
+  hr: Int
+  temperature: Float
+  weight: Float
+  note: String
+  id: ID!
+}
+
+input DeleteVitalSignsInput {
+  id: ID!
+}
+
+input ModelSubscriptionVitalSignsFilterInput {
+  patientId: ModelSubscriptionIDInput
+  date: ModelSubscriptionStringInput
+  sys: ModelSubscriptionIntInput
+  dia: ModelSubscriptionIntInput
+  spo2: ModelSubscriptionIntInput
+  hr: ModelSubscriptionIntInput
+  temperature: ModelSubscriptionFloatInput
+  weight: ModelSubscriptionFloatInput
+  note: ModelSubscriptionStringInput
+  id: ModelSubscriptionIDInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionVitalSignsFilterInput]
+  or: [ModelSubscriptionVitalSignsFilterInput]
+  tenantId: ModelStringInput
+}
+
+type ModelBillingRecordConnection @aws_iam @aws_cognito_user_pools {
+  items: [BillingRecord]!
+  nextToken: String
+}
+
+input ModelBillingStatusInput {
+  eq: BillingStatus
+  ne: BillingStatus
+}
+
+input ModelBillingRecordFilterInput {
+  tenantId: ModelIDInput
+  patientId: ModelIDInput
+  shiftId: ModelIDInput
+  invoiceNumber: ModelStringInput
+  totalValue: ModelFloatInput
+  status: ModelBillingStatusInput
+  radicationDate: ModelStringInput
+  date: ModelStringInput
+  procedures: ModelStringInput
+  diagnosis: ModelStringInput
+  eps: ModelStringInput
+  ripsGenerated: ModelBooleanInput
+  submittedAt: ModelStringInput
+  approvedAt: ModelStringInput
+  rejectionReason: ModelStringInput
+  glosaDefense: ModelStringInput
+  ripsValidationResult: ModelStringInput
+  glosaDefenseText: ModelStringInput
+  glosaDefenseGeneratedAt: ModelStringInput
+  id: ModelIDInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelBillingRecordFilterInput]
+  or: [ModelBillingRecordFilterInput]
+  not: ModelBillingRecordFilterInput
+}
+
+input ModelBillingRecordConditionInput {
+  tenantId: ModelIDInput
+  patientId: ModelIDInput
+  shiftId: ModelIDInput
+  invoiceNumber: ModelStringInput
+  totalValue: ModelFloatInput
+  status: ModelBillingStatusInput
+  radicationDate: ModelStringInput
+  date: ModelStringInput
+  procedures: ModelStringInput
+  diagnosis: ModelStringInput
+  eps: ModelStringInput
+  ripsGenerated: ModelBooleanInput
+  submittedAt: ModelStringInput
+  approvedAt: ModelStringInput
+  rejectionReason: ModelStringInput
+  glosaDefense: ModelStringInput
+  ripsValidationResult: ModelStringInput
+  glosaDefenseText: ModelStringInput
+  glosaDefenseGeneratedAt: ModelStringInput
+  and: [ModelBillingRecordConditionInput]
+  or: [ModelBillingRecordConditionInput]
+  not: ModelBillingRecordConditionInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+}
+
+input CreateBillingRecordInput {
+  tenantId: ID!
+  patientId: ID!
+  shiftId: ID
+  invoiceNumber: String
+  totalValue: Float!
+  status: BillingStatus!
+  radicationDate: AWSDate
+  date: String
+  procedures: [String]
+  diagnosis: String
+  eps: String
+  ripsGenerated: Boolean!
+  submittedAt: AWSDateTime
+  approvedAt: AWSDateTime
+  rejectionReason: String
+  glosaDefense: String
+  ripsValidationResult: AWSJSON
+  glosaDefenseText: String
+  glosaDefenseGeneratedAt: AWSDateTime
+  id: ID
+}
+
+input UpdateBillingRecordInput {
+  tenantId: ID
+  patientId: ID
+  shiftId: ID
+  invoiceNumber: String
+  totalValue: Float
+  status: BillingStatus
+  radicationDate: AWSDate
+  date: String
+  procedures: [String]
+  diagnosis: String
+  eps: String
+  ripsGenerated: Boolean
+  submittedAt: AWSDateTime
+  approvedAt: AWSDateTime
+  rejectionReason: String
+  glosaDefense: String
+  ripsValidationResult: AWSJSON
+  glosaDefenseText: String
+  glosaDefenseGeneratedAt: AWSDateTime
+  id: ID!
+}
+
+input DeleteBillingRecordInput {
+  id: ID!
+}
+
+input ModelSubscriptionBillingRecordFilterInput {
+  patientId: ModelSubscriptionIDInput
+  shiftId: ModelSubscriptionIDInput
+  invoiceNumber: ModelSubscriptionStringInput
+  totalValue: ModelSubscriptionFloatInput
+  status: ModelSubscriptionStringInput
+  radicationDate: ModelSubscriptionStringInput
+  date: ModelSubscriptionStringInput
+  procedures: ModelSubscriptionStringInput
+  diagnosis: ModelSubscriptionStringInput
+  eps: ModelSubscriptionStringInput
+  ripsGenerated: ModelSubscriptionBooleanInput
+  submittedAt: ModelSubscriptionStringInput
+  approvedAt: ModelSubscriptionStringInput
+  rejectionReason: ModelSubscriptionStringInput
+  glosaDefense: ModelSubscriptionStringInput
+  ripsValidationResult: ModelSubscriptionStringInput
+  glosaDefenseText: ModelSubscriptionStringInput
+  glosaDefenseGeneratedAt: ModelSubscriptionStringInput
+  id: ModelSubscriptionIDInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionBillingRecordFilterInput]
+  or: [ModelSubscriptionBillingRecordFilterInput]
+  tenantId: ModelStringInput
+}
+
+input KARDEXInput {
+  generalObservations: String!
+  skinCondition: String
+  mobilityStatus: String
+  nutritionIntake: String
+  painLevel: Int
+  mentalStatus: String
+  environmentalSafety: String
+  caregiverSupport: String
+  internalNotes: String
+}
+
+input MedicationAdminInput {
+  medicationName: String!
+  intendedDosage: String!
+  dosageGiven: String!
+  time: AWSDateTime!
+  route: String
+  notes: String
+}
+
+input TaskCompletionInput {
+  taskDescription: String!
+  completedAt: AWSDateTime!
+  notes: String
+}
+
+type ModelVisitConnection @aws_iam @aws_cognito_user_pools {
+  items: [Visit]!
+  nextToken: String
+}
+
+input ModelVisitStatusInput {
+  eq: VisitStatus
+  ne: VisitStatus
+}
+
+input ModelVisitFilterInput {
+  tenantId: ModelIDInput
+  shiftId: ModelIDInput
+  patientId: ModelIDInput
+  nurseId: ModelIDInput
+  status: ModelVisitStatusInput
+  vitalsRecorded: ModelStringInput
+  submittedAt: ModelStringInput
+  reviewedAt: ModelStringInput
+  reviewedBy: ModelIDInput
+  rejectionReason: ModelStringInput
+  approvedAt: ModelStringInput
+  approvedBy: ModelIDInput
+  id: ModelIDInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelVisitFilterInput]
+  or: [ModelVisitFilterInput]
+  not: ModelVisitFilterInput
+}
+
+input ModelVisitConditionInput {
+  tenantId: ModelIDInput
+  shiftId: ModelIDInput
+  patientId: ModelIDInput
+  nurseId: ModelIDInput
+  status: ModelVisitStatusInput
+  vitalsRecorded: ModelStringInput
+  submittedAt: ModelStringInput
+  reviewedAt: ModelStringInput
+  reviewedBy: ModelIDInput
+  rejectionReason: ModelStringInput
+  approvedAt: ModelStringInput
+  approvedBy: ModelIDInput
+  and: [ModelVisitConditionInput]
+  or: [ModelVisitConditionInput]
+  not: ModelVisitConditionInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+}
+
+input CreateVisitInput {
+  tenantId: ID!
+  shiftId: ID!
+  patientId: ID!
+  nurseId: ID!
+  status: VisitStatus!
+  kardex: KARDEXInput!
+  vitalsRecorded: AWSJSON
+  medicationsAdministered: [MedicationAdminInput]
+  tasksCompleted: [TaskCompletionInput]
+  submittedAt: AWSDateTime
+  reviewedAt: AWSDateTime
+  reviewedBy: ID
+  rejectionReason: String
+  approvedAt: AWSDateTime
+  approvedBy: ID
+  id: ID
+}
+
+input UpdateVisitInput {
+  tenantId: ID
+  shiftId: ID
+  patientId: ID
+  nurseId: ID
+  status: VisitStatus
+  kardex: KARDEXInput
+  vitalsRecorded: AWSJSON
+  medicationsAdministered: [MedicationAdminInput]
+  tasksCompleted: [TaskCompletionInput]
+  submittedAt: AWSDateTime
+  reviewedAt: AWSDateTime
+  reviewedBy: ID
+  rejectionReason: String
+  approvedAt: AWSDateTime
+  approvedBy: ID
+  id: ID!
+}
+
+input DeleteVisitInput {
+  id: ID!
+}
+
+input ModelSubscriptionVisitFilterInput {
+  shiftId: ModelSubscriptionIDInput
+  patientId: ModelSubscriptionIDInput
+  nurseId: ModelSubscriptionIDInput
+  status: ModelSubscriptionStringInput
+  vitalsRecorded: ModelSubscriptionStringInput
+  submittedAt: ModelSubscriptionStringInput
+  reviewedAt: ModelSubscriptionStringInput
+  reviewedBy: ModelSubscriptionIDInput
+  rejectionReason: ModelSubscriptionStringInput
+  approvedAt: ModelSubscriptionStringInput
+  approvedBy: ModelSubscriptionIDInput
+  id: ModelSubscriptionIDInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionVisitFilterInput]
+  or: [ModelSubscriptionVisitFilterInput]
+  tenantId: ModelStringInput
+}
+
+type ModelAuditLogConnection @aws_iam @aws_cognito_user_pools {
+  items: [AuditLog]!
+  nextToken: String
+}
+
+input ModelAuditActionInput {
+  eq: AuditAction
+  ne: AuditAction
+}
+
+input ModelAuditLogFilterInput {
+  tenantId: ModelIDInput
+  userId: ModelIDInput
+  userRole: ModelStringInput
+  action: ModelAuditActionInput
+  entityType: ModelStringInput
+  entityId: ModelIDInput
+  timestamp: ModelStringInput
+  details: ModelStringInput
+  ipAddress: ModelStringInput
+  id: ModelIDInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelAuditLogFilterInput]
+  or: [ModelAuditLogFilterInput]
+  not: ModelAuditLogFilterInput
+}
+
+input ModelAuditLogConditionInput {
+  tenantId: ModelIDInput
+  userId: ModelIDInput
+  userRole: ModelStringInput
+  action: ModelAuditActionInput
+  entityType: ModelStringInput
+  entityId: ModelIDInput
+  timestamp: ModelStringInput
+  details: ModelStringInput
+  ipAddress: ModelStringInput
+  and: [ModelAuditLogConditionInput]
+  or: [ModelAuditLogConditionInput]
+  not: ModelAuditLogConditionInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+}
+
+input CreateAuditLogInput {
+  tenantId: ID!
+  userId: ID!
+  userRole: String!
+  action: AuditAction!
+  entityType: String!
+  entityId: ID!
+  timestamp: AWSDateTime!
+  details: AWSJSON
+  ipAddress: String
+  id: ID
+}
+
+input UpdateAuditLogInput {
+  tenantId: ID
+  userId: ID
+  userRole: String
+  action: AuditAction
+  entityType: String
+  entityId: ID
+  timestamp: AWSDateTime
+  details: AWSJSON
+  ipAddress: String
+  id: ID!
+}
+
+input DeleteAuditLogInput {
+  id: ID!
+}
+
+input ModelSubscriptionAuditLogFilterInput {
+  userId: ModelSubscriptionIDInput
+  userRole: ModelSubscriptionStringInput
+  action: ModelSubscriptionStringInput
+  entityType: ModelSubscriptionStringInput
+  entityId: ModelSubscriptionIDInput
+  timestamp: ModelSubscriptionStringInput
+  details: ModelSubscriptionStringInput
+  ipAddress: ModelSubscriptionStringInput
+  id: ModelSubscriptionIDInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionAuditLogFilterInput]
+  or: [ModelSubscriptionAuditLogFilterInput]
+  tenantId: ModelStringInput
+}
+
+type ModelNotificationConnection @aws_iam @aws_cognito_user_pools {
+  items: [Notification]!
+  nextToken: String
+}
+
+input ModelNotificationTypeInput {
+  eq: NotificationType
+  ne: NotificationType
+}
+
+input ModelNotificationFilterInput {
+  tenantId: ModelIDInput
+  userId: ModelIDInput
+  type: ModelNotificationTypeInput
+  message: ModelStringInput
+  entityType: ModelStringInput
+  entityId: ModelIDInput
+  read: ModelBooleanInput
+  id: ModelIDInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelNotificationFilterInput]
+  or: [ModelNotificationFilterInput]
+  not: ModelNotificationFilterInput
+}
+
+input ModelNotificationConditionInput {
+  tenantId: ModelIDInput
+  userId: ModelIDInput
+  type: ModelNotificationTypeInput
+  message: ModelStringInput
+  entityType: ModelStringInput
+  entityId: ModelIDInput
+  read: ModelBooleanInput
+  and: [ModelNotificationConditionInput]
+  or: [ModelNotificationConditionInput]
+  not: ModelNotificationConditionInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+}
+
+input CreateNotificationInput {
+  tenantId: ID!
+  userId: ID!
+  type: NotificationType!
+  message: String!
+  entityType: String!
+  entityId: ID!
+  read: Boolean!
+  id: ID
+}
+
+input UpdateNotificationInput {
+  tenantId: ID
+  userId: ID
+  type: NotificationType
+  message: String
+  entityType: String
+  entityId: ID
+  read: Boolean
+  id: ID!
+}
+
+input DeleteNotificationInput {
+  id: ID!
+}
+
+input ModelSubscriptionNotificationFilterInput {
+  userId: ModelSubscriptionIDInput
+  type: ModelSubscriptionStringInput
+  message: ModelSubscriptionStringInput
+  entityType: ModelSubscriptionStringInput
+  entityId: ModelSubscriptionIDInput
+  read: ModelSubscriptionBooleanInput
+  id: ModelSubscriptionIDInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionNotificationFilterInput]
+  or: [ModelSubscriptionNotificationFilterInput]
+  tenantId: ModelStringInput
+}

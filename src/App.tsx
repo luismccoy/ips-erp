@@ -5,6 +5,7 @@ import DemoSelection from './components/DemoSelection';
 import { useAuth } from './hooks/useAuth';
 import { useAnalytics } from './hooks/useAnalytics';
 import { TENANTS } from './data/mock-data';
+import { ToastProvider } from './components/ui/Toast';
 
 // Lazy loaded components for performance
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
@@ -180,11 +181,14 @@ export default function App() {
   }
 
   // Use Suspense to handle loading state of lazy components
+  // Wrap everything with ToastProvider for global notifications
   return (
-    <Suspense fallback={<PageLoader />}>
-      {role === 'nurse' && <SimpleNurseApp onLogout={handleLogout} />}
-      {role === 'family' && <FamilyPortal onLogout={handleLogout} />}
-      {role === 'admin' && <AdminDashboard view={view} setView={setView} onLogout={handleLogout} tenant={tenant} />}
-    </Suspense>
+    <ToastProvider>
+      <Suspense fallback={<PageLoader />}>
+        {role === 'nurse' && <SimpleNurseApp onLogout={handleLogout} />}
+        {role === 'family' && <FamilyPortal onLogout={handleLogout} />}
+        {role === 'admin' && <AdminDashboard view={view} setView={setView} onLogout={handleLogout} tenant={tenant} />}
+      </Suspense>
+    </ToastProvider>
   );
 }

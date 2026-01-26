@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react';
 import { Calendar, Sparkles, Clock, MapPin, Plus, User, Check, X, Users, RefreshCw } from 'lucide-react';
 import { client, isUsingRealBackend, MOCK_USER } from '../amplify-utils';
 import { usePagination } from '../hooks/usePagination';
+import { useLoadingTimeout } from '../hooks/useLoadingTimeout';
+import { ErrorState } from './ui/ErrorState';
 import type { Shift, Patient, Nurse } from '../types';
 import { LoadingSpinner } from './ui/LoadingSpinner';
 
 export function RosterDashboard() {
-    const { items: shifts, setItems, loadMore, hasMore, isLoading } = usePagination<Shift>();
+    const { items: shifts, setItems, loadMore, hasMore, isLoading: isPaginationLoading } = usePagination<Shift>();
+    const { isLoading, hasTimedOut, startLoading, stopLoading } = useLoadingTimeout();
     const [patients, setPatients] = useState<Patient[]>([]);
     const [nurses, setNurses] = useState<Nurse[]>([]); // Added for assignment
 
@@ -22,37 +25,38 @@ export function RosterDashboard() {
     const [newShiftTime, setNewShiftTime] = useState('');
     const [newShiftLocation, setNewShiftLocation] = useState('');
 
-    useEffect(() => {
-        const fetchData = async () => {
-            if (!isUsingRealBackend()) {
-                const { PATIENTS, SHIFTS, NURSES } = await import('../data/mock-data');
-                setPatients(PATIENTS as any);
-                setNurses(NURSES as any || []); // Handle missing mock nurses safely
-                loadMore(async () => ({ data: SHIFTS as any, nextToken: null }), true);
-                return;
-            }
+    const fetchData = async () => {
+        startLoading();
+        
+        try {
+            // Always use the client - it returns mock data in demo mode
+            const [patientsRes, nursesRes] = await Promise.all([
+                (client.models.Patient as any).list(),
+                (client.models.Nurse as any).list()
+            ]);
+            setPatients(patientsRes.data || []);
+            setNurses(nursesRes.data || []);
+        } catch (error) {
+            console.error('Error fetching dropdown data:', error);
+        }
 
+        await loadMore(async (token) => {
             try {
-                // Fetch basic lists for dropdowns
-                const [patientsRes, nursesRes] = await Promise.all([
-                    (client.models.Patient as any).list(),
-                    (client.models.Nurse as any).list()
-                ]);
-                setPatients(patientsRes.data || []);
-                setNurses(nursesRes.data || []);
-            } catch (error) {
-                console.error('Error fetching dropdown data:', error);
-            }
-
-            loadMore(async (token) => {
                 const response = await (client.models.Shift as any).list({
                     limit: 50,
                     nextToken: token
                 });
+                stopLoading();
                 return { data: response.data || [], nextToken: response.nextToken };
-            }, true);
-        };
+            } catch (error) {
+                console.error('Failed to fetch shifts:', error);
+                stopLoading();
+                return { data: [], nextToken: null };
+            }
+        }, true);
+    };
 
+    useEffect(() => {
         fetchData();
     }, [loadMore]);
 
@@ -119,7 +123,21 @@ export function RosterDashboard() {
     };
 
     if (isLoading && shifts.length === 0) {
-        return <LoadingSpinner size="lg" label="Loading Roster..." />;
+        return (
+            <div className="flex flex-col items-center justify-center py-12 bg-white rounded-2xl border border-slate-100 border-dashed animate-pulse">
+                <LoadingSpinner size="lg" label="Sincronizando Roster..." />
+            </div>
+        );
+    }
+
+    if (hasTimedOut && shifts.length === 0) {
+        return (
+            <ErrorState
+                title="Roster Connection Unstable"
+                message="We couldn't load the shift schedule. This usually happens if the rostering engine is scaling or if there are permission gaps in AWS AppSync."
+                onRetry={fetchData}
+            />
+        );
     }
 
     return (

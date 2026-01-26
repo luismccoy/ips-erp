@@ -1891,6 +1891,19 @@
                       "delete",
                       "read"
                     ]
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "read",
+                      "update"
+                    ],
+                    "groups": [
+                      "ADMIN",
+                      "NURSE"
+                    ]
                   }
                 ]
               }
@@ -2318,6 +2331,26 @@
               "isArray": false,
               "type": "AWSJSON",
               "isRequired": false
+            }
+          }
+        },
+        "verifyFamilyAccessCode": {
+          "name": "verifyFamilyAccessCode",
+          "isArray": false,
+          "type": "AWSJSON",
+          "isRequired": false,
+          "arguments": {
+            "patientId": {
+              "name": "patientId",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true
+            },
+            "accessCode": {
+              "name": "accessCode",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
             }
           }
         },

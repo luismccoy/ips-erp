@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import {
     Users, Search, Plus, MapPin, Mail, UserCheck,
-    MoreVertical, Edit, Trash2, X, Save, Stethoscope
+    MoreVertical, Edit, Trash2, X, Save, Stethoscope, ExternalLink
 } from 'lucide-react';
 import { client, isUsingRealBackend } from '../amplify-utils';
 import type { Nurse } from '../types';
 import { LoadingSpinner } from './ui/LoadingSpinner';
+import { useToast } from './ui/Toast';
 
 export function StaffManager() {
+    const { showToast } = useToast();
     const [nurses, setNurses] = useState<Nurse[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -31,34 +33,9 @@ export function StaffManager() {
     const fetchNurses = async () => {
         setLoading(true);
         try {
-            if (isUsingRealBackend()) {
-                const response = await (client.models.Nurse as any).list();
-                setNurses(response.data || []);
-            } else {
-                // Mock behavior
-                // Mock nurses would come from data/mock-data or similar
-                const mockNurses: Nurse[] = [
-                    {
-                        id: 'nurse-1',
-                        tenantId: 'tenant-1',
-                        name: 'Betty Cooper',
-                        email: 'nurse.betty@ips.com',
-                        role: 'NURSE',
-                        skills: ['Wound Care', 'Palliative'],
-                        isActive: true
-                    },
-                    {
-                        id: 'nurse-2',
-                        tenantId: 'tenant-1',
-                        name: 'Veronica Lodge',
-                        email: 'nurse.v@ips.com',
-                        role: 'COORDINATOR',
-                        skills: ['Admin', 'Triage'],
-                        isActive: true
-                    }
-                ];
-                setNurses(mockNurses);
-            }
+            // Always use the client - it returns mock data in demo mode
+            const response = await (client.models.Nurse as any).list();
+            setNurses(response.data || []);
         } catch (err) {
             console.error('Error fetching nurses:', err);
             setError('Failed to load staff list');
@@ -108,30 +85,55 @@ export function StaffManager() {
                         role: formData.role,
                         skills: skillsArray
                     });
+                    showToast('success', `Staff member "${formData.name}" updated successfully`);
                 } else {
-                    // Create
-                    // Note: This creates the DB record. 
-                    // In a real flow, you'd also create the Cognito user via a separate API or Trigger.
-                    // For now, we generate a random UUID for cognitoSub to satisfy the schema requirement.
-                    await (client.models.Nurse as any).create({
+                    // Create with optimistic update
+                    const tempId = 'temp-' + Date.now();
+                    const optimisticNurse: Nurse = {
+                        id: tempId,
                         tenantId: 'tenant-bogota-01',
-                        cognitoSub: crypto.randomUUID(), // Placeholder ID
                         name: formData.name,
                         email: formData.email,
                         role: formData.role,
                         skills: skillsArray,
                         isActive: true
-                    });
+                    };
+
+                    setNurses(prev => [...prev, optimisticNurse]);
+                    setShowModal(false);
+
+                    try {
+                        const result = await (client.models.Nurse as any).create({
+                            tenantId: 'tenant-bogota-01',
+                            cognitoSub: crypto.randomUUID(), // Placeholder ID
+                            name: formData.name,
+                            email: formData.email,
+                            role: formData.role,
+                            skills: skillsArray,
+                            isActive: true
+                        });
+
+                        // Replace temp with real data
+                        setNurses(prev => prev.map(n => n.id === tempId ? result.data : n));
+                        showToast('success', `Staff member "${formData.name}" created successfully`);
+                    } catch (createErr) {
+                        // Revert on error
+                        setNurses(prev => prev.filter(n => n.id !== tempId));
+                        throw createErr;
+                    }
+                    return;
                 }
                 await fetchNurses();
                 setShowModal(false);
             } else {
-                alert('Mock Mode: Changes specific to session only.');
+                showToast('info', 'Mock Mode: Changes are session-only');
                 setShowModal(false);
             }
         } catch (err) {
             console.error('Error saving nurse:', err);
-            setError('Failed to save nurse information.');
+            const errorMsg = 'Failed to save staff information. Please check your permissions.';
+            setError(errorMsg);
+            showToast('error', errorMsg);
         } finally {
             setFormLoading(false);
         }
@@ -201,8 +203,8 @@ export function StaffManager() {
                                         <div className="space-y-1">
                                             <div className="flex items-center gap-1.5">
                                                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${nurse.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' :
-                                                        nurse.role === 'COORDINATOR' ? 'bg-orange-100 text-orange-700' :
-                                                            'bg-blue-100 text-blue-700'
+                                                    nurse.role === 'COORDINATOR' ? 'bg-orange-100 text-orange-700' :
+                                                        'bg-blue-100 text-blue-700'
                                                     }`}>
                                                     {nurse.role}
                                                 </span>
@@ -280,10 +282,21 @@ export function StaffManager() {
                             )}
 
                             {/* Alert about Cognito User Creation */}
-                            <div className="p-4 bg-blue-50 text-blue-800 rounded-xl text-xs leading-relaxed border border-blue-100">
-                                <strong>Note:</strong> Creating a nurse here adds them to the database.
-                                In this version, you must also create the Cognito User manually in the AWS Console
-                                so they can log in. Use the email provided below.
+                            <div className="p-4 bg-blue-50 text-blue-800 rounded-xl text-xs leading-relaxed border border-blue-100 flex flex-col gap-3">
+                                <div>
+                                    <strong>Workflow Requirement:</strong> Creating staff here adds them to the database.
+                                    In this version, you must also create the Cognito User manually in the AWS Console
+                                    so they can log in.
+                                </div>
+                                <a
+                                    href="https://us-east-1.console.aws.amazon.com/cognito/v2/idp/user-pools"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg font-bold w-fit hover:bg-blue-700 transition-colors shadow-sm"
+                                >
+                                    <ExternalLink size={14} />
+                                    Open Cognito Console
+                                </a>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

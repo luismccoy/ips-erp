@@ -3,11 +3,14 @@ import { Package, Plus, X, AlertTriangle, Check, RefreshCw } from 'lucide-react'
 // import { client, isUsingRealBackend, MOCK_USER } from '../amplify-utils'; // client temporarily disabled for mutations until permissions fixed
 import { client, isUsingRealBackend, MOCK_USER } from '../amplify-utils';
 import { usePagination } from '../hooks/usePagination';
+import { useLoadingTimeout } from '../hooks/useLoadingTimeout';
+import { ErrorState } from './ui/ErrorState';
 import type { InventoryItem } from '../types';
 import { graphqlToFrontendSafe, frontendToGraphQLSafe } from '../utils/inventory-transforms';
 
 export function InventoryDashboard() {
-    const { items: inventory, setItems, loadMore, hasMore, isLoading } = usePagination<InventoryItem>();
+    const { items: inventory, setItems, loadMore, hasMore, isLoading: isPaginationLoading } = usePagination<InventoryItem>();
+    const { isLoading, hasTimedOut, startLoading, stopLoading, reset: resetLoading } = useLoadingTimeout();
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -19,37 +22,34 @@ export function InventoryDashboard() {
     const [newItemReorder, setNewItemReorder] = useState(10);
     const [newItemSku, setNewItemSku] = useState('');
 
-    useEffect(() => {
-        const fetchInventory = async () => {
-            if (!isUsingRealBackend()) {
-                // Mock backend already uses lowercase format (no transformation needed)
-                const { INVENTORY } = await import('../data/mock-data');
-                loadMore(async () => ({ data: INVENTORY as any, nextToken: null }), true);
-                return;
+    const fetchInventory = async () => {
+        startLoading();
+        
+        // Always use the client - it returns mock data in demo mode
+        await loadMore(async (token) => {
+            try {
+                const response = await (client.models.InventoryItem as any).list({
+                    limit: 50,
+                    nextToken: token
+                });
+
+                // Transform status from GraphQL format (IN_STOCK) to frontend format (in-stock) if needed
+                const transformedData = (response.data || []).map((item: any) => ({
+                    ...item,
+                    status: item.status ? graphqlToFrontendSafe(item.status) || 'in-stock' : 'in-stock'
+                }));
+
+                stopLoading();
+                return { data: transformedData, nextToken: response.nextToken };
+            } catch (error) {
+                console.error('Failed to fetch inventory:', error);
+                stopLoading();
+                return { data: [], nextToken: null };
             }
+        }, true);
+    };
 
-            // Real backend: fetch and transform status from GraphQL format to frontend format
-            loadMore(async (token) => {
-                try {
-                    const response = await (client.models.InventoryItem as any).list({
-                        limit: 50,
-                        nextToken: token
-                    });
-                    
-                    // Transform status from GraphQL format (IN_STOCK) to frontend format (in-stock)
-                    const transformedData = (response.data || []).map((item: any) => ({
-                        ...item,
-                        status: graphqlToFrontendSafe(item.status) || 'in-stock' // Fallback to safe default
-                    }));
-                    
-                    return { data: transformedData, nextToken: response.nextToken };
-                } catch (error) {
-                    console.error('Failed to fetch inventory:', error);
-                    return { data: [], nextToken: null };
-                }
-            }, true);
-        };
-
+    useEffect(() => {
         fetchInventory();
     }, [loadMore]);
 
@@ -58,20 +58,20 @@ export function InventoryDashboard() {
             // Mock backend doesn't support pagination
             return;
         }
-        
+
         loadMore(async (token) => {
             try {
                 const response = await (client.models.InventoryItem as any).list({
                     limit: 50,
                     nextToken: token
                 });
-                
+
                 // Transform status from GraphQL format (IN_STOCK) to frontend format (in-stock)
                 const transformedData = (response.data || []).map((item: any) => ({
                     ...item,
                     status: graphqlToFrontendSafe(item.status) || 'in-stock' // Fallback to safe default
                 }));
-                
+
                 return { data: transformedData, nextToken: response.nextToken };
             } catch (error) {
                 console.error('Failed to load more inventory:', error);
@@ -86,11 +86,11 @@ export function InventoryDashboard() {
         try {
             // Calculate frontend status based on quantity
             const frontendStatus = newItemQuantity > 0 ? 'in-stock' : 'out-of-stock';
-            
+
             if (isUsingRealBackend()) {
                 // Transform status to GraphQL format before sending to backend
                 const graphqlStatus = frontendToGraphQLSafe(frontendStatus);
-                
+
                 // TODO: Uncomment when backend permissions are fixed
                 // await client.models.InventoryItem.create({
                 //     name: newItemName,
@@ -101,7 +101,7 @@ export function InventoryDashboard() {
                 //     status: graphqlStatus,
                 //     tenantId: MOCK_USER.attributes['custom:tenantId']
                 // });
-                
+
                 console.log('Would create item with GraphQL status:', graphqlStatus);
             }
 
@@ -135,23 +135,23 @@ export function InventoryDashboard() {
         setIsSubmitting(true);
         try {
             // Calculate frontend status based on quantity and reorder level
-            const frontendStatus = newItemQuantity <= 0 
-                ? 'out-of-stock' 
-                : newItemQuantity <= editingItem.reorderLevel 
-                    ? 'low-stock' 
+            const frontendStatus = newItemQuantity <= 0
+                ? 'out-of-stock'
+                : newItemQuantity <= editingItem.reorderLevel
+                    ? 'low-stock'
                     : 'in-stock';
-            
+
             if (isUsingRealBackend()) {
                 // Transform status to GraphQL format before sending to backend
                 const graphqlStatus = frontendToGraphQLSafe(frontendStatus);
-                
+
                 // TODO: Uncomment when backend permissions are fixed
                 // await client.models.InventoryItem.update({
                 //     id: editingItem.id,
                 //     quantity: newItemQuantity,
                 //     status: graphqlStatus
                 // });
-                
+
                 console.log('Would update item with GraphQL status:', graphqlStatus);
             }
 
@@ -200,10 +200,23 @@ export function InventoryDashboard() {
             {/* List */}
             <div className="space-y-3">
                 {isLoading && inventory.length === 0 && (
-                    <div className="text-center py-8 text-slate-400">Loading inventory...</div>
+                    <div className="text-center py-12 bg-slate-50 rounded-2xl border border-slate-100 border-dashed animate-pulse">
+                        <div className="flex flex-col items-center gap-2">
+                            <RefreshCw className="text-blue-500 animate-spin" size={24} />
+                            <p className="text-sm font-bold text-slate-400 font-mono uppercase tracking-widest">Loading inventory...</p>
+                        </div>
+                    </div>
                 )}
 
-                {!isLoading && inventory.length === 0 && (
+                {hasTimedOut && inventory.length === 0 && (
+                    <ErrorState
+                        title="Inventory Sync Timeout"
+                        message="The inventory system is taking longer than usual to respond. This might be due to connection issues or missing backend permissions."
+                        onRetry={fetchInventory}
+                    />
+                )}
+
+                {!isLoading && !hasTimedOut && inventory.length === 0 && (
                     <div className="text-center py-8 text-slate-400">No items found. Add your first item above.</div>
                 )}
 

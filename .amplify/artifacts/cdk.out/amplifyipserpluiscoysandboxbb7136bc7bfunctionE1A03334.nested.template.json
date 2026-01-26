@@ -1007,6 +1007,130 @@
     "aws:asset:property": "Code"
    }
   },
+  "verifyfamilyaccesslambdaServiceRoleCB3B8210": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "amplify:deployment-type",
+      "Value": "sandbox"
+     },
+     {
+      "Key": "amplify:friendly-name",
+      "Value": "verify-family-access"
+     },
+     {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
+      "Key": "created-by",
+      "Value": "amplify"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/verify-family-access-lambda/ServiceRole/Resource"
+   }
+  },
+  "verifyfamilyaccesslambdaA0E8B3E0": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Architectures": [
+     "x86_64"
+    ],
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+     },
+     "S3Key": "eeb677782a40169935ea594e7c62ac4fcdef809a8e89aa3a91f80b3a1d818f26.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "PATIENT_TABLE_NAME": "",
+      "AMPLIFY_SSM_ENV_CONFIG": "{}"
+     }
+    },
+    "EphemeralStorage": {
+     "Size": 512
+    },
+    "Handler": "index.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "verifyfamilyaccesslambdaServiceRoleCB3B8210",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs20.x",
+    "Tags": [
+     {
+      "Key": "amplify:deployment-type",
+      "Value": "sandbox"
+     },
+     {
+      "Key": "amplify:friendly-name",
+      "Value": "verify-family-access"
+     },
+     {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
+      "Key": "created-by",
+      "Value": "amplify"
+     }
+    ],
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "verifyfamilyaccesslambdaServiceRoleCB3B8210"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/verify-family-access-lambda/Resource",
+    "aws:asset:path": "asset.eeb677782a40169935ea594e7c62ac4fcdef809a8e89aa3a91f80b3a1d818f26",
+    "aws:asset:is-bundled": true,
+    "aws:asset:property": "Code"
+   }
+  },
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
@@ -1323,6 +1447,11 @@
   "amplifyipserpluiscoysandboxbb7136bc7bfunctionapprovevisitlambdaA75308DDRef": {
    "Value": {
     "Ref": "approvevisitlambdaF91E5D0A"
+   }
+  },
+  "amplifyipserpluiscoysandboxbb7136bc7bfunctionverifyfamilyaccesslambda3589BA81Ref": {
+   "Value": {
+    "Ref": "verifyfamilyaccesslambdaA0E8B3E0"
    }
   }
  }

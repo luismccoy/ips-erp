@@ -271,6 +271,13 @@
         "Outputs.amplifyipserpluiscoysandboxbb7136bc7bfunctionapprovevisitlambdaA75308DDRef"
        ]
       },
+      "\",\"",
+      {
+       "Fn::GetAtt": [
+        "function1351588B",
+        "Outputs.amplifyipserpluiscoysandboxbb7136bc7bfunctionverifyfamilyaccesslambda3589BA81Ref"
+       ]
+      },
       "\"]"
      ]
     ]
@@ -391,7 +398,7 @@
        {
         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
        },
-       "/f9e553dba7f318caf00fa1066897c01586211ed02bdf2d1bb9f21b4bb83d8b02.json"
+       "/c7a3ed85ff509d53f350838a6cfcbfd2cff770db32a3b6fbb18fe80eb265d1b9.json"
       ]
      ]
     }
@@ -441,7 +448,7 @@
        {
         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
        },
-       "/5507ebc270fbc6899c0362764059bb688d8667b3ee855b695c4f1ac0ce332ddc.json"
+       "/d40b7c68732b4f83c92f3eef1a3171a1d52803118bc0c1373ffaad3f71fc1b72.json"
       ]
      ]
     }

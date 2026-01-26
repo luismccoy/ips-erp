@@ -1,4 +1,5 @@
-import { Activity, Stethoscope, Users, Building2, ArrowLeft } from 'lucide-react';
+import { Activity, Stethoscope, Users, Building2, ArrowLeft, Sparkles } from 'lucide-react';
+import { enableDemoMode } from '../amplify-utils';
 
 interface DemoSelectionProps {
     onSelectAdmin: () => void;
@@ -8,6 +9,22 @@ interface DemoSelectionProps {
 }
 
 export default function DemoSelection({ onSelectAdmin, onSelectNurse, onSelectFamily, onBack }: DemoSelectionProps) {
+    
+    const handleSelectAdmin = () => {
+        enableDemoMode();
+        onSelectAdmin();
+    };
+
+    const handleSelectNurse = () => {
+        enableDemoMode();
+        onSelectNurse();
+    };
+
+    const handleSelectFamily = () => {
+        enableDemoMode();
+        onSelectFamily();
+    };
+
     return (
         <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center p-4 relative overflow-hidden">
             {/* Background effects similar to login */}
@@ -27,12 +44,18 @@ export default function DemoSelection({ onSelectAdmin, onSelectNurse, onSelectFa
                     <p className="text-slate-500 text-lg max-w-2xl">
                         Explore the IPS ERP platform from different perspectives. Choose a role below to enter the interactive demo environment.
                     </p>
+                    
+                    {/* Demo Mode Badge */}
+                    <div className="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-200 text-violet-700 px-4 py-2 rounded-full text-sm font-medium">
+                        <Sparkles className="h-4 w-4" />
+                        Demo Mode: Pre-loaded with sample data
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Admin Card */}
                     <button
-                        onClick={onSelectAdmin}
+                        onClick={handleSelectAdmin}
                         className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group text-left relative overflow-hidden"
                     >
                         <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity transform group-hover:scale-110 duration-500">
@@ -46,7 +69,12 @@ export default function DemoSelection({ onSelectAdmin, onSelectNurse, onSelectFa
                             <p className="text-slate-500 leading-relaxed">
                                 Full control center for rostering, billing defense, analytics, and staff management.
                             </p>
-                            <div className="mt-8 flex items-center text-blue-600 font-bold text-sm tracking-wide uppercase opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
+                            <div className="mt-4 flex flex-wrap gap-2">
+                                <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full">8 Patients</span>
+                                <span className="text-xs bg-emerald-50 text-emerald-600 px-2 py-1 rounded-full">12 Shifts</span>
+                                <span className="text-xs bg-amber-50 text-amber-600 px-2 py-1 rounded-full">2 Glosas</span>
+                            </div>
+                            <div className="mt-6 flex items-center text-blue-600 font-bold text-sm tracking-wide uppercase opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
                                 Launch Demo <Activity className="h-4 w-4 ml-2" />
                             </div>
                         </div>
@@ -54,7 +82,7 @@ export default function DemoSelection({ onSelectAdmin, onSelectNurse, onSelectFa
 
                     {/* Nurse Card */}
                     <button
-                        onClick={onSelectNurse}
+                        onClick={handleSelectNurse}
                         className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group text-left relative overflow-hidden"
                     >
                         <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity transform group-hover:scale-110 duration-500">
@@ -68,7 +96,12 @@ export default function DemoSelection({ onSelectAdmin, onSelectNurse, onSelectFa
                             <p className="text-slate-500 leading-relaxed">
                                 Mobile-optimized interface for route navigation, patient care logging, and supplies.
                             </p>
-                            <div className="mt-8 flex items-center text-emerald-600 font-bold text-sm tracking-wide uppercase opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
+                            <div className="mt-4 flex flex-wrap gap-2">
+                                <span className="text-xs bg-emerald-50 text-emerald-600 px-2 py-1 rounded-full">3 Today</span>
+                                <span className="text-xs bg-amber-50 text-amber-600 px-2 py-1 rounded-full">1 Pending</span>
+                                <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full">Offline Ready</span>
+                            </div>
+                            <div className="mt-6 flex items-center text-emerald-600 font-bold text-sm tracking-wide uppercase opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
                                 Launch Demo <Activity className="h-4 w-4 ml-2" />
                             </div>
                         </div>
@@ -76,7 +109,7 @@ export default function DemoSelection({ onSelectAdmin, onSelectNurse, onSelectFa
 
                     {/* Family Card */}
                     <button
-                        onClick={onSelectFamily}
+                        onClick={handleSelectFamily}
                         className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group text-left relative overflow-hidden"
                     >
                         <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity transform group-hover:scale-110 duration-500">
@@ -90,7 +123,11 @@ export default function DemoSelection({ onSelectAdmin, onSelectNurse, onSelectFa
                             <p className="text-slate-500 leading-relaxed">
                                 Transparency for family members to track visits, vitals, and care progress in real-time.
                             </p>
-                            <div className="mt-8 flex items-center text-indigo-600 font-bold text-sm tracking-wide uppercase opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
+                            <div className="mt-4 flex flex-wrap gap-2">
+                                <span className="text-xs bg-indigo-50 text-indigo-600 px-2 py-1 rounded-full">Patient: Roberto</span>
+                                <span className="text-xs bg-emerald-50 text-emerald-600 px-2 py-1 rounded-full">Last Visit: Today</span>
+                            </div>
+                            <div className="mt-6 flex items-center text-indigo-600 font-bold text-sm tracking-wide uppercase opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
                                 Launch Demo <Activity className="h-4 w-4 ml-2" />
                             </div>
                         </div>

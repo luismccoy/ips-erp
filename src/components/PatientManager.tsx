@@ -6,8 +6,10 @@ import {
 import { client, isUsingRealBackend } from '../amplify-utils';
 import type { Patient } from '../types';
 import { LoadingSpinner } from './ui/LoadingSpinner';
+import { useToast } from './ui/Toast';
 
 export function PatientManager() {
+    const { showToast } = useToast();
     const [patients, setPatients] = useState<Patient[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -33,27 +35,9 @@ export function PatientManager() {
     const fetchPatients = async () => {
         setLoading(true);
         try {
-            if (isUsingRealBackend()) {
-                const response = await (client.models.Patient as any).list();
-                setPatients(response.data || []);
-            } else {
-                // Mock behavior
-                const { PATIENTS } = await import('../data/mock-data');
-                // Transform mock data to match Patient type if needed
-                const transformed: Patient[] = PATIENTS.map((p: any) => ({
-                    id: p.id,
-                    tenantId: 'tenant-1',
-                    name: p.name,
-                    documentId: 'DOC-' + Math.floor(Math.random() * 10000),
-                    age: p.age || 70,
-                    address: p.address,
-                    diagnosis: p.diagnosis,
-                    eps: p.eps || 'Sura',
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                }));
-                setPatients(transformed);
-            }
+            // Always use the client - it returns mock data in demo mode
+            const response = await (client.models.Patient as any).list();
+            setPatients(response.data || []);
         } catch (err) {
             console.error('Error fetching patients:', err);
             setError('Failed to load patients');
@@ -101,22 +85,49 @@ export function PatientManager() {
                         id: selectedPatient.id,
                         ...formData
                     });
+                    showToast('success', `Patient "${formData.name}" updated successfully`);
                 } else {
-                    // Create
-                    await (client.models.Patient as any).create({
-                        tenantId: 'tenant-bogota-01', // Default per Audit
-                        ...formData
-                    });
+                    // Create with optimistic update
+                    const tempId = 'temp-' + Date.now();
+                    const optimisticPatient: Patient = {
+                        id: tempId,
+                        tenantId: 'tenant-bogota-01',
+                        ...formData,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    };
+
+                    // Optimistically add to list
+                    setPatients(prev => [...prev, optimisticPatient]);
+                    setShowModal(false);
+
+                    try {
+                        const result = await (client.models.Patient as any).create({
+                            tenantId: 'tenant-bogota-01',
+                            ...formData
+                        });
+
+                        // Replace temp with real data
+                        setPatients(prev => prev.map(p => p.id === tempId ? result.data : p));
+                        showToast('success', `Patient "${formData.name}" created successfully`);
+                    } catch (createErr) {
+                        // Revert optimistic update on error
+                        setPatients(prev => prev.filter(p => p.id !== tempId));
+                        throw createErr;
+                    }
+                    return; // Exit early for optimistic flow
                 }
                 await fetchPatients();
                 setShowModal(false);
             } else {
-                alert('Mock Mode: Changes specific to session only.');
+                showToast('info', 'Mock Mode: Changes are session-only');
                 setShowModal(false);
             }
         } catch (err) {
             console.error('Error saving patient:', err);
-            setError('Failed to save patient. Please check your permissions.');
+            const errorMsg = 'Failed to save patient. Please check your permissions.';
+            setError(errorMsg);
+            showToast('error', errorMsg);
         } finally {
             setFormLoading(false);
         }

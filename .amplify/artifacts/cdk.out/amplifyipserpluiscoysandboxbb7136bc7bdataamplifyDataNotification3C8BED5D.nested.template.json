@@ -655,7 +655,7 @@
     "FunctionVersion": "2018-05-29",
     "Name": "QuerygetNotificationauth0Function",
     "RequestMappingTemplateS3Location": {
-     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/bfe49061d09fdede7ca8db55a0ad2c915c74e71c5ab677f203ef1b0530e7a0c5.vtl"
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/c97c796df113229ed3c2d96aea002752789df0e60c5af202404f395ed1347c0f.vtl"
     },
     "ResponseMappingTemplate": "$util.toJson({})"
    },
@@ -835,7 +835,7 @@
     "FunctionVersion": "2018-05-29",
     "Name": "QuerylistNotificationsauth0Function",
     "RequestMappingTemplateS3Location": {
-     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/bfe49061d09fdede7ca8db55a0ad2c915c74e71c5ab677f203ef1b0530e7a0c5.vtl"
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/c97c796df113229ed3c2d96aea002752789df0e60c5af202404f395ed1347c0f.vtl"
     },
     "ResponseMappingTemplate": "$util.toJson({})"
    },
@@ -1279,7 +1279,7 @@
      "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/1f5fed297da9c32ae3af922bf3a38ccf23b956078887d16891ec06c20c64722c.vtl"
     },
     "ResponseMappingTemplateS3Location": {
-     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/795ab4f0f4fdd6ae6c5797a5396da9438d1b87bdc728c1a4006278a442e4fef6.vtl"
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/497ebf976e958583c3f44b72ae7b5b8f9f51b206a0f9a1b9e484543375a085d4.vtl"
     }
    },
    "DependsOn": [
@@ -1655,7 +1655,7 @@
     "FunctionVersion": "2018-05-29",
     "Name": "SubscriptiononCreateNotificationauth0Function",
     "RequestMappingTemplateS3Location": {
-     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/d76797d8f4109d432a2aec1bab7951695b056b19fc45eb84a433159abf7384a1.vtl"
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/dd04c2cef3a937a8487ce649d6108aeeccad2fd3c89fac1d87fbd55fd83298f9.vtl"
     },
     "ResponseMappingTemplate": "$util.toJson({})"
    },
@@ -1802,7 +1802,7 @@
     "FunctionVersion": "2018-05-29",
     "Name": "SubscriptiononUpdateNotificationauth0Function",
     "RequestMappingTemplateS3Location": {
-     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/d76797d8f4109d432a2aec1bab7951695b056b19fc45eb84a433159abf7384a1.vtl"
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/dd04c2cef3a937a8487ce649d6108aeeccad2fd3c89fac1d87fbd55fd83298f9.vtl"
     },
     "ResponseMappingTemplate": "$util.toJson({})"
    },
@@ -1949,7 +1949,7 @@
     "FunctionVersion": "2018-05-29",
     "Name": "SubscriptiononDeleteNotificationauth0Function",
     "RequestMappingTemplateS3Location": {
-     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/d76797d8f4109d432a2aec1bab7951695b056b19fc45eb84a433159abf7384a1.vtl"
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/dd04c2cef3a937a8487ce649d6108aeeccad2fd3c89fac1d87fbd55fd83298f9.vtl"
     },
     "ResponseMappingTemplate": "$util.toJson({})"
    },

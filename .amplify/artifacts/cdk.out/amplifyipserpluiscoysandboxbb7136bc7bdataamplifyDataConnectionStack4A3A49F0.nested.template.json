@@ -1156,7 +1156,7 @@
     "FunctionVersion": "2018-05-29",
     "Name": "Tenantnotificationsauth0Function",
     "RequestMappingTemplateS3Location": {
-     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/90e9303569aaa04ffaa62ecfae9423055b97a223cf65ef40ecf8e645c4de91b6.vtl"
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/9fc2e6cebee8e8a4905b29db8a616250f885aacc3c9168c5b1c2fc3cdc4c52e7.vtl"
     },
     "ResponseMappingTemplate": "$util.toJson({})"
    },

@@ -170,20 +170,8 @@ function DashboardView() {
 
     useEffect(() => {
         const fetchStats = async () => {
-            if (!isUsingRealBackend()) {
-                // Use mock data dynamically
-                const { PATIENTS, INVENTORY, SHIFTS } = await import('../data/mock-data');
-                setStats({
-                    patients: PATIENTS.length,
-                    shifts: SHIFTS.length,
-                    inventory: INVENTORY.filter((i: any) => i.quantity < i.reorderThreshold).length
-                });
-                setLoading(false);
-                return;
-            }
-
             try {
-                // Fetch real data
+                // Always use the client - it returns mock data in demo mode
                 const [patientsRes, shiftsRes, inventoryRes] = await Promise.all([
                     (client.models.Patient as any).list(),
                     (client.models.Shift as any).list(),

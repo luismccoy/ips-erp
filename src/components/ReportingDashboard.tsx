@@ -2,12 +2,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Download, Calendar as CalendarIcon, Filter } from 'lucide-react';
 import { client } from '../amplify-utils';
 import { usePagination } from '../hooks/usePagination';
+import { useLoadingTimeout } from '../hooks/useLoadingTimeout';
+import { ErrorState } from './ui/ErrorState';
 import type { BillingRecord, Shift } from '../types';
 import { downloadCSV } from '../utils/csvExport';
 import { LoadingSpinner } from './ui/LoadingSpinner';
 
 export const ReportingDashboard: React.FC = () => {
-    const [isLoadingData, setIsLoadingData] = useState(true);
+    const { isLoading, hasTimedOut, startLoading, stopLoading } = useLoadingTimeout();
     const [stats, setStats] = useState({
         totalRevenue: 0,
         completedShifts: 0,
@@ -22,7 +24,7 @@ export const ReportingDashboard: React.FC = () => {
     const { items: shifts, loadMore: loadShifts } = usePagination<Shift>();
 
     const fetchData = useCallback(async () => {
-        setIsLoadingData(true);
+        startLoading();
         try {
             // Fetch Counts directly
             const [patientsRes, staffRes] = await Promise.all([
@@ -65,12 +67,12 @@ export const ReportingDashboard: React.FC = () => {
                 activePatients: 8, // Placeholder
             }));
 
+            stopLoading();
         } catch (error) {
             console.error('Error fetching reporting data:', error);
-        } finally {
-            setIsLoadingData(false);
+            stopLoading();
         }
-    }, [loadBills, loadShifts]);
+    }, [loadBills, loadShifts, startLoading, stopLoading]);
 
     useEffect(() => {
         fetchData();
@@ -159,9 +161,17 @@ export const ReportingDashboard: React.FC = () => {
                 </div>
             </div>
 
-            {isLoadingData && bills.length === 0 ? (
-                <div className="glass p-12 flex justify-center">
+            {isLoading && bills.length === 0 && shifts.length === 0 ? (
+                <div className="glass p-12 flex justify-center animate-pulse">
                     <LoadingSpinner size="lg" label="Calculando métricas..." />
+                </div>
+            ) : hasTimedOut && bills.length === 0 && shifts.length === 0 ? (
+                <div className="glass p-12">
+                    <ErrorState
+                        title="Error al Calcular Reportes"
+                        message="El motor de analítica está tardando demasiado. Esto puede ser debido a un gran volumen de datos o latencia en AWS AppSync."
+                        onRetry={fetchData}
+                    />
                 </div>
             ) : (
                 <>
