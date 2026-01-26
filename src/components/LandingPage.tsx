@@ -24,12 +24,12 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
                         <div className="hidden md:flex space-x-8">
                             <a href="#features" className="text-sm font-medium hover:text-[#2563eb] transition-colors">Plataforma</a>
                             <a href="#ai" className="text-sm font-medium hover:text-[#2563eb] transition-colors flex items-center gap-1">
-                                <Sparkles className="h-3 w-3 text-purple-500" /> Generative AI
+                                <Sparkles className="h-3 w-3 text-purple-500" /> IA Generativa
                             </a>
-                            <a href="#infrastructure" className="text-sm font-medium hover:text-[#2563eb] transition-colors">Infrastructure</a>
+                            <a href="#infrastructure" className="text-sm font-medium hover:text-[#2563eb] transition-colors">Infraestructura</a>
                         </div>
                         <div className="flex items-center gap-4">
-                            <button onClick={onLogin} className="hidden md:block text-sm font-medium text-slate-900 hover:text-[#2563eb]">Login</button>
+                            <button onClick={onLogin} className="hidden md:block text-sm font-medium text-slate-900 hover:text-[#2563eb]">Iniciar Sesión</button>
                             <button onClick={onViewDemo} className="bg-slate-900 text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-slate-800 transition-all hover:shadow-lg transform hover:-translate-y-0.5">
                                 Agendar Demo
                             </button>
@@ -51,7 +51,7 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
                         </span>
-                        Powered by Generative AI Models
+                        Impulsado por Modelos de IA Generativa
                     </div>
 
                     <h1 className="text-5xl md:text-7xl font-bold text-slate-900 tracking-tight mb-6 leading-tight">
@@ -67,7 +67,7 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
 
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                         <button onClick={onViewDemo} className="w-full sm:w-auto px-8 py-4 bg-[#2563eb] text-white rounded-xl font-semibold shadow-xl shadow-blue-500/20 hover:bg-[#1d4ed8] transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2">
-                            View Demo
+                            Ver Demo
                             <ArrowRight className="h-4 w-4" />
                         </button>
                         <button onClick={() => setShowVideoModal(true)} className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-xl font-semibold hover:bg-slate-50 transition-all flex items-center justify-center gap-2 group">
@@ -317,9 +317,9 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
                             <div>
                                 <div className="flex items-center gap-3 mb-6">
                                     <div className="h-10 w-16 bg-slate-900 rounded flex items-center justify-center text-white font-bold tracking-tighter">AWS</div>
-                                    <span className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Technology Partner</span>
+                                    <span className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Socio Tecnológico</span>
                                 </div>
-                                <h3 className="text-2xl font-bold text-slate-900 mb-4">Cloud-Native Reliability</h3>
+                                <h3 className="text-2xl font-bold text-slate-900 mb-4">Infraestructura Nativa en la Nube</h3>
                                 <ul className="space-y-4">
                                     <li className="flex items-start gap-3">
                                         <div className="bg-green-100 p-1 rounded-full text-green-600 mt-0.5"><Check className="h-4 w-4" /></div>
@@ -348,13 +348,13 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
                                 <div className="absolute inset-0 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl transform rotate-3"></div>
                                 <div className="relative bg-slate-900 rounded-xl p-6 text-white shadow-2xl">
                                     <div className="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
-                                        <span className="font-mono text-xs text-green-400">● System Operational</span>
+                                        <span className="font-mono text-xs text-green-400">● Sistema Operativo</span>
                                         <span className="font-mono text-xs text-slate-400">us-east-1 / bog-1</span>
                                     </div>
                                     <div className="space-y-3 font-mono text-xs text-slate-300">
-                                        <div className="flex justify-between"><span>Database Latency</span><span className="text-green-400">12ms</span></div>
-                                        <div className="flex justify-between"><span>Encryption Status</span><span className="text-green-400">Active (KMS)</span></div>
-                                        <div className="flex justify-between"><span>Backup Policy</span><span className="text-blue-400">Hourly (PITR)</span></div>
+                                        <div className="flex justify-between"><span>Latencia BD</span><span className="text-green-400">12ms</span></div>
+                                        <div className="flex justify-between"><span>Encriptación</span><span className="text-green-400">Activo (KMS)</span></div>
+                                        <div className="flex justify-between"><span>Respaldos</span><span className="text-blue-400">Cada hora (PITR)</span></div>
                                         <div className="h-1 w-full bg-slate-700 rounded mt-4 overflow-hidden">
                                             <div className="h-full bg-green-500 w-[98%]"></div>
                                         </div>
