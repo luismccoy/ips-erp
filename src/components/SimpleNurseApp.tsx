@@ -12,12 +12,13 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { Activity, LogOut, FileText, Edit3, Clock, CheckCircle, XCircle, AlertCircle, FileCheck } from 'lucide-react';
+import { Activity, LogOut, FileText, Edit3, Clock, CheckCircle, XCircle, AlertCircle, FileCheck, HeartPulse } from 'lucide-react';
 import { client, isUsingRealBackend } from '../amplify-utils';
 import { createVisitDraft } from '../api/workflow-api';
 import { usePagination } from '../hooks/usePagination';
 import { NotificationBell } from './NotificationBell';
 import { VisitDocumentationForm } from './VisitDocumentationForm';
+import { AssessmentEntryForm } from './AssessmentEntryForm';
 import type { SimpleNurseAppProps } from '../types/components';
 import type { Shift, Patient } from '../types';
 import type { Visit, VisitStatus, NotificationItem } from '../types/workflow';
@@ -238,6 +239,10 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
     // Visit Documentation Form state
     const [showDocumentationForm, setShowDocumentationForm] = useState(false);
     const [selectedShift, setSelectedShift] = useState<ShiftWithVisit | null>(null);
+
+    // Clinical Assessment Form state
+    const [showAssessmentForm, setShowAssessmentForm] = useState(false);
+    const [assessmentPatient, setAssessmentPatient] = useState<{ id: string; name: string } | null>(null);
 
     // Current user ID (in real app, this would come from auth context)
     const currentUserId = 'nurse-1';
@@ -607,6 +612,23 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                     onGeneratePacket={handleGeneratePacket}
                                                     isLoading={isCreatingThisDraft}
                                                 />
+
+                                                {/* Clinical Assessment Button */}
+                                                {shift.status === 'COMPLETED' && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setAssessmentPatient({
+                                                                id: shift.patientId || '',
+                                                                name: patient?.name || shift.patientName || 'Paciente'
+                                                            });
+                                                            setShowAssessmentForm(true);
+                                                        }}
+                                                        className="mt-2 w-full flex items-center justify-center gap-2 px-3 py-2 bg-pink-600/20 border border-pink-500/30 text-pink-400 text-sm font-medium rounded-lg hover:bg-pink-600/30 transition-colors"
+                                                    >
+                                                        <HeartPulse size={16} />
+                                                        Registrar Valoración Clínica
+                                                    </button>
+                                                )}
                                             </div>
                                         );
                                     })
@@ -682,6 +704,30 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                     onClose={handleCloseDocumentationForm}
                     onSubmitSuccess={handleSubmitSuccess}
                 />
+            )}
+
+            {/* Clinical Assessment Form Modal */}
+            {showAssessmentForm && assessmentPatient && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <div className="p-6">
+                            <AssessmentEntryForm
+                                patientId={assessmentPatient.id}
+                                patientName={assessmentPatient.name}
+                                nurseId={currentUserId}
+                                onSave={(assessment) => {
+                                    console.log('Assessment saved:', assessment);
+                                    setShowAssessmentForm(false);
+                                    setAssessmentPatient(null);
+                                }}
+                                onCancel={() => {
+                                    setShowAssessmentForm(false);
+                                    setAssessmentPatient(null);
+                                }}
+                            />
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

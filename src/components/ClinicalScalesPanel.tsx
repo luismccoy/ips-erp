@@ -19,8 +19,9 @@ import { useState, useEffect } from 'react';
 import { 
   Activity, AlertTriangle, Brain, Heart, Shield, 
   TrendingDown, TrendingUp, Minus, Clock, User,
-  ChevronDown, ChevronUp, FileText
+  ChevronDown, ChevronUp, FileText, BarChart3
 } from 'lucide-react';
+import { AssessmentTrendChart } from './AssessmentTrendChart';
 import { client } from '../amplify-utils';
 import type { 
   PatientAssessment, 
@@ -44,6 +45,7 @@ interface ClinicalScalesPanelProps {
   patientId: string;
   patientName?: string;
   showHistory?: boolean;
+  showTrends?: boolean;
   compact?: boolean;
   onAssessmentClick?: (assessment: PatientAssessment) => void;
 }
@@ -205,12 +207,14 @@ export function ClinicalScalesPanel({
   patientId, 
   patientName,
   showHistory = false,
+  showTrends = false,
   compact = false,
   onAssessmentClick
 }: ClinicalScalesPanelProps) {
   const [assessments, setAssessments] = useState<PatientAssessment[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [activeView, setActiveView] = useState<'scales' | 'trends'>('scales');
 
   useEffect(() => {
     loadAssessments();
@@ -301,41 +305,75 @@ export function ClinicalScalesPanel({
 
   return (
     <div className="space-y-4">
-      {/* Header with date selector */}
+      {/* Header with tabs */}
       <div className="flex items-center justify-between">
         <div>
           {patientName && (
             <h3 className="text-lg font-semibold text-gray-900">{patientName}</h3>
           )}
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <Clock size={14} />
-            <span>{assessmentDate}</span>
-            {assessments.length > 1 && (
-              <span className="text-gray-400">
-                ({selectedIndex + 1} de {assessments.length})
-              </span>
-            )}
-          </div>
+          {activeView === 'scales' && (
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <Clock size={14} />
+              <span>{assessmentDate}</span>
+              {assessments.length > 1 && (
+                <span className="text-gray-400">
+                  ({selectedIndex + 1} de {assessments.length})
+                </span>
+              )}
+            </div>
+          )}
         </div>
-        {showHistory && assessments.length > 1 && (
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setSelectedIndex(Math.min(selectedIndex + 1, assessments.length - 1))}
-              disabled={selectedIndex >= assessments.length - 1}
-              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50"
-            >
-              <TrendingDown size={18} />
-            </button>
-            <button
-              onClick={() => setSelectedIndex(Math.max(selectedIndex - 1, 0))}
-              disabled={selectedIndex === 0}
-              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50"
-            >
-              <TrendingUp size={18} />
-            </button>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {showTrends && (
+            <div className="flex bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setActiveView('scales')}
+                className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                  activeView === 'scales' ? 'bg-white shadow text-gray-900' : 'text-gray-600'
+                }`}
+              >
+                Escalas
+              </button>
+              <button
+                onClick={() => setActiveView('trends')}
+                className={`px-3 py-1 text-sm rounded-md transition-colors flex items-center gap-1 ${
+                  activeView === 'trends' ? 'bg-white shadow text-gray-900' : 'text-gray-600'
+                }`}
+              >
+                <BarChart3 size={14} />
+                Tendencias
+              </button>
+            </div>
+          )}
+          {showHistory && assessments.length > 1 && activeView === 'scales' && (
+            <>
+              <button
+                onClick={() => setSelectedIndex(Math.min(selectedIndex + 1, assessments.length - 1))}
+                disabled={selectedIndex >= assessments.length - 1}
+                className="p-1 rounded hover:bg-gray-100 disabled:opacity-50"
+              >
+                <TrendingDown size={18} />
+              </button>
+              <button
+                onClick={() => setSelectedIndex(Math.max(selectedIndex - 1, 0))}
+                disabled={selectedIndex === 0}
+                className="p-1 rounded hover:bg-gray-100 disabled:opacity-50"
+              >
+                <TrendingUp size={18} />
+              </button>
+            </>
+          )}
+        </div>
       </div>
+
+      {/* Trends View */}
+      {activeView === 'trends' && (
+        <AssessmentTrendChart patientId={patientId} patientName={patientName} daysBack={30} />
+      )}
+
+      {/* Scales View */}
+      {activeView === 'scales' && (
+        <>
 
       {/* Alerts */}
       <AlertBanner alerts={currentAssessment.alerts || []} />
@@ -494,6 +532,8 @@ export function ClinicalScalesPanel({
           <h4 className="text-sm font-medium text-gray-700 mb-1">Notas Clínicas</h4>
           <p className="text-sm text-gray-600">{currentAssessment.notes}</p>
         </div>
+      )}
+      </>
       )}
     </div>
   );
