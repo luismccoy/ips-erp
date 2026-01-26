@@ -38,9 +38,20 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
                 });
                 
                 if (patientsRes.data && patientsRes.data.length > 0) {
-                    setPatient(patientsRes.data[0]);
-                    setIsAuthenticated(true);
-                    fetchFamilyData(patientsRes.data[0]);
+                    const matchedPatient = patientsRes.data[0];
+                    
+                    // SECURITY: Defense-in-depth - verify access code matches client-side
+                    // This protects against backend filter failures or misconfigurations
+                    if (matchedPatient.familyAccessCode && matchedPatient.familyAccessCode === accessCode) {
+                        setPatient(matchedPatient);
+                        setIsAuthenticated(true);
+                        fetchFamilyData(matchedPatient);
+                    } else {
+                        // Access code mismatch - potential filter failure, deny access
+                        console.warn('Security: Patient returned but access code mismatch - denying access');
+                        setAuthError('Código de acceso inválido. Verifique con su IPS.');
+                        setIsCheckingAuth(false);
+                    }
                 } else {
                     setAuthError('Código de acceso inválido. Verifique con su IPS.');
                     setIsCheckingAuth(false);

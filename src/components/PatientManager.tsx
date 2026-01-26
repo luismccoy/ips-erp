@@ -371,6 +371,7 @@ export function PatientManager() {
                                 patientId={selectedPatient.id}
                                 patientName={selectedPatient.name}
                                 showHistory={true}
+                                showTrends={true}
                             />
                         </div>
                     </div>

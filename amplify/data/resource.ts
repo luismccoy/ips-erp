@@ -120,7 +120,7 @@ const schema = a.schema({
     // Assessment Alert - Generated when scores hit risk thresholds
     AssessmentAlert: a.customType({
         scale: a.string().required(),         // Scale name (e.g., "Glasgow", "Morse")
-        level: a.enum(['INFO', 'WARNING', 'CRITICAL']).required(),
+        level: a.enum(['INFO', 'WARNING', 'CRITICAL']),  // Enums don't support .required()
         message: a.string().required(),       // Spanish alert message
     }),
     

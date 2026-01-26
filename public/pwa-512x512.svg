@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#2563eb" rx="64"/>
+  <text x="256" y="280" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="128" font-weight="bold">IPS</text>
+  <text x="256" y="380" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="64">ERP</text>
+</svg>

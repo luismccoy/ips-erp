@@ -374,9 +374,10 @@ export function InventoryDashboard() {
                                 <div className="text-center">
                                     <input
                                         type="number"
+                                        min="0"
                                         className="w-24 text-center text-4xl font-black text-slate-900 border-none focus:ring-0 p-0"
                                         value={newItemQuantity}
-                                        onChange={e => setNewItemQuantity(Number(e.target.value))}
+                                        onChange={e => setNewItemQuantity(Math.max(0, Number(e.target.value)))}
                                     />
                                     <div className="text-xs text-slate-400 font-bold uppercase">{editingItem.unit}</div>
                                 </div>
