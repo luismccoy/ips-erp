@@ -251,10 +251,8 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
 
         try {
             // Always use the client - it returns demo data in demo mode
-            {
-                // Real backend mode
-                const patientsRes = await (client.models.Patient as any).list();
-                setPatients(patientsRes.data || []);
+            const patientsRes = await (client.models.Patient as any).list();
+            setPatients(patientsRes.data || []);
 
                 loadMore(async (token) => {
                     const shiftsRes = await (client.models.Shift as any).list({
@@ -299,7 +297,6 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
 
                     return { data: shiftsWithVisits, nextToken: shiftsRes.nextToken };
                 }, true);
-            }
         } catch (err) {
             console.error('Error fetching nurse data:', err);
             setError('Error al cargar los datos. Por favor intente de nuevo.');
