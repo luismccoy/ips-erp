@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 
 export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => void, onViewDemo: () => void }) {
-    const [showVideoModal, setShowVideoModal] = useState(false);
+    // Video modal removed - will add back with real video content
 
     return (
         <div className="font-sans text-slate-600 bg-slate-50 antialiased">
@@ -67,14 +67,8 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
 
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                         <button onClick={onViewDemo} className="w-full sm:w-auto px-8 py-4 bg-[#2563eb] text-white rounded-xl font-semibold shadow-xl shadow-blue-500/20 hover:bg-[#1d4ed8] transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2">
-                            Ver Demo
+                            Ver Demo Interactivo
                             <ArrowRight className="h-4 w-4" />
-                        </button>
-                        <button onClick={() => setShowVideoModal(true)} className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-xl font-semibold hover:bg-slate-50 transition-all flex items-center justify-center gap-2 group">
-                            <div className="bg-slate-100 rounded-full p-1 group-hover:scale-110 transition-transform">
-                                <PlayCircle className="h-5 w-5 text-slate-600" />
-                            </div>
-                            Ver Demo (30s)
                         </button>
                     </div>
 
@@ -269,8 +263,8 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
                                     <span className="text-slate-300">Motores predictivos para auditoría de notas clínicas.</span>
                                 </li>
                             </ul>
-                            <button onClick={() => setShowVideoModal(true)} className="bg-white text-slate-900 px-6 py-3 rounded-lg font-bold hover:bg-slate-100 transition-colors">
-                                Ver Demo IA
+                            <button onClick={onViewDemo} className="bg-white text-slate-900 px-6 py-3 rounded-lg font-bold hover:bg-slate-100 transition-colors">
+                                Probar IA Ahora
                             </button>
                         </div>
                         <div className="flex-1 w-full">
@@ -415,28 +409,6 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
                 </div>
             </footer>
 
-            {/* VIDEO MODAL */}
-            {showVideoModal && (
-                <div className="fixed inset-0 z-[60]">
-                    <div className="absolute inset-0 bg-slate-900/90 backdrop-blur-sm" onClick={() => setShowVideoModal(false)}></div>
-                    <div className="absolute inset-0 flex items-center justify-center p-4">
-                        <div className="bg-black w-full max-w-4xl aspect-video rounded-2xl shadow-2xl overflow-hidden relative">
-                            <button onClick={() => setShowVideoModal(false)} className="absolute top-4 right-4 z-10 text-white/50 hover:text-white bg-black/50 hover:bg-black/70 rounded-full p-2 transition-colors">
-                                <X className="h-6 w-6" />
-                            </button>
-                            <img
-                                src="/app_walkthrough.webp"
-                                className="w-full h-full object-contain bg-black"
-                                alt="IPS ERP App Walkthrough"
-                            />
-                            <div className="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
-                                <h3 className="text-white font-bold text-xl">IPS ERP Demo</h3>
-                                <p className="text-slate-300 text-sm">Mostrando flujo de Rostering Automático y Validación de RIPS.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
