@@ -2,12 +2,16 @@ import { useState, useEffect } from 'react';
 import { getCurrentUser, signIn, signOut, fetchUserAttributes, fetchAuthSession, type SignInInput, type AuthUser } from 'aws-amplify/auth';
 import { TENANTS } from '../data/mock-data';
 import type { Tenant } from '../types';
-import { isUsingRealBackend } from '../amplify-utils';
+import { isUsingRealBackend, isDemoMode } from '../amplify-utils';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '../../amplify/data/resource';
 
 // Valid user roles (priority order for group resolution)
 type UserRole = 'superadmin' | 'admin' | 'nurse' | 'family';
+
+// Keys for persisting demo state across refreshes
+const DEMO_ROLE_KEY = 'ips-erp-demo-role';
+const DEMO_TENANT_KEY = 'ips-erp-demo-tenant';
 
 /**
  * Custom hook for managing authentication state via AWS Amplify.
@@ -115,10 +119,18 @@ export function useAuth() {
                     setTenant(null);
                 }
             } else {
-                // Mock mode - no real authentication
-                setUser(null);
-                setRole(null);
-                setTenant(null);
+                // Mock/Demo mode - restore persisted demo state if available
+                const savedRole = sessionStorage.getItem(DEMO_ROLE_KEY) as UserRole | null;
+                const savedTenantJson = sessionStorage.getItem(DEMO_TENANT_KEY);
+                
+                if (isDemoMode() && savedRole) {
+                    setRole(savedRole);
+                    setTenant(savedTenantJson ? JSON.parse(savedTenantJson) : TENANTS[0]);
+                } else {
+                    setUser(null);
+                    setRole(null);
+                    setTenant(null);
+                }
             }
         } catch {
             // No user signed in
@@ -159,15 +171,28 @@ export function useAuth() {
             setUser(null);
             setRole(null);
             setTenant(null);
+            
+            // Clear persisted demo state
+            sessionStorage.removeItem(DEMO_ROLE_KEY);
+            sessionStorage.removeItem(DEMO_TENANT_KEY);
         } catch (error) {
             console.error('Logout failed', error);
         }
     }
 
     // Manual overrides for demo/mocking purposes
+    // Persists to sessionStorage so state survives page refresh
     const setDemoState = (newRole: UserRole, newTenant: Tenant | null) => {
         setRole(newRole);
         setTenant(newTenant);
+        
+        // Persist to sessionStorage for refresh survival
+        sessionStorage.setItem(DEMO_ROLE_KEY, newRole);
+        if (newTenant) {
+            sessionStorage.setItem(DEMO_TENANT_KEY, JSON.stringify(newTenant));
+        } else {
+            sessionStorage.removeItem(DEMO_TENANT_KEY);
+        }
     };
     
     // Check if user has superadmin privileges
