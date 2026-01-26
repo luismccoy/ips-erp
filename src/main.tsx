@@ -5,7 +5,14 @@ import outputs from '../amplify_outputs.json'
 import './index.css'
 import App from './App.tsx'
 
+// PWA Service Worker Registration
+import { initServiceWorker, setupInstallPrompt } from './sw-register'
+
 Amplify.configure(outputs)
+
+// Initialize PWA features
+initServiceWorker()
+setupInstallPrompt()
 
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 
