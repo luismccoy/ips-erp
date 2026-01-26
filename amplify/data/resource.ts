@@ -45,6 +45,85 @@ const schema = a.schema({
         internalNotes: a.string(), // Hidden from family
     }),
     
+    // ============================================
+    // CLINICAL ASSESSMENT SCALES (Phase 4)
+    // Standardized nursing assessment scales required for RIPS compliance
+    // ============================================
+    
+    // Glasgow Coma Scale (GCS) - Consciousness level assessment
+    GlasgowScore: a.customType({
+        eye: a.integer().required(),      // 1-4: Eye opening response
+        verbal: a.integer().required(),   // 1-5: Verbal response
+        motor: a.integer().required(),    // 1-6: Motor response
+        total: a.integer().required(),    // 3-15: Computed total
+    }),
+    
+    // Braden Scale - Pressure ulcer risk assessment
+    BradenScore: a.customType({
+        sensoryPerception: a.integer().required(),  // 1-4
+        moisture: a.integer().required(),           // 1-4
+        activity: a.integer().required(),           // 1-4
+        mobility: a.integer().required(),           // 1-4
+        nutrition: a.integer().required(),          // 1-4
+        frictionShear: a.integer().required(),      // 1-3
+        total: a.integer().required(),              // 6-23: Computed total
+    }),
+    
+    // Morse Fall Scale - Fall risk assessment
+    MorseScore: a.customType({
+        historyOfFalling: a.integer().required(),   // 0 or 25
+        secondaryDiagnosis: a.integer().required(), // 0 or 15
+        ambulatoryAid: a.integer().required(),      // 0, 15, or 30
+        ivHeparinLock: a.integer().required(),      // 0 or 20
+        gait: a.integer().required(),               // 0, 10, or 20
+        mentalStatus: a.integer().required(),       // 0 or 15
+        total: a.integer().required(),              // 0-125: Computed total
+    }),
+    
+    // NEWS/NEWS2 - National Early Warning Score for clinical deterioration
+    NEWSScore: a.customType({
+        respirationRate: a.integer().required(),    // 0-3
+        oxygenSaturation: a.integer().required(),   // 0-3
+        supplementalO2: a.integer().required(),     // 0-2
+        temperature: a.integer().required(),        // 0-3
+        systolicBP: a.integer().required(),         // 0-3
+        heartRate: a.integer().required(),          // 0-3
+        consciousness: a.integer().required(),      // 0-3
+        total: a.integer().required(),              // 0-20: Computed total
+    }),
+    
+    // Barthel Index - ADL independence assessment
+    BarthelScore: a.customType({
+        feeding: a.integer().required(),      // 0, 5, 10
+        bathing: a.integer().required(),      // 0, 5
+        grooming: a.integer().required(),     // 0, 5
+        dressing: a.integer().required(),     // 0, 5, 10
+        bowels: a.integer().required(),       // 0, 5, 10
+        bladder: a.integer().required(),      // 0, 5, 10
+        toiletUse: a.integer().required(),    // 0, 5, 10
+        transfers: a.integer().required(),    // 0, 5, 10, 15
+        mobility: a.integer().required(),     // 0, 5, 10, 15
+        stairs: a.integer().required(),       // 0, 5, 10
+        total: a.integer().required(),        // 0-100: Computed total
+    }),
+    
+    // Norton Scale - Pressure sore risk assessment
+    NortonScore: a.customType({
+        physicalCondition: a.integer().required(),  // 1-4
+        mentalCondition: a.integer().required(),    // 1-4
+        activity: a.integer().required(),           // 1-4
+        mobility: a.integer().required(),           // 1-4
+        incontinence: a.integer().required(),       // 1-4
+        total: a.integer().required(),              // 5-20: Computed total
+    }),
+    
+    // Assessment Alert - Generated when scores hit risk thresholds
+    AssessmentAlert: a.customType({
+        scale: a.string().required(),         // Scale name (e.g., "Glasgow", "Morse")
+        level: a.enum(['INFO', 'WARNING', 'CRITICAL']).required(),
+        message: a.string().required(),       // Spanish alert message
+    }),
+    
     MedicationAdmin: a.customType({
         medicationName: a.string().required(),
         intendedDosage: a.string().required(),
@@ -107,6 +186,7 @@ const schema = a.schema({
         visits: a.hasMany('Visit', 'tenantId'),
         auditLogs: a.hasMany('AuditLog', 'tenantId'),
         notifications: a.hasMany('Notification', 'tenantId'),
+        assessments: a.hasMany('PatientAssessment', 'tenantId'), // Phase 4: Clinical assessments
     }).authorization(allow => [
         allow.authenticated()
     ]),
@@ -135,6 +215,7 @@ const schema = a.schema({
         shifts: a.hasMany('Shift', 'patientId'),
         vitalSigns: a.hasMany('VitalSigns', 'patientId'),
         visits: a.hasMany('Visit', 'patientId'),
+        assessments: a.hasMany('PatientAssessment', 'patientId'), // Phase 4: Clinical assessments
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')
     ]),
@@ -158,6 +239,7 @@ const schema = a.schema({
         // Relationships
         shifts: a.hasMany('Shift', 'nurseId'),
         visits: a.hasMany('Visit', 'nurseId'),
+        assessments: a.hasMany('PatientAssessment', 'nurseId'), // Phase 4: Clinical assessments
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')
     ]),
@@ -335,6 +417,53 @@ const schema = a.schema({
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
         // Phase 16: Explicit group permissions for subscriptions
         allow.groups(['ADMIN', 'NURSE']).to(['read', 'update'])
+    ]),
+    
+    // 11. PATIENT ASSESSMENT - Phase 4: Clinical Assessment Scales
+    // Standardized nursing assessment scales required for RIPS compliance in Colombian healthcare
+    PatientAssessment: a.model({
+        tenantId: a.id().required(),
+        tenant: a.belongsTo('Tenant', 'tenantId'),
+        
+        patientId: a.id().required(),
+        patient: a.belongsTo('Patient', 'patientId'),
+        
+        nurseId: a.id().required(),
+        nurse: a.belongsTo('Nurse', 'nurseId'),
+        
+        // Assessment timestamp (sortable)
+        assessedAt: a.datetime().required(),
+        
+        // Clinical Assessment Scales (null if not assessed during this visit)
+        glasgowScore: a.ref('GlasgowScore'),       // GCS: 3-15 (consciousness)
+        painScore: a.integer(),                     // EVA: 0-10 (pain intensity)
+        bradenScore: a.ref('BradenScore'),         // 6-23 (pressure ulcer risk)
+        morseScore: a.ref('MorseScore'),           // 0-125 (fall risk)
+        newsScore: a.ref('NEWSScore'),             // 0-20 (early warning)
+        barthelScore: a.ref('BarthelScore'),       // 0-100 (ADL independence)
+        nortonScore: a.ref('NortonScore'),         // 5-20 (pressure sore risk)
+        rassScore: a.integer(),                     // -5 to +4 (sedation/agitation)
+        
+        // Computed alerts (generated based on score thresholds)
+        alerts: a.ref('AssessmentAlert').array(),
+        
+        // Clinical notes
+        notes: a.string(),
+        
+        // Link to visit (optional - assessments can be standalone)
+        visitId: a.id(),
+    }).authorization(allow => [
+        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
+        allow.groups(['ADMIN']).to(['create', 'read', 'update', 'delete']),
+        allow.groups(['NURSE']).to(['create', 'read']),
+        allow.groups(['FAMILY']).to(['read'])
+    ]).secondaryIndexes(index => [
+        // Query assessments by patient, sorted by date (most recent first)
+        index('patientId').sortKeys(['assessedAt']).name('byPatient'),
+        // Query assessments by nurse
+        index('nurseId').name('byNurse'),
+        // Query all assessments for a tenant
+        index('tenantId').name('byTenant')
     ]),
 
     // ============================================

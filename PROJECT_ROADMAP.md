@@ -188,6 +188,28 @@ feature/* branches    ← Active development
 
 ### Phase 2: Build Backend Business Logic (Priority: HIGH)
 
+**0. Clinical Assessment Scales Module (NEW - Priority: CRITICAL)**
+Standard nursing assessment scales for patient evaluation:
+
+| Scale | Purpose | Score Range |
+|-------|---------|-------------|
+| **Glasgow (GCS)** | Consciousness level | 3-15 |
+| **Pain Scale (EVA)** | Pain intensity | 0-10 |
+| **Braden** | Pressure ulcer risk | 6-23 (≤12 = high risk) |
+| **Morse** | Fall risk | 0-125 (≥45 = high risk) |
+| **NEWS/NEWS2** | Early warning deterioration | 0-20 (≥7 = critical) |
+| **Barthel** | ADL independence | 0-100 |
+| **Norton** | Pressure sore risk | 5-20 (≤14 = high risk) |
+| **RASS** | Sedation/agitation level | -5 to +4 |
+
+**Implementation Requirements:**
+- GraphQL model: `PatientAssessment` linked to Patient + Nurse + timestamp
+- Auto-calculate scores from individual parameters
+- Alert triggers when scores indicate high risk
+- Historical trend tracking per patient
+- Include in RIPS compliance reports
+- Demo mode: seed with realistic sample assessments
+
 **1. Patient Management API**
 - CRUD operations for patients
 - Link patients to tenants

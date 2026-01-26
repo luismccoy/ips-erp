@@ -2,7 +2,7 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import {
     Activity, ClipboardCheck, Package, Calendar, ShieldAlert,
     FileText, LogOut, DollarSign, ClipboardList, BarChart,
-    Users, Stethoscope, Menu, X
+    Users, Stethoscope, Menu, X, HeartPulse
 } from 'lucide-react';
 
 import { client, isUsingRealBackend, isDemoMode, MOCK_USER } from '../amplify-utils';
@@ -24,6 +24,9 @@ const ComplianceDashboard = lazy(() => import('./ComplianceDashboard').then(m =>
 const ReportingDashboard = lazy(() => import('./ReportingDashboard').then(m => ({ default: m.ReportingDashboard })));
 const PatientManager = lazy(() => import('./PatientManager').then(m => ({ default: m.PatientManager })));
 const StaffManager = lazy(() => import('./StaffManager').then(m => ({ default: m.StaffManager })));
+
+// Clinical Assessment Components
+import { ClinicalAlertsWidget } from './ClinicalAlertsWidget';
 
 // Panel loading fallback
 const PanelLoader = () => (
@@ -382,7 +385,7 @@ function DashboardView() {
 
     return (
         <div className="space-y-6">
-            <div className="grid grid-cols-3 gap-6" data-tour="dashboard-stats">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6" data-tour="dashboard-stats">
                 {[
                     { label: 'Pacientes', value: stats.patients.toString(), change: 'Activos', color: 'blue' },
                     { label: 'Turnos', value: stats.shifts.toString(), change: 'Total', color: 'purple' },
@@ -400,16 +403,36 @@ function DashboardView() {
                     </div>
                 ))}
             </div>
-            <div className="bg-white p-6 rounded-2xl border border-slate-100">
-                <h3 className="font-black text-slate-900 mb-4">Estado del Sistema</h3>
-                <div className="space-y-3">
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-                        <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold text-xs">
-                            ✓
+            
+            {/* Clinical Alerts Widget */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ClinicalAlertsWidget 
+                    onPatientClick={(patientId) => {
+                        console.log('Navigate to patient:', patientId);
+                        // TODO: Navigate to patient detail or assessments view
+                    }}
+                    maxItems={5}
+                />
+                
+                <div className="bg-white p-6 rounded-2xl border border-slate-100">
+                    <h3 className="font-black text-slate-900 mb-4">Estado del Sistema</h3>
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                            <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold text-xs">
+                                ✓
+                            </div>
+                            <span className="text-sm text-slate-700 font-medium">
+                                {isUsingRealBackend() ? 'Conectado a AWS Backend' : 'Usando Datos de Prueba (Modo Demo)'}
+                            </span>
                         </div>
-                        <span className="text-sm text-slate-700 font-medium">
-                            {isUsingRealBackend() ? 'Conectado a AWS Backend' : 'Usando Datos de Prueba (Modo Demo)'}
-                        </span>
+                        <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                            <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-xs">
+                                <HeartPulse size={16} />
+                            </div>
+                            <span className="text-sm text-slate-700 font-medium">
+                                Escalas Clínicas: Glasgow, Braden, Morse, NEWS, Barthel, Norton, RASS
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>

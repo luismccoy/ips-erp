@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import {
     User, Search, Plus, MapPin, FileText, Activity,
-    MoreVertical, Edit, Trash2, X, Save, CheckCircle
+    MoreVertical, Edit, Trash2, X, Save, CheckCircle, HeartPulse
 } from 'lucide-react';
 import { client, isUsingRealBackend } from '../amplify-utils';
 import type { Patient } from '../types';
 import { LoadingSpinner } from './ui/LoadingSpinner';
 import { useToast } from './ui/Toast';
+import { ClinicalScalesPanel } from './ClinicalScalesPanel';
 
 export function PatientManager() {
     const { showToast } = useToast();
@@ -14,6 +15,7 @@ export function PatientManager() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [showModal, setShowModal] = useState(false);
+    const [showScalesModal, setShowScalesModal] = useState(false);
     const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
     const [formLoading, setFormLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -214,12 +216,25 @@ export function PatientManager() {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <button
-                                            onClick={() => handleEdit(patient)}
-                                            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                        >
-                                            <Edit size={16} />
-                                        </button>
+                                        <div className="flex items-center justify-end gap-1">
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedPatient(patient);
+                                                    setShowScalesModal(true);
+                                                }}
+                                                className="p-2 text-slate-400 hover:text-pink-600 hover:bg-pink-50 rounded-lg transition-colors"
+                                                title="Ver Escalas Clínicas"
+                                            >
+                                                <HeartPulse size={16} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleEdit(patient)}
+                                                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                title="Editar Paciente"
+                                            >
+                                                <Edit size={16} />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))
@@ -331,6 +346,33 @@ export function PatientManager() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Clinical Scales Modal */}
+            {showScalesModal && selectedPatient && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden animate-in fade-in zoom-in duration-200">
+                        <div className="flex justify-between items-center p-6 border-b border-slate-100 bg-gradient-to-r from-pink-50 to-purple-50">
+                            <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                                <HeartPulse className="text-pink-600" />
+                                Escalas Clínicas - {selectedPatient.name}
+                            </h3>
+                            <button 
+                                onClick={() => setShowScalesModal(false)} 
+                                className="text-slate-400 hover:text-slate-600 p-1"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+                        <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+                            <ClinicalScalesPanel 
+                                patientId={selectedPatient.id}
+                                patientName={selectedPatient.name}
+                                showHistory={true}
+                            />
+                        </div>
                     </div>
                 </div>
             )}
