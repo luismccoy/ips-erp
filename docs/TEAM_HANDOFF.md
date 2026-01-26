@@ -67,16 +67,31 @@ Get production authentication working with real Cognito users so we can test ful
 
 ---
 
-### Kiro (Backend) - Last Update: [PENDING]
+### Kiro (Backend) - Last Update: 2026-01-26 (Auth Complete!)
 
-#### Assigned Tasks 📋
-See `docs/KIRO_BACKEND_TASKS.md` for detailed instructions.
+#### Completed ✅
+1. [x] Created `SuperAdmin` Cognito group
+2. [x] Created 5 test users in Cognito
+3. [x] Seeded 2 tenants in DynamoDB
+4. [x] Verified all users authenticate (5/5 PASS)
+5. [x] Added SPA redirect rule
 
-1. [ ] Verify/Create `SuperAdmin` Cognito group
-2. [ ] Create 5 test users in Cognito (see task doc for commands)
-3. [ ] Seed 2 tenants in DynamoDB
-4. [ ] Verify all users can authenticate
-5. [ ] Update this section when complete
+#### NEW TASK: Seed Production Data 📋
+Clawd created a seed script at `scripts/seed-production-data.ts`.
+
+**Run with:**
+```bash
+cd ~/projects/ERP
+git pull origin main
+npx ts-node scripts/seed-production-data.ts
+```
+
+This will create:
+- 3 nurses (2 for Clínica Vida, 1 for IPS Salud)
+- 4 patients with medications
+- 7 inventory items
+- 14 shifts (7 days ahead)
+- Billing records
 
 #### Completed ✅
 *[Kiro: Update this section as you complete tasks]*
@@ -175,10 +190,13 @@ Upcoming:
 
 | Issue | Status | Owner | Notes |
 |-------|--------|-------|-------|
-| SPA redirect rules not configured | 🟡 Pending | Kiro | Need to add in Amplify Console |
+| ~~SPA redirect rules~~ | ✅ Done | Kiro | 404→200 rule active |
 | ~~No production test users~~ | ✅ Done | Kiro | 5 users + 2 tenants created |
-| ~~Chunk size warning (545kb)~~ | ✅ Fixed | Clawd | Code splitting implemented |
-| Test production auth flow | 🔄 In Progress | Clawd | Ready to test with new users |
+| ~~Chunk size warning~~ | ✅ Fixed | Clawd | Code splitting implemented |
+| ~~PendingReviewsPanel tenant filter~~ | ✅ Fixed | Clawd | Security fix applied |
+| ~~FamilyPortal production auth~~ | ✅ Fixed | Clawd | Now verifies familyAccessCode |
+| Seed production data | 🔄 Next | Kiro | Run scripts/seed-production-data.ts |
+| SuperAdmin dashboard | 🟡 Backlog | - | Feature: multi-tenant overview |
 
 ---
 
@@ -189,6 +207,10 @@ Upcoming:
 | 2026-01-26 | Clawd | Created handoff doc, fixed useAuth, assigned Kiro tasks |
 | 2026-01-26 | Clawd | Performance fix: lazy loading + panel state persistence |
 | 2026-01-26 | Kiro | Created 5 Cognito users + 2 DynamoDB tenants |
+| 2026-01-26 | Kiro | Added SPA redirect rule, verified auth 5/5 PASS |
+| 2026-01-26 | Clawd | **SECURITY**: Fixed PendingReviewsPanel tenant filter |
+| 2026-01-26 | Clawd | **SECURITY**: Fixed FamilyPortal production auth |
+| 2026-01-26 | Clawd | Created seed script + audit report |
 | | | |
 
 ---
