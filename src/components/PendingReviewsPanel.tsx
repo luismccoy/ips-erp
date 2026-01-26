@@ -468,6 +468,7 @@ const RejectionModal: React.FC<RejectionModalInternalProps> = ({ visit, onConfir
 // ============================================================================
 
 export const PendingReviewsPanel: React.FC<PendingReviewsPanelExtendedProps> = ({
+  tenantId,
   onApprove,
   onReject,
 }) => {
@@ -492,7 +493,10 @@ export const PendingReviewsPanel: React.FC<PendingReviewsPanelExtendedProps> = (
     try {
       loadMore(async (token) => {
         const response = await client.models.Visit.list({
-          filter: { status: { eq: 'SUBMITTED' } },
+          filter: { 
+            status: { eq: 'SUBMITTED' },
+            tenantId: { eq: tenantId } // SECURITY: Filter by tenant!
+          },
           limit: 50,
           nextToken: token
         });
@@ -524,12 +528,15 @@ export const PendingReviewsPanel: React.FC<PendingReviewsPanelExtendedProps> = (
       console.error('Error fetching pending visits:', err);
       setError('Error al cargar las visitas pendientes. Por favor, intente de nuevo.');
     }
-  }, [loadMore, hiddenVisitIds]);
+  }, [loadMore, hiddenVisitIds, tenantId]);
 
   const handleLoadMore = useCallback(() => {
     loadMore(async (token) => {
       const response = await client.models.Visit.list({
-        filter: { status: { eq: 'SUBMITTED' } },
+        filter: { 
+          status: { eq: 'SUBMITTED' },
+          tenantId: { eq: tenantId } // SECURITY: Filter by tenant!
+        },
         limit: 50,
         nextToken: token
       });
@@ -551,7 +558,7 @@ export const PendingReviewsPanel: React.FC<PendingReviewsPanelExtendedProps> = (
 
       return { data: mappedVisits, nextToken: response.nextToken };
     });
-  }, [loadMore, hiddenVisitIds]);
+  }, [loadMore, hiddenVisitIds, tenantId]);
 
   // Fetch on mount
   useEffect(() => {
