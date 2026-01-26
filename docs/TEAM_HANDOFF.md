@@ -157,15 +157,17 @@ Upcoming:
 
 ## 📊 Production Test Credentials
 
-*[To be filled by Kiro after user creation]*
+**✅ Created by Kiro on 2026-01-26**
 
 | Role | Email | Password | TenantId |
 |------|-------|----------|----------|
-| SuperAdmin | superadmin@ipserp.com | [pending] | - |
-| Admin | admin@clinica-vida.com | [pending] | tenant-vida-01 |
-| Admin | admin@clinica-salud.com | [pending] | tenant-salud-01 |
-| Nurse | maria.nurse@clinica-vida.com | [pending] | tenant-vida-01 |
-| Family | carlos.familia@gmail.com | [pending] | tenant-vida-01 |
+| SuperAdmin | superadmin@ipserp.com | TempPass123! | - |
+| Admin | admin@clinica-vida.com | TempPass123! | tenant-vida-01 |
+| Admin | admin@clinica-salud.com | TempPass123! | tenant-salud-01 |
+| Nurse | maria.nurse@clinica-vida.com | TempPass123! | tenant-vida-01 |
+| Family | carlos.familia@gmail.com | TempPass123! | tenant-vida-01 |
+
+⚠️ **Note:** First login will require password change (Cognito policy).
 
 ---
 
@@ -173,9 +175,10 @@ Upcoming:
 
 | Issue | Status | Owner | Notes |
 |-------|--------|-------|-------|
-| SPA redirect rules not configured | 🔴 Blocking | Kiro | Need to add in Amplify Console |
-| No production test users | 🔴 Blocking | Kiro | See KIRO_BACKEND_TASKS.md |
-| Chunk size warning (545kb) | 🟡 Low | Antigravity | Consider code splitting later |
+| SPA redirect rules not configured | 🟡 Pending | Kiro | Need to add in Amplify Console |
+| ~~No production test users~~ | ✅ Done | Kiro | 5 users + 2 tenants created |
+| ~~Chunk size warning (545kb)~~ | ✅ Fixed | Clawd | Code splitting implemented |
+| Test production auth flow | 🔄 In Progress | Clawd | Ready to test with new users |
 
 ---
 
@@ -184,6 +187,8 @@ Upcoming:
 | Date | Agent | Change |
 |------|-------|--------|
 | 2026-01-26 | Clawd | Created handoff doc, fixed useAuth, assigned Kiro tasks |
+| 2026-01-26 | Clawd | Performance fix: lazy loading + panel state persistence |
+| 2026-01-26 | Kiro | Created 5 Cognito users + 2 DynamoDB tenants |
 | | | |
 
 ---
