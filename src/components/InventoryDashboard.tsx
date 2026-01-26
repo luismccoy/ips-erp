@@ -187,13 +187,13 @@ export function InventoryDashboard() {
             <div className="flex justify-between items-center mb-6">
                 <h3 className="font-black text-slate-900 flex items-center gap-2">
                     <Package size={18} className="text-slate-400" />
-                    Inventory (Farmacia)
+                    Inventario (Farmacia)
                 </h3>
                 <button
                     onClick={() => setIsAddModalOpen(true)}
                     className="flex items-center gap-2 bg-[#2563eb] text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all"
                 >
-                    <Plus size={16} /> Add Item
+                    <Plus size={16} /> Agregar Ítem
                 </button>
             </div>
 
@@ -203,21 +203,21 @@ export function InventoryDashboard() {
                     <div className="text-center py-12 bg-slate-50 rounded-2xl border border-slate-100 border-dashed animate-pulse">
                         <div className="flex flex-col items-center gap-2">
                             <RefreshCw className="text-blue-500 animate-spin" size={24} />
-                            <p className="text-sm font-bold text-slate-400 font-mono uppercase tracking-widest">Loading inventory...</p>
+                            <p className="text-sm font-bold text-slate-400 font-mono uppercase tracking-widest">Cargando inventario...</p>
                         </div>
                     </div>
                 )}
 
                 {hasTimedOut && inventory.length === 0 && (
                     <ErrorState
-                        title="Inventory Sync Timeout"
-                        message="The inventory system is taking longer than usual to respond. This might be due to connection issues or missing backend permissions."
+                        title="Tiempo de espera agotado"
+                        message="El sistema de inventario está tardando más de lo usual. Puede ser por problemas de conexión o permisos faltantes."
                         onRetry={fetchInventory}
                     />
                 )}
 
                 {!isLoading && !hasTimedOut && inventory.length === 0 && (
-                    <div className="text-center py-8 text-slate-400">No items found. Add your first item above.</div>
+                    <div className="text-center py-8 text-slate-400">No se encontraron ítems. Agregue el primero arriba.</div>
                 )}
 
                 {inventory.map(item => (
@@ -243,7 +243,7 @@ export function InventoryDashboard() {
                                 {item.quantity}
                             </div>
                             <div className="text-[10px] text-slate-400 uppercase font-bold tracking-tight">
-                                Threshold: {item.reorderLevel}
+                                Mínimo: {item.reorderLevel}
                             </div>
                         </div>
                     </div>
@@ -264,27 +264,27 @@ export function InventoryDashboard() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-sm">
                     <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 animate-in fade-in zoom-in duration-200">
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="font-bold text-lg text-slate-900">Add Inventory Item</h3>
+                            <h3 className="font-bold text-lg text-slate-900">Agregar Ítem al Inventario</h3>
                             <button onClick={() => setIsAddModalOpen(false)} className="text-slate-400 hover:text-slate-600">
                                 <X size={20} />
                             </button>
                         </div>
                         <form onSubmit={handleAddItem} className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Item Name</label>
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nombre del Ítem</label>
                                 <input
                                     autoFocus
                                     type="text"
                                     required
                                     className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] font-bold text-slate-900"
-                                    placeholder="e.g. Acetaminophen 500mg"
+                                    placeholder="ej. Acetaminofén 500mg"
                                     value={newItemName}
                                     onChange={e => setNewItemName(e.target.value)}
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Initial Qty</label>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Cantidad Inicial</label>
                                     <input
                                         type="number"
                                         required
@@ -295,7 +295,7 @@ export function InventoryDashboard() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Low Stock Alert</label>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Alerta Stock Bajo</label>
                                     <input
                                         type="number"
                                         required
@@ -312,13 +312,13 @@ export function InventoryDashboard() {
                                     <input
                                         type="text"
                                         className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] font-bold text-slate-900"
-                                        placeholder="Box, Pill, Ampoule"
+                                        placeholder="Caja, Tableta, Ampolla"
                                         value={newItemUnit}
                                         onChange={e => setNewItemUnit(e.target.value)}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">SKU (Optional)</label>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">SKU (Opcional)</label>
                                     <input
                                         type="text"
                                         className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] font-bold text-slate-900"
@@ -341,7 +341,7 @@ export function InventoryDashboard() {
                                     disabled={isSubmitting}
                                     className="flex-1 py-3 bg-[#2563eb] text-white font-bold rounded-xl hover:bg-blue-600 transition-colors flex justify-center items-center gap-2"
                                 >
-                                    {isSubmitting ? <RefreshCw className="animate-spin" size={18} /> : 'Create Item'}
+                                    {isSubmitting ? <RefreshCw className="animate-spin" size={18} /> : 'Crear Ítem'}
                                 </button>
                             </div>
                         </form>
@@ -355,7 +355,7 @@ export function InventoryDashboard() {
                     <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 animate-in fade-in zoom-in duration-200">
                         <div className="flex justify-between items-center mb-6">
                             <div>
-                                <h3 className="font-bold text-lg text-slate-900">Update Stock</h3>
+                                <h3 className="font-bold text-lg text-slate-900">Actualizar Stock</h3>
                                 <p className="text-xs text-slate-400">{editingItem.name}</p>
                             </div>
                             <button onClick={() => setEditingItem(null)} className="text-slate-400 hover:text-slate-600">
@@ -392,7 +392,7 @@ export function InventoryDashboard() {
                             {newItemQuantity <= editingItem.reorderLevel && (
                                 <div className="bg-red-50 text-red-600 p-3 rounded-xl flex items-center gap-2 text-xs font-bold">
                                     <AlertTriangle size={16} />
-                                    Warning: Level is below threshold ({editingItem.reorderLevel})
+                                    Advertencia: Nivel por debajo del mínimo ({editingItem.reorderLevel})
                                 </div>
                             )}
 
@@ -402,7 +402,7 @@ export function InventoryDashboard() {
                                     disabled={isSubmitting}
                                     className="w-full py-3 bg-[#2563eb] text-white font-bold rounded-xl hover:bg-blue-600 transition-colors flex justify-center items-center gap-2"
                                 >
-                                    {isSubmitting ? <RefreshCw className="animate-spin" size={18} /> : <><Check size={18} /> Update Stock</>}
+                                    {isSubmitting ? <RefreshCw className="animate-spin" size={18} /> : <><Check size={18} /> Actualizar Stock</>}
                                 </button>
                             </div>
                         </form>

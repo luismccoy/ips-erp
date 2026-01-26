@@ -103,7 +103,7 @@ export function BillingDashboard() {
             const response = await (client.queries as any).validateRIPS({
                 invoiceId: 'test-invoice'
             });
-            console.log('RIPS Validation Result:', response);
+            console.log('Resultado de Validación RIPS:', response);
 
             // Show result modal instead of alert
             const mockResult = response || {
@@ -415,14 +415,14 @@ export function BillingDashboard() {
                         <div className="flex justify-between items-center mb-6">
                             <div className="flex items-center gap-2">
                                 <Sparkles className="text-blue-500" size={20} />
-                                <h3 className="font-bold text-lg text-slate-900">AI Generated Defense</h3>
+                                <h3 className="font-bold text-lg text-slate-900">Defensa Generada por IA</h3>
                             </div>
                             <button onClick={() => setRebuttalResult(null)} className="text-slate-400 hover:text-slate-600">
                                 <X size={20} />
                             </button>
                         </div>
                         <div className="mb-6">
-                            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Technical Rebuttal (Editable)</label>
+                            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Respuesta Técnica (Editable)</label>
                             <textarea
                                 className="w-full h-64 p-4 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none leading-relaxed"
                                 value={rebuttalResult}
@@ -456,7 +456,7 @@ export function BillingDashboard() {
                             <div className="flex items-center gap-2">
                                 <ClipboardCheck className={ripsResult.valid ? "text-emerald-500" : "text-red-500"} size={20} />
                                 <h3 className="font-bold text-lg text-slate-900">
-                                    RIPS Validation Result
+                                    Resultado de Validación RIPS
                                 </h3>
                             </div>
                             <button onClick={() => setRipsResult(null)} className="text-slate-400 hover:text-slate-600">
@@ -468,23 +468,23 @@ export function BillingDashboard() {
                             <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 mb-6 flex gap-3 text-emerald-800">
                                 <Check className="shrink-0" size={20} />
                                 <div>
-                                    <h4 className="font-bold">Validation Passed</h4>
-                                    <p className="text-sm opacity-90">All RIPS files comply with Res 2275.</p>
+                                    <h4 className="font-bold">Validación Exitosa</h4>
+                                    <p className="text-sm opacity-90">Todos los archivos RIPS cumplen con la Res 2275.</p>
                                 </div>
                             </div>
                         ) : (
                             <div className="bg-red-50 border border-red-100 rounded-xl p-4 mb-6 flex gap-3 text-red-800">
                                 <AlertTriangle className="shrink-0" size={20} />
                                 <div>
-                                    <h4 className="font-bold">Validation Failed</h4>
-                                    <p className="text-sm opacity-90">Found {ripsResult.errors.length} critical errors.</p>
+                                    <h4 className="font-bold">Validación Fallida</h4>
+                                    <p className="text-sm opacity-90">Se encontraron errores críticos.</p>
                                 </div>
                             </div>
                         )}
 
                         <div className="space-y-4 mb-6">
                             <div>
-                                <h5 className="text-xs font-bold text-slate-500 uppercase mb-2">Files Processed</h5>
+                                <h5 className="text-xs font-bold text-slate-500 uppercase mb-2">Archivos Procesados</h5>
                                 <div className="flex flex-wrap gap-2">
                                     {ripsResult.files.map((file: string) => (
                                         <span key={file} className="px-2 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-md border border-slate-200">
