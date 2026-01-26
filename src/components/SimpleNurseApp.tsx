@@ -254,7 +254,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
             const patientsRes = await (client.models.Patient as any).list();
             setPatients(patientsRes.data || []);
 
-                loadMore(async (token) => {
+            await loadMore(async (token) => {
                     const shiftsRes = await (client.models.Shift as any).list({
                         limit: 50,
                         nextToken: token
