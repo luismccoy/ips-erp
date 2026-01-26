@@ -107,11 +107,14 @@ export function getClient() {
     return getMockClient();
 }
 
-// For backwards compatibility - static export
-// Components should migrate to getClient() for demo mode support
-export const client = shouldUseRealBackend() 
-    ? getRealClient() 
-    : getMockClient();
+// Dynamic client proxy - checks demo mode on EVERY access
+// This ensures components always get the right client even after demo mode toggle
+export const client = new Proxy({} as ReturnType<typeof generateMockClient>, {
+    get(_, prop) {
+        const activeClient = getClient();
+        return (activeClient as any)[prop];
+    }
+});
 
 // ============================================
 // MOCK USER FOR DEMO MODE
@@ -121,7 +124,7 @@ export const MOCK_USER: AmplifyUser = {
     attributes: {
         sub: 'demo-admin-user-001',
         email: 'admin@demo.ipserp.com',
-        'custom:tenantId': 'tenant-bogota-01'
+        'custom:tenantId': 'ips-vida'
     }
 };
 
@@ -133,7 +136,7 @@ export const DEMO_PERSONAS = {
         attributes: {
             sub: 'demo-admin-user-001',
             email: 'admin@demo.ipserp.com',
-            'custom:tenantId': 'tenant-bogota-01'
+            'custom:tenantId': 'ips-vida'
         }
     },
     nurse: {
@@ -142,7 +145,7 @@ export const DEMO_PERSONAS = {
         attributes: {
             sub: 'demo-nurse-user-001',
             email: 'maria@demo.ipserp.com',
-            'custom:tenantId': 'tenant-bogota-01'
+            'custom:tenantId': 'ips-vida'
         }
     },
     family: {
@@ -151,7 +154,7 @@ export const DEMO_PERSONAS = {
         attributes: {
             sub: 'demo-family-user-001',
             email: 'familia@demo.ipserp.com',
-            'custom:tenantId': 'tenant-bogota-01'
+            'custom:tenantId': 'ips-vida'
         }
     }
 };

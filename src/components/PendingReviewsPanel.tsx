@@ -814,7 +814,7 @@ export const PendingReviewsPanel: React.FC<PendingReviewsPanelExtendedProps> = (
       </div>
 
       {/* List */}
-      <div className="divide-y divide-slate-100">
+      <div className="divide-y divide-slate-100" data-tour="pending-list">
         {pendingVisits.map((visit) => (
           <button
             key={visit.id}

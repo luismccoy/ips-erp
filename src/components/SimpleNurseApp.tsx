@@ -250,47 +250,9 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
         setError(null);
 
         try {
-            if (!isUsingRealBackend()) {
-                // Mock mode: load mock data
-                const { SHIFTS, PATIENTS } = await import('../data/mock-data');
-                await simulateNetworkDelay();
-
-                // Transform mock data to match Shift type
-                const transformedShifts: ShiftWithVisit[] = SHIFTS.map((shift: any) => ({
-                    id: shift.id,
-                    tenantId: 'tenant-1',
-                    nurseId: shift.nurseId,
-                    nurseName: 'Enfermera Demo',
-                    patientId: shift.patientId,
-                    patientName: PATIENTS.find((p: any) => p.id === shift.patientId)?.name || 'Paciente',
-                    location: PATIENTS.find((p: any) => p.id === shift.patientId)?.address || '',
-                    status: shift.status === 'Completed' ? 'COMPLETED' :
-                        shift.status === 'Pending' ? 'PENDING' :
-                            shift.status === 'In Progress' ? 'IN_PROGRESS' : 'PENDING',
-                    scheduledTime: `${shift.date}T${shift.startTime}:00`,
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                    visit: MOCK_VISITS[shift.id] || null,
-                }));
-
-                // Transform mock patients to match Patient type
-                const transformedPatients: Patient[] = PATIENTS.map((patient: any) => ({
-                    id: patient.id,
-                    tenantId: 'tenant-1',
-                    name: patient.name,
-                    documentId: '123456789',
-                    address: patient.address,
-                    diagnosis: patient.diagnosis,
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                }));
-
-                loadMore(async () => ({ data: transformedShifts, nextToken: null }), true);
-                setPatients(transformedPatients);
-            } else {
-                // Real backend mode
-                const patientsRes = await (client.models.Patient as any).list();
-                setPatients(patientsRes.data || []);
+            // Always use the client - it returns demo data in demo mode
+            const patientsRes = await (client.models.Patient as any).list();
+            setPatients(patientsRes.data || []);
 
                 loadMore(async (token) => {
                     const shiftsRes = await (client.models.Shift as any).list({
@@ -312,10 +274,11 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                     // Create a map of visits by shiftId for quick lookup
                     const visitsMap: Record<string, Visit> = {};
                     visitsData.forEach((visit: any) => {
-                        visitsMap[visit.id] = {
+                        const visitShiftId = visit.shiftId || visit.id;
+                        visitsMap[visitShiftId] = {
                             id: visit.id,
                             tenantId: visit.tenantId,
-                            shiftId: visit.id,
+                            shiftId: visitShiftId,
                             patientId: visit.patientId,
                             nurseId: visit.nurseId,
                             status: visit.status,
@@ -334,7 +297,6 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
 
                     return { data: shiftsWithVisits, nextToken: shiftsRes.nextToken };
                 }, true);
-            }
         } catch (err) {
             console.error('Error fetching nurse data:', err);
             setError('Error al cargar los datos. Por favor intente de nuevo.');
@@ -364,10 +326,11 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
 
             const visitsMap: Record<string, Visit> = {};
             visitsData.forEach((visit: any) => {
-                visitsMap[visit.id] = {
+                const visitShiftId = visit.shiftId || visit.id;
+                visitsMap[visitShiftId] = {
                     id: visit.id,
                     tenantId: visit.tenantId,
-                    shiftId: visit.id,
+                    shiftId: visitShiftId,
                     patientId: visit.patientId,
                     nurseId: visit.nurseId,
                     status: visit.status,
