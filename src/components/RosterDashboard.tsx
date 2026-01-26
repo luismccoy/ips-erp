@@ -145,7 +145,7 @@ export function RosterDashboard() {
             <div className="flex justify-between items-center mb-6">
                 <h3 className="font-black text-slate-900 flex items-center gap-2">
                     <Calendar size={18} className="text-slate-400" />
-                    Shift Management
+                    Gestión de Turnos
                 </h3>
                 <div className="flex gap-3">
                     <button
@@ -154,13 +154,13 @@ export function RosterDashboard() {
                         className="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-xl font-bold text-xs hover:bg-indigo-100 transition-all flex items-center gap-2 border border-indigo-100"
                     >
                         {isOptimizing ? <LoadingSpinner size="sm" /> : <Sparkles size={14} />}
-                        {isOptimizing ? 'Optimizing...' : 'Optimize Routes (AI)'}
+                        {isOptimizing ? 'Optimizando...' : 'Optimizar Rutas (IA)'}
                     </button>
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
                         className="bg-[#2563eb] text-white px-4 py-2 rounded-xl font-bold text-xs hover:bg-blue-700 transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20"
                     >
-                        <Plus size={16} /> New Shift
+                        <Plus size={16} /> Nuevo Turno
                     </button>
                 </div>
             </div>
@@ -168,12 +168,12 @@ export function RosterDashboard() {
             {shifts.length === 0 && !isLoading && (
                 <div className="text-center py-12 bg-slate-50 rounded-2xl border border-slate-100 border-dashed">
                     <Calendar className="mx-auto text-slate-300 mb-4" size={48} />
-                    <p className="text-slate-400 mb-4 font-medium">No shifts scheduled yet</p>
+                    <p className="text-slate-400 mb-4 font-medium">No hay turnos programados</p>
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
                         className="text-[#2563eb] font-bold text-sm hover:underline"
                     >
-                        Create your first shift
+                        Crear su primer turno
                     </button>
                 </div>
             )}
@@ -198,7 +198,7 @@ export function RosterDashboard() {
                                         </p>
                                         <p className="text-xs text-slate-400 flex items-center gap-1 font-medium">
                                             <User size={10} />
-                                            {nurse?.name || 'Unassigned'}
+                                            {nurse?.name || 'Sin Asignar'}
                                         </p>
                                     </div>
                                 </div>

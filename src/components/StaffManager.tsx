@@ -153,7 +153,7 @@ export function StaffManager() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                     <input
                         type="text"
-                        placeholder="Search staff by name or email..."
+                        placeholder="Buscar personal por nombre o correo..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
@@ -182,7 +182,7 @@ export function StaffManager() {
                         {filteredNurses.length === 0 ? (
                             <tr>
                                 <td colSpan={5} className="px-6 py-12 text-center text-slate-400">
-                                    No staff found. Create one to get started.
+                                    No se encontró personal. Cree uno para comenzar.
                                 </td>
                             </tr>
                         ) : (
@@ -360,7 +360,7 @@ export function StaffManager() {
                                     className="px-5 py-2.5 bg-[#2563eb] text-white font-bold rounded-xl hover:bg-blue-600 transition-colors flex items-center gap-2 disabled:opacity-50"
                                 >
                                     {formLoading ? <LoadingSpinner size="sm" /> : <Save size={18} />}
-                                    {selectedNurse ? 'Update Staff' : 'Add Staff Member'}
+                                    {selectedNurse ? 'Actualizar Personal' : 'Agregar Personal'}
                                 </button>
                             </div>
                         </form>
