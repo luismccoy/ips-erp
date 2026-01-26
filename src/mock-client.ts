@@ -574,6 +574,54 @@ const DEMO_VISITS: Visit[] = [
         ],
         createdAt: daysAgo(3),
         updatedAt: daysAgo(2)
+    },
+    // SHOWCASE VISIT - Rich clinical documentation example (for demo)
+    {
+        id: 'visit-showcase',
+        shiftId: 'shift-012',
+        patientId: 'p5',
+        nurseId: 'nurse-maria',
+        tenantId: TENANT_ID,
+        status: 'APPROVED',
+        approvedAt: daysAgo(3),
+        approvedBy: 'Dr. Alejandra Mendez',
+        submittedAt: daysAgo(4),
+        kardex: {
+            generalObservations: 'Paciente de 85 años con cardiopatía isquémica crónica. Se encuentra hemodinámicamente estable durante la visita. Refiere mejoría en tolerancia al ejercicio desde ajuste de medicación hace 2 semanas. Sin disnea en reposo. Edema de miembros inferiores grado I, controlado con diurético.',
+            skinCondition: 'Piel íntegra, hidratada. Sin úlceras por presión. Leve edema pretibial bilateral.',
+            mobilityStatus: 'Deambula con bastón dentro del hogar. Sube escaleras con pausas. Se recomienda continuar programa de rehabilitación cardíaca.',
+            nutritionIntake: 'Dieta hiposódica cumplida. Ingesta hídrica 1.5L/día. Apetito conservado.',
+            painLevel: 2,
+            mentalStatus: 'Alerta, orientado en tiempo, espacio y persona. Ánimo estable.',
+            environmentalSafety: 'Hogar adaptado con barras de apoyo en baño. Buena iluminación. Sin riesgos de caída identificados.',
+            caregiverSupport: 'Esposa presente 24/7. Hija visita diariamente. Red de apoyo familiar sólida.',
+            internalNotes: 'Considerar solicitar ecocardiograma de control en próxima cita con cardiología. Paciente candidato a programa de telemonitoreo.'
+        },
+        vitalsRecorded: { 
+            sys: 132, 
+            dia: 78, 
+            spo2: 95, 
+            hr: 68, 
+            temperature: 36.4,
+            weight: 72.5
+        },
+        medicationsAdministered: [
+            { medicationName: 'Carvedilol 12.5mg', intendedDosage: '12.5mg', dosageGiven: '12.5mg', time: '08:00', route: 'Oral', notes: 'Tomado con alimentos' },
+            { medicationName: 'Furosemida 40mg', intendedDosage: '40mg', dosageGiven: '40mg', time: '08:00', route: 'Oral', notes: '' },
+            { medicationName: 'Atorvastatina 20mg', intendedDosage: '20mg', dosageGiven: '20mg', time: '20:00', route: 'Oral', notes: 'Dosis nocturna - verificada adherencia' },
+            { medicationName: 'Aspirina 100mg', intendedDosage: '100mg', dosageGiven: '100mg', time: '08:00', route: 'Oral', notes: '' },
+            { medicationName: 'Enalapril 10mg', intendedDosage: '10mg', dosageGiven: '10mg', time: '08:00', route: 'Oral', notes: '' }
+        ],
+        tasksCompleted: [
+            { taskDescription: 'Toma completa de signos vitales', completedAt: daysAgo(4), notes: 'TA controlada, FC regular' },
+            { taskDescription: 'Administración de medicamentos AM', completedAt: daysAgo(4), notes: '5 medicamentos según prescripción' },
+            { taskDescription: 'Evaluación de edema periférico', completedAt: daysAgo(4), notes: 'Grado I, mejorado vs visita anterior' },
+            { taskDescription: 'Educación sobre signos de alarma', completedAt: daysAgo(4), notes: 'Reforzada con paciente y cuidadora' },
+            { taskDescription: 'Verificación de adherencia terapéutica', completedAt: daysAgo(4), notes: 'Pastillero organizado correctamente' },
+            { taskDescription: 'Coordinación con cardiología', completedAt: daysAgo(4), notes: 'Próxima cita: 15 Feb 2026' }
+        ],
+        createdAt: daysAgo(4),
+        updatedAt: daysAgo(3)
     }
 ];
 
