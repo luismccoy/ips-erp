@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { client, MOCK_USER } from '../amplify-utils';
 import { type Patient } from '../types';
+import { useToast } from './ui/Toast';
 
 interface HistoryItem {
     id: string;
@@ -11,6 +12,7 @@ interface HistoryItem {
 }
 
 export const EvidenceGenerator: React.FC = () => {
+    const { showToast } = useToast();
     const [patients, setPatients] = useState<Patient[]>([]);
     const [selectedPatient, setSelectedPatient] = useState<string>('');
     const [isGenerating, setIsGenerating] = useState(false);
@@ -31,7 +33,10 @@ export const EvidenceGenerator: React.FC = () => {
     }, []);
 
     const handleGenerate = async () => {
-        if (!selectedPatient) return alert('Por favor seleccione un paciente.');
+        if (!selectedPatient) {
+            showToast('warning', 'Selección requerida', 'Por favor seleccione un paciente.');
+            return;
+        }
         setIsGenerating(true);
         // Simulate PDF/Zip generation
         await new Promise(r => setTimeout(r, 3000));
@@ -44,7 +49,7 @@ export const EvidenceGenerator: React.FC = () => {
             size: '2.1 MB'
         }, ...history]);
         setIsGenerating(false);
-        alert('¡Paquete de evidencia generado exitosamente!');
+        showToast('success', '¡Éxito!', 'Paquete de evidencia generado exitosamente.');
     };
 
     return (

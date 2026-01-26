@@ -135,6 +135,9 @@ export function BillingDashboard() {
     };
 
     const handleGenerateDefense = async (billingRecordId: string) => {
+        // Prevent race condition - ignore if already generating
+        if (isGeneratingDefense) return;
+        
         setIsGeneratingDefense(true);
         setErrorMessage('');
 
@@ -218,7 +221,7 @@ export function BillingDashboard() {
     const handleSaveRebuttal = async () => {
         // Placeholder for saving to BillingRecord
         console.log('Saving rebuttal:', rebuttalResult);
-        alert('Rebuttal saved to Billing Record (Backend Logic Pending)');
+        showToast('info', 'Guardado', 'Respuesta guardada en el registro de facturación (Backend pendiente)');
         setRebuttalResult(null);
     };
 
@@ -562,7 +565,7 @@ export function BillingDashboard() {
                                 onClick={() => {
                                     navigator.clipboard.writeText(defenseLetterModal.content);
                                     // Show success feedback (could add a toast notification here)
-                                    console.log('Defense letter copied to clipboard');
+                                    showToast('success', '¡Copiado!', 'Carta de defensa copiada al portapapeles.');
                                 }}
                                 className="px-5 py-3 bg-[#2563eb] text-white font-bold rounded-xl hover:bg-blue-600 transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20"
                             >

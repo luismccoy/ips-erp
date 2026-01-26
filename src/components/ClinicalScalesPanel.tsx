@@ -168,7 +168,7 @@ function AlertBanner({ alerts }: { alerts: AssessmentAlert[] }) {
       {criticalAlerts.length > 0 && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-3">
           <div className="flex items-start gap-2">
-            <AlertTriangle className="text-red-600 flex-shrink-0 mt-0.5\" size={18} />
+            <AlertTriangle className="text-red-600 flex-shrink-0 mt-0.5" size={18} />
             <div>
               <h4 className="font-semibold text-red-800">Alertas Críticas</h4>
               <ul className="mt-1 space-y-1">

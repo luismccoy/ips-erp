@@ -44,7 +44,7 @@ interface ScaleSectionProps {
   onToggle: () => void;
   children: React.ReactNode;
   score?: number;
-  maxScore?: number;
+  maxScore?: number | string; // Allow string for bipolar scales like RASS (±4)
 }
 
 function ScaleSection({ title, icon, expanded, onToggle, children, score, maxScore }: ScaleSectionProps) {
