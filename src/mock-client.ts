@@ -1,6 +1,8 @@
 // import { type Schema } from '../amplify/data/resource';
 import type { Shift, Nurse, InventoryItem, Patient, Medication, Task, VitalSigns, AuditLog, BillingRecord } from './types';
 import type { Visit, NotificationItem } from './types/workflow';
+import type { PatientAssessment, AssessmentAlert } from './types/clinical-scales';
+import { generateAssessmentAlerts } from './types/clinical-scales';
 
 // ============================================
 // RICH DEMO DATA FOR SALES PRESENTATIONS
@@ -29,6 +31,7 @@ interface StoreType {
     AuditLog: AuditLog[];
     BillingRecord: BillingRecord[];
     Notification: NotificationItem[];
+    PatientAssessment: PatientAssessment[];
 
     [key: string]: unknown[];
 }
@@ -647,7 +650,6 @@ const DEMO_NOTIFICATIONS: NotificationItem[] = [
     { id: 'notif-002', userId: 'admin', type: 'VISIT_PENDING_REVIEW', message: '3 turnos sin asignar para mañana', entityId: 'shift-008', entityType: 'Shift', read: false, createdAt: NOW.toISOString() },
     { id: 'notif-003', userId: 'nurse-maria', type: 'VISIT_APPROVED', message: 'Su visita ha sido aprobada: Jorge Luis Borges', entityId: 'shift-005', entityType: 'Shift', read: true, createdAt: daysAgo(1) }
 ];
-
 // ============================================
 // DEMO MEDICATIONS
 // ============================================
@@ -673,6 +675,342 @@ const DEMO_TASKS: Task[] = [
 ];
 
 // ============================================
+// DEMO PATIENT ASSESSMENTS (Clinical Scales)
+// Realistic assessment data showcasing various risk levels
+// ============================================
+const DEMO_ASSESSMENTS: PatientAssessment[] = [
+    // Patient p1 - Roberto Gómez (78 años, Hipertensión)
+    // Elderly with moderate fall risk and pressure ulcer concerns
+    {
+        id: 'assess-001',
+        tenantId: TENANT_ID,
+        patientId: 'p1',
+        nurseId: 'nurse-maria',
+        assessedAt: daysAgo(1),
+        glasgowScore: { eye: 4, verbal: 5, motor: 6, total: 15 }, // Normal consciousness
+        painScore: 3, // Mild pain
+        bradenScore: {
+            sensoryPerception: 3, moisture: 3, activity: 2, mobility: 2,
+            nutrition: 3, frictionShear: 2, total: 15 // Mild risk
+        },
+        morseScore: {
+            historyOfFalling: 25, secondaryDiagnosis: 15, ambulatoryAid: 15,
+            ivHeparinLock: 0, gait: 10, mentalStatus: 0, total: 65 // HIGH fall risk
+        },
+        newsScore: {
+            respirationRate: 0, oxygenSaturation: 1, supplementalO2: 0,
+            temperature: 0, systolicBP: 1, heartRate: 0, consciousness: 0, total: 2
+        },
+        barthelScore: {
+            feeding: 10, bathing: 5, grooming: 5, dressing: 5, bowels: 10,
+            bladder: 10, toiletUse: 5, transfers: 10, mobility: 10, stairs: 5, total: 75 // Moderate dependence
+        },
+        nortonScore: {
+            physicalCondition: 3, mentalCondition: 4, activity: 2,
+            mobility: 2, incontinence: 4, total: 15 // Medium risk
+        },
+        rassScore: 0, // Alert and calm
+        alerts: [],
+        notes: 'Paciente estable. Riesgo de caídas elevado por historial y uso de bastón. Continuar protocolo de prevención.',
+        visitId: 'visit-001',
+        createdAt: daysAgo(1),
+        updatedAt: daysAgo(1)
+    },
+    // Patient p3 - Carlos Eduardo Vives (82 años, Artritis Reumatoide)
+    // High dependency and severe pressure ulcer risk
+    {
+        id: 'assess-002',
+        tenantId: TENANT_ID,
+        patientId: 'p3',
+        nurseId: 'nurse-carlos',
+        assessedAt: daysAgo(2),
+        glasgowScore: { eye: 4, verbal: 5, motor: 6, total: 15 },
+        painScore: 6, // Moderate pain (arthritis)
+        bradenScore: {
+            sensoryPerception: 3, moisture: 2, activity: 2, mobility: 2,
+            nutrition: 3, frictionShear: 1, total: 13 // Moderate risk
+        },
+        morseScore: {
+            historyOfFalling: 25, secondaryDiagnosis: 15, ambulatoryAid: 30,
+            ivHeparinLock: 0, gait: 20, mentalStatus: 0, total: 90 // CRITICAL fall risk
+        },
+        newsScore: {
+            respirationRate: 0, oxygenSaturation: 0, supplementalO2: 0,
+            temperature: 1, systolicBP: 0, heartRate: 0, consciousness: 0, total: 1
+        },
+        barthelScore: {
+            feeding: 10, bathing: 0, grooming: 5, dressing: 5, bowels: 10,
+            bladder: 10, toiletUse: 5, transfers: 5, mobility: 5, stairs: 0, total: 55 // Severe dependence
+        },
+        nortonScore: {
+            physicalCondition: 2, mentalCondition: 4, activity: 2,
+            mobility: 2, incontinence: 4, total: 14 // HIGH risk
+        },
+        rassScore: 0,
+        alerts: [],
+        notes: 'Dolor articular moderado manejado con medicación. Alta dependencia para movilidad. Precaución con transferencias.',
+        createdAt: daysAgo(2),
+        updatedAt: daysAgo(2)
+    },
+    // Patient p4 - María Teresa Londoño (71 años, EPOC)
+    // Respiratory concerns, NEWS elevated
+    {
+        id: 'assess-003',
+        tenantId: TENANT_ID,
+        patientId: 'p4',
+        nurseId: 'nurse-maria',
+        assessedAt: daysAgo(2),
+        glasgowScore: { eye: 4, verbal: 5, motor: 6, total: 15 },
+        painScore: 2,
+        bradenScore: {
+            sensoryPerception: 4, moisture: 4, activity: 3, mobility: 3,
+            nutrition: 4, frictionShear: 3, total: 21 // No risk
+        },
+        morseScore: {
+            historyOfFalling: 0, secondaryDiagnosis: 15, ambulatoryAid: 0,
+            ivHeparinLock: 0, gait: 10, mentalStatus: 0, total: 25 // Moderate fall risk
+        },
+        newsScore: {
+            respirationRate: 2, oxygenSaturation: 2, supplementalO2: 2,
+            temperature: 0, systolicBP: 0, heartRate: 1, consciousness: 0, total: 7 // HIGH - Early warning!
+        },
+        barthelScore: {
+            feeding: 10, bathing: 5, grooming: 5, dressing: 10, bowels: 10,
+            bladder: 10, toiletUse: 10, transfers: 15, mobility: 10, stairs: 5, total: 90 // Moderate dependence
+        },
+        nortonScore: {
+            physicalCondition: 3, mentalCondition: 4, activity: 3,
+            mobility: 3, incontinence: 4, total: 17 // Low risk
+        },
+        rassScore: 0,
+        alerts: [],
+        notes: 'ALERTA: NEWS elevado por compromiso respiratorio. Paciente con oxígeno suplementario. Monitoreo estrecho requerido.',
+        createdAt: daysAgo(2),
+        updatedAt: daysAgo(2)
+    },
+    // Patient p5 - Jorge Luis Borges (85 años, Cardiopatía Isquémica)
+    // Critical patient with multiple concerns
+    {
+        id: 'assess-004',
+        tenantId: TENANT_ID,
+        patientId: 'p5',
+        nurseId: 'nurse-maria',
+        assessedAt: daysAgo(4),
+        glasgowScore: { eye: 4, verbal: 5, motor: 6, total: 15 },
+        painScore: 4,
+        bradenScore: {
+            sensoryPerception: 3, moisture: 3, activity: 2, mobility: 2,
+            nutrition: 3, frictionShear: 2, total: 15 // Mild risk
+        },
+        morseScore: {
+            historyOfFalling: 25, secondaryDiagnosis: 15, ambulatoryAid: 15,
+            ivHeparinLock: 0, gait: 10, mentalStatus: 0, total: 65 // HIGH fall risk
+        },
+        newsScore: {
+            respirationRate: 1, oxygenSaturation: 1, supplementalO2: 0,
+            temperature: 0, systolicBP: 1, heartRate: 1, consciousness: 0, total: 4 // Low-moderate
+        },
+        barthelScore: {
+            feeding: 10, bathing: 5, grooming: 5, dressing: 5, bowels: 10,
+            bladder: 10, toiletUse: 5, transfers: 10, mobility: 10, stairs: 0, total: 70 // Moderate dependence
+        },
+        nortonScore: {
+            physicalCondition: 3, mentalCondition: 4, activity: 2,
+            mobility: 2, incontinence: 4, total: 15 // Medium risk
+        },
+        rassScore: -1, // Drowsy
+        alerts: [],
+        notes: 'Paciente cardiópata estable. Somnolencia leve post-medicación. Continuar plan de cuidados.',
+        visitId: 'visit-showcase',
+        createdAt: daysAgo(4),
+        updatedAt: daysAgo(4)
+    },
+    // Patient p6 - Lucía Fernanda Castro (68 años, Parkinson)
+    // Progressive neurological condition
+    {
+        id: 'assess-005',
+        tenantId: TENANT_ID,
+        patientId: 'p6',
+        nurseId: 'nurse-carlos',
+        assessedAt: daysAgo(3),
+        glasgowScore: { eye: 4, verbal: 4, motor: 6, total: 14 }, // Slightly reduced verbal
+        painScore: 2,
+        bradenScore: {
+            sensoryPerception: 3, moisture: 3, activity: 2, mobility: 2,
+            nutrition: 3, frictionShear: 2, total: 15
+        },
+        morseScore: {
+            historyOfFalling: 25, secondaryDiagnosis: 15, ambulatoryAid: 15,
+            ivHeparinLock: 0, gait: 20, mentalStatus: 15, total: 90 // CRITICAL fall risk (Parkinson gait)
+        },
+        newsScore: {
+            respirationRate: 0, oxygenSaturation: 0, supplementalO2: 0,
+            temperature: 0, systolicBP: 0, heartRate: 0, consciousness: 0, total: 0
+        },
+        barthelScore: {
+            feeding: 5, bathing: 0, grooming: 0, dressing: 5, bowels: 10,
+            bladder: 10, toiletUse: 5, transfers: 10, mobility: 10, stairs: 0, total: 55 // Severe dependence
+        },
+        nortonScore: {
+            physicalCondition: 3, mentalCondition: 3, activity: 2,
+            mobility: 2, incontinence: 4, total: 14 // HIGH risk
+        },
+        rassScore: 0,
+        alerts: [],
+        notes: 'Parkinson avanzado. Temblor en reposo, bradicinesia. Alto riesgo de caídas por marcha festinante.',
+        createdAt: daysAgo(3),
+        updatedAt: daysAgo(3)
+    },
+    // Patient p7 - Pedro Pablo Pérez (74 años, Enfermedad Renal Crónica)
+    // Dialysis patient with fluid management concerns
+    {
+        id: 'assess-006',
+        tenantId: TENANT_ID,
+        patientId: 'p7',
+        nurseId: 'nurse-laura',
+        assessedAt: daysAgo(1),
+        glasgowScore: { eye: 4, verbal: 5, motor: 6, total: 15 },
+        painScore: 1,
+        bradenScore: {
+            sensoryPerception: 4, moisture: 2, activity: 3, mobility: 3,
+            nutrition: 2, frictionShear: 2, total: 16 // Mild risk (poor nutrition)
+        },
+        morseScore: {
+            historyOfFalling: 0, secondaryDiagnosis: 15, ambulatoryAid: 0,
+            ivHeparinLock: 20, gait: 10, mentalStatus: 0, total: 45 // HIGH fall risk (IV access)
+        },
+        newsScore: {
+            respirationRate: 0, oxygenSaturation: 0, supplementalO2: 0,
+            temperature: 0, systolicBP: 2, heartRate: 1, consciousness: 0, total: 3
+        },
+        barthelScore: {
+            feeding: 10, bathing: 5, grooming: 5, dressing: 10, bowels: 10,
+            bladder: 5, toiletUse: 10, transfers: 15, mobility: 15, stairs: 5, total: 90 // Moderate dependence
+        },
+        nortonScore: {
+            physicalCondition: 3, mentalCondition: 4, activity: 3,
+            mobility: 3, incontinence: 3, total: 16 // Medium risk
+        },
+        rassScore: 0,
+        alerts: [],
+        notes: 'Paciente con catéter para diálisis. Control de líquidos estricto. Nutrición subóptima.',
+        createdAt: daysAgo(1),
+        updatedAt: daysAgo(1)
+    },
+    // Patient p8 - Sofía Vergara Medina (69 años, Cáncer en Remisión)
+    // Post-oncology patient with fatigue
+    {
+        id: 'assess-007',
+        tenantId: TENANT_ID,
+        patientId: 'p8',
+        nurseId: 'nurse-laura',
+        assessedAt: daysAgo(0),
+        glasgowScore: { eye: 4, verbal: 5, motor: 6, total: 15 },
+        painScore: 5, // Moderate pain (post-treatment)
+        bradenScore: {
+            sensoryPerception: 4, moisture: 4, activity: 3, mobility: 4,
+            nutrition: 3, frictionShear: 3, total: 21 // No risk
+        },
+        morseScore: {
+            historyOfFalling: 0, secondaryDiagnosis: 15, ambulatoryAid: 0,
+            ivHeparinLock: 0, gait: 0, mentalStatus: 0, total: 15 // Low fall risk
+        },
+        newsScore: {
+            respirationRate: 0, oxygenSaturation: 0, supplementalO2: 0,
+            temperature: 0, systolicBP: 0, heartRate: 0, consciousness: 0, total: 0
+        },
+        barthelScore: {
+            feeding: 10, bathing: 5, grooming: 5, dressing: 10, bowels: 10,
+            bladder: 10, toiletUse: 10, transfers: 15, mobility: 15, stairs: 10, total: 100 // Independent!
+        },
+        nortonScore: {
+            physicalCondition: 4, mentalCondition: 4, activity: 4,
+            mobility: 4, incontinence: 4, total: 20 // Low risk
+        },
+        rassScore: 0,
+        alerts: [],
+        notes: 'Paciente en remisión, buen estado general. Fatiga post-tratamiento manejada. Ánimo positivo.',
+        createdAt: daysAgo(0),
+        updatedAt: daysAgo(0)
+    },
+    // Historical assessment for trending demo - Patient p1 (2 weeks ago)
+    {
+        id: 'assess-008',
+        tenantId: TENANT_ID,
+        patientId: 'p1',
+        nurseId: 'nurse-maria',
+        assessedAt: daysAgo(14),
+        glasgowScore: { eye: 4, verbal: 5, motor: 6, total: 15 },
+        painScore: 5, // Higher pain 2 weeks ago
+        bradenScore: {
+            sensoryPerception: 3, moisture: 2, activity: 2, mobility: 2,
+            nutrition: 3, frictionShear: 2, total: 14 // Was moderate risk
+        },
+        morseScore: {
+            historyOfFalling: 25, secondaryDiagnosis: 15, ambulatoryAid: 15,
+            ivHeparinLock: 0, gait: 20, mentalStatus: 0, total: 75 // Higher fall risk before
+        },
+        newsScore: {
+            respirationRate: 1, oxygenSaturation: 1, supplementalO2: 0,
+            temperature: 0, systolicBP: 2, heartRate: 1, consciousness: 0, total: 5 // Medium risk
+        },
+        barthelScore: {
+            feeding: 10, bathing: 5, grooming: 5, dressing: 5, bowels: 10,
+            bladder: 10, toiletUse: 5, transfers: 10, mobility: 5, stairs: 5, total: 70 // Was worse
+        },
+        nortonScore: {
+            physicalCondition: 3, mentalCondition: 4, activity: 2,
+            mobility: 2, incontinence: 3, total: 14 // Was HIGH risk
+        },
+        rassScore: 0,
+        alerts: [],
+        notes: 'Evaluación inicial. Paciente requiere intervención por múltiples factores de riesgo.',
+        createdAt: daysAgo(14),
+        updatedAt: daysAgo(14)
+    },
+    // CRITICAL patient example - for alerts demo
+    {
+        id: 'assess-009',
+        tenantId: TENANT_ID,
+        patientId: 'p2',
+        nurseId: 'nurse-laura',
+        assessedAt: daysAgo(0),
+        glasgowScore: { eye: 3, verbal: 4, motor: 5, total: 12 }, // Moderate impairment
+        painScore: 8, // SEVERE pain
+        bradenScore: {
+            sensoryPerception: 2, moisture: 2, activity: 1, mobility: 1,
+            nutrition: 2, frictionShear: 1, total: 9 // VERY HIGH risk
+        },
+        morseScore: {
+            historyOfFalling: 25, secondaryDiagnosis: 15, ambulatoryAid: 30,
+            ivHeparinLock: 20, gait: 20, mentalStatus: 15, total: 125 // MAXIMUM fall risk
+        },
+        newsScore: {
+            respirationRate: 2, oxygenSaturation: 2, supplementalO2: 2,
+            temperature: 1, systolicBP: 2, heartRate: 2, consciousness: 3, total: 14 // CRITICAL
+        },
+        barthelScore: {
+            feeding: 5, bathing: 0, grooming: 0, dressing: 0, bowels: 5,
+            bladder: 5, toiletUse: 0, transfers: 5, mobility: 5, stairs: 0, total: 25 // Severe dependence
+        },
+        nortonScore: {
+            physicalCondition: 2, mentalCondition: 2, activity: 1,
+            mobility: 1, incontinence: 2, total: 8 // CRITICAL risk
+        },
+        rassScore: -3, // Moderate sedation
+        alerts: [],
+        notes: '⚠️ PACIENTE CRÍTICO - Deterioro agudo post-hipoglicemia severa. Requiere monitoreo continuo y posible hospitalización.',
+        createdAt: daysAgo(0),
+        updatedAt: daysAgo(0)
+    }
+];
+
+// Generate alerts for all assessments
+DEMO_ASSESSMENTS.forEach(assessment => {
+    assessment.alerts = generateAssessmentAlerts(assessment);
+});
+
+// ============================================
 // INITIALIZE STORE WITH DEMO DATA
 // ============================================
 const STORE: StoreType = {
@@ -686,7 +1024,8 @@ const STORE: StoreType = {
     Visit: [...DEMO_VISITS],
     AuditLog: [...DEMO_AUDIT_LOGS],
     BillingRecord: [...DEMO_BILLING],
-    Notification: [...DEMO_NOTIFICATIONS]
+    Notification: [...DEMO_NOTIFICATIONS],
+    PatientAssessment: [...DEMO_ASSESSMENTS]
 };
 
 // Properly type LISTENERS using a generic function type or unknown
@@ -703,7 +1042,8 @@ const LISTENERS: Record<string, ListenerCallback<any>[]> = {
     Visit: [],
     AuditLog: [],
     BillingRecord: [],
-    Notification: []
+    Notification: [],
+    PatientAssessment: []
 };
 
 function notify<T>(model: keyof StoreType) {
@@ -736,6 +1076,7 @@ export interface MockClient {
         AuditLog: MockModelClient<AuditLog>;
         BillingRecord: MockModelClient<BillingRecord>;
         Notification: MockModelClient<NotificationItem>;
+        PatientAssessment: MockModelClient<PatientAssessment>;
     };
     queries: {
         generateRoster: (args: { nurses: string; unassignedShifts: string }) => Promise<{ data: string; errors?: Error[] }>;
@@ -833,7 +1174,8 @@ export function generateMockClient(): MockClient {
             Visit: createModelHandlers<Visit>('Visit'),
             AuditLog: createModelHandlers<AuditLog>('AuditLog'),
             BillingRecord: createModelHandlers<BillingRecord>('BillingRecord'),
-            Notification: createModelHandlers<NotificationItem>('Notification')
+            Notification: createModelHandlers<NotificationItem>('Notification'),
+            PatientAssessment: createModelHandlers<PatientAssessment>('PatientAssessment')
         },
         queries: {
             // AI Roster Generation (simulates Bedrock Claude)

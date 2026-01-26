@@ -193,3 +193,17 @@ export type AmplifyUser = {
     };
 };
 
+// Re-export clinical assessment scale types
+export type {
+    PatientAssessment,
+    GlasgowScore,
+    BradenScore,
+    MorseScore,
+    NEWSScore,
+    BarthelScore,
+    NortonScore,
+    AssessmentAlert,
+    AlertLevel,
+    RiskLevel,
+} from './types/clinical-scales';
+

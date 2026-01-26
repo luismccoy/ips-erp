@@ -322,12 +322,12 @@ These assessments must be included in RIPS reports:
 
 ## Implementation Checklist
 
-### Backend (Kiro)
-- [ ] Add `PatientAssessment` model to schema
-- [ ] Create indexes for efficient queries
-- [ ] Implement score calculation resolvers
-- [ ] Add alert generation logic
-- [ ] Seed demo data
+### Backend (Kiro) ✅ COMPLETED 2026-01-27
+- [x] Add `PatientAssessment` model to schema
+- [x] Create indexes for efficient queries (`byPatient`, `byNurse`, `byTenant`)
+- [x] Implement score calculation utilities (TypeScript)
+- [x] Add alert generation logic (`generateAssessmentAlerts()`)
+- [x] Seed demo data (9 realistic assessments across 8 patients)
 
 ### Frontend (Clawd/Antigravity)
 - [ ] Assessment form component
