@@ -1,18 +1,31 @@
 import { useState, useEffect } from 'react';
-import { getCurrentUser, signIn, signOut, fetchUserAttributes, type SignInInput, type AuthUser } from 'aws-amplify/auth';
+import { getCurrentUser, signIn, signOut, fetchUserAttributes, fetchAuthSession, type SignInInput, type AuthUser } from 'aws-amplify/auth';
 import { TENANTS } from '../data/mock-data';
 import type { Tenant } from '../types';
 import { isUsingRealBackend } from '../amplify-utils';
+import { generateClient } from 'aws-amplify/data';
+import type { Schema } from '../../amplify/data/resource';
+
+// Valid user roles (priority order for group resolution)
+type UserRole = 'superadmin' | 'admin' | 'nurse' | 'family';
 
 /**
  * Custom hook for managing authentication state via AWS Amplify.
  * Handles current user, role, tenant context, and sign-in/sign-out actions.
  * 
- * Supports both real Cognito authentication and mock mode for development.
+ * Role Detection:
+ * - Reads from Cognito Groups (SuperAdmin, Admin, Nurse, Family)
+ * - Uses JWT token payload for group membership
+ * - Falls back to 'admin' if no group found (backwards compatibility)
+ * 
+ * Multi-tenancy:
+ * - Reads custom:tenantId from user attributes
+ * - Fetches full Tenant record from DynamoDB
+ * - SuperAdmin has no tenantId (platform-wide access)
  */
 export function useAuth() {
     const [user, setUser] = useState<AuthUser | null>(null);
-    const [role, setRole] = useState<'admin' | 'nurse' | 'family' | null>(null);
+    const [role, setRole] = useState<UserRole | null>(null);
     const [tenant, setTenant] = useState<Tenant | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -21,27 +34,86 @@ export function useAuth() {
         checkUser();
     }, []);
 
+    /**
+     * Determine user role from Cognito groups (priority order)
+     */
+    function resolveRoleFromGroups(groups: string[]): UserRole {
+        const normalizedGroups = groups.map(g => g.toLowerCase());
+        
+        if (normalizedGroups.includes('superadmin')) return 'superadmin';
+        if (normalizedGroups.includes('admin')) return 'admin';
+        if (normalizedGroups.includes('nurse')) return 'nurse';
+        if (normalizedGroups.includes('family')) return 'family';
+        
+        // Default fallback (shouldn't happen with proper user setup)
+        console.warn('User has no recognized group, defaulting to admin');
+        return 'admin';
+    }
+
+    /**
+     * Fetch tenant details from DynamoDB (production only)
+     * In demo/mock mode, returns a mock tenant with the given ID
+     */
+    async function fetchTenantById(tenantId: string): Promise<Tenant | null> {
+        if (!tenantId) return null;
+        
+        // Only attempt real fetch in production mode
+        if (isUsingRealBackend()) {
+            try {
+                const client = generateClient<Schema>();
+                const { data } = await client.models.Tenant.get({ id: tenantId });
+                
+                if (data) {
+                    return {
+                        id: data.id,
+                        name: data.name,
+                        nit: data.nit
+                    };
+                }
+            } catch (err) {
+                console.warn('Failed to fetch tenant from DynamoDB, using fallback:', err);
+            }
+        }
+        
+        // Fallback: use mock tenant with real ID
+        return {
+            ...TENANTS[0],
+            id: tenantId
+        };
+    }
+
     async function checkUser() {
         try {
             if (isUsingRealBackend()) {
                 // Real Cognito authentication
                 const currentUser = await getCurrentUser();
-                const attributes = await fetchUserAttributes();
+                const [attributes, session] = await Promise.all([
+                    fetchUserAttributes(),
+                    fetchAuthSession()
+                ]);
 
                 setUser(currentUser);
                 
-                // Extract role and tenantId from custom attributes
-                const userRole = attributes['custom:role'] as 'admin' | 'nurse' | 'family' || 'admin';
+                // Extract groups from JWT token (this is the correct way!)
+                const groups = session.tokens?.accessToken?.payload['cognito:groups'] as string[] || [];
+                const userRole = resolveRoleFromGroups(groups);
+                
+                // Extract tenantId from custom attributes
                 const tenantId = attributes['custom:tenantId'] || '';
                 
                 setRole(userRole);
                 
-                // In production, fetch tenant from DynamoDB using tenantId
-                // For now, use mock tenant with real tenantId
-                setTenant({
-                    ...TENANTS[0],
-                    id: tenantId
-                });
+                // SuperAdmin has no tenant (platform-wide access)
+                if (userRole === 'superadmin') {
+                    setTenant(null);
+                } else if (tenantId) {
+                    // Fetch tenant from DynamoDB
+                    const tenantData = await fetchTenantById(tenantId);
+                    setTenant(tenantData);
+                } else {
+                    console.warn('Non-superadmin user has no tenantId');
+                    setTenant(null);
+                }
             } else {
                 // Mock mode - no real authentication
                 setUser(null);
@@ -93,10 +165,13 @@ export function useAuth() {
     }
 
     // Manual overrides for demo/mocking purposes
-    const setDemoState = (newRole: 'admin' | 'nurse' | 'family', newTenant: Tenant) => {
+    const setDemoState = (newRole: UserRole, newTenant: Tenant | null) => {
         setRole(newRole);
         setTenant(newTenant);
     };
+    
+    // Check if user has superadmin privileges
+    const isSuperAdmin = role === 'superadmin';
 
     return {
         user,
@@ -106,6 +181,7 @@ export function useAuth() {
         error,
         login,
         logout,
-        setDemoState
+        setDemoState,
+        isSuperAdmin
     };
 }

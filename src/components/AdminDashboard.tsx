@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import {
     Activity, ClipboardCheck, Package, Calendar, ShieldAlert,
     FileText, LogOut, DollarSign, ClipboardList, BarChart,
@@ -9,18 +9,30 @@ import { client, isUsingRealBackend, MOCK_USER } from '../amplify-utils';
 import type { AdminDashboardProps, NavItemProps } from '../types/components';
 import { graphqlToFrontendSafe } from '../utils/inventory-transforms';
 
-import { PendingReviewsPanel } from './PendingReviewsPanel';
 import { NotificationBell } from './NotificationBell';
-
 import type { NotificationItem } from '../types/workflow';
-import { AuditLogViewer } from './AuditLogViewer';
-import { BillingDashboard } from './BillingDashboard';
-import { InventoryDashboard } from './InventoryDashboard';
-import { RosterDashboard } from './RosterDashboard';
-import { ComplianceDashboard } from './ComplianceDashboard';
-import { ReportingDashboard } from './ReportingDashboard';
-import { PatientManager } from './PatientManager';
-import { StaffManager } from './StaffManager';
+
+// Lazy load heavy sub-panels for faster initial render
+// Once loaded, they stay mounted (hidden) for instant tab switching
+const PendingReviewsPanel = lazy(() => import('./PendingReviewsPanel').then(m => ({ default: m.PendingReviewsPanel })));
+const AuditLogViewer = lazy(() => import('./AuditLogViewer').then(m => ({ default: m.AuditLogViewer })));
+const BillingDashboard = lazy(() => import('./BillingDashboard').then(m => ({ default: m.BillingDashboard })));
+const InventoryDashboard = lazy(() => import('./InventoryDashboard').then(m => ({ default: m.InventoryDashboard })));
+const RosterDashboard = lazy(() => import('./RosterDashboard').then(m => ({ default: m.RosterDashboard })));
+const ComplianceDashboard = lazy(() => import('./ComplianceDashboard').then(m => ({ default: m.ComplianceDashboard })));
+const ReportingDashboard = lazy(() => import('./ReportingDashboard').then(m => ({ default: m.ReportingDashboard })));
+const PatientManager = lazy(() => import('./PatientManager').then(m => ({ default: m.PatientManager })));
+const StaffManager = lazy(() => import('./StaffManager').then(m => ({ default: m.StaffManager })));
+
+// Panel loading fallback
+const PanelLoader = () => (
+    <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+            <div className="h-8 w-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-3"></div>
+            <p className="text-sm text-slate-400">Cargando módulo...</p>
+        </div>
+    </div>
+);
 
 
 
@@ -28,6 +40,16 @@ import { StaffManager } from './StaffManager';
 export default function AdminDashboard({ view, setView, onLogout, tenant }: AdminDashboardProps) {
     // Mobile sidebar toggle
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    
+    // Track visited panels for lazy mounting (only load when first visited, then keep mounted)
+    const [visitedPanels, setVisitedPanels] = useState<Set<string>>(new Set(['dashboard']));
+    
+    // Mark current view as visited
+    useEffect(() => {
+        if (!visitedPanels.has(view)) {
+            setVisitedPanels(prev => new Set([...prev, view]));
+        }
+    }, [view, visitedPanels]);
     
     /**
      * Handles visit approval from PendingReviewsPanel.
@@ -150,23 +172,68 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                         <div className="h-10 w-10 bg-slate-900 rounded-xl flex items-center justify-center text-white font-bold">A</div>
                     </div>
                 </header>
-                <div className="p-8">
-                    {view === 'dashboard' && <DashboardView />}
-                    {view === 'pending-reviews' && (
-                        <PendingReviewsPanel
-                            tenantId={tenant?.id || ''}
-                            onApprove={handleApproveRequest}
-                            onReject={handleRejectRequest}
-                        />
+                {/* 
+                  Performance optimization: 
+                  1. Lazy load panels on first visit (code-split for fast initial render)
+                  2. Keep panels mounted after visited (hidden via CSS, preserves state)
+                  3. Result: Fast initial load + instant tab switching after first visit
+                */}
+                <div className="p-4 md:p-8">
+                    {/* Dashboard is always mounted (default view) */}
+                    <div className={view === 'dashboard' ? '' : 'hidden'}><DashboardView /></div>
+                    
+                    {/* Lazy panels: only mount after first visit, then stay mounted */}
+                    {visitedPanels.has('pending-reviews') && (
+                        <Suspense fallback={<PanelLoader />}>
+                            <div className={view === 'pending-reviews' ? '' : 'hidden'}>
+                                <PendingReviewsPanel
+                                    tenantId={tenant?.id || ''}
+                                    onApprove={handleApproveRequest}
+                                    onReject={handleRejectRequest}
+                                />
+                            </div>
+                        </Suspense>
                     )}
-                    {view === 'audit' && <AuditLogViewer />}
-                    {view === 'inventory' && <InventoryDashboard />}
-                    {view === 'roster' && <RosterDashboard />}
-                    {view === 'compliance' && <ComplianceDashboard />}
-                    {view === 'billing' && <BillingDashboard />}
-                    {view === 'reporting' && <ReportingDashboard />}
-                    {view === 'patients' && <PatientManager />}
-                    {view === 'staff' && <StaffManager />}
+                    {visitedPanels.has('audit') && (
+                        <Suspense fallback={<PanelLoader />}>
+                            <div className={view === 'audit' ? '' : 'hidden'}><AuditLogViewer /></div>
+                        </Suspense>
+                    )}
+                    {visitedPanels.has('inventory') && (
+                        <Suspense fallback={<PanelLoader />}>
+                            <div className={view === 'inventory' ? '' : 'hidden'}><InventoryDashboard /></div>
+                        </Suspense>
+                    )}
+                    {visitedPanels.has('roster') && (
+                        <Suspense fallback={<PanelLoader />}>
+                            <div className={view === 'roster' ? '' : 'hidden'}><RosterDashboard /></div>
+                        </Suspense>
+                    )}
+                    {visitedPanels.has('compliance') && (
+                        <Suspense fallback={<PanelLoader />}>
+                            <div className={view === 'compliance' ? '' : 'hidden'}><ComplianceDashboard /></div>
+                        </Suspense>
+                    )}
+                    {visitedPanels.has('billing') && (
+                        <Suspense fallback={<PanelLoader />}>
+                            <div className={view === 'billing' ? '' : 'hidden'}><BillingDashboard /></div>
+                        </Suspense>
+                    )}
+                    {visitedPanels.has('reporting') && (
+                        <Suspense fallback={<PanelLoader />}>
+                            <div className={view === 'reporting' ? '' : 'hidden'}><ReportingDashboard /></div>
+                        </Suspense>
+                    )}
+                    {visitedPanels.has('patients') && (
+                        <Suspense fallback={<PanelLoader />}>
+                            <div className={view === 'patients' ? '' : 'hidden'}><PatientManager /></div>
+                        </Suspense>
+                    )}
+                    {visitedPanels.has('staff') && (
+                        <Suspense fallback={<PanelLoader />}>
+                            <div className={view === 'staff' ? '' : 'hidden'}><StaffManager /></div>
+                        </Suspense>
+                    )}
 
 
                 </div>

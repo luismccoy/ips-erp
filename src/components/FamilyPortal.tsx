@@ -29,36 +29,55 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
         setIsCheckingAuth(true);
         setAuthError('');
 
-        // Mock Auth Logic - In real app, verify against backend
-        // For MVP, we accept '1234' or any valid patient ID substring if needed
-        // Here we just simulate a check
-        await new Promise(resolve => setTimeout(resolve, 800));
-
-        if (accessCode === '1234') { // Hardcoded for demo/MVP
-            setIsAuthenticated(true);
-            fetchFamilyData();
-        } else {
-            setAuthError('Código de acceso inválido. Intente nuevamente.');
+        try {
+            if (isUsingRealBackend()) {
+                // PRODUCTION: Query patient by familyAccessCode
+                const patientsRes = await (client.models.Patient as any).list({
+                    filter: { familyAccessCode: { eq: accessCode } },
+                    limit: 1
+                });
+                
+                if (patientsRes.data && patientsRes.data.length > 0) {
+                    setPatient(patientsRes.data[0]);
+                    setIsAuthenticated(true);
+                    fetchFamilyData(patientsRes.data[0]);
+                } else {
+                    setAuthError('Código de acceso inválido. Verifique con su IPS.');
+                    setIsCheckingAuth(false);
+                }
+            } else {
+                // DEMO MODE: Accept '1234' for demo patient
+                await new Promise(resolve => setTimeout(resolve, 800));
+                
+                if (accessCode === '1234') {
+                    setIsAuthenticated(true);
+                    fetchFamilyData(null); // Will load demo patient
+                } else {
+                    setAuthError('Código de acceso inválido. Use "1234" para el demo.');
+                    setIsCheckingAuth(false);
+                }
+            }
+        } catch (error) {
+            console.error('Error during family auth:', error);
+            setAuthError('Error de conexión. Intente nuevamente.');
             setIsCheckingAuth(false);
         }
     };
 
-    const fetchFamilyData = async () => {
+    const fetchFamilyData = async (authenticatedPatient: Patient | null) => {
         setLoading(true);
         try {
-            // 1. Fetch Patient Details - In real app, filtered by the Access Code/User context
-            // Here we prioritize fetching a demo patient or the first one if listing
-            let targetPatient: Patient | null = null;
+            // Use the authenticated patient if provided (production), otherwise load demo data
+            let targetPatient: Patient | null = authenticatedPatient;
 
-            if (isUsingRealBackend()) {
-                const patientsRes = await (client.models.Patient as any).list({ limit: 1 });
-                if (patientsRes.data.length > 0) targetPatient = patientsRes.data[0];
-            } else {
+            if (!targetPatient && !isUsingRealBackend()) {
+                // Demo mode - load mock patient
                 const { PATIENTS } = await import('../data/mock-data');
                 targetPatient = PATIENTS[0] as any;
+                setPatient(targetPatient);
+            } else if (targetPatient) {
+                setPatient(targetPatient);
             }
-
-            setPatient(targetPatient);
 
             if (targetPatient) {
                 // 2. Fetch Visits
