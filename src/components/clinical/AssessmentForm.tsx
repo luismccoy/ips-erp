@@ -52,7 +52,7 @@ import {
   DEFAULT_NEWS,
   DEFAULT_BARTHEL,
   DEFAULT_NORTON,
-} from '@/types/clinical-scales';
+} from '../../types/clinical-scales';
 
 const client = generateClient<Schema>();
 

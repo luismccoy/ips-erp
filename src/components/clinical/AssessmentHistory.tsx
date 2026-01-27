@@ -24,7 +24,7 @@ import {
   getNEWSRiskLevel,
   getBarthelRiskLevel,
   getNortonRiskLevel,
-} from '@/types/clinical-scales';
+} from '../../types/clinical-scales';
 
 const client = generateClient<Schema>();
 
