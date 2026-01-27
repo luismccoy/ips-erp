@@ -16,18 +16,23 @@
     ],
     "groups": [
       {
-        "Admin": {
+        "SuperAdmin": {
           "precedence": 0
         }
       },
       {
-        "Nurse": {
+        "Admin": {
           "precedence": 1
         }
       },
       {
-        "Family": {
+        "Nurse": {
           "precedence": 2
+        }
+      },
+      {
+        "Family": {
+          "precedence": 3
         }
       }
     ],
@@ -208,6 +213,22 @@
               "isArray": true,
               "type": {
                 "model": "Notification"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true,
+              "association": {
+                "connectionType": "HAS_MANY",
+                "associatedWith": [
+                  "tenantId"
+                ]
+              }
+            },
+            "assessments": {
+              "name": "assessments",
+              "isArray": true,
+              "type": {
+                "model": "PatientAssessment"
               },
               "isRequired": false,
               "attributes": [],
@@ -423,6 +444,22 @@
                 ]
               }
             },
+            "assessments": {
+              "name": "assessments",
+              "isArray": true,
+              "type": {
+                "model": "PatientAssessment"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true,
+              "association": {
+                "connectionType": "HAS_MANY",
+                "associatedWith": [
+                  "patientId"
+                ]
+              }
+            },
             "createdAt": {
               "name": "createdAt",
               "isArray": false,
@@ -585,6 +622,22 @@
               "isArray": true,
               "type": {
                 "model": "Visit"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true,
+              "association": {
+                "connectionType": "HAS_MANY",
+                "associatedWith": [
+                  "nurseId"
+                ]
+              }
+            },
+            "assessments": {
+              "name": "assessments",
+              "isArray": true,
+              "type": {
+                "model": "PatientAssessment"
               },
               "isRequired": false,
               "attributes": [],
@@ -1914,6 +1967,299 @@
             "primaryKeyFieldName": "id",
             "sortKeyFieldNames": []
           }
+        },
+        "PatientAssessment": {
+          "name": "PatientAssessment",
+          "fields": {
+            "id": {
+              "name": "id",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "tenantId": {
+              "name": "tenantId",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "tenant": {
+              "name": "tenant",
+              "isArray": false,
+              "type": {
+                "model": "Tenant"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "association": {
+                "connectionType": "BELONGS_TO",
+                "targetNames": [
+                  "tenantId"
+                ]
+              }
+            },
+            "patientId": {
+              "name": "patientId",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "patient": {
+              "name": "patient",
+              "isArray": false,
+              "type": {
+                "model": "Patient"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "association": {
+                "connectionType": "BELONGS_TO",
+                "targetNames": [
+                  "patientId"
+                ]
+              }
+            },
+            "nurseId": {
+              "name": "nurseId",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "nurse": {
+              "name": "nurse",
+              "isArray": false,
+              "type": {
+                "model": "Nurse"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "association": {
+                "connectionType": "BELONGS_TO",
+                "targetNames": [
+                  "nurseId"
+                ]
+              }
+            },
+            "assessedAt": {
+              "name": "assessedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": true,
+              "attributes": []
+            },
+            "glasgowScore": {
+              "name": "glasgowScore",
+              "isArray": false,
+              "type": {
+                "nonModel": "GlasgowScore"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "painScore": {
+              "name": "painScore",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": false,
+              "attributes": []
+            },
+            "bradenScore": {
+              "name": "bradenScore",
+              "isArray": false,
+              "type": {
+                "nonModel": "BradenScore"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "morseScore": {
+              "name": "morseScore",
+              "isArray": false,
+              "type": {
+                "nonModel": "MorseScore"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "newsScore": {
+              "name": "newsScore",
+              "isArray": false,
+              "type": {
+                "nonModel": "NEWSScore"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "barthelScore": {
+              "name": "barthelScore",
+              "isArray": false,
+              "type": {
+                "nonModel": "BarthelScore"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "nortonScore": {
+              "name": "nortonScore",
+              "isArray": false,
+              "type": {
+                "nonModel": "NortonScore"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "rassScore": {
+              "name": "rassScore",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": false,
+              "attributes": []
+            },
+            "alerts": {
+              "name": "alerts",
+              "isArray": true,
+              "type": {
+                "nonModel": "AssessmentAlert"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
+            "notes": {
+              "name": "notes",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "visitId": {
+              "name": "visitId",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": false,
+              "attributes": []
+            },
+            "createdAt": {
+              "name": "createdAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            },
+            "updatedAt": {
+              "name": "updatedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            }
+          },
+          "syncable": true,
+          "pluralName": "PatientAssessments",
+          "attributes": [
+            {
+              "type": "model",
+              "properties": {}
+            },
+            {
+              "type": "key",
+              "properties": {
+                "name": "byTenant",
+                "queryField": "listPatientAssessmentByTenantId",
+                "fields": [
+                  "tenantId"
+                ]
+              }
+            },
+            {
+              "type": "key",
+              "properties": {
+                "name": "byPatient",
+                "queryField": "listPatientAssessmentByPatientIdAndAssessedAt",
+                "fields": [
+                  "patientId",
+                  "assessedAt"
+                ]
+              }
+            },
+            {
+              "type": "key",
+              "properties": {
+                "name": "byNurse",
+                "queryField": "listPatientAssessmentByNurseId",
+                "fields": [
+                  "nurseId"
+                ]
+              }
+            },
+            {
+              "type": "auth",
+              "properties": {
+                "rules": [
+                  {
+                    "provider": "userPools",
+                    "ownerField": "tenantId",
+                    "allow": "owner",
+                    "identityClaim": "custom:tenantId",
+                    "operations": [
+                      "create",
+                      "update",
+                      "delete",
+                      "read"
+                    ]
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update",
+                      "delete"
+                    ],
+                    "groups": [
+                      "ADMIN"
+                    ]
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "create",
+                      "read"
+                    ],
+                    "groups": [
+                      "NURSE"
+                    ]
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "read"
+                    ],
+                    "groups": [
+                      "FAMILY"
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "primaryKeyInfo": {
+            "isCustomPrimaryKey": false,
+            "primaryKeyFieldName": "id",
+            "sortKeyFieldNames": []
+          }
         }
       },
       "enums": {
@@ -1985,11 +2331,27 @@
             "COORDINATOR"
           ]
         },
+        "CreateNurseWithValidationRole": {
+          "name": "CreateNurseWithValidationRole",
+          "values": [
+            "ADMIN",
+            "NURSE",
+            "COORDINATOR"
+          ]
+        },
         "MedicationStatus": {
           "name": "MedicationStatus",
           "values": [
             "ACTIVE",
             "DISCONTINUED"
+          ]
+        },
+        "AssessmentAlertLevel": {
+          "name": "AssessmentAlertLevel",
+          "values": [
+            "INFO",
+            "WARNING",
+            "CRITICAL"
           ]
         }
       },
@@ -2147,6 +2509,365 @@
               "isArray": false,
               "type": "String",
               "isRequired": false,
+              "attributes": []
+            }
+          }
+        },
+        "GlasgowScore": {
+          "name": "GlasgowScore",
+          "fields": {
+            "eye": {
+              "name": "eye",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "verbal": {
+              "name": "verbal",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "motor": {
+              "name": "motor",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "total": {
+              "name": "total",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            }
+          }
+        },
+        "BradenScore": {
+          "name": "BradenScore",
+          "fields": {
+            "sensoryPerception": {
+              "name": "sensoryPerception",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "moisture": {
+              "name": "moisture",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "activity": {
+              "name": "activity",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "mobility": {
+              "name": "mobility",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "nutrition": {
+              "name": "nutrition",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "frictionShear": {
+              "name": "frictionShear",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "total": {
+              "name": "total",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            }
+          }
+        },
+        "MorseScore": {
+          "name": "MorseScore",
+          "fields": {
+            "historyOfFalling": {
+              "name": "historyOfFalling",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "secondaryDiagnosis": {
+              "name": "secondaryDiagnosis",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "ambulatoryAid": {
+              "name": "ambulatoryAid",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "ivHeparinLock": {
+              "name": "ivHeparinLock",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "gait": {
+              "name": "gait",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "mentalStatus": {
+              "name": "mentalStatus",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "total": {
+              "name": "total",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            }
+          }
+        },
+        "NEWSScore": {
+          "name": "NEWSScore",
+          "fields": {
+            "respirationRate": {
+              "name": "respirationRate",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "oxygenSaturation": {
+              "name": "oxygenSaturation",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "supplementalO2": {
+              "name": "supplementalO2",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "temperature": {
+              "name": "temperature",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "systolicBP": {
+              "name": "systolicBP",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "heartRate": {
+              "name": "heartRate",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "consciousness": {
+              "name": "consciousness",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "total": {
+              "name": "total",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            }
+          }
+        },
+        "BarthelScore": {
+          "name": "BarthelScore",
+          "fields": {
+            "feeding": {
+              "name": "feeding",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "bathing": {
+              "name": "bathing",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "grooming": {
+              "name": "grooming",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "dressing": {
+              "name": "dressing",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "bowels": {
+              "name": "bowels",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "bladder": {
+              "name": "bladder",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "toiletUse": {
+              "name": "toiletUse",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "transfers": {
+              "name": "transfers",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "mobility": {
+              "name": "mobility",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "stairs": {
+              "name": "stairs",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "total": {
+              "name": "total",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            }
+          }
+        },
+        "NortonScore": {
+          "name": "NortonScore",
+          "fields": {
+            "physicalCondition": {
+              "name": "physicalCondition",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "mentalCondition": {
+              "name": "mentalCondition",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "activity": {
+              "name": "activity",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "mobility": {
+              "name": "mobility",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "incontinence": {
+              "name": "incontinence",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "total": {
+              "name": "total",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            }
+          }
+        },
+        "AssessmentAlert": {
+          "name": "AssessmentAlert",
+          "fields": {
+            "scale": {
+              "name": "scale",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "level": {
+              "name": "level",
+              "isArray": false,
+              "type": {
+                "enum": "AssessmentAlertLevel"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "message": {
+              "name": "message",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
               "attributes": []
             }
           }
@@ -2429,6 +3150,53 @@
           "arguments": {
             "shiftId": {
               "name": "shiftId",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true
+            }
+          }
+        },
+        "createNurseWithValidation": {
+          "name": "createNurseWithValidation",
+          "isArray": false,
+          "type": "AWSJSON",
+          "isRequired": false,
+          "arguments": {
+            "name": {
+              "name": "name",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "email": {
+              "name": "email",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            },
+            "role": {
+              "name": "role",
+              "isArray": false,
+              "type": {
+                "enum": "CreateNurseWithValidationRole"
+              },
+              "isRequired": false
+            },
+            "skills": {
+              "name": "skills",
+              "isArray": true,
+              "type": "String",
+              "isRequired": false,
+              "isArrayNullable": true
+            },
+            "cognitoSub": {
+              "name": "cognitoSub",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true
+            },
+            "tenantId": {
+              "name": "tenantId",
               "isArray": false,
               "type": "ID",
               "isRequired": true

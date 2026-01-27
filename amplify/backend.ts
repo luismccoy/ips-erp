@@ -12,6 +12,7 @@ import { submitVisit } from './functions/submit-visit/resource';
 import { rejectVisit } from './functions/reject-visit/resource';
 import { approveVisit } from './functions/approve-visit/resource';
 import { verifyFamilyAccess } from './functions/verify-family-access/resource';
+import { createNurseValidated } from './functions/create-nurse-validated/resource';
 
 /**
  * @see https://docs.amplify.aws/react/build-a-backend/
@@ -28,6 +29,7 @@ const backend = defineBackend({
     rejectVisit,
     approveVisit,
     verifyFamilyAccess,
+    createNurseValidated,
 });
 
 // Grant Bedrock permissions to AI-powered Lambda functions

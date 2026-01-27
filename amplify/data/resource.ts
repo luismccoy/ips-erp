@@ -559,6 +559,25 @@ const schema = a.schema({
         .returns(a.json())
         .authorization(allow => [allow.authenticated()])
         .handler(a.handler.function('approve-visit')),
+    
+    // ============================================
+    // PHASE 19: SECURITY ENHANCEMENTS
+    // ============================================
+    
+    // Task 1.2: Create Nurse with cognitoSub validation
+    // Validates Cognito user exists before creating Nurse record
+    createNurseWithValidation: a.mutation()
+        .arguments({
+            name: a.string().required(),
+            email: a.string(),
+            role: a.enum(['ADMIN', 'NURSE', 'COORDINATOR']),
+            skills: a.string().array(),
+            cognitoSub: a.id().required(),
+            tenantId: a.id().required()
+        })
+        .returns(a.json())
+        .authorization(allow => [allow.authenticated()])
+        .handler(a.handler.function('create-nurse-validated')),
 });
 
 export type Schema = ClientSchema<typeof schema>;
