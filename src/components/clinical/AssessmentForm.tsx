@@ -22,10 +22,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
-import type { Schema } from '@/amplify/data/resource';
-import { isDemoMode } from '@/amplify-utils';
+import type { Schema } from '../../../amplify/data/resource';
+import { isDemoMode } from '../../amplify-utils';
 import { RiskIndicatorBadge } from './RiskIndicatorBadge';
-import {
+import type {
   PatientAssessment,
   GlasgowScore,
   BradenScore,
@@ -33,6 +33,8 @@ import {
   NEWSScore,
   BarthelScore,
   NortonScore,
+} from '../../types/clinical-scales';
+import {
   calculateGlasgowTotal,
   calculateBradenTotal,
   calculateMorseTotal,

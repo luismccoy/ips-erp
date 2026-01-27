@@ -13,11 +13,11 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
-import type { Schema } from '@/amplify/data/resource';
-import { isDemoMode } from '@/amplify-utils';
+import type { Schema } from '../../../amplify/data/resource';
+import { isDemoMode } from '../../amplify-utils';
 import { RiskIndicatorBadge } from './RiskIndicatorBadge';
+import type { PatientAssessment } from '../../types/clinical-scales';
 import {
-  PatientAssessment,
   getGlasgowRiskLevel,
   getBradenRiskLevel,
   getMorseRiskLevel,

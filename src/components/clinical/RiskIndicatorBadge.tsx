@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { RiskLevel } from '../../types/clinical-scales';
+import type { RiskLevel } from '../../types/clinical-scales';
 
 interface RiskIndicatorBadgeProps {
   /** Risk level (none, low, moderate, high, critical) */
