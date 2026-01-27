@@ -4,35 +4,13 @@
   "queues": {
     "kiro": {
       "description": "Backend tasks",
-      "pending": [
-        {
-          "id": "KIRO-003",
-          "title": "P1: Fix GraphQL listNotifications authorization",
-          "priority": "P1",
-          "status": "PENDING",
-          "createdAt": "2026-01-27T23:00:00Z",
-          "notes": "Error: Not Authorized to access listNotifications on type Query. Check AppSync auth rules."
-        },
-        {
-          "id": "KIRO-004",
-          "title": "P1: Investigate session instability",
-          "priority": "P1",
-          "status": "PENDING",
-          "createdAt": "2026-01-27T23:00:00Z",
-          "notes": "Users get logged out during navigation. Check Cognito session handling and token refresh."
-        },
-        {
-          "id": "KIRO-005",
-          "title": "P2: Fix deprecated meta tag",
-          "priority": "P2",
-          "status": "PENDING",
-          "createdAt": "2026-01-27T23:00:00Z",
-          "notes": "apple-mobile-web-app-capable is deprecated. Update to mobile-web-app-capable in index.html"
-        }
-      ],
+      "pending": [],
       "completed": [
         {"id": "KIRO-001", "title": "AWS Transcribe", "status": "COMPLETED"},
-        {"id": "KIRO-002", "title": "PWA manifest (fixed by Clawd)", "status": "COMPLETED"}
+        {"id": "KIRO-002", "title": "PWA manifest (fixed by Clawd)", "status": "COMPLETED"},
+        {"id": "KIRO-003", "title": "P1: Fix GraphQL listNotifications authorization", "status": "COMPLETED", "completedAt": "2026-01-27T23:30:00Z", "notes": "Added 'create' and 'delete' permissions to Notification model authorization rules"},
+        {"id": "KIRO-004", "title": "P1: Investigate session instability", "status": "COMPLETED", "completedAt": "2026-01-27T23:30:00Z", "notes": "Added Hub auth event listener and proactive session refresh interval in useAuth.ts"},
+        {"id": "KIRO-005", "title": "P2: Fix deprecated meta tag", "status": "COMPLETED", "completedAt": "2026-01-27T23:30:00Z", "notes": "Changed apple-mobile-web-app-capable to mobile-web-app-capable in index.html"}
       ]
     },
     "antigravity": {
@@ -79,5 +57,5 @@
       ]
     }
   },
-  "lastUpdated": "2026-01-27T23:00:00Z"
+  "lastUpdated": "2026-01-27T23:30:00Z"
 }

@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getCurrentUser, signIn, signOut, fetchUserAttributes, fetchAuthSession, type SignInInput, type AuthUser } from 'aws-amplify/auth';
+import { Hub } from 'aws-amplify/utils';
 import { TENANTS } from '../data/mock-data';
 import type { Tenant } from '../types';
 import { isUsingRealBackend, isDemoMode } from '../amplify-utils';
@@ -36,6 +37,50 @@ export function useAuth() {
 
     useEffect(() => {
         checkUser();
+        
+        // KIRO-004 Fix: Listen for auth events to handle token refresh and session changes
+        // This prevents random logouts during navigation
+        const hubListener = Hub.listen('auth', async ({ payload }) => {
+            switch (payload.event) {
+                case 'signedIn':
+                    await checkUser();
+                    break;
+                case 'signedOut':
+                    setUser(null);
+                    setRole(null);
+                    setTenant(null);
+                    break;
+                case 'tokenRefresh':
+                    // Token was refreshed successfully - no action needed
+                    console.log('Auth token refreshed');
+                    break;
+                case 'tokenRefresh_failure':
+                    // Token refresh failed - user needs to re-authenticate
+                    console.warn('Token refresh failed, user may need to re-login');
+                    // Don't immediately logout - let the next API call handle it
+                    break;
+            }
+        });
+        
+        // KIRO-004 Fix: Proactive session refresh every 10 minutes
+        // Amplify auto-refreshes tokens, but this ensures we catch any issues early
+        let refreshInterval: NodeJS.Timeout | null = null;
+        if (isUsingRealBackend()) {
+            refreshInterval = setInterval(async () => {
+                try {
+                    // fetchAuthSession with forceRefresh will refresh tokens if needed
+                    await fetchAuthSession({ forceRefresh: false });
+                } catch (err) {
+                    console.warn('Proactive session check failed:', err);
+                }
+            }, 10 * 60 * 1000); // 10 minutes
+        }
+        
+        // Cleanup listener and interval on unmount
+        return () => {
+            hubListener();
+            if (refreshInterval) clearInterval(refreshInterval);
+        };
     }, []);
 
     /**

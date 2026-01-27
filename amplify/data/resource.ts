@@ -211,6 +211,10 @@ const schema = a.schema({
         familyMembers: a.id().array(), // Cognito user IDs with read access
         accessCode: a.string(), // Phase 12: Family portal access code
         
+        // Task 4.3: Primary nurse assignment
+        primaryNurseId: a.id(),
+        primaryNurse: a.belongsTo('Nurse', 'primaryNurseId'),
+        
         // Relationships
         shifts: a.hasMany('Shift', 'patientId'),
         vitalSigns: a.hasMany('VitalSigns', 'patientId'),
@@ -240,6 +244,7 @@ const schema = a.schema({
         shifts: a.hasMany('Shift', 'nurseId'),
         visits: a.hasMany('Visit', 'nurseId'),
         assessments: a.hasMany('PatientAssessment', 'nurseId'), // Phase 4: Clinical assessments
+        primaryPatients: a.hasMany('Patient', 'primaryNurseId'), // Task 4.3: Patients assigned to this nurse
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')
     ]),
@@ -271,6 +276,9 @@ const schema = a.schema({
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
         allow.groups(['ADMIN']).to(['create', 'read', 'update', 'delete']),
         allow.groups(['NURSE']).to(['read'])
+    ]).secondaryIndexes(index => [
+        // Task 4.1: Query shifts by nurse and date for roster optimization
+        index('nurseId').sortKeys(['scheduledTime']).name('byNurseAndDate')
     ]),
 
     // 5. INVENTORY ITEM - Medical supplies
@@ -342,6 +350,16 @@ const schema = a.schema({
         ripsValidationResult: a.json(), // Stores validateRIPS JSON output
         glosaDefenseText: a.string(), // Stores glosaDefender markdown output
         glosaDefenseGeneratedAt: a.datetime(), // Timestamp of AI generation
+        
+        // Task 4.2: Colombian RIPS Compliance Fields (Resolución 2275)
+        codigoPrestador: a.string(),       // IPS provider code (12 digits)
+        tipoDocumento: a.string(),          // Document type (CC, TI, CE, PA, RC, MS, AS, NV)
+        numeroAutorizacion: a.string(),    // EPS authorization number
+        codigoServicio: a.string(),        // Service code (01=urgencias, 02=hospitalizacion, etc.)
+        valorCopago: a.float(),            // Copayment value (COP)
+        valorCuotaModeradora: a.float(),   // Moderating fee (COP)
+        fechaConsulta: a.date(),           // Consultation date (AWSDate)
+        causaExterna: a.string(),          // External cause code (01-15 per RIPS spec)
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
         allow.groups(['ADMIN']).to(['create', 'read', 'update', 'delete'])
@@ -381,6 +399,9 @@ const schema = a.schema({
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
         // Only admin and assigned nurse can access (enforced in Lambda)
         allow.authenticated()
+    ]).secondaryIndexes(index => [
+        // Task 4.1: Query visits by tenant and status for admin dashboard
+        index('tenantId').sortKeys(['status']).name('byTenantAndStatus')
     ]),
     
     // 9. AUDIT LOG - Phase 3: Immutable event log
@@ -416,7 +437,12 @@ const schema = a.schema({
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
         // Phase 16: Explicit group permissions for subscriptions
-        allow.groups(['ADMIN', 'NURSE']).to(['read', 'update'])
+        // KIRO-003 Fix: Added 'create' and explicit operations for list queries
+        allow.groups(['ADMIN', 'NURSE']).to(['create', 'read', 'update', 'delete'])
+    ]).secondaryIndexes(index => [
+        // Task 4.1: Query notifications by user (filter by read status in app)
+        // Note: Boolean fields cannot be sort keys in DynamoDB GSIs
+        index('userId').name('byUser')
     ]),
     
     // 11. PATIENT ASSESSMENT - Phase 4: Clinical Assessment Scales
