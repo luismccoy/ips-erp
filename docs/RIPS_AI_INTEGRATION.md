@@ -175,13 +175,53 @@ npm run test:recordings:refresh
 6. **Graceful Degradation**: AI failure doesn't block basic validation
 7. **Testability**: VCR-style recordings enable fast, deterministic tests
 
+## IAM Configuration ✅
+
+**Status**: Configured in `amplify/backend.ts`
+
+Added Bedrock IAM policy to all AI-powered Lambda functions:
+
+```typescript
+const bedrockPolicy = new PolicyStatement({
+    effect: Effect.ALLOW,
+    actions: ['bedrock:InvokeModel'],
+    resources: [
+        'arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-5-sonnet-20240620-v1:0'
+    ]
+});
+
+backend.ripsValidator.resources.lambda.addToRolePolicy(bedrockPolicy);
+backend.glosaDefender.resources.lambda.addToRolePolicy(bedrockPolicy);
+backend.rosterArchitect.resources.lambda.addToRolePolicy(bedrockPolicy);
+```
+
+### Functions with Bedrock Access
+
+| Function | Purpose | Model |
+|----------|---------|-------|
+| `ripsValidator` | Colombian RIPS compliance validation | Claude 3.5 Sonnet |
+| `glosaDefender` | Billing defense letter generation | Claude 3.5 Sonnet |
+| `rosterArchitect` | AI nurse scheduling | Claude 3.5 Sonnet |
+
+### Verification Steps
+
+To verify permissions are correctly applied after deployment:
+
+```bash
+# 1. Deploy the changes
+npx ampx sandbox
+
+# 2. Check Lambda execution role in AWS Console
+# Navigate to: Lambda > rips-validator > Configuration > Permissions
+# Verify: IAM role has "bedrock:InvokeModel" permission
+
+# 3. Test AI validation
+# Submit a billing record and check that AI validation runs successfully
+```
+
 ## Next Steps
 
-1. **IAM Permissions**: Ensure Lambda execution role has `bedrock:InvokeModel` permission
-   - This may be automatically granted by Amplify
-   - Verify in AWS Console or via CDK
-
-2. **Testing**:
+1. **Testing**:
    - Create integration tests with sample billing records
    - Record AI responses for CI/CD
    - Test glosa risk scenarios

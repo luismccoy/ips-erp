@@ -1,5 +1,6 @@
 import { defineBackend } from '@aws-amplify/backend';
 import { Tags } from 'aws-cdk-lib';
+import { PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam';
 import { auth } from './auth/resource';
 import { data } from './data/resource';
 import { rosterArchitect } from './functions/roster-architect/resource';
@@ -28,6 +29,22 @@ const backend = defineBackend({
     approveVisit,
     verifyFamilyAccess,
 });
+
+// Grant Bedrock permissions to AI-powered Lambda functions
+// Required for: ripsValidator, glosaDefender, rosterArchitect
+// These functions use AWS Bedrock (Claude 3.5 Sonnet) for AI inference
+const bedrockPolicy = new PolicyStatement({
+    effect: Effect.ALLOW,
+    actions: ['bedrock:InvokeModel'],
+    resources: [
+        // Anthropic Claude 3.5 Sonnet model used by all AI functions
+        'arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-5-sonnet-20240620-v1:0'
+    ]
+});
+
+backend.ripsValidator.resources.lambda.addToRolePolicy(bedrockPolicy);
+backend.glosaDefender.resources.lambda.addToRolePolicy(bedrockPolicy);
+backend.rosterArchitect.resources.lambda.addToRolePolicy(bedrockPolicy);
 
 // Apply AWS resource tags to prevent Spring cleaning deletion
 // These tags are inherited by all resources in the stack (DynamoDB, Lambda, Cognito, AppSync, etc.)
