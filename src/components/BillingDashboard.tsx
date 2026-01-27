@@ -5,6 +5,8 @@ import { usePagination } from '../hooks/usePagination';
 import { useLoadingTimeout } from '../hooks/useLoadingTimeout';
 import { useToast } from './ui/Toast';
 import { ErrorState } from './ui/ErrorState';
+import { ErrorBoundary } from './ErrorBoundary';
+import { RipsExportPanel } from './RipsExportPanel';
 import type { BillingRecord as BillingRecordType, BillingStatus } from '../types';
 import { LoadingSpinner } from './ui/LoadingSpinner';
 
@@ -414,6 +416,23 @@ export function BillingDashboard() {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* RIPS JSON Export Section */}
+            <div className="mt-6">
+                <ErrorBoundary>
+                    <RipsExportPanel
+                        tenantId={tenantId}
+                        tenantName="IPS-ERP"
+                        onExportComplete={(result) => {
+                            if (result.success) {
+                                showToast('success', 'RIPS Generado', `Se generaron ${result.stats.totalUsuarios} usuarios y ${result.stats.totalConsultas} consultas.`);
+                            } else {
+                                showToast('warning', 'RIPS con Errores', 'La generación completó con algunos errores. Revise el panel de resultados.');
+                            }
+                        }}
+                    />
+                </ErrorBoundary>
             </div>
 
             {/* AI Rebuttal Review Modal */}
