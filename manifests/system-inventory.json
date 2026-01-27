@@ -1,0 +1,347 @@
+{
+  "$schema": "./system-inventory.schema.json",
+  "version": "1.0.0",
+  "generatedAt": "2026-01-27T03:02:00Z",
+  "project": {
+    "name": "IPS-ERP",
+    "description": "Colombian home healthcare ERP with AI-powered scheduling and billing",
+    "repository": "https://github.com/luiscoy/ips-erp",
+    "primaryRegion": "us-east-1"
+  },
+  "iacFramework": {
+    "type": "amplify-gen2",
+    "entrypoint": "amplify/backend.ts",
+    "version": "@aws-amplify/backend@1.20.0",
+    "underlyingIac": "aws-cdk"
+  },
+  "environments": [
+    {
+      "name": "development",
+      "branch": "develop",
+      "amplifyAppId": "${AMPLIFY_APP_ID_DEV}",
+      "description": "Development sandbox for feature work"
+    },
+    {
+      "name": "staging",
+      "branch": "staging",
+      "amplifyAppId": "${AMPLIFY_APP_ID_STAGING}",
+      "description": "Pre-production testing environment"
+    },
+    {
+      "name": "production",
+      "branch": "main",
+      "amplifyAppId": "${AMPLIFY_APP_ID_PROD}",
+      "url": "https://main.d2wwgecog8smmr.amplifyapp.com",
+      "description": "Production environment"
+    }
+  ],
+  "components": {
+    "frontend": {
+      "type": "spa",
+      "framework": "vite-react",
+      "language": "typescript",
+      "hosting": "amplify-hosting",
+      "buildCommand": "npm run build",
+      "outputDir": "dist",
+      "dependencies": [
+        "react@19.2.0",
+        "react-router-dom@7.12.0",
+        "aws-amplify@6.15.10",
+        "tailwindcss@4.1.18",
+        "lucide-react@0.562.0"
+      ]
+    },
+    "auth": {
+      "service": "cognito",
+      "managedBy": "amplify",
+      "resourceFile": "amplify/auth/resource.ts",
+      "features": {
+        "loginWith": ["email"],
+        "groups": ["SuperAdmin", "Admin", "Nurse", "Family"],
+        "customAttributes": ["custom:tenantId"],
+        "mfa": "NONE",
+        "accountRecovery": "EMAIL_ONLY"
+      },
+      "outputs": ["user_pool_id", "user_pool_client_id", "identity_pool_id"]
+    },
+    "api": {
+      "service": "appsync",
+      "managedBy": "amplify",
+      "resourceFile": "amplify/data/resource.ts",
+      "type": "graphql",
+      "authModes": ["AMAZON_COGNITO_USER_POOLS", "AWS_IAM"],
+      "models": [
+        "Tenant",
+        "Patient",
+        "Nurse",
+        "Shift",
+        "InventoryItem",
+        "VitalSigns",
+        "BillingRecord",
+        "Visit",
+        "AuditLog",
+        "Notification",
+        "PatientAssessment"
+      ],
+      "customQueries": [
+        "generateRoster",
+        "validateRIPS",
+        "generateGlosaDefense",
+        "verifyFamilyAccessCode",
+        "listApprovedVisitSummariesForFamily"
+      ],
+      "customMutations": [
+        "createVisitDraftFromShift",
+        "submitVisit",
+        "rejectVisit",
+        "approveVisit"
+      ]
+    },
+    "database": {
+      "service": "dynamodb",
+      "managedBy": "amplify",
+      "tables": [
+        {
+          "name": "Tenant",
+          "partitionKey": "id",
+          "pitr": true,
+          "gsi": []
+        },
+        {
+          "name": "Patient",
+          "partitionKey": "id",
+          "pitr": true,
+          "gsi": ["byTenant"]
+        },
+        {
+          "name": "Nurse",
+          "partitionKey": "id",
+          "pitr": true,
+          "gsi": ["byTenant"]
+        },
+        {
+          "name": "Shift",
+          "partitionKey": "id",
+          "pitr": true,
+          "gsi": ["byTenant", "byNurse", "byPatient"]
+        },
+        {
+          "name": "InventoryItem",
+          "partitionKey": "id",
+          "pitr": true,
+          "gsi": ["byTenant"]
+        },
+        {
+          "name": "VitalSigns",
+          "partitionKey": "id",
+          "pitr": true,
+          "gsi": ["byTenant", "byPatient"]
+        },
+        {
+          "name": "BillingRecord",
+          "partitionKey": "id",
+          "pitr": true,
+          "gsi": ["byTenant"]
+        },
+        {
+          "name": "Visit",
+          "partitionKey": "id",
+          "pitr": true,
+          "gsi": ["byTenant", "byPatient", "byNurse"]
+        },
+        {
+          "name": "AuditLog",
+          "partitionKey": "id",
+          "pitr": true,
+          "gsi": ["byTenant"]
+        },
+        {
+          "name": "Notification",
+          "partitionKey": "id",
+          "pitr": true,
+          "gsi": ["byTenant"]
+        },
+        {
+          "name": "PatientAssessment",
+          "partitionKey": "id",
+          "pitr": true,
+          "gsi": ["byPatient", "byNurse", "byTenant"]
+        }
+      ]
+    },
+    "functions": [
+      {
+        "name": "roster-architect",
+        "runtime": "nodejs",
+        "handler": "handler.handler",
+        "timeout": 60,
+        "memoryMB": 512,
+        "resourceFile": "amplify/functions/roster-architect/resource.ts",
+        "purpose": "AI-powered nurse scheduling using Bedrock Claude",
+        "envVars": ["MODEL_ID", "AI_RECORDINGS_S3_BUCKET"],
+        "iamPermissions": ["bedrock:InvokeModel", "s3:GetObject", "s3:PutObject"]
+      },
+      {
+        "name": "rips-validator",
+        "runtime": "nodejs",
+        "handler": "handler.handler",
+        "timeout": 60,
+        "memoryMB": 512,
+        "resourceFile": "amplify/functions/rips-validator/resource.ts",
+        "purpose": "RIPS billing compliance validation using Bedrock Claude",
+        "envVars": ["MODEL_ID"],
+        "iamPermissions": ["bedrock:InvokeModel"]
+      },
+      {
+        "name": "glosa-defender",
+        "runtime": "nodejs",
+        "handler": "handler.handler",
+        "timeout": 60,
+        "memoryMB": 512,
+        "resourceFile": "amplify/functions/glosa-defender/resource.ts",
+        "purpose": "AI-generated billing defense letters using Bedrock Claude",
+        "envVars": ["MODEL_ID"],
+        "iamPermissions": ["bedrock:InvokeModel"]
+      },
+      {
+        "name": "list-approved-visit-summaries",
+        "runtime": "nodejs",
+        "handler": "handler.handler",
+        "timeout": 30,
+        "memoryMB": 256,
+        "resourceFile": "amplify/functions/list-approved-visit-summaries/resource.ts",
+        "purpose": "Family-safe query for approved visit summaries",
+        "envVars": [],
+        "iamPermissions": ["dynamodb:Query"]
+      },
+      {
+        "name": "create-visit-draft",
+        "runtime": "nodejs",
+        "handler": "handler.handler",
+        "timeout": 30,
+        "memoryMB": 256,
+        "resourceFile": "amplify/functions/create-visit-draft/resource.ts",
+        "purpose": "Create DRAFT visit from completed shift",
+        "envVars": [],
+        "iamPermissions": ["dynamodb:GetItem", "dynamodb:PutItem"]
+      },
+      {
+        "name": "submit-visit",
+        "runtime": "nodejs",
+        "handler": "handler.handler",
+        "timeout": 30,
+        "memoryMB": 256,
+        "resourceFile": "amplify/functions/submit-visit/resource.ts",
+        "purpose": "Submit visit for admin review",
+        "envVars": [],
+        "iamPermissions": ["dynamodb:GetItem", "dynamodb:UpdateItem"]
+      },
+      {
+        "name": "reject-visit",
+        "runtime": "nodejs",
+        "handler": "handler.handler",
+        "timeout": 30,
+        "memoryMB": 256,
+        "resourceFile": "amplify/functions/reject-visit/resource.ts",
+        "purpose": "Admin rejects visit with reason",
+        "envVars": [],
+        "iamPermissions": ["dynamodb:GetItem", "dynamodb:UpdateItem"]
+      },
+      {
+        "name": "approve-visit",
+        "runtime": "nodejs",
+        "handler": "handler.handler",
+        "timeout": 30,
+        "memoryMB": 256,
+        "resourceFile": "amplify/functions/approve-visit/resource.ts",
+        "purpose": "Admin approves visit (immutable)",
+        "envVars": [],
+        "iamPermissions": ["dynamodb:GetItem", "dynamodb:UpdateItem"]
+      },
+      {
+        "name": "verify-family-access",
+        "runtime": "nodejs",
+        "handler": "handler.handler",
+        "timeout": 30,
+        "memoryMB": 256,
+        "resourceFile": "amplify/functions/verify-family-access/resource.ts",
+        "purpose": "Verify family portal access code",
+        "envVars": [],
+        "iamPermissions": ["dynamodb:GetItem"]
+      }
+    ],
+    "ai": {
+      "service": "bedrock",
+      "modelId": "anthropic.claude-3-5-sonnet-20240620-v1:0",
+      "region": "us-east-1",
+      "usedBy": ["roster-architect", "rips-validator", "glosa-defender"],
+      "note": "Model access must be enabled in Bedrock console for new accounts"
+    },
+    "storage": {
+      "service": "s3",
+      "managedBy": "amplify",
+      "buckets": [
+        {
+          "purpose": "ai-recordings",
+          "naming": "amplify-{appId}-{branch}-airec",
+          "encryption": "AES256",
+          "versioning": true
+        }
+      ]
+    },
+    "cicd": {
+      "platform": "github-actions",
+      "workflowFiles": [
+        ".github/workflows/deploy.yml",
+        ".github/workflows/test.yml"
+      ],
+      "deploymentTrigger": "amplify-hosted",
+      "branches": {
+        "develop": "development",
+        "staging": "staging",
+        "main": "production"
+      }
+    }
+  },
+  "deployOrder": [
+    "1. AWS Account bootstrap (CDK bootstrap)",
+    "2. Amplify App creation (amplify init or console)",
+    "3. Backend deployment (amplify sandbox or pipeline)",
+    "4. Frontend build and deploy (automatic via Amplify Hosting)",
+    "5. Post-deploy: Enable Bedrock model access",
+    "6. Post-deploy: Create initial admin user in Cognito"
+  ],
+  "externalDependencies": [
+    {
+      "name": "GitHub",
+      "type": "source-control",
+      "integration": "OAuth app for Amplify",
+      "reauthorizationRequired": true
+    },
+    {
+      "name": "Amazon Bedrock",
+      "type": "ai-service",
+      "integration": "IAM role with bedrock:InvokeModel",
+      "modelAccessRequired": true
+    }
+  ],
+  "accountSpecificResources": [
+    "Cognito User Pool ID",
+    "Cognito Identity Pool ID",
+    "AppSync API URL",
+    "Amplify App ID",
+    "S3 Bucket names (auto-generated)"
+  ],
+  "dataPortability": {
+    "dynamodb": {
+      "exportMethod": "PITR + Export to S3",
+      "restoreMethod": "Import from S3 or DynamoDB Restore",
+      "tooling": "AWS CLI / boto3"
+    },
+    "cognito": {
+      "exportMethod": "ListUsers API (no password export)",
+      "restoreMethod": "AdminCreateUser with password reset",
+      "note": "Users must reset passwords after migration"
+    }
+  }
+}

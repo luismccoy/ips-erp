@@ -1,0 +1,72 @@
+{
+  "$schema": "./backup-manifest.schema.json",
+  "version": "1.0.0",
+  "timestamp": "2026-01-27T03:00:00Z",
+  "environment": "production",
+  "region": "us-east-1",
+  "tables": {
+    "Tenant-abc123-main": {
+      "file": "Tenant-abc123-main.json",
+      "count": 5,
+      "sizeBytes": 2048
+    },
+    "Patient-abc123-main": {
+      "file": "Patient-abc123-main.json",
+      "count": 150,
+      "sizeBytes": 125000
+    },
+    "Nurse-abc123-main": {
+      "file": "Nurse-abc123-main.json",
+      "count": 25,
+      "sizeBytes": 15000
+    },
+    "Shift-abc123-main": {
+      "file": "Shift-abc123-main.json",
+      "count": 500,
+      "sizeBytes": 250000
+    },
+    "Visit-abc123-main": {
+      "file": "Visit-abc123-main.json",
+      "count": 450,
+      "sizeBytes": 500000
+    },
+    "VitalSigns-abc123-main": {
+      "file": "VitalSigns-abc123-main.json",
+      "count": 1200,
+      "sizeBytes": 180000
+    },
+    "BillingRecord-abc123-main": {
+      "file": "BillingRecord-abc123-main.json",
+      "count": 300,
+      "sizeBytes": 150000
+    },
+    "InventoryItem-abc123-main": {
+      "file": "InventoryItem-abc123-main.json",
+      "count": 75,
+      "sizeBytes": 25000
+    },
+    "AuditLog-abc123-main": {
+      "file": "AuditLog-abc123-main.json",
+      "count": 5000,
+      "sizeBytes": 2500000
+    },
+    "Notification-abc123-main": {
+      "file": "Notification-abc123-main.json",
+      "count": 200,
+      "sizeBytes": 50000
+    },
+    "PatientAssessment-abc123-main": {
+      "file": "PatientAssessment-abc123-main.json",
+      "count": 800,
+      "sizeBytes": 400000
+    }
+  },
+  "cognito": {
+    "userPoolId": "us-east-1_q9ZtCLtQr",
+    "usersFile": "cognito-users.json",
+    "userCount": 35,
+    "note": "Passwords cannot be exported. Users must reset on migration."
+  },
+  "totalSizeBytes": 4197048,
+  "checksum": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
+}

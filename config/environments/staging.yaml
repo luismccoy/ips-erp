@@ -1,0 +1,44 @@
+# IPS-ERP Staging Environment Configuration
+# This file is used by deployment scripts and documentation
+# Actual runtime config is in .env.staging
+
+environment:
+  name: staging
+  branch: staging
+  region: us-east-1
+
+frontend:
+  api_timeout: 30000
+  use_real_backend: true
+  enable_analytics: false
+  enable_mock_data: false
+  app_name: "IPS ERP [STAGING]"
+
+backend:
+  bedrock_model: "anthropic.claude-3-5-sonnet-20240620-v1:0"
+  lambda_timeout: 60
+  log_level: INFO
+
+amplify:
+  # Set after creating Amplify app
+  app_id: "${AMPLIFY_APP_ID_STAGING}"
+  
+database:
+  # DynamoDB settings (managed by Amplify)
+  pitr_enabled: true
+  deletion_protection: false
+
+auth:
+  # Cognito settings (managed by Amplify)
+  mfa: NONE
+  password_min_length: 8
+
+monitoring:
+  # CloudWatch settings
+  log_retention_days: 14
+  enable_tracing: true
+
+tags:
+  environment: staging
+  auto-delete: "no"
+  application: IPS-ERP

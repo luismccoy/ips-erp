@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ips-erp.com/schemas/backup-manifest.schema.json",
+  "title": "IPS-ERP Backup Manifest",
+  "description": "Schema for IPS-ERP data backup manifests",
+  "type": "object",
+  "required": ["version", "timestamp", "environment", "region", "tables"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Manifest schema version",
+      "enum": ["1.0.0"]
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of backup creation"
+    },
+    "environment": {
+      "type": "string",
+      "description": "Source environment name",
+      "enum": ["development", "staging", "production"]
+    },
+    "region": {
+      "type": "string",
+      "description": "AWS region of source deployment",
+      "pattern": "^[a-z]{2}-[a-z]+-[0-9]+$"
+    },
+    "tables": {
+      "type": "object",
+      "description": "Map of DynamoDB table backups",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["file", "count", "sizeBytes"],
+        "properties": {
+          "file": {
+            "type": "string",
+            "description": "Relative path to JSON data file"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of items in table"
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Size of data file in bytes"
+          }
+        }
+      }
+    },
+    "cognito": {
+      "type": ["object", "null"],
+      "description": "Cognito user export metadata",
+      "properties": {
+        "userPoolId": {
+          "type": "string",
+          "description": "Source Cognito User Pool ID"
+        },
+        "usersFile": {
+          "type": "string",
+          "description": "Relative path to users JSON file"
+        },
+        "userCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of users exported"
+        },
+        "note": {
+          "type": "string",
+          "description": "Important notes about Cognito export"
+        }
+      }
+    },
+    "totalSizeBytes": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total size of all backup files in bytes"
+    },
+    "checksum": {
+      "type": "string",
+      "description": "MD5 checksum of all data files for integrity verification"
+    }
+  }
+}

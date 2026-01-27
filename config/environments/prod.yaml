@@ -1,0 +1,53 @@
+# IPS-ERP Production Environment Configuration
+# This file is used by deployment scripts and documentation
+# Actual runtime config is in .env.production
+
+environment:
+  name: production
+  branch: main
+  region: us-east-1
+
+frontend:
+  api_timeout: 30000
+  use_real_backend: true
+  enable_analytics: true
+  enable_mock_data: false
+  app_name: "IPS ERP"
+
+backend:
+  bedrock_model: "anthropic.claude-3-5-sonnet-20240620-v1:0"
+  lambda_timeout: 60
+  log_level: WARN
+
+amplify:
+  # Current production Amplify app
+  app_id: "${AMPLIFY_APP_ID_PROD}"
+  url: "https://main.d2wwgecog8smmr.amplifyapp.com"
+  
+database:
+  # DynamoDB settings (managed by Amplify)
+  pitr_enabled: true
+  deletion_protection: true  # Prevent accidental deletion
+
+auth:
+  # Cognito settings (managed by Amplify)
+  mfa: NONE  # Consider OPTIONAL for production
+  password_min_length: 8
+
+monitoring:
+  # CloudWatch settings
+  log_retention_days: 90
+  enable_tracing: true
+  enable_alarms: true
+
+tags:
+  environment: production
+  auto-delete: "no"  # CRITICAL: Prevents Spring cleaning deletion
+  application: EPS  # As specified in backend.ts
+
+# Production-specific notes
+notes:
+  - "PITR enabled on all DynamoDB tables"
+  - "Tags auto-delete=no applied to all resources"
+  - "Consider enabling Cognito MFA for production"
+  - "Backup exported weekly to S3"
