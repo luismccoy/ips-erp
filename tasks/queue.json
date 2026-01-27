@@ -4,37 +4,42 @@
   "queues": {
     "kiro": {
       "description": "Backend tasks: CDK, Lambda, GraphQL, AWS services",
-      "pending": [
+      "pending": [],
+      "inProgress": [],
+      "completed": [
         {
           "id": "KIRO-001",
           "title": "Implement AWS Transcribe Voice Notes",
           "spec": "docs/KIRO_TRANSCRIBE_SPEC.md",
           "priority": "P2",
-          "status": "PENDING",
+          "status": "COMPLETED",
           "createdAt": "2026-01-27T17:30:00Z",
-          "createdBy": "Clawd"
+          "createdBy": "Clawd",
+          "completedAt": "2026-01-27T22:00:00Z",
+          "completedBy": "Kiro",
+          "notes": "Phase 19: createNurseWithValidation + rate limiting"
         }
-      ],
-      "inProgress": [],
-      "completed": []
+      ]
     },
     "antigravity": {
       "description": "Frontend tasks: React components, UI/UX, styling",
-      "pending": [
+      "pending": [],
+      "inProgress": [],
+      "completed": [
         {
           "id": "ANTIGRAVITY-001",
           "title": "Build Admin CRUD Pages (Patients + Staff)",
           "spec": "docs/FRONTEND_ADMIN_CRUD_SPEC.md",
           "priority": "P0",
-          "status": "PENDING",
+          "status": "COMPLETED",
           "createdAt": "2026-01-27T21:30:00Z",
           "createdBy": "Clawd",
-          "notes": "Critical blocker - production is unusable without this"
+          "notes": "PatientsPage + StaffPage with forms",
+          "completedAt": "2026-01-27T22:00:00Z",
+          "completedBy": "Antigravity"
         }
-      ],
-      "inProgress": [],
-      "completed": []
+      ]
     }
   },
-  "lastUpdated": "2026-01-27T21:30:00Z"
+  "lastUpdated": "2026-01-27T22:00:00Z"
 }
