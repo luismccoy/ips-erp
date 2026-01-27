@@ -28,3 +28,14 @@ dist-ssr
 .env.local
 .env.*.local
 .local-tests/
+
+# AWS Amplify generated outputs (account-specific, regenerated per deployment)
+amplify_outputs.json
+amplify_outputs.*.json
+
+# Backup files (contain sensitive data)
+backups/
+*.backup.json
+
+# Bootstrap artifacts
+bootstrap-summary-*.txt

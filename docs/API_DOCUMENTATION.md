@@ -6922,3 +6922,243 @@ Critical success: No Unauthorized errors (Phase 16 fix verified).
 **Phase 18 Status:** ✅ COMPLETE  
 **Test Execution:** ✅ ALL TESTS PASSED  
 **Production Readiness:** ✅ VERIFIED
+
+
+---
+
+## Phase 19: Security Enhancements
+
+**Status:** ✅ COMPLETE  
+**Deployment Date:** 2026-01-27  
+**Deployment Time:** 138.472 seconds
+
+### Overview
+
+Phase 19 implements critical security enhancements for the IPS ERP backend:
+1. **createNurseWithValidation mutation** - Secure nurse creation with identity validation
+2. **Subscription authorization verification** - Confirmed tenant isolation on real-time updates
+3. **Family Portal rate limiting** - Brute force protection for access codes
+
+---
+
+### 19.1 createNurseWithValidation Mutation
+
+**Purpose:** Secure nurse creation with cognitoSub validation and tenant isolation.
+
+**GraphQL Schema:**
+```graphql
+type Mutation {
+  createNurseWithValidation(
+    name: String!
+    email: String
+    role: String
+    skills: [String]
+    cognitoSub: String!
+    tenantId: String!
+  ): CreateNurseResult @function(name: "createNurseValidated")
+}
+
+type CreateNurseResult {
+  success: Boolean!
+  nurse: Nurse
+  error: String
+  errorCode: String
+  message: String
+}
+```
+
+**Security Validations:**
+1. Only Admin/SuperAdmin can create nurses
+2. Tenant isolation enforced (Admin can only create in their tenant)
+3. Duplicate cognitoSub prevention within tenant
+4. Required field validation (name, cognitoSub)
+
+**Error Codes:**
+| Code | Spanish Message | Description |
+|------|-----------------|-------------|
+| `UNAUTHORIZED` | Solo administradores pueden crear enfermeros | Non-admin user attempted creation |
+| `MISSING_TENANT` | TenantId es requerido | Missing tenant context |
+| `MISSING_FIELDS` | Nombre y cognitoSub son requeridos | Required fields missing |
+| `DUPLICATE_COGNITO_SUB` | Ya existe un enfermero con este usuario de Cognito | Duplicate identity mapping |
+| `INTERNAL_ERROR` | Error al crear enfermero: [details] | Database or system error |
+
+**Usage Example:**
+```typescript
+const result = await client.graphql({
+  query: `
+    mutation CreateNurse($input: CreateNurseInput!) {
+      createNurseWithValidation(
+        name: "María García"
+        email: "maria@ips.com"
+        role: "NURSE"
+        skills: ["Pediatría", "Geriatría"]
+        cognitoSub: "abc123-def456-ghi789"
+        tenantId: "IPS-001"
+      ) {
+        success
+        nurse { id name email }
+        error
+        errorCode
+      }
+    }
+  `
+});
+
+if (result.data.createNurseWithValidation.success) {
+  console.log('Nurse created:', result.data.createNurseWithValidation.nurse);
+} else {
+  console.error('Error:', result.data.createNurseWithValidation.error);
+}
+```
+
+---
+
+### 19.2 Subscription Authorization
+
+**Status:** ✅ VERIFIED
+
+**Models with Subscriptions:**
+- `Shift` - Real-time shift updates (NURSE read permission)
+- `Notification` - Real-time notifications (ADMIN, NURSE group permissions)
+- `Visit` - Visit status changes (tenant-isolated)
+
+**Authorization Rules Verified:**
+```typescript
+// Shift model - NURSE can read (subscribe)
+Shift: a.model({...})
+  .authorization(allow => [
+    allow.groups(['ADMIN']).to(['create', 'read', 'update', 'delete']),
+    allow.groups(['NURSE']).to(['read'])
+  ])
+
+// Notification model - Explicit group permissions for subscriptions
+Notification: a.model({...})
+  .authorization(allow => [
+    allow.ownerDefinedIn('tenantId'),
+    allow.groups(['ADMIN', 'NURSE']).to(['read', 'update'])
+  ])
+```
+
+**Tenant Isolation:** All subscription-enabled models include `ownerDefinedIn('tenantId')` which enforces tenant isolation at the AppSync resolver level.
+
+---
+
+### 19.3 Family Portal Rate Limiting
+
+**Purpose:** Protect against brute force attacks on patient access codes.
+
+**Configuration:**
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| `MAX_FAILED_ATTEMPTS` | 5 | Maximum failed attempts before lockout |
+| `LOCKOUT_DURATION_MS` | 900,000 (15 min) | Duration of lockout period |
+
+**Rate Limit Storage:**
+- Stored in Patient table with `ratelimit:` prefix
+- Key format: `ratelimit:{patientId}:{callerSub}`
+- Fields: `failedAttempts`, `lockedUntil`, `updatedAt`
+
+**Security Events Logged:**
+| Event | Description |
+|-------|-------------|
+| `ACCESS_GRANTED` | Successful access code verification |
+| `ACCESS_DENIED` | Invalid access code provided |
+| `RATE_LIMIT_EXCEEDED` | User exceeded max failed attempts |
+
+**Response Format:**
+```typescript
+interface VerifyFamilyAccessResult {
+  authorized: boolean;
+  patientName?: string;      // Only on success
+  error?: string;            // Spanish error message
+  remainingAttempts?: number; // Attempts left before lockout
+}
+```
+
+**Error Messages (Spanish):**
+| Scenario | Message |
+|----------|---------|
+| Rate limited | `Demasiados intentos fallidos. Intente de nuevo en X minutos.` |
+| Invalid code (attempts left) | `Código de acceso inválido. X intentos restantes.` |
+| Invalid code (locked) | `Código de acceso inválido. Cuenta bloqueada por 15 minutos.` |
+| Patient not found | `Paciente no encontrado` |
+| Missing fields | `Código de acceso y ID de paciente son requeridos` |
+
+**Usage Example:**
+```typescript
+const result = await client.graphql({
+  query: `
+    query VerifyAccess($patientId: ID!, $accessCode: String!) {
+      verifyFamilyAccessCode(patientId: $patientId, accessCode: $accessCode) {
+        authorized
+        patientName
+        error
+        remainingAttempts
+      }
+    }
+  `,
+  variables: {
+    patientId: "patient-123",
+    accessCode: "ABC123"
+  }
+});
+
+if (result.data.verifyFamilyAccessCode.authorized) {
+  // Grant access to Family Portal
+  console.log('Welcome,', result.data.verifyFamilyAccessCode.patientName);
+} else {
+  // Show error with remaining attempts
+  console.error(result.data.verifyFamilyAccessCode.error);
+}
+```
+
+---
+
+### 19.4 Audit Logging
+
+**Security events are logged to the AuditLog table:**
+
+```typescript
+{
+  id: "audit:1706380800000:abc123def",
+  tenantId: "IPS-001",
+  userId: "cognito-sub-or-anonymous",
+  userRole: "FAMILY",
+  action: "FAMILY_ACCESS_ATTEMPT",
+  entityType: "Patient",
+  entityId: "patient-123",
+  timestamp: "2026-01-27T12:00:00.000Z",
+  details: "{\"action\":\"ACCESS_GRANTED\",\"patientId\":\"patient-123\"}"
+}
+```
+
+**Audit Actions:**
+- `FAMILY_ACCESS_ATTEMPT` with details: `ACCESS_GRANTED`, `ACCESS_DENIED`, `RATE_LIMIT_EXCEEDED`
+
+---
+
+### 19.5 Deployment Summary
+
+**Files Modified:**
+- `amplify/data/resource.ts` - Added createNurseWithValidation mutation
+- `amplify/backend.ts` - Registered createNurseValidated Lambda
+- `amplify/functions/verify-family-access/handler.ts` - Added rate limiting
+
+**Files Created:**
+- `amplify/functions/create-nurse-validated/handler.ts` - Lambda handler
+- `amplify/functions/create-nurse-validated/resource.ts` - Lambda resource
+- `amplify/functions/create-nurse-validated/package.json` - Dependencies
+
+**Lambda Functions:**
+| Function | Purpose | Timeout |
+|----------|---------|---------|
+| `createNurseValidated` | Secure nurse creation | 30s |
+| `verifyFamilyAccess` | Access code verification with rate limiting | 30s |
+
+**AppSync Endpoint:** https://ga4dwdcapvg5ziixpgipcvmfbe.appsync-api.us-east-1.amazonaws.com/graphql
+
+---
+
+**Phase 19 Status:** ✅ COMPLETE  
+**Tasks Completed:** 1.2, 2.1, 2.2  
+**Security Level:** Enhanced

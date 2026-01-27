@@ -1,0 +1,7 @@
+# Tool versions for IPS-ERP
+# Used by asdf (https://asdf-vm.com/) and similar version managers
+# Ensures reproducible development environments
+
+nodejs 18.20.4
+python 3.12.0
+awscli 2.15.0

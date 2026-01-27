@@ -7,18 +7,26 @@
  * - Start/continue visit documentation for completed shifts
  * - See visit status badges (Pending Approval, Rejected, Approved)
  * - Receive notifications for visit approvals/rejections
+ * - Work offline with automatic sync when connectivity returns
  * 
  * Requirements: 1.1, 1.2, 1.5, 3.4, 3.6, 4.1
+ * Offline: Phase 4 UI Integration
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { Activity, LogOut, FileText, Edit3, Clock, CheckCircle, XCircle, AlertCircle, FileCheck, HeartPulse } from 'lucide-react';
+import { Activity, LogOut, FileText, Edit3, Clock, CheckCircle, XCircle, AlertCircle, FileCheck, HeartPulse, CloudOff } from 'lucide-react';
 import { client, isUsingRealBackend } from '../amplify-utils';
 import { createVisitDraft } from '../api/workflow-api';
 import { usePagination } from '../hooks/usePagination';
+import { useNetworkStatus } from '../hooks/useNetworkStatus';
+import { useSyncStatus } from '../hooks/useSyncStatus';
 import { NotificationBell } from './NotificationBell';
 import { VisitDocumentationForm } from './VisitDocumentationForm';
 import { AssessmentEntryForm } from './AssessmentEntryForm';
+import { OfflineBanner } from './OfflineBanner';
+import { SyncStatusBadge, SyncCloudIcon, type SyncStatusType } from './SyncStatusBadge';
+import { SyncProgressIndicator } from './SyncProgressIndicator';
+import { NetworkStatusIndicator, LastSyncTime } from './NetworkStatusIndicator';
 import type { SimpleNurseAppProps } from '../types/components';
 import type { Shift, Patient } from '../types';
 import type { Visit, VisitStatus, NotificationItem } from '../types/workflow';
@@ -29,6 +37,8 @@ import type { Visit, VisitStatus, NotificationItem } from '../types/workflow';
 
 interface ShiftWithVisit extends Shift {
     visit?: Visit | null;
+    /** Sync status for offline support */
+    _syncStatus?: SyncStatusType;
 }
 
 // ============================================================================
@@ -248,6 +258,12 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
     const currentUserId = 'nurse-1';
 
     // ========================================================================
+    // Offline Hooks (Phase 4)
+    // ========================================================================
+    const { isOffline, isSlow, isOnline } = useNetworkStatus();
+    const { pendingCount, isSyncing, lastSyncTimeFormatted } = useSyncStatus();
+
+    // ========================================================================
     // Data Fetching
     // ========================================================================
     const fetchData = useCallback(async () => {
@@ -366,51 +382,89 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
     /**
      * Handles "Start Documentation" button click.
      * Creates a visit draft and opens the documentation form.
+     * Supports offline mode with optimistic updates.
      * 
      * Validates: Requirements 1.1, 1.2
+     * Offline: Phase 4 - Optimistic updates
      */
     const handleStartDocumentation = useCallback(async (shiftId: string) => {
         setCreatingDraft(shiftId);
         setError(null);
 
+        // Find the shift first for optimistic update
+        const shift = shifts.find(s => s.id === shiftId);
+        if (!shift) {
+            setError('Turno no encontrado');
+            setCreatingDraft(null);
+            return;
+        }
+
+        // Prepare the optimistic draft visit
+        const optimisticVisit: Visit = {
+            id: shiftId,
+            tenantId: shift.tenantId || '',
+            shiftId: shiftId,
+            patientId: shift.patientId || '',
+            nurseId: currentUserId,
+            status: 'DRAFT',
+            kardex: { generalObservations: '' },
+        };
+
+        // Apply optimistic update immediately
+        const updatedShift: ShiftWithVisit = {
+            ...shift,
+            visit: optimisticVisit,
+            _syncStatus: isOffline ? 'pending' : 'syncing',
+        };
+
+        // Update UI immediately (optimistic)
+        setShifts(prev => prev.map(s => s.id === shiftId ? updatedShift : s));
+        setSelectedShift(updatedShift);
+        setShowDocumentationForm(true);
+
         try {
-            const result = await createVisitDraft(shiftId);
-
-            if (result.success) {
-                // Find the shift and open documentation form
-                const shift = shifts.find(s => s.id === shiftId);
-                if (shift) {
-                    // Update shift with new draft visit
-                    const updatedShift: ShiftWithVisit = {
-                        ...shift,
-                        visit: {
-                            id: shiftId,
-                            tenantId: shift.tenantId || '',
-                            shiftId: shiftId,
-                            patientId: shift.patientId || '',
-                            nurseId: currentUserId,
-                            status: 'DRAFT',
-                            kardex: { generalObservations: '' },
-                        },
-                    };
-
-                    // Update shifts state
-                    setShifts(prev => prev.map(s => s.id === shiftId ? updatedShift : s));
-
-                    // Open documentation form
-                    setSelectedShift(updatedShift);
-                    setShowDocumentationForm(true);
-                }
+            // If offline, the draft is already saved optimistically
+            if (isOffline) {
+                console.log('📴 Offline: Visit draft queued for sync');
+                // Mark as pending sync
+                setShifts(prev => prev.map(s => 
+                    s.id === shiftId 
+                        ? { ...s, _syncStatus: 'pending' as SyncStatusType }
+                        : s
+                ));
             } else {
-                setError(result.error || 'Error al crear el borrador de visita');
+                // Online: try to create on server
+                const result = await createVisitDraft(shiftId);
+
+                if (result.success) {
+                    // Update with synced status
+                    setShifts(prev => prev.map(s => 
+                        s.id === shiftId 
+                            ? { ...s, _syncStatus: 'synced' as SyncStatusType }
+                            : s
+                    ));
+                } else {
+                    // Server error but keep the local draft
+                    console.warn('Server error, keeping local draft:', result.error);
+                    setShifts(prev => prev.map(s => 
+                        s.id === shiftId 
+                            ? { ...s, _syncStatus: 'pending' as SyncStatusType }
+                            : s
+                    ));
+                }
             }
         } catch (err) {
             console.error('Error creating visit draft:', err);
-            setError('Error al crear el borrador de visita. Por favor intente de nuevo.');
+            // Mark as pending if network error
+            setShifts(prev => prev.map(s => 
+                s.id === shiftId 
+                    ? { ...s, _syncStatus: 'pending' as SyncStatusType }
+                    : s
+            ));
         } finally {
             setCreatingDraft(null);
         }
-    }, [shifts, currentUserId]);
+    }, [shifts, currentUserId, isOffline, setShifts]);
 
     /**
      * Handles "Continue Documentation" button click.
@@ -488,13 +542,26 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
     // ========================================================================
     return (
         <div className="min-h-screen bg-slate-900 text-white">
-            {/* Header with NotificationBell */}
-            <header className="bg-slate-800 p-4 flex justify-between items-center">
+            {/* Offline Banner - Shows when offline, slow, or syncing */}
+            <OfflineBanner />
+            
+            {/* Header with NotificationBell and Network Status */}
+            <header className={`bg-slate-800 p-4 flex justify-between items-center ${(isOffline || isSlow || pendingCount > 0 || isSyncing) ? 'mt-10' : ''}`}>
                 <div className="flex items-center gap-2">
                     <Activity size={24} className="text-[#2563eb]" />
                     <span className="font-black text-lg">IPS ERP</span>
+                    {/* Network status dot */}
+                    {isOffline && (
+                        <span className="text-xs text-red-400 flex items-center gap-1 ml-2">
+                            <CloudOff size={12} />
+                            Offline
+                        </span>
+                    )}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
+                    {/* Network Status Indicator with pending badge */}
+                    <NetworkStatusIndicator showPendingBadge={true} size="md" />
+                    
                     {/* NotificationBell - Requirement 4.1 */}
                     <NotificationBell
                         userId={currentUserId}
@@ -560,14 +627,23 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                     shifts.map(shift => {
                                         const patient = patients.find(p => p.id === shift.patientId);
                                         const isCreatingThisDraft = creatingDraft === shift.id;
+                                        // Determine sync status for the shift/visit
+                                        // _syncStatus is tracked on ShiftWithVisit level
+                                        const visitSyncStatus: SyncStatusType = shift._syncStatus || 'synced';
 
                                         return (
                                             <div key={shift.id} className="bg-slate-800 p-4 rounded-xl">
                                                 {/* Shift Header */}
                                                 <div className="flex justify-between items-start mb-2">
-                                                    <h3 className="font-bold text-white">
-                                                        {patient?.name || shift.patientName || 'Paciente Desconocido'}
-                                                    </h3>
+                                                    <div className="flex items-center gap-2">
+                                                        <h3 className="font-bold text-white">
+                                                            {patient?.name || shift.patientName || 'Paciente Desconocido'}
+                                                        </h3>
+                                                        {/* Sync status icon for the visit */}
+                                                        {shift.visit && visitSyncStatus !== 'synced' && (
+                                                            <SyncCloudIcon syncStatus={visitSyncStatus} size={14} />
+                                                        )}
+                                                    </div>
                                                     <span className={`px-2 py-1 rounded text-xs font-bold ${shift.status === 'COMPLETED'
                                                         ? 'bg-green-500/20 text-green-400'
                                                         : shift.status === 'IN_PROGRESS'
@@ -604,6 +680,20 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                     />
                                                 )}
 
+                                                {/* Offline sync status message */}
+                                                {visitSyncStatus === 'pending' && (
+                                                    <div className="mt-2 text-xs text-yellow-400 flex items-center gap-1.5 bg-yellow-500/10 px-2 py-1.5 rounded">
+                                                        <CloudOff size={12} />
+                                                        <span>Se sincronizará cuando haya conexión</span>
+                                                    </div>
+                                                )}
+                                                {visitSyncStatus === 'error' && (
+                                                    <div className="mt-2 text-xs text-red-400 flex items-center gap-1.5 bg-red-500/10 px-2 py-1.5 rounded">
+                                                        <AlertCircle size={12} />
+                                                        <span>Error al sincronizar - toque para reintentar</span>
+                                                    </div>
+                                                )}
+
                                                 {/* Documentation Button - Requirements 1.1, 1.5 */}
                                                 <DocumentationButton
                                                     shift={shift}
@@ -623,10 +713,15 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                             });
                                                             setShowAssessmentForm(true);
                                                         }}
-                                                        className="mt-2 w-full flex items-center justify-center gap-2 px-3 py-2 bg-pink-600/20 border border-pink-500/30 text-pink-400 text-sm font-medium rounded-lg hover:bg-pink-600/30 transition-colors"
+                                                        className={`mt-2 w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                                                            isOffline 
+                                                                ? 'bg-pink-600/10 border border-pink-500/20 text-pink-400/70' 
+                                                                : 'bg-pink-600/20 border border-pink-500/30 text-pink-400 hover:bg-pink-600/30'
+                                                        }`}
                                                     >
                                                         <HeartPulse size={16} />
                                                         Registrar Valoración Clínica
+                                                        {isOffline && <span className="text-[10px] ml-1">(offline)</span>}
                                                     </button>
                                                 )}
                                             </div>
@@ -685,11 +780,40 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                         {isUsingRealBackend() ? '🟢 Datos en Vivo' : '🟡 Datos de Prueba'}
                                     </div>
                                 </div>
+
+                                {/* Sync Status */}
+                                <div className="bg-slate-800 p-4 rounded-xl">
+                                    <h4 className="text-sm font-semibold text-slate-300 mb-3">Estado de Sincronización</h4>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div className="text-center p-2 bg-slate-700/50 rounded-lg">
+                                            <div className={`text-xl font-bold ${isOnline ? 'text-green-400' : 'text-red-400'}`}>
+                                                {isOnline ? '🟢' : '🔴'}
+                                            </div>
+                                            <div className="text-xs text-slate-400">
+                                                {isOnline ? 'Conectado' : 'Sin conexión'}
+                                            </div>
+                                        </div>
+                                        <div className="text-center p-2 bg-slate-700/50 rounded-lg">
+                                            <div className={`text-xl font-bold ${pendingCount > 0 ? 'text-yellow-400' : 'text-green-400'}`}>
+                                                {pendingCount}
+                                            </div>
+                                            <div className="text-xs text-slate-400">Pendientes</div>
+                                        </div>
+                                    </div>
+                                    {lastSyncTimeFormatted && (
+                                        <div className="mt-3 text-center">
+                                            <LastSyncTime className="text-slate-500" />
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </>
                 )}
             </div>
+
+            {/* Sync Progress Indicator - Floating at bottom right */}
+            <SyncProgressIndicator position="bottom-right" />
 
             {/* Visit Documentation Form Modal */}
             {showDocumentationForm && selectedShift && (

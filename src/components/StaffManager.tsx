@@ -168,7 +168,8 @@ export function StaffManager() {
             </div>
 
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                <table className="w-full">
+                <div className="overflow-x-auto">
+                    <table className="min-w-full w-full">
                     <thead className="bg-slate-50 border-b border-slate-200">
                         <tr>
                             <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Nurse Name</th>
@@ -257,6 +258,7 @@ export function StaffManager() {
                         )}
                     </tbody>
                 </table>
+                </div>
             </div>
 
             {/* Modal */}

@@ -1,6 +1,7 @@
 import { type Schema } from '../../data/resource';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, UpdateCommand } from '@aws-sdk/lib-dynamodb';
+import { validateRIPSWithAI } from './ai-client';
 
 const ddbClient = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddbClient);
@@ -153,17 +154,70 @@ export const handler: Schema["validateRIPS"]["functionHandler"] = async (event) 
         warnings
     };
 
+    // AI-powered validation (if basic validation passed and MODEL_ID is configured)
+    let aiValidation: {
+        isCompliant: boolean;
+        issues: string[];
+        suggestions: string[];
+        confidence: number;
+    } | undefined;
+
+    if (result.isValid && process.env.MODEL_ID) {
+        try {
+            console.log('[RIPS_VALIDATOR] Running AI validation...');
+            aiValidation = await validateRIPSWithAI(billingRecord);
+            
+            // If AI found compliance issues, add them to warnings or errors
+            if (!aiValidation.isCompliant) {
+                // Add AI-detected issues as warnings (not errors, since basic validation passed)
+                aiValidation.issues.forEach(issue => {
+                    warnings.push(`⚠️ AI: ${issue}`);
+                });
+                
+                console.log(`[RIPS_VALIDATOR] AI detected ${aiValidation.issues.length} compliance issues`);
+            }
+            
+            // Add AI suggestions to warnings
+            if (aiValidation.suggestions.length > 0) {
+                aiValidation.suggestions.forEach(suggestion => {
+                    warnings.push(`💡 ${suggestion}`);
+                });
+            }
+            
+            console.log('[RIPS_VALIDATOR] ✅ AI validation completed', {
+                aiCompliant: aiValidation.isCompliant,
+                confidence: aiValidation.confidence
+            });
+            
+        } catch (error) {
+            console.error('[RIPS_VALIDATOR] AI validation failed:', error);
+            warnings.push('⚠️ AI validation could not be completed');
+        }
+    } else if (!process.env.MODEL_ID) {
+        console.log('[RIPS_VALIDATOR] Skipping AI validation: MODEL_ID not configured');
+    }
+
     // Phase 12: Persist validation result to BillingRecord if billingRecordId provided
     if (billingRecord.id) {
         try {
+            const updateExpression = aiValidation 
+                ? 'SET ripsValidationResult = :result, ripsAIValidation = :aiResult, updatedAt = :updatedAt'
+                : 'SET ripsValidationResult = :result, updatedAt = :updatedAt';
+            
+            const expressionValues: any = {
+                ':result': result,
+                ':updatedAt': new Date().toISOString()
+            };
+            
+            if (aiValidation) {
+                expressionValues[':aiResult'] = aiValidation;
+            }
+            
             await docClient.send(new UpdateCommand({
                 TableName: BILLING_RECORD_TABLE,
                 Key: { id: billingRecord.id },
-                UpdateExpression: 'SET ripsValidationResult = :result, updatedAt = :updatedAt',
-                ExpressionAttributeValues: {
-                    ':result': result,
-                    ':updatedAt': new Date().toISOString()
-                }
+                UpdateExpression: updateExpression,
+                ExpressionAttributeValues: expressionValues
             }));
         } catch (error) {
             console.error('Failed to persist validation result:', error);

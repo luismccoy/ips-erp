@@ -2,13 +2,14 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import {
     Activity, ClipboardCheck, Package, Calendar, ShieldAlert,
     FileText, LogOut, DollarSign, ClipboardList, BarChart,
-    Users, Stethoscope, Menu, X, HeartPulse
+    Users, Stethoscope, Menu, X, HeartPulse, Globe
 } from 'lucide-react';
 
 import { client, isUsingRealBackend, isDemoMode, MOCK_USER } from '../amplify-utils';
 import { GuidedTour, RestartTourButton } from './GuidedTour';
 import type { AdminDashboardProps, NavItemProps } from '../types/components';
 import { graphqlToFrontendSafe } from '../utils/inventory-transforms';
+import { useLanguage } from '../contexts/LanguageContext';
 
 import { NotificationBell } from './NotificationBell';
 import type { NotificationItem } from '../types/workflow';
@@ -48,6 +49,9 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
     
     // Track visited panels for lazy mounting (only load when first visited, then keep mounted)
     const [visitedPanels, setVisitedPanels] = useState<Set<string>>(new Set(['dashboard']));
+    
+    // Language toggle
+    const { language, setLanguage } = useLanguage();
     
     // Guided tour state (only show in demo mode)
     const [showTour, setShowTour] = useState(false);
@@ -189,6 +193,14 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                             userId={tenant?.id || 'admin'}
                             onNotificationClick={handleNotificationClick}
                         />
+                        <button
+                            onClick={() => setLanguage(language === 'es' ? 'en' : 'es')}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-xs font-bold transition-colors"
+                            title={language === 'es' ? 'Switch to English' : 'Cambiar a Español'}
+                        >
+                            <Globe size={14} />
+                            {language === 'es' ? '🇺🇸 EN' : '🇨🇴 ES'}
+                        </button>
                         <span className="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-xs font-bold">Res 3100 Compliant</span>
                         <div className="h-10 w-10 bg-slate-900 rounded-xl flex items-center justify-center text-white font-bold">A</div>
                     </div>

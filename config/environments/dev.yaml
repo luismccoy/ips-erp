@@ -1,0 +1,44 @@
+# IPS-ERP Development Environment Configuration
+# This file is used by deployment scripts and documentation
+# Actual runtime config is in .env.development
+
+environment:
+  name: development
+  branch: develop
+  region: us-east-1
+
+frontend:
+  api_timeout: 30000
+  use_real_backend: false
+  enable_analytics: false
+  enable_mock_data: true
+  app_name: "IPS ERP [DEV]"
+
+backend:
+  bedrock_model: "anthropic.claude-3-5-sonnet-20240620-v1:0"
+  lambda_timeout: 60
+  log_level: DEBUG
+
+amplify:
+  # Set after creating Amplify app
+  app_id: "${AMPLIFY_APP_ID_DEV}"
+  
+database:
+  # DynamoDB settings (managed by Amplify)
+  pitr_enabled: true
+  deletion_protection: false
+
+auth:
+  # Cognito settings (managed by Amplify)
+  mfa: NONE
+  password_min_length: 8
+
+monitoring:
+  # CloudWatch settings
+  log_retention_days: 7
+  enable_tracing: false
+
+tags:
+  environment: development
+  auto-delete: "yes"  # Development resources can be cleaned up
+  application: IPS-ERP

@@ -91,18 +91,16 @@ export function InventoryDashboard() {
                 // Transform status to GraphQL format before sending to backend
                 const graphqlStatus = frontendToGraphQLSafe(frontendStatus);
 
-                // TODO: Uncomment when backend permissions are fixed
-                // await client.models.InventoryItem.create({
-                //     name: newItemName,
-                //     quantity: newItemQuantity,
-                //     unit: newItemUnit,
-                //     reorderLevel: newItemReorder,
-                //     sku: newItemSku,
-                //     status: graphqlStatus,
-                //     tenantId: MOCK_USER.attributes['custom:tenantId']
-                // });
-
-                console.log('Would create item with GraphQL status:', graphqlStatus);
+                // P1 Fix: ADMIN group now has create/update/delete permissions in amplify/data/resource.ts
+                await (client.models.InventoryItem as any).create({
+                    name: newItemName,
+                    quantity: newItemQuantity,
+                    unit: newItemUnit,
+                    reorderLevel: newItemReorder,
+                    sku: newItemSku,
+                    status: graphqlStatus,
+                    tenantId: MOCK_USER.attributes['custom:tenantId']
+                });
             }
 
             // Optimistic update for UI testing (uses frontend format)
@@ -145,14 +143,12 @@ export function InventoryDashboard() {
                 // Transform status to GraphQL format before sending to backend
                 const graphqlStatus = frontendToGraphQLSafe(frontendStatus);
 
-                // TODO: Uncomment when backend permissions are fixed
-                // await client.models.InventoryItem.update({
-                //     id: editingItem.id,
-                //     quantity: newItemQuantity,
-                //     status: graphqlStatus
-                // });
-
-                console.log('Would update item with GraphQL status:', graphqlStatus);
+                // P1 Fix: ADMIN group now has create/update/delete permissions in amplify/data/resource.ts
+                await (client.models.InventoryItem as any).update({
+                    id: editingItem.id,
+                    quantity: newItemQuantity,
+                    status: graphqlStatus
+                });
             }
 
             // Optimistic update (uses frontend format)
