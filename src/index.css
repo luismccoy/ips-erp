@@ -11,3 +11,19 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: #f8fafc;
 }
+
+/* Custom animations for optimization feedback */
+@keyframes pulse-green {
+  0%, 100% {
+    background-color: rgb(240 253 244);
+    border-color: rgb(134 239 172);
+  }
+  50% {
+    background-color: rgb(220 252 231);
+    border-color: rgb(74 222 128);
+  }
+}
+
+.animate-pulse-green {
+  animation: pulse-green 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

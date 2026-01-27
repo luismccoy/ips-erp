@@ -17,6 +17,11 @@ export function RosterDashboard() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isOptimizing, setIsOptimizing] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isOptimizationResultOpen, setIsOptimizationResultOpen] = useState(false);
+
+    // Optimization Result States
+    const [recentlyAssignedIds, setRecentlyAssignedIds] = useState<Set<string>>(new Set());
+    const [optimizationResult, setOptimizationResult] = useState<any>(null);
 
     // Form States
     const [newShiftPatientId, setNewShiftPatientId] = useState('');
@@ -126,24 +131,68 @@ export function RosterDashboard() {
                 
                 // Apply the AI assignments to the shifts
                 if (result.assignments && result.assignments.length > 0) {
+                    const newlyAssignedIds = new Set<string>();
+                    const assignmentDetails: any[] = [];
+                    
                     const updatedShifts = shifts.map(shift => {
                         const assignment = result.assignments.find((a: any) => a.shiftId === shift.id);
                         if (assignment && assignment.nurseId !== 'UNASSIGNED') {
                             const nurse = nurses.find(n => n.id === assignment.nurseId);
+                            const patient = patients.find(p => p.id === shift.patientId);
+                            
+                            newlyAssignedIds.add(shift.id);
+                            assignmentDetails.push({
+                                patientName: patient?.name || 'Paciente desconocido',
+                                nurseName: nurse?.name || assignment.nurseName || 'Asignado',
+                                location: shift.location || 'Sin ubicación',
+                                time: new Date(shift.scheduledTime).toLocaleString('es-CO', { 
+                                    hour: '2-digit', 
+                                    minute: '2-digit', 
+                                    day: '2-digit', 
+                                    month: 'short' 
+                                })
+                            });
+                            
                             return {
                                 ...shift,
                                 nurseId: assignment.nurseId,
-                                nurseName: nurse?.name || assignment.nurseName || 'Asignado'
+                                nurseName: nurse?.name || assignment.nurseName || 'Asignado',
+                                status: 'PENDING' as const // Update status to show it's now assigned
                             };
                         }
                         return shift;
                     });
                     
                     setItems(updatedShifts);
+                    setRecentlyAssignedIds(newlyAssignedIds);
                     
-                    // Show success message with details
+                    // Store result for detailed modal
                     const assignedCount = result.assignments.filter((a: any) => a.nurseId !== 'UNASSIGNED').length;
-                    alert(`🤖 IA Completada!\n\n✅ ${assignedCount} turnos asignados automáticamente\n📊 Score de optimización: ${Math.round((result.optimizationScore || 0.85) * 100)}%\n🚗 Tiempo total de viaje: ${result.totalTravelTime || '2h 15min'}`);
+                    setOptimizationResult({
+                        assignedCount,
+                        optimizationScore: Math.round((result.optimizationScore || 0.85) * 100),
+                        totalTravelTime: result.totalTravelTime || '2h 15min',
+                        assignments: assignmentDetails
+                    });
+                    
+                    // Show detailed result modal
+                    setIsOptimizationResultOpen(true);
+                    
+                    // Auto-scroll to first assigned shift after modal closes
+                    setTimeout(() => {
+                        const firstAssignedId = Array.from(newlyAssignedIds)[0];
+                        if (firstAssignedId) {
+                            const element = document.getElementById(`shift-${firstAssignedId}`);
+                            if (element) {
+                                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                        }
+                    }, 500);
+                    
+                    // Clear highlights after 5 seconds
+                    setTimeout(() => {
+                        setRecentlyAssignedIds(new Set());
+                    }, 5000);
                 } else {
                     alert('La IA no pudo encontrar asignaciones óptimas. Intente agregar más enfermeras con habilidades coincidentes.');
                 }
@@ -225,23 +274,43 @@ export function RosterDashboard() {
                 {shifts.map(shift => {
                     const patient = patients.find(p => p.id === shift.patientId);
                     const nurse = nurses.find(n => n.id === shift.nurseId);
+                    const isRecentlyAssigned = recentlyAssignedIds.has(shift.id);
 
                     return (
-                        <div key={shift.id} className="p-4 border border-slate-50 rounded-xl hover:bg-slate-50/50 transition-all flex justify-between items-center">
+                        <div 
+                            key={shift.id} 
+                            id={`shift-${shift.id}`}
+                            className={`p-4 border rounded-xl transition-all flex justify-between items-center ${
+                                isRecentlyAssigned 
+                                    ? 'border-green-300 bg-green-50 animate-pulse-green shadow-lg shadow-green-200/50' 
+                                    : 'border-slate-50 hover:bg-slate-50/50'
+                            }`}
+                        >
                             <div className="flex gap-4 items-center">
-                                <div className="h-10 w-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-600 shadow-sm">
-                                    <Clock size={18} />
+                                <div className={`h-10 w-10 rounded-full flex items-center justify-center shadow-sm ${
+                                    isRecentlyAssigned ? 'bg-green-100 text-green-600' : 'bg-blue-50 text-blue-600'
+                                }`}>
+                                    {isRecentlyAssigned ? <Check size={18} /> : <Clock size={18} />}
                                 </div>
                                 <div>
-                                    <h4 className="font-bold text-slate-900">{patient?.name || 'Unknown Patient'}</h4>
+                                    <div className="flex items-center gap-2">
+                                        <h4 className="font-bold text-slate-900">{patient?.name || 'Unknown Patient'}</h4>
+                                        {isRecentlyAssigned && (
+                                            <span className="px-2 py-0.5 bg-green-500 text-white text-[9px] font-black rounded-full uppercase animate-bounce">
+                                                ✨ Recién Asignado
+                                            </span>
+                                        )}
+                                    </div>
                                     <div className="flex flex-col gap-0.5 mt-1">
                                         <p className="text-xs text-slate-500 flex items-center gap-1">
                                             <MapPin size={10} />
                                             {shift.location || 'No location set'}
                                         </p>
-                                        <p className="text-xs text-slate-400 flex items-center gap-1 font-medium">
+                                        <p className={`text-xs flex items-center gap-1 font-medium ${
+                                            isRecentlyAssigned ? 'text-green-600' : 'text-slate-400'
+                                        }`}>
                                             <User size={10} />
-                                            {nurse?.name || 'Sin Asignar'}
+                                            {nurse?.name || shift.nurseName || 'Sin Asignar'}
                                         </p>
                                     </div>
                                 </div>
@@ -270,6 +339,103 @@ export function RosterDashboard() {
                     </button>
                 )}
             </div>
+
+            {/* Optimization Result Modal */}
+            {isOptimizationResultOpen && optimizationResult && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-6 animate-in fade-in zoom-in duration-200">
+                        <div className="flex justify-between items-center mb-6">
+                            <div className="flex items-center gap-3">
+                                <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
+                                    <Sparkles className="text-green-600" size={24} />
+                                </div>
+                                <div>
+                                    <h3 className="font-black text-xl text-slate-900">¡Optimización Completada!</h3>
+                                    <p className="text-sm text-slate-500">Turnos asignados automáticamente por IA</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => setIsOptimizationResultOpen(false)} 
+                                className="text-slate-400 hover:text-slate-600 transition-colors"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        {/* Summary Stats */}
+                        <div className="grid grid-cols-3 gap-4 mb-6">
+                            <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                                <div className="text-3xl font-black text-green-600 mb-1">
+                                    {optimizationResult.assignedCount}
+                                </div>
+                                <div className="text-xs font-bold text-green-700 uppercase">
+                                    Turnos Asignados
+                                </div>
+                            </div>
+                            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
+                                <div className="text-3xl font-black text-blue-600 mb-1">
+                                    {optimizationResult.optimizationScore}%
+                                </div>
+                                <div className="text-xs font-bold text-blue-700 uppercase">
+                                    Score de Optimización
+                                </div>
+                            </div>
+                            <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 text-center">
+                                <div className="text-3xl font-black text-purple-600 mb-1">
+                                    {optimizationResult.totalTravelTime}
+                                </div>
+                                <div className="text-xs font-bold text-purple-700 uppercase">
+                                    Tiempo de Viaje
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Assignment Details Table */}
+                        <div className="mb-6">
+                            <h4 className="font-bold text-sm text-slate-700 mb-3 flex items-center gap-2">
+                                <Users size={16} />
+                                Asignaciones Realizadas
+                            </h4>
+                            <div className="max-h-64 overflow-y-auto border border-slate-200 rounded-xl">
+                                <table className="w-full">
+                                    <thead className="bg-slate-50 sticky top-0">
+                                        <tr>
+                                            <th className="text-left px-4 py-3 text-xs font-black text-slate-600 uppercase">Paciente</th>
+                                            <th className="text-left px-4 py-3 text-xs font-black text-slate-600 uppercase">Enfermera Asignada</th>
+                                            <th className="text-left px-4 py-3 text-xs font-black text-slate-600 uppercase">Ubicación</th>
+                                            <th className="text-left px-4 py-3 text-xs font-black text-slate-600 uppercase">Horario</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {optimizationResult.assignments.map((assignment: any, idx: number) => (
+                                            <tr key={idx} className="border-t border-slate-100 hover:bg-slate-50 transition-colors">
+                                                <td className="px-4 py-3 text-sm font-bold text-slate-900">{assignment.patientName}</td>
+                                                <td className="px-4 py-3 text-sm font-medium text-green-600 flex items-center gap-2">
+                                                    <Check size={14} />
+                                                    {assignment.nurseName}
+                                                </td>
+                                                <td className="px-4 py-3 text-xs text-slate-500">{assignment.location}</td>
+                                                <td className="px-4 py-3 text-xs text-slate-500">{assignment.time}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {/* Action Button */}
+                        <div className="flex justify-end">
+                            <button
+                                onClick={() => setIsOptimizationResultOpen(false)}
+                                className="px-6 py-3 bg-[#2563eb] text-white font-bold rounded-xl hover:bg-blue-600 transition-colors flex items-center gap-2 shadow-lg shadow-blue-500/20"
+                            >
+                                <Check size={18} />
+                                Entendido
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Create Shift Modal */}
             {isCreateModalOpen && (
