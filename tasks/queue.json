@@ -1,0 +1,29 @@
+{
+  "version": "1.0.0",
+  "description": "Task queue for IDE handoffs. Kiro polls for backend tasks, Antigravity polls for frontend tasks.",
+  "queues": {
+    "kiro": {
+      "description": "Backend tasks: CDK, Lambda, GraphQL, AWS services",
+      "pending": [
+        {
+          "id": "KIRO-001",
+          "title": "Implement AWS Transcribe Voice Notes",
+          "spec": "docs/KIRO_TRANSCRIBE_SPEC.md",
+          "priority": "P2",
+          "status": "PENDING",
+          "createdAt": "2026-01-27T17:30:00Z",
+          "createdBy": "Clawd"
+        }
+      ],
+      "inProgress": [],
+      "completed": []
+    },
+    "antigravity": {
+      "description": "Frontend tasks: React components, UI/UX, styling",
+      "pending": [],
+      "inProgress": [],
+      "completed": []
+    }
+  },
+  "lastUpdated": "2026-01-27T21:15:00Z"
+}
