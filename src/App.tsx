@@ -122,10 +122,20 @@ export default function App() {
   }
 
   if (!role) {
+    // Handler for Organization Access login - clears any demo state first
+    const handleOrgLogin = () => {
+      // Clear demo state so org login form can show
+      sessionStorage.removeItem('ips-demo-role');
+      sessionStorage.removeItem('ips-demo-tenant');
+      sessionStorage.removeItem('ips-demo-mode');
+      logout(); // This clears role state
+      setAuthStage('login');
+    };
+
     if (authStage === 'landing') {
       return (
         <LandingPage
-          onLogin={() => setAuthStage('login')}
+          onLogin={handleOrgLogin}
           onViewDemo={() => setAuthStage('demo')}
         />
       );
@@ -155,28 +165,30 @@ export default function App() {
             </div>
           </div>
           <h1 className="text-3xl font-black text-center text-slate-900 tracking-tighter mb-2 italic">IPS ERP</h1>
-          <p className="text-center text-slate-400 font-bold uppercase tracking-[2px] text-xs mb-12">Organization Access</p>
+          <p className="text-center text-slate-400 font-bold uppercase tracking-[2px] text-xs mb-12">Acceso Organizacional</p>
 
           <form onSubmit={handleSignIn} className="space-y-6">
             <div>
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[3px] px-2 mb-2 block">Email</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[3px] px-2 mb-2 block">Correo Electrónico</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full p-6 border border-slate-100 rounded-[24px] focus:outline-none focus:ring-4 focus:ring-blue-50 focus:border-[#2563eb] transition-all font-bold text-slate-700"
                 placeholder="nombre@ips.com"
+                autoComplete="email"
                 required
               />
             </div>
             <div>
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[3px] px-2 mb-2 block">Password</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[3px] px-2 mb-2 block">Contraseña</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full p-6 border border-slate-100 rounded-[24px] focus:outline-none focus:ring-4 focus:ring-blue-50 focus:border-[#2563eb] transition-all font-bold text-slate-700"
                 placeholder="••••••••"
+                autoComplete="current-password"
                 required
               />
             </div>
@@ -188,7 +200,7 @@ export default function App() {
               disabled={isSigningIn}
               className="w-full py-6 bg-[#2563eb] text-white rounded-[24px] font-black uppercase tracking-[4px] shadow-xl hover:bg-blue-700 transition-all disabled:opacity-50"
             >
-              {isSigningIn ? 'Signing in...' : 'Enter Platform'}
+              {isSigningIn ? 'Ingresando...' : 'Ingresar'}
             </button>
             <div className="text-center pt-4">
               <button
@@ -196,7 +208,7 @@ export default function App() {
                 onClick={() => setAuthStage('landing')}
                 className="text-xs font-bold text-slate-400 uppercase hover:text-slate-600 transition-colors"
               >
-                Back to Home
+                Volver al Inicio
               </button>
             </div>
           </form>

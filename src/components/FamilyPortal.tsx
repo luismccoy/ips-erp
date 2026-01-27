@@ -13,6 +13,12 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
     // Auth State
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [accessCode, setAccessCode] = useState('');
+    const [attemptCount, setAttemptCount] = useState(0);
+    const [lockoutUntil, setLockoutUntil] = useState<number | null>(null);
+    
+    // Rate limiting constants
+    const MAX_ATTEMPTS = 5;
+    const LOCKOUT_MINUTES = 15;
     const [authError, setAuthError] = useState('');
     const [isCheckingAuth, setIsCheckingAuth] = useState(false);
 
@@ -26,6 +32,20 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        // Check if currently locked out
+        if (lockoutUntil && Date.now() < lockoutUntil) {
+            const remainingMinutes = Math.ceil((lockoutUntil - Date.now()) / 60000);
+            setAuthError(`Demasiados intentos fallidos. Cuenta bloqueada por ${remainingMinutes} minutos.`);
+            return;
+        }
+        
+        // Clear lockout if expired
+        if (lockoutUntil && Date.now() >= lockoutUntil) {
+            setLockoutUntil(null);
+            setAttemptCount(0);
+        }
+        
         setIsCheckingAuth(true);
         setAuthError('');
 
@@ -45,6 +65,7 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
                     if (matchedPatient.familyAccessCode && matchedPatient.familyAccessCode === accessCode) {
                         setPatient(matchedPatient);
                         setIsAuthenticated(true);
+                        setAttemptCount(0); // Reset on success
                         fetchFamilyData(matchedPatient);
                     } else {
                         // Access code mismatch - potential filter failure, deny access
@@ -53,7 +74,18 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
                         setIsCheckingAuth(false);
                     }
                 } else {
-                    setAuthError('Código de acceso inválido. Verifique con su IPS.');
+                    // Failed attempt - increment counter
+                    const newAttemptCount = attemptCount + 1;
+                    setAttemptCount(newAttemptCount);
+                    
+                    if (newAttemptCount >= MAX_ATTEMPTS) {
+                        const lockoutTime = Date.now() + (LOCKOUT_MINUTES * 60 * 1000);
+                        setLockoutUntil(lockoutTime);
+                        setAuthError(`Demasiados intentos fallidos. Cuenta bloqueada por ${LOCKOUT_MINUTES} minutos.`);
+                    } else {
+                        const remaining = MAX_ATTEMPTS - newAttemptCount;
+                        setAuthError(`Código de acceso incorrecto. Intentos restantes: ${remaining}`);
+                    }
                     setIsCheckingAuth(false);
                 }
             } else {
@@ -62,9 +94,21 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
                 
                 if (accessCode === '1234') {
                     setIsAuthenticated(true);
+                    setAttemptCount(0); // Reset on success
                     fetchFamilyData(null); // Will load demo patient
                 } else {
-                    setAuthError('Código de acceso inválido. Use "1234" para el demo.');
+                    // Failed attempt in demo mode
+                    const newAttemptCount = attemptCount + 1;
+                    setAttemptCount(newAttemptCount);
+                    
+                    if (newAttemptCount >= MAX_ATTEMPTS) {
+                        const lockoutTime = Date.now() + (LOCKOUT_MINUTES * 60 * 1000);
+                        setLockoutUntil(lockoutTime);
+                        setAuthError(`Demasiados intentos fallidos. Cuenta bloqueada por ${LOCKOUT_MINUTES} minutos.`);
+                    } else {
+                        const remaining = MAX_ATTEMPTS - newAttemptCount;
+                        setAuthError(`Código de acceso inválido. Intentos restantes: ${remaining}. Use "1234" para el demo.`);
+                    }
                     setIsCheckingAuth(false);
                 }
             }
