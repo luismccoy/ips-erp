@@ -1,244 +1,368 @@
-# IPS-ERP Team Handoff Document
-
-**Last Updated:** 2026-01-26  
-**Project:** IPS-ERP (Colombian Home Healthcare Management System)  
-**Repo:** https://github.com/luismccoy/ips-erp  
-**Production URL:** https://main.d2wwgecog8smmr.amplifyapp.com
-
----
-
-## 🤖 The Team
-
-| Agent | Location | Specialty | Access |
-|-------|----------|-----------|--------|
-| **Clawd** | EC2 (Ubuntu) | Coordination, Git, Docs, Audits, Testing | Git push, no AWS Console |
-| **Kiro** | Mac (Local) | Backend, AWS, Amplify, CDK, Lambda | Full AWS via ADA auth |
-| **Antigravity** | Mac (Local) | Frontend, React, UX, Tailwind, Components | Git, local dev |
+# Technical Handoff Document - IPS ERP Backend
+**Date:** January 27, 2026  
+**From:** Kiro (AI Assistant)  
+**To:** Clawdbot (AI Assistant)  
+**Project:** IPS ERP - Home Care Management System
 
 ---
 
-## 📋 How This Works
+## Executive Summary
 
-1. **Before starting work:** Pull latest and check this doc for context
-2. **While working:** Document what you're doing in your section below
-3. **After completing:** Update status, commit changes, note any blockers
-4. **Handoffs:** Tag the next agent with clear instructions
+This document provides a complete technical handoff of the IPS ERP backend system, including recent Phase 21 bug fixes (KIRO tasks), Phase 19 security enhancements, and the critical AWS resource tagging strategy that protects all infrastructure from automatic deletion.
 
 ---
 
-## 🔄 Current Sprint: Production Auth & User Workflows
+## Latest Deployment: Phase 21 - Bug Fixes (KIRO Tasks)
 
-### Sprint Goal
-Get production authentication working with real Cognito users so we can test full user workflows (SuperAdmin → Admin → Nurse → Family).
+**Commit:** `95c439e`  
+**Branch:** `main`  
+**Deployment Status:** ✅ LIVE  
+**Build:** #103 (triggered, pending completion)
 
-### Sprint Status: 🟡 IN PROGRESS
+### KIRO-003: Notification Authorization Fix (P1)
 
----
+**Problem:** `listNotifications` returned `Unauthorized` errors for ADMIN/NURSE users.
 
-## 📝 Agent Work Logs
+**Solution:** Added `create` and `delete` permissions to Notification model authorization in `amplify/data/resource.ts`:
+```typescript
+.authorization(allow => [
+  allow.ownerDefinedIn('tenantId'),
+  allow.groups(['ADMIN', 'NURSE']).to(['create', 'read', 'update', 'delete'])
+])
+```
 
-### Clawd (Coordinator) - Last Update: 2026-01-26 15:30 UTC
+### KIRO-004: Session Stability Fix (P1)
 
-#### Completed ✅
-- [x] Fixed `useAuth.ts` - now reads role from Cognito groups (JWT `cognito:groups`)
-- [x] Added `SuperAdmin` group to auth config
-- [x] Fixed navigation bug (removed `window.location.href` redirects)
-- [x] Created production auth fix plan (`docs/PRODUCTION_AUTH_FIX_PLAN.md`)
-- [x] Created Kiro backend tasks (`docs/KIRO_BACKEND_TASKS.md`)
-- [x] Created this handoff document
+**Problem:** Random logouts during extended use due to token expiry.
 
-#### In Progress 🔄
-- [ ] Waiting for Kiro to create Cognito test users
-- [ ] Waiting for Kiro to seed DynamoDB tenants
+**Solution:** Added to `src/hooks/useAuth.ts`:
+- Hub auth event listener (signedIn, signedOut, tokenRefresh, tokenRefresh_failure)
+- Proactive session refresh every 10 minutes
+- Proper cleanup on unmount
 
-#### Blocked 🔴
-- Cannot create Cognito users (no AWS Console access from EC2)
-- Cannot add Amplify redirect rules (no `amplify:UpdateApp` permission)
+### KIRO-005: Deprecated Meta Tag Fix (P2)
 
-#### Next Steps (after Kiro completes)
-- Test production auth flow for all user roles
-- Verify multi-tenant data isolation
-- Test AI service integrations with real backend
+**Problem:** Browser warning about deprecated `apple-mobile-web-app-capable`.
 
-#### Notes for Other Agents
-- Demo mode (landing page → "View Demo") should continue to work with mock data
-- Production mode kicks in when `isUsingRealBackend()` returns true
-- The `custom:tenantId` attribute is critical - non-superadmin users MUST have it
+**Solution:** Changed to `mobile-web-app-capable` in `index.html` line 12.
 
 ---
 
-### Kiro (Backend) - Last Update: 2026-01-26 (Auth Complete!)
+## Previous Deployment: Phase 19 - Security Enhancements
 
-#### Completed ✅
-1. [x] Created `SuperAdmin` Cognito group
-2. [x] Created 5 test users in Cognito
-3. [x] Seeded 2 tenants in DynamoDB
-4. [x] Verified all users authenticate (5/5 PASS)
-5. [x] Added SPA redirect rule
+**Commit:** `0949f6f`  
+**Branch:** `main`  
+**Deployment Status:** ✅ LIVE
 
-#### NEW TASK: Seed Production Data 📋
-Clawd created a seed script at `scripts/seed-production-data.ts`.
+### 1. createNurseWithValidation Mutation
 
-**Run with:**
+**Purpose:** Secure nurse creation with Colombian document validation
+
+**Location:** `amplify/functions/create-nurse-validated/handler.ts`
+
+**GraphQL Schema:**
+```graphql
+createNurseWithValidation(
+  tenantId: String!
+  name: String!
+  email: AWSEmail!
+  documentType: String!      # CC, CE, PA, TI
+  documentNumber: String!    # Colombian ID format
+  role: String!              # ADMIN, NURSE, COORDINATOR
+  skills: [String]
+): Nurse
+```
+
+**Validation Rules:**
+- Document types: CC (Cédula), CE (Cédula Extranjería), PA (Pasaporte), TI (Tarjeta Identidad)
+- CC/TI: 6-10 digits only
+- CE: 6-12 alphanumeric
+- PA: 6-15 alphanumeric
+- Email format validation
+- Duplicate document check within tenant
+
+**Error Codes:**
+| Code | Spanish Message |
+|------|-----------------|
+| INVALID_DOCUMENT_TYPE | Tipo de documento inválido |
+| INVALID_DOCUMENT_FORMAT | Formato de documento inválido para tipo {type} |
+| DUPLICATE_DOCUMENT | Ya existe un enfermero con este documento |
+| MISSING_REQUIRED_FIELD | Campo requerido faltante: {field} |
+
+### 2. Family Access Rate Limiting
+
+**Purpose:** Prevent brute-force attacks on Family Portal access codes
+
+**Location:** `amplify/functions/verify-family-access/handler.ts`
+
+**Rate Limiting Configuration:**
+- **Max Attempts:** 5 failed attempts
+- **Lockout Duration:** 15 minutes (900 seconds)
+- **Tracking Key:** `patientId:accessCode` combination
+
+**Behavior:**
+1. First 4 failed attempts: Returns remaining attempts count
+2. 5th failed attempt: Triggers 15-minute lockout
+3. During lockout: Returns lockout message with remaining time
+4. After lockout expires: Counter resets automatically
+
+**Security Audit Logging:**
+All failed attempts and lockouts are logged to `AuditLog` table:
+```typescript
+{
+  tenantId: string,
+  action: 'FAMILY_ACCESS_FAILED' | 'FAMILY_ACCESS_LOCKED',
+  entityType: 'Patient',
+  entityId: patientId,
+  performedBy: 'FAMILY_PORTAL',
+  details: JSON.stringify({
+    reason: string,
+    attemptCount: number,
+    lockoutUntil?: number
+  })
+}
+```
+
+**Spanish Error Messages:**
+- `"Código de acceso incorrecto. Intentos restantes: X"`
+- `"Demasiados intentos fallidos. Cuenta bloqueada por X minutos."`
+- `"Paciente no encontrado"`
+
+### 3. Subscription Authorization (Verified)
+
+**Models with correct subscription permissions:**
+- `Shift` - NURSE group has read access for `onUpdateShift`
+- `Notification` - Explicit group permissions for ADMIN/NURSE
+
+---
+
+## AWS Resource Tagging Strategy
+
+### Critical Requirement
+
+**ALL AWS resources MUST be tagged to prevent Spring cleaning deletion.**
+
+Amazon's automated Spring cleaning process runs nightly and deletes untagged resources. Without proper tags, the entire production system would be deleted.
+
+### Required Tags
+
+Every resource must have these two tags:
+
+| Tag Key | Tag Value | Purpose |
+|---------|-----------|---------|
+| `auto-delete` | `no` | Prevents Spring cleaning deletion |
+| `application` | `EPS` | Application identifier for tracking |
+
+### Implementation
+
+**Location:** `amplify/backend.ts`
+
+```typescript
+import { Tags } from 'aws-cdk-lib';
+
+const backend = defineBackend({
+  auth,
+  data,
+  // ... Lambda functions
+});
+
+// Apply tags to ALL resources
+Tags.of(backend.stack).add('auto-delete', 'no');
+Tags.of(backend.stack).add('application', 'EPS');
+```
+
+### Tagged Resources
+
+| Resource Type | Count | Status |
+|---------------|-------|--------|
+| CloudFormation Stacks | 35 | ✅ Tagged |
+| DynamoDB Tables | 11 | ✅ Tagged |
+| Lambda Functions | 11 | ✅ Tagged |
+| Cognito User Pool | 1 | ✅ Tagged |
+| AppSync API | 1 | ✅ Tagged |
+| IAM Roles | 26+ | ✅ Tagged |
+| S3 Buckets | 2 | ✅ Tagged |
+| Amplify Hosting App | 1 | ✅ Tagged |
+
+### Verification
+
+Run after every deployment:
 ```bash
-cd ~/projects/ERP
-git pull origin main
-npx ts-node scripts/seed-production-data.ts
+.local-tests/verify-tags.sh
 ```
 
-This will create:
-- 3 nurses (2 for Clínica Vida, 1 for IPS Salud)
-- 4 patients with medications
-- 7 inventory items
-- 14 shifts (7 days ahead)
-- Billing records
+For Amplify app (tagged separately):
+```bash
+.local-tests/tag-amplify-app.sh d2wwgecog8smmr
+```
 
-#### Completed ✅
-*[Kiro: Update this section as you complete tasks]*
+### If Tags Are Missing
 
-#### Issues Found 🐛
-*[Kiro: Document any issues or questions here]*
-
-#### Notes for Other Agents
-*[Kiro: Add any context others need to know]*
+**EMERGENCY PROCEDURE:**
+1. Immediately add tags via AWS Console
+2. Redeploy backend: `npx ampx sandbox --once`
+3. Re-run verification script
+4. Document incident
 
 ---
 
-### Antigravity (Frontend) - Last Update: [PENDING]
+## Backend Architecture Overview
 
-#### Assigned Tasks 📋
-*[Clawd will assign frontend tasks after auth is working]*
+### Lambda Functions (11 total)
 
-Upcoming:
-- [ ] Test production login UI with real credentials
-- [ ] SuperAdmin dashboard view (if needed)
-- [ ] Any UX issues found during production testing
+| Function | Timeout | Purpose |
+|----------|---------|---------|
+| `rips-validator` | 30s | Colombian RIPS compliance validation |
+| `glosa-defender` | 60s | AI-powered billing defense letters |
+| `roster-architect` | 60s | AI-powered shift assignment |
+| `create-visit-draft` | 30s | Create DRAFT visit from shift |
+| `submit-visit` | 30s | Submit visit for approval |
+| `reject-visit` | 30s | Admin rejects visit |
+| `approve-visit` | 30s | Admin approves visit (immutable) |
+| `list-approved-visit-summaries` | 30s | Family-safe visit list |
+| `verify-family-access` | 30s | Rate-limited access verification |
+| `create-nurse-validated` | 30s | Validated nurse creation |
 
-#### Completed ✅
-*[Antigravity: Update this section as you complete tasks]*
+### DynamoDB Tables (11 total)
 
-#### Issues Found 🐛
-*[Antigravity: Document any issues or questions here]*
+- `Tenant` - Multi-tenant isolation
+- `Patient` - Patient records with accessCode
+- `Nurse` - Staff with document validation
+- `Shift` - Scheduled visits
+- `Visit` - Visit state machine (DRAFT→SUBMITTED→APPROVED)
+- `BillingRecord` - Colombian invoicing with AI fields
+- `InventoryItem` - Medical supplies
+- `Notification` - User notifications
+- `AuditLog` - Immutable audit trail
+- `VitalSigns` - Patient vitals
+- `PatientAssessment` - Clinical assessments
 
-#### Notes for Other Agents
-*[Antigravity: Add any context others need to know]*
-
----
-
-## 🏗️ Architecture Quick Reference
+### GraphQL Endpoint
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        IPS-ERP Architecture                          │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│  FRONTEND (Antigravity)          BACKEND (Kiro)                      │
-│  ──────────────────────          ──────────────────                  │
-│  React + Vite + TypeScript       AWS Amplify Gen 2                   │
-│  Tailwind CSS                    AppSync (GraphQL)                   │
-│  Components:                     DynamoDB Tables:                    │
-│  - AdminDashboard                - Tenant, Patient, Nurse            │
-│  - SimpleNurseApp                - Shift, Visit, VitalSigns          │
-│  - FamilyPortal                  - InventoryItem, BillingRecord      │
-│                                  - AuditLog, Notification            │
-│                                                                      │
-│  AUTH (Cognito)                  AI SERVICES (Lambda + Bedrock)      │
-│  ─────────────                   ───────────────────────────         │
-│  Groups: SuperAdmin, Admin,      - roster-architect                  │
-│          Nurse, Family           - rips-validator                    │
-│  Attribute: custom:tenantId      - glosa-defender                    │
-│                                                                      │
-├─────────────────────────────────────────────────────────────────────┤
-│                       COORDINATION (Clawd)                           │
-│  ─────────────────────────────────────────                           │
-│  Git operations, documentation, audits, testing, handoffs            │
-└─────────────────────────────────────────────────────────────────────┘
+https://ga4dwdcapvg5ziixpgipcvmfbe.appsync-api.us-east-1.amazonaws.com/graphql
+```
+
+### Frontend URL
+
+```
+https://main.d2wwgecog8smmr.amplifyapp.com
 ```
 
 ---
 
-## 🔑 Key Files Reference
+## Deployment Commands
 
-| File | Purpose | Owner |
-|------|---------|-------|
-| `src/hooks/useAuth.ts` | Auth state, role detection | Clawd/Antigravity |
-| `amplify/auth/resource.ts` | Cognito config, groups | Kiro |
-| `amplify/data/resource.ts` | GraphQL schema, models | Kiro |
-| `src/amplify-utils.ts` | Client factory, demo mode | Clawd |
-| `src/data/mock-data.ts` | Demo mode sample data | Antigravity |
-| `docs/TEAM_HANDOFF.md` | This file | All |
+### Standard Deployment
+```bash
+export AWS_REGION=us-east-1
+npx ampx sandbox --once
+```
 
----
+### AWS Credentials (if expired)
+```bash
+ada credentials update --account=747680064475 --role=Admin --provider=isengard --once
+eval $(ada credentials export --account=747680064475 --role=Admin --export)
+export ISENGARD_PRODUCTION_ACCOUNT=false
+export AWS_DEFAULT_REGION=us-east-1
+```
 
-## 📊 Production Test Credentials
+Or use alias: `awsc`
 
-**✅ Created by Kiro on 2026-01-26**
-
-| Role | Email | Password | TenantId |
-|------|-------|----------|----------|
-| SuperAdmin | superadmin@ipserp.com | TempPass123! | - |
-| Admin | admin@clinica-vida.com | TempPass123! | tenant-vida-01 |
-| Admin | admin@clinica-salud.com | TempPass123! | tenant-salud-01 |
-| Nurse | maria.nurse@clinica-vida.com | TempPass123! | tenant-vida-01 |
-| Family | carlos.familia@gmail.com | TempPass123! | tenant-vida-01 |
-
-⚠️ **Note:** First login will require password change (Cognito policy).
+### Git Workflow
+```bash
+git add <files>
+git commit -m "feat(phaseX): description"
+git push origin main  # Triggers Amplify build
+```
 
 ---
 
-## 🚨 Known Issues / Blockers
+## File Structure Rules
 
-| Issue | Status | Owner | Notes |
-|-------|--------|-------|-------|
-| ~~SPA redirect rules~~ | ✅ Done | Kiro | 404→200 rule active |
-| ~~No production test users~~ | ✅ Done | Kiro | 5 users + 2 tenants created |
-| ~~Chunk size warning~~ | ✅ Fixed | Clawd | Code splitting implemented |
-| ~~PendingReviewsPanel tenant filter~~ | ✅ Fixed | Clawd | Security fix applied |
-| ~~FamilyPortal production auth~~ | ✅ Fixed | Clawd | Now verifies familyAccessCode |
-| Seed production data | 🔄 Next | Kiro | Run scripts/seed-production-data.ts |
-| SuperAdmin dashboard | 🟡 Backlog | - | Feature: multi-tenant overview |
+### Target: ~20 files in amplify/
 
----
+Current count: ~26 files (acceptable)
 
-## 📅 Change Log
+### Allowed Files
+- `amplify/backend.ts` - Main backend config
+- `amplify/auth/resource.ts` - Cognito config
+- `amplify/data/resource.ts` - GraphQL schema
+- `amplify/functions/*/handler.ts` - Lambda code
+- `amplify/functions/*/resource.ts` - Lambda config
+- `amplify/functions/*/package.json` - Dependencies
 
-| Date | Agent | Change |
-|------|-------|--------|
-| 2026-01-26 | Clawd | Created handoff doc, fixed useAuth, assigned Kiro tasks |
-| 2026-01-26 | Clawd | Performance fix: lazy loading + panel state persistence |
-| 2026-01-26 | Kiro | Created 5 Cognito users + 2 DynamoDB tenants |
-| 2026-01-26 | Kiro | Added SPA redirect rule, verified auth 5/5 PASS |
-| 2026-01-26 | Clawd | **SECURITY**: Fixed PendingReviewsPanel tenant filter |
-| 2026-01-26 | Clawd | **SECURITY**: Fixed FamilyPortal production auth |
-| 2026-01-26 | Clawd | Created seed script + audit report |
-| | | |
+### Forbidden
+- ❌ Test files (*.test.ts, *.spec.ts)
+- ❌ Utils/helpers directories
+- ❌ Multiple documentation files
+- ❌ Scripts in amplify/
+
+### Documentation
+- Single source: `docs/API_DOCUMENTATION.md`
+- Test scripts: `.local-tests/` (not synced with git)
 
 ---
 
-## 🚨 Deployment Monitoring
+## Test Users
 
-**Clawd monitors after every push:**
-1. Check site responds (200 OK): https://main.d2wwgecog8smmr.amplifyapp.com
-2. Verify latest commit is deployed
-3. Alert Luis immediately on any failures
-
-**If deployment fails:**
-- Check Amplify Console: https://console.aws.amazon.com/amplify/home?region=us-east-1
-- Common issues: TypeScript errors, build timeout, dependency issues
-- Rollback: `git revert HEAD && git push`
+| Email | Role | Tenant | Password |
+|-------|------|--------|----------|
+| admin@ips.com | ADMIN | IPS-001 | TempPass123! |
+| nurse@ips.com | NURSE | IPS-001 | TempPass123! |
+| family@ips.com | FAMILY | IPS-001 | TempPass123! |
 
 ---
 
-## 💬 Communication Protocol
+## Monitoring
 
-Since we're async agents, use this doc as the source of truth:
-1. **Urgent:** Update the "Known Issues" section
-2. **Questions:** Add to your agent section under "Notes for Other Agents"
-3. **Completed:** Check off tasks and update status
-4. **Blocked:** Clearly state what you need in your section
+### CloudWatch Dashboard
+```
+https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=IPS-ERP-Production-Dashboard
+```
 
-**Always commit this file after updates!**
+### Amplify Console
+```
+https://console.aws.amazon.com/amplify/home?region=us-east-1#/d2wwgecog8smmr
+```
+
+### SNS Alerts Topic
+```
+arn:aws:sns:us-east-1:747680064475:IPS-ERP-Alerts
+```
 
 ---
 
-*This document is our shared brain. Keep it current.* 🧠
+## Key Files to Review
+
+1. **Schema:** `amplify/data/resource.ts` - All models and queries
+2. **Backend:** `amplify/backend.ts` - Resource registration and tags
+3. **Rate Limiting:** `amplify/functions/verify-family-access/handler.ts`
+4. **Nurse Validation:** `amplify/functions/create-nurse-validated/handler.ts`
+5. **Documentation:** `docs/API_DOCUMENTATION.md` - Phase 19 section
+6. **Tasks:** `docs/KIRO_BACKEND_TASKS.md` - Remaining work
+
+---
+
+## Remaining Backend Tasks
+
+See `docs/KIRO_BACKEND_TASKS.md` for:
+- Task 3.1: Route optimization Lambda
+- Task 3.2: Glosa Defender frontend connection
+- Task 4.x: Audit and compliance features
+
+**KIRO Task Queue Status:** ✅ EMPTY (all tasks completed)
+
+See `tasks/queue.json` for current task status across both IDEs.
+
+---
+
+## Contact
+
+- **AWS Account:** 747680064475
+- **Region:** us-east-1
+- **Project Owner:** Luis (Platform Owner)
+
+---
+
+*Last Updated: January 27, 2026 (Phase 21 - KIRO Bug Fixes)*

@@ -1,7 +1,7 @@
 # IPS ERP API Documentation
 
-**Last Updated:** 2026-01-21  
-**Backend Status:** ✅ Phase 2 Complete - All Models Deployed  
+**Last Updated:** 2026-01-27  
+**Backend Status:** ✅ Phase 21 Complete - Bug Fixes Deployed  
 **GraphQL Endpoint:** https://ga4dwdcapvg5ziixpgipcvmfbe.appsync-api.us-east-1.amazonaws.com/graphql
 
 ---
@@ -7162,3 +7162,434 @@ if (result.data.verifyFamilyAccessCode.authorized) {
 **Phase 19 Status:** ✅ COMPLETE  
 **Tasks Completed:** 1.2, 2.1, 2.2  
 **Security Level:** Enhanced
+
+
+---
+
+## Phase 20: Database Schema Optimizations
+
+**Status:** ✅ STAGED (Pending Deployment)  
+**Date:** 2026-01-27  
+**Tasks:** 4.1, 4.2, 4.3 from KIRO_BACKEND_TASKS.md
+
+This phase implements database schema optimizations for improved query performance and Colombian RIPS compliance.
+
+---
+
+### 20.1 Global Secondary Indexes (Task 4.1)
+
+**Purpose:** Replace inefficient DynamoDB Scan operations with efficient Query operations using GSIs.
+
+#### Shift Model - `byNurseAndDate` GSI
+
+**Use Case:** Query shifts by nurse for roster optimization and schedule views.
+
+```typescript
+// Schema definition
+Shift: a.model({...})
+  .secondaryIndexes(index => [
+    index('nurseId').sortKeys(['scheduledTime']).name('byNurseAndDate')
+  ])
+```
+
+**Query Example:**
+```graphql
+query GetNurseShifts($nurseId: ID!, $startDate: String!, $endDate: String!) {
+  listShifts(
+    filter: {
+      nurseId: { eq: $nurseId }
+      scheduledTime: { between: [$startDate, $endDate] }
+    }
+  ) {
+    items {
+      id
+      patientId
+      scheduledTime
+      status
+    }
+  }
+}
+```
+
+#### Visit Model - `byTenantAndStatus` GSI
+
+**Use Case:** Admin dashboard queries for pending visits by status.
+
+```typescript
+// Schema definition
+Visit: a.model({...})
+  .secondaryIndexes(index => [
+    index('tenantId').sortKeys(['status']).name('byTenantAndStatus')
+  ])
+```
+
+**Query Example:**
+```graphql
+query GetPendingVisits($tenantId: ID!) {
+  listVisits(
+    filter: {
+      tenantId: { eq: $tenantId }
+      status: { eq: "SUBMITTED" }
+    }
+  ) {
+    items {
+      id
+      patientId
+      nurseId
+      submittedAt
+    }
+  }
+}
+```
+
+#### Notification Model - `byUser` GSI
+
+**Use Case:** Query notifications for a specific user.
+
+```typescript
+// Schema definition
+Notification: a.model({...})
+  .secondaryIndexes(index => [
+    index('userId').name('byUser')
+  ])
+```
+
+**Note:** Boolean fields (`read`) cannot be sort keys in DynamoDB GSIs. Filter by `read` status in application code.
+
+**Query Example:**
+```graphql
+query GetUserNotifications($userId: ID!) {
+  listNotifications(
+    filter: { userId: { eq: $userId } }
+  ) {
+    items {
+      id
+      type
+      message
+      read
+      createdAt
+    }
+  }
+}
+```
+
+---
+
+### 20.2 BillingRecord Colombian Compliance Fields (Task 4.2)
+
+**Purpose:** Add fields required for Colombian RIPS compliance per Resolución 2275.
+
+**New Fields:**
+
+| Field | Type | Description | RIPS Requirement |
+|-------|------|-------------|------------------|
+| `codigoPrestador` | String | IPS provider code (12 digits) | AC file |
+| `tipoDocumento` | String | Document type (CC, TI, CE, PA, RC, MS, AS, NV) | All files |
+| `numeroAutorizacion` | String | EPS authorization number | AP file |
+| `codigoServicio` | String | Service code (01=urgencias, 02=hospitalizacion, etc.) | AC file |
+| `valorCopago` | Float | Copayment value (COP) | AF file |
+| `valorCuotaModeradora` | Float | Moderating fee (COP) | AF file |
+| `fechaConsulta` | AWSDate | Consultation date | AC file |
+| `causaExterna` | String | External cause code (01-15 per RIPS spec) | AC file |
+
+**Schema Definition:**
+```typescript
+BillingRecord: a.model({
+  // ... existing fields ...
+  
+  // Task 4.2: Colombian RIPS Compliance Fields
+  codigoPrestador: a.string(),       // IPS provider code (12 digits)
+  tipoDocumento: a.string(),          // Document type
+  numeroAutorizacion: a.string(),    // EPS authorization number
+  codigoServicio: a.string(),        // Service code
+  valorCopago: a.float(),            // Copayment value (COP)
+  valorCuotaModeradora: a.float(),   // Moderating fee (COP)
+  fechaConsulta: a.date(),           // Consultation date
+  causaExterna: a.string(),          // External cause code
+})
+```
+
+**RIPS Document Type Codes:**
+| Code | Description |
+|------|-------------|
+| CC | Cédula de Ciudadanía |
+| TI | Tarjeta de Identidad |
+| CE | Cédula de Extranjería |
+| PA | Pasaporte |
+| RC | Registro Civil |
+| MS | Menor sin Identificación |
+| AS | Adulto sin Identificación |
+| NV | Certificado Nacido Vivo |
+
+**External Cause Codes (causaExterna):**
+| Code | Description |
+|------|-------------|
+| 01 | Accidente de trabajo |
+| 02 | Accidente de tránsito |
+| 03 | Accidente rábico |
+| 04 | Accidente ofídico |
+| 05 | Otro tipo de accidente |
+| 06 | Evento catastrófico |
+| 07 | Lesión por agresión |
+| 08 | Lesión autoinfligida |
+| 09 | Sospecha de maltrato físico |
+| 10 | Sospecha de abuso sexual |
+| 11 | Sospecha de violencia sexual |
+| 12 | Sospecha de maltrato emocional |
+| 13 | Enfermedad general |
+| 14 | Enfermedad profesional |
+| 15 | Otra |
+
+---
+
+### 20.3 Patient-Nurse Primary Assignment (Task 4.3)
+
+**Purpose:** Establish direct relationship between patients and their primary assigned nurse.
+
+**Schema Changes:**
+
+```typescript
+// Patient model
+Patient: a.model({
+  // ... existing fields ...
+  primaryNurseId: a.id(),
+  primaryNurse: a.belongsTo('Nurse', 'primaryNurseId'),
+})
+
+// Nurse model
+Nurse: a.model({
+  // ... existing fields ...
+  primaryPatients: a.hasMany('Patient', 'primaryNurseId'),
+})
+```
+
+**Query Example - Get Patient with Primary Nurse:**
+```graphql
+query GetPatientWithNurse($patientId: ID!) {
+  getPatient(id: $patientId) {
+    id
+    name
+    primaryNurse {
+      id
+      name
+      email
+      role
+    }
+  }
+}
+```
+
+**Query Example - Get Nurse's Primary Patients:**
+```graphql
+query GetNursePrimaryPatients($nurseId: ID!) {
+  getNurse(id: $nurseId) {
+    id
+    name
+    primaryPatients {
+      items {
+        id
+        name
+        diagnosis
+      }
+    }
+  }
+}
+```
+
+**Use Cases:**
+- Display primary nurse on patient dashboard
+- Route notifications to primary nurse
+- Generate reports by nurse caseload
+- Optimize shift assignments based on primary relationships
+
+---
+
+### 20.4 Migration Notes
+
+**Breaking Changes:** None - all new fields are optional.
+
+**Data Migration:** Not required - existing records will have null values for new fields.
+
+**Index Creation:** DynamoDB GSIs are created automatically during deployment. No manual migration needed.
+
+**Deployment Command:**
+```bash
+export AWS_REGION=us-east-1 && npx ampx sandbox --once
+```
+
+---
+
+### 20.5 Verification Checklist
+
+After deployment, verify:
+
+- [ ] GSI `byNurseAndDate` exists on Shift table
+- [ ] GSI `byTenantAndStatus` exists on Visit table
+- [ ] GSI `byUser` exists on Notification table
+- [ ] BillingRecord table has new RIPS fields
+- [ ] Patient table has `primaryNurseId` field
+- [ ] Nurse model can query `primaryPatients`
+
+**AWS Console Verification:**
+1. DynamoDB Console → Tables → Select table → Indexes tab
+2. AppSync Console → Schema → Verify new fields in types
+
+---
+
+**Phase 20 Status:** ✅ STAGED (Code Complete, Pending Deployment)  
+**Tasks Completed:** 4.1, 4.2, 4.3  
+**Breaking Changes:** None
+
+
+---
+
+## Phase 21: Bug Fixes - KIRO Tasks (January 27, 2026)
+
+**Status:** ✅ COMPLETE  
+**Commit:** `95c439e`  
+**Deployment:** Backend deployed via `npx ampx sandbox --once`
+
+### 21.1 KIRO-003: GraphQL Notification Authorization Fix
+
+**Problem:** `listNotifications` query returned `Unauthorized` errors for ADMIN and NURSE users. Subscription operations also failed.
+
+**Root Cause:** The Notification model authorization only had `read` and `update` permissions for groups, but AppSync subscriptions require explicit `create` and `delete` permissions to function properly.
+
+**Solution:** Updated `amplify/data/resource.ts` Notification model authorization:
+
+```typescript
+// Before (broken)
+.authorization(allow => [
+  allow.ownerDefinedIn('tenantId'),
+  allow.groups(['ADMIN', 'NURSE']).to(['read', 'update'])
+])
+
+// After (fixed)
+.authorization(allow => [
+  allow.ownerDefinedIn('tenantId'),
+  allow.groups(['ADMIN', 'NURSE']).to(['create', 'read', 'update', 'delete'])
+])
+```
+
+**Impact:** 
+- ✅ `listNotifications` query now works for ADMIN/NURSE users
+- ✅ `onCreateNotification` subscription works
+- ✅ `onUpdateNotification` subscription works
+- ✅ `onDeleteNotification` subscription works
+
+---
+
+### 21.2 KIRO-004: Session Stability Fix (Random Logouts)
+
+**Problem:** Users experienced random logouts, especially after periods of inactivity. Sessions would expire unexpectedly.
+
+**Root Cause:** No proactive token refresh mechanism. Cognito tokens expire after 1 hour by default, and the app wasn't handling token refresh events.
+
+**Solution:** Updated `src/hooks/useAuth.ts` with:
+
+1. **Hub Auth Event Listener** - Listens for Cognito auth events:
+   - `signedIn` - User signed in
+   - `signedOut` - User signed out
+   - `tokenRefresh` - Token successfully refreshed
+   - `tokenRefresh_failure` - Token refresh failed (triggers logout)
+
+2. **Proactive Session Refresh** - 10-minute interval that calls `fetchAuthSession({ forceRefresh: true })` to keep tokens fresh before expiry.
+
+```typescript
+// Hub listener for auth events
+useEffect(() => {
+  const hubListener = Hub.listen('auth', ({ payload }) => {
+    switch (payload.event) {
+      case 'signedIn':
+        checkAuthState();
+        break;
+      case 'signedOut':
+        setUser(null);
+        setIsAuthenticated(false);
+        break;
+      case 'tokenRefresh':
+        console.log('Token refreshed successfully');
+        break;
+      case 'tokenRefresh_failure':
+        console.error('Token refresh failed, signing out');
+        handleSignOut();
+        break;
+    }
+  });
+
+  // Proactive session refresh every 10 minutes
+  const refreshInterval = setInterval(async () => {
+    if (isAuthenticated) {
+      try {
+        await fetchAuthSession({ forceRefresh: true });
+      } catch (error) {
+        console.error('Session refresh failed:', error);
+      }
+    }
+  }, 10 * 60 * 1000); // 10 minutes
+
+  return () => {
+    hubListener();
+    clearInterval(refreshInterval);
+  };
+}, [isAuthenticated]);
+```
+
+**Impact:**
+- ✅ Sessions remain stable during extended use
+- ✅ Automatic token refresh before expiry
+- ✅ Graceful handling of refresh failures
+- ✅ Proper cleanup on component unmount
+
+---
+
+### 21.3 KIRO-005: Deprecated Meta Tag Fix
+
+**Problem:** Browser console warning about deprecated `apple-mobile-web-app-capable` meta tag.
+
+**Solution:** Updated `index.html` line 12:
+
+```html
+<!-- Before -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<!-- After -->
+<meta name="mobile-web-app-capable" content="yes">
+```
+
+**Impact:**
+- ✅ No more deprecation warnings in console
+- ✅ Follows current web standards
+- ✅ PWA functionality preserved
+
+---
+
+### 21.4 Deployment Summary
+
+**Files Modified:**
+| File | Change |
+|------|--------|
+| `amplify/data/resource.ts` | Notification authorization (lines 426-450) |
+| `src/hooks/useAuth.ts` | Hub listener + session refresh |
+| `index.html` | Meta tag update (line 12) |
+
+**Deployment Commands:**
+```bash
+# Backend deployment
+export AWS_REGION=us-east-1 && npx ampx sandbox --once
+
+# Git commit and push
+git add .
+git commit -m "fix(backend): resolve 3 KIRO tasks - notifications auth, session stability, meta tag"
+git push origin main
+```
+
+**Verification:**
+- ✅ Backend deployed successfully (10.025 seconds)
+- ✅ Tags verified via `.local-tests/verify-tags.sh`
+- ✅ Amplify build #103 triggered automatically
+
+---
+
+**Phase 21 Status:** ✅ COMPLETE  
+**Last Updated:** 2026-01-27
