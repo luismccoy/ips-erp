@@ -54,8 +54,8 @@ function generateAlerts(assessment: Partial<CreateAssessmentInput>): AssessmentA
   const alerts: AssessmentAlert[] = [];
   
   // Glasgow Coma Scale alerts
-  if (assessment.glasgowScore) {
-    const total = assessment.glasgowScore.total;
+  if (assessment.glasgow) {
+    const total = assessment.glasgow.total;
     if (total <= 8) {
       alerts.push({
         scale: 'Glasgow',
@@ -72,8 +72,8 @@ function generateAlerts(assessment: Partial<CreateAssessmentInput>): AssessmentA
   }
   
   // Pain Scale alerts
-  if (assessment.painScore !== undefined && assessment.painScore !== null) {
-    const score = assessment.painScore;
+  if (assessment.painScale !== undefined && assessment.painScale !== null) {
+    const score = assessment.painScale;
     if (score >= 8) {
       alerts.push({
         scale: 'Dolor (EVA)',
@@ -90,14 +90,14 @@ function generateAlerts(assessment: Partial<CreateAssessmentInput>): AssessmentA
   }
   
   // Braden Scale alerts (lower = higher risk)
-  if (assessment.bradenScore) {
+  if (assessment.braden) {
     const total = 
-      assessment.bradenScore.sensoryPerception +
-      assessment.bradenScore.moisture +
-      assessment.bradenScore.activity +
-      assessment.bradenScore.mobility +
-      assessment.bradenScore.nutrition +
-      assessment.bradenScore.frictionShear;
+      assessment.braden.sensoryPerception +
+      assessment.braden.moisture +
+      assessment.braden.activity +
+      assessment.braden.mobility +
+      assessment.braden.nutrition +
+      assessment.braden.frictionShear;
     
     if (total <= 12) {
       alerts.push({
