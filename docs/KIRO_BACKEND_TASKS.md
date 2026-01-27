@@ -11,26 +11,12 @@
 ### 1.1 InventoryDashboard Backend Mutations Disabled
 **File**: `src/components/InventoryDashboard.tsx` (lines 94, 148)
 
-```typescript
-// TODO: Uncomment when backend permissions are fixed
-// await client.models.InventoryItem.create({...});
-// await client.models.InventoryItem.update({...});
-```
+**Status**: ✅ COMPLETED (2025-01-27)
 
-**Issue**: Create and update operations for InventoryItem are commented out. Production users cannot actually modify inventory.
-
-**Fix Required**:
-1. Review `InventoryItem` authorization rules in `amplify/data/resource.ts`
-2. Current rule: `allow.groups(['ADMIN', 'NURSE']).to(['read'])`
-3. **Missing**: Create/Update permissions for ADMIN group
-4. Update schema to:
-```typescript
-.authorization(allow => [
-    allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
-    allow.groups(['ADMIN']).to(['create', 'read', 'update', 'delete']),
-    allow.groups(['NURSE']).to(['read'])
-])
-```
+**Resolution**:
+- Verified `amplify/data/resource.ts` already has correct authorization rules with ADMIN group having `['create', 'read', 'update', 'delete']` permissions
+- Uncommented the `client.models.InventoryItem.create()` and `client.models.InventoryItem.update()` mutations in InventoryDashboard.tsx
+- TypeScript check passes
 
 **Effort**: 1 hour | **Risk**: High
 
@@ -52,11 +38,16 @@
 ### 1.3 Audit Logs Write Authorization Missing
 **File**: `amplify/data/resource.ts` (AuditLog model)
 
-**Issue**: AuditLog model only allows read access. Lambda functions write directly to DynamoDB, bypassing AppSync authorization.
+**Status**: ✅ VERIFIED (2025-01-27)
 
-**Current Implementation**: Lambdas use DynamoDB SDK directly (correct for immutable logs)
-
-**Verification Needed**: Confirm no client-side write attempts to AuditLog via GraphQL
+**Verification Results**:
+- Searched all `.tsx` and `.ts` files in `src/` for AuditLog usage
+- Found only read operations:
+  - `AuditLogViewer.tsx`: Uses `client.models.AuditLog.list()` (read only)
+  - `AdminDashboard.tsx`: Uses `client.models.AuditLog.onCreate()` subscription (read only)
+  - `mock-client.ts`: Demo data definitions
+- **No client-side `.create()`, `.update()`, or `.delete()` calls to AuditLog**
+- Lambda functions write to AuditLog table via DynamoDB SDK (correct architecture for immutable audit logs)
 
 **Effort**: 30 minutes | **Risk**: Low
 
