@@ -1,8 +1,36 @@
 # Kiro IDE Backend Tasks - IPS-ERP
 
 **Generated**: 2025-01-26  
+**Last Updated**: 2026-01-27  
 **Project**: IPS-ERP Healthcare Home Care Management  
 **Stack**: AWS Amplify Gen 2, AppSync GraphQL, DynamoDB, Lambda, Cognito
+
+---
+
+## 📊 QUICK STATUS SUMMARY
+
+| Priority | Task | Status | Assigned |
+|----------|------|--------|----------|
+| 🔴 P1 | 1.1 InventoryDashboard mutations | ✅ DONE | Clawd |
+| 🔴 P1 | 1.2 Nurse.cognitoSub validation | ⏳ TODO | **KIRO** |
+| 🔴 P1 | 1.3 AuditLog authorization | ✅ VERIFIED | Clawd |
+| 🟡 P2 | 2.1 Subscription authorization | ⏳ TODO | **KIRO** |
+| 🟡 P2 | 2.2 Family access rate limiting | ⏳ TODO | **KIRO** |
+| 🟡 P2 | 2.3 Tenant isolation audit | ⏳ TODO | **KIRO** |
+| 🟠 P3 | 3.1 Lambda resource files | ⏳ TODO | Kiro |
+| 🟠 P3 | 3.2 RIPS validator AI | ⏳ TODO | Kiro |
+| 🔵 P4 | 4.1 GSI creation | ⏳ TODO | Kiro |
+| 🔵 P4 | 4.2 BillingRecord schema | ⏳ TODO | Kiro |
+| 🔵 P4 | 4.3 Patient-Nurse relation | ⏳ TODO | Kiro |
+| 🟣 P5 | 5.1 Subscription handlers | ⏳ TODO | Kiro |
+| 🟣 P5 | 5.2 Push notifications | ⏳ TODO | Kiro |
+| 🔘 P6 | 6.1 Demo mode cleanup | ⏳ TODO | Antigravity |
+| 🔘 P6 | 6.2 Lambda unit tests | ⏳ TODO | Kiro |
+| 🔘 P6 | 6.3 Environment variables | ⏳ TODO | Kiro |
+
+**Tonight's Focus**: Tasks 1.2, 2.1, 2.2 (MUST), then 3.2, 4.1 (IF TIME)
+
+📖 **Super Prompt**: See `docs/KIRO_SUPERPROMPT.md` for detailed implementation instructions.
 
 ---
 
