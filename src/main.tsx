@@ -15,11 +15,14 @@ initServiceWorker()
 setupInstallPrompt()
 
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
+import { LanguageProvider } from './contexts/LanguageContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ErrorBoundary>
-      <App />
-    </ErrorBoundary>
+    <LanguageProvider>
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    </LanguageProvider>
   </StrictMode>,
 )

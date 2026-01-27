@@ -11,7 +11,10 @@
  * @component
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { generateClient } from 'aws-amplify/data';
+import type { Schema } from '@/amplify/data/resource';
+import { isDemoMode } from '@/amplify-utils';
 import { RiskIndicatorBadge } from './RiskIndicatorBadge';
 import {
   PatientAssessment,
@@ -23,13 +26,13 @@ import {
   getNortonRiskLevel,
 } from '@/types/clinical-scales';
 
+const client = generateClient<Schema>();
+
 interface AssessmentHistoryProps {
-  /** List of assessments for the patient */
-  assessments: PatientAssessment[];
+  /** Patient ID to fetch assessments for */
+  patientId: string;
   /** Optional filter for scale type */
   filterScale?: ScaleType | 'all';
-  /** Loading state */
-  isLoading?: boolean;
   /** Callback when assessment is clicked */
   onAssessmentClick?: (assessment: PatientAssessment) => void;
 }
@@ -136,12 +139,45 @@ function formatDate(isoDate: string): string {
  * AssessmentHistory - Timeline view of patient assessments.
  */
 export const AssessmentHistory: React.FC<AssessmentHistoryProps> = ({
-  assessments,
+  patientId,
   filterScale = 'all',
-  isLoading = false,
   onAssessmentClick,
 }) => {
   const [selectedScale, setSelectedScale] = useState<ScaleType | 'all'>(filterScale);
+  const [assessments, setAssessments] = useState<PatientAssessment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch assessments from backend
+  useEffect(() => {
+    const fetchAssessments = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        if (isDemoMode()) {
+          // Demo mode: Use mock client (will auto-return demo data)
+          const { data } = await client.models.PatientAssessment.list({
+            filter: { patientId: { eq: patientId } },
+          });
+          setAssessments((data || []) as PatientAssessment[]);
+        } else {
+          // Real backend: Fetch from GraphQL
+          const { data } = await client.models.PatientAssessment.list({
+            filter: { patientId: { eq: patientId } },
+          });
+          setAssessments((data || []) as PatientAssessment[]);
+        }
+      } catch (err) {
+        console.error('Error fetching assessments:', err);
+        setError('Error al cargar el historial de evaluaciones');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAssessments();
+  }, [patientId]);
 
   // Sort assessments by date (newest first)
   const sortedAssessments = useMemo(() => {
@@ -167,6 +203,28 @@ export const AssessmentHistory: React.FC<AssessmentHistoryProps> = ({
     return (
       <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <svg
+          className="mx-auto h-12 w-12 text-red-400"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+        <h3 className="mt-2 text-sm font-medium text-gray-900">Error</h3>
+        <p className="mt-1 text-sm text-gray-500">{error}</p>
       </div>
     );
   }

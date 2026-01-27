@@ -2,15 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { client, MOCK_USER } from '../amplify-utils';
 import { usePagination } from '../hooks/usePagination';
 import { type Patient, type Medication, type Task } from '../types';
+import { AssessmentForm, AssessmentHistory } from './clinical';
 
 export const PatientDashboard: React.FC = () => {
     const { items: patients, loadMore, hasMore, isLoading } = usePagination<Patient>();
     const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
     const [medications, setMedications] = useState<Medication[]>([]);
     const [tasks, setTasks] = useState<Task[]>([]);
+    const [showAssessmentForm, setShowAssessmentForm] = useState(false);
     // Note: setPatients is not used directly as patients are managed by usePagination hook
 
     const tenantId = MOCK_USER.attributes['custom:tenantId'];
+    const nurseId = MOCK_USER.attributes.sub; // Current user's nurse ID
 
     useEffect(() => {
         const fetchPatients = async () => {
@@ -191,6 +194,35 @@ export const PatientDashboard: React.FC = () => {
                                 </div>
                             ))}
                         </div>
+                    </section>
+
+                    {/* Clinical Assessment Scales Section */}
+                    <section className="assessment-section glass">
+                        <div className="section-header">
+                            <h3>Evaluaciones Clínicas</h3>
+                            <button
+                                onClick={() => setShowAssessmentForm(!showAssessmentForm)}
+                                className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                            >
+                                {showAssessmentForm ? 'Ver Historial' : 'Nueva Evaluación'}
+                            </button>
+                        </div>
+
+                        {showAssessmentForm ? (
+                            <AssessmentForm
+                                patientId={selectedPatient.id}
+                                nurseId={nurseId}
+                                tenantId={tenantId}
+                                onSubmit={() => {
+                                    setShowAssessmentForm(false);
+                                }}
+                                onCancel={() => setShowAssessmentForm(false)}
+                            />
+                        ) : (
+                            <AssessmentHistory
+                                patientId={selectedPatient.id}
+                            />
+                        )}
                     </section>
                 </div>
             </div>

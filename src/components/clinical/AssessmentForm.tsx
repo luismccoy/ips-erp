@@ -21,6 +21,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { generateClient } from 'aws-amplify/data';
+import type { Schema } from '@/amplify/data/resource';
+import { isDemoMode } from '@/amplify-utils';
 import { RiskIndicatorBadge } from './RiskIndicatorBadge';
 import {
   PatientAssessment,
@@ -51,15 +54,19 @@ import {
   DEFAULT_NORTON,
 } from '@/types/clinical-scales';
 
+const client = generateClient<Schema>();
+
 interface AssessmentFormProps {
   /** Patient ID for this assessment */
   patientId: string;
   /** Nurse ID (current user) */
   nurseId: string;
+  /** Tenant ID for multi-tenancy */
+  tenantId: string;
   /** Optional existing assessment to edit */
   existingAssessment?: Partial<PatientAssessment>;
-  /** Callback when assessment is submitted */
-  onSubmit: (assessment: Partial<PatientAssessment>) => void | Promise<void>;
+  /** Callback when assessment is submitted (optional, for additional logic) */
+  onSubmit?: (assessment: Partial<PatientAssessment>) => void | Promise<void>;
   /** Optional callback for cancel */
   onCancel?: () => void;
 }
@@ -80,6 +87,7 @@ type ScaleTab =
 export const AssessmentForm: React.FC<AssessmentFormProps> = ({
   patientId,
   nurseId,
+  tenantId,
   existingAssessment,
   onSubmit,
   onCancel,
@@ -189,6 +197,7 @@ export const AssessmentForm: React.FC<AssessmentFormProps> = ({
       const assessment: Partial<PatientAssessment> = {
         patientId,
         nurseId,
+        tenantId,
         assessedAt: new Date().toISOString(),
         glasgowScore,
         painScore,
@@ -204,9 +213,42 @@ export const AssessmentForm: React.FC<AssessmentFormProps> = ({
       // Generate alerts based on scores
       assessment.alerts = generateAssessmentAlerts(assessment);
 
-      await onSubmit(assessment);
+      // Save to backend (or mock in demo mode)
+      if (isDemoMode()) {
+        console.log('🎭 Demo Mode: Assessment saved locally', assessment);
+        // In demo mode, just call the optional onSubmit callback
+        await onSubmit?.(assessment);
+      } else {
+        // Real backend: Save via GraphQL mutation
+        const result = await client.models.PatientAssessment.create({
+          tenantId,
+          patientId,
+          nurseId,
+          assessedAt: new Date().toISOString(),
+          glasgowScore: glasgowScore as any,
+          painScore,
+          bradenScore: bradenScore as any,
+          morseScore: morseScore as any,
+          newsScore: newsScore as any,
+          barthelScore: barthelScore as any,
+          nortonScore: nortonScore as any,
+          rassScore,
+          alerts: (assessment.alerts || []) as any,
+          notes: notes || undefined,
+        });
+
+        console.log('✅ Assessment saved to backend:', result.data);
+        
+        // Call optional callback with the saved assessment
+        await onSubmit?.(result.data as PatientAssessment);
+      }
+
+      // Show success feedback (could be a toast notification in the future)
+      alert('Evaluación guardada exitosamente');
+      
     } catch (error) {
       console.error('Error submitting assessment:', error);
+      alert('Error al guardar la evaluación. Por favor intente nuevamente.');
     } finally {
       setIsSubmitting(false);
     }
