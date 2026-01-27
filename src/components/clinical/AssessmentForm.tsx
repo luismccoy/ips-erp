@@ -222,22 +222,23 @@ export const AssessmentForm: React.FC<AssessmentFormProps> = ({
         await onSubmit?.(assessment);
       } else {
         // Real backend: Save via GraphQL mutation
-        const result = await client.models.PatientAssessment.create({
+        const createInput: any = {
           tenantId,
           patientId,
           nurseId,
           assessedAt: new Date().toISOString(),
-          glasgowScore: glasgowScore as any,
+          glasgowScore,
           painScore,
-          bradenScore: bradenScore as any,
-          morseScore: morseScore as any,
-          newsScore: newsScore as any,
-          barthelScore: barthelScore as any,
-          nortonScore: nortonScore as any,
+          bradenScore,
+          morseScore,
+          newsScore,
+          barthelScore,
+          nortonScore,
           rassScore,
-          alerts: (assessment.alerts || []) as any,
+          alerts: assessment.alerts || [],
           notes: notes || undefined,
-        });
+        };
+        const result = await client.models.PatientAssessment.create(createInput);
 
         console.log('✅ Assessment saved to backend:', result.data);
         
