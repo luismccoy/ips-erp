@@ -6,102 +6,78 @@
       "description": "Backend tasks",
       "pending": [
         {
-          "id": "KIRO-002",
-          "title": "Fix PWA manifest routing in Amplify",
-          "priority": "P0",
-          "status": "PENDING",
-          "createdAt": "2026-01-27T22:30:00Z",
-          "createdBy": "Stress Test",
-          "notes": "manifest.webmanifest returns HTML. Configure Amplify rewrites to exclude from SPA routing."
-        },
-        {
           "id": "KIRO-003",
-          "title": "Fix GraphQL listNotifications authorization",
+          "title": "P1: Fix GraphQL listNotifications authorization",
           "priority": "P1",
           "status": "PENDING",
-          "createdAt": "2026-01-27T22:30:00Z",
-          "createdBy": "Stress Test",
-          "notes": "Error: Not Authorized to access listNotifications on type Query"
+          "createdAt": "2026-01-27T23:00:00Z",
+          "notes": "Error: Not Authorized to access listNotifications on type Query. Check AppSync auth rules."
         },
         {
           "id": "KIRO-004",
-          "title": "Investigate session instability",
+          "title": "P1: Investigate session instability",
           "priority": "P1",
           "status": "PENDING",
-          "createdAt": "2026-01-27T22:30:00Z",
-          "createdBy": "Stress Test",
-          "notes": "Users get logged out during navigation. React state frequently resets."
+          "createdAt": "2026-01-27T23:00:00Z",
+          "notes": "Users get logged out during navigation. Check Cognito session handling and token refresh."
+        },
+        {
+          "id": "KIRO-005",
+          "title": "P2: Fix deprecated meta tag",
+          "priority": "P2",
+          "status": "PENDING",
+          "createdAt": "2026-01-27T23:00:00Z",
+          "notes": "apple-mobile-web-app-capable is deprecated. Update to mobile-web-app-capable in index.html"
         }
       ],
-      "inProgress": [],
       "completed": [
-        {
-          "id": "KIRO-001",
-          "title": "Implement AWS Transcribe Voice Notes",
-          "status": "COMPLETED",
-          "completedAt": "2026-01-27T22:00:00Z"
-        }
+        {"id": "KIRO-001", "title": "AWS Transcribe", "status": "COMPLETED"},
+        {"id": "KIRO-002", "title": "PWA manifest (fixed by Clawd)", "status": "COMPLETED"}
       ]
     },
     "antigravity": {
       "description": "Frontend tasks",
       "pending": [
         {
-          "id": "ANTIGRAVITY-002",
-          "title": "P0: Fix admin login routing",
-          "priority": "P0",
-          "status": "PENDING",
-          "createdAt": "2026-01-27T22:30:00Z",
-          "createdBy": "Stress Test",
-          "notes": "Iniciar Sesión routes to Family Portal instead of Org Access. Add /login/family and /login/staff routes."
-        },
-        {
-          "id": "ANTIGRAVITY-003",
-          "title": "P0: Handle rate limit responses in Family Portal",
-          "priority": "P0",
-          "status": "PENDING",
-          "createdAt": "2026-01-27T22:30:00Z",
-          "createdBy": "Stress Test",
-          "notes": "Backend has rate limiting but frontend doesn't surface errors or show lockout message."
-        },
-        {
           "id": "ANTIGRAVITY-004",
           "title": "P1: Fix nurse nav buttons",
           "priority": "P1",
           "status": "PENDING",
-          "createdAt": "2026-01-27T22:30:00Z",
-          "createdBy": "Stress Test",
-          "notes": "Notifications icon opens Family Portal. Profile icon opens landing page. Fix onClick handlers."
-        },
-        {
-          "id": "ANTIGRAVITY-005",
-          "title": "P1: Translate login page to Spanish",
-          "priority": "P1",
-          "status": "PENDING",
-          "createdAt": "2026-01-27T22:30:00Z",
-          "createdBy": "Stress Test",
-          "notes": "Login shows English: ORGANIZATION ACCESS, EMAIL, PASSWORD, ENTER PLATFORM"
+          "createdAt": "2026-01-27T23:00:00Z",
+          "notes": "Notifications icon opens Family Portal (wrong). Profile icon opens landing page (wrong). Fix onClick handlers in SimpleNurseApp.tsx"
         },
         {
           "id": "ANTIGRAVITY-006",
           "title": "P1: Fix /family route",
           "priority": "P1",
           "status": "PENDING",
-          "createdAt": "2026-01-27T22:30:00Z",
-          "createdBy": "Stress Test",
-          "notes": "Direct /family route redirects to landing. Should work like /app?demo=family"
+          "createdAt": "2026-01-27T23:00:00Z",
+          "notes": "Direct /family route redirects to landing. Should load Family Portal directly. Add route handling."
+        },
+        {
+          "id": "ANTIGRAVITY-007",
+          "title": "P2: Translate footer 'Billing Defense'",
+          "priority": "P2",
+          "status": "PENDING",
+          "createdAt": "2026-01-27T23:00:00Z",
+          "notes": "Footer shows 'Billing Defense' in English. Should be 'Defensa de Facturación'. Check LandingPage.tsx footer."
+        },
+        {
+          "id": "ANTIGRAVITY-008",
+          "title": "P2: Add family notifications feature",
+          "priority": "P2",
+          "status": "PENDING",
+          "createdAt": "2026-01-27T23:00:00Z",
+          "notes": "Family Portal has no notification features. Add upcoming visit alerts or notification panel."
         }
       ],
-      "inProgress": [],
       "completed": [
-        {
-          "id": "ANTIGRAVITY-001",
-          "title": "Build Admin CRUD Pages",
-          "status": "COMPLETED",
-          "completedAt": "2026-01-27T22:00:00Z"
-        }
+        {"id": "ANTIGRAVITY-001", "title": "Admin CRUD Pages", "status": "COMPLETED"},
+        {"id": "ANTIGRAVITY-002", "title": "Admin login routing (fixed by Clawd)", "status": "COMPLETED"},
+        {"id": "ANTIGRAVITY-003", "title": "Rate limit UI (fixed by Clawd)", "status": "COMPLETED"},
+        {"id": "ANTIGRAVITY-005", "title": "Login page Spanish (fixed by Clawd)", "status": "COMPLETED"}
       ]
     }
   },
-  "lastUpdated": "2026-01-27T22:30:00Z"
+  "lastUpdated": "2026-01-27T23:00:00Z"
 }
