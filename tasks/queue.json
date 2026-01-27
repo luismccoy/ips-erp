@@ -1,45 +1,107 @@
 {
   "version": "1.0.0",
-  "description": "Task queue for IDE handoffs. Kiro polls for backend tasks, Antigravity polls for frontend tasks.",
+  "description": "Task queue for IDE handoffs",
   "queues": {
     "kiro": {
-      "description": "Backend tasks: CDK, Lambda, GraphQL, AWS services",
-      "pending": [],
+      "description": "Backend tasks",
+      "pending": [
+        {
+          "id": "KIRO-002",
+          "title": "Fix PWA manifest routing in Amplify",
+          "priority": "P0",
+          "status": "PENDING",
+          "createdAt": "2026-01-27T22:30:00Z",
+          "createdBy": "Stress Test",
+          "notes": "manifest.webmanifest returns HTML. Configure Amplify rewrites to exclude from SPA routing."
+        },
+        {
+          "id": "KIRO-003",
+          "title": "Fix GraphQL listNotifications authorization",
+          "priority": "P1",
+          "status": "PENDING",
+          "createdAt": "2026-01-27T22:30:00Z",
+          "createdBy": "Stress Test",
+          "notes": "Error: Not Authorized to access listNotifications on type Query"
+        },
+        {
+          "id": "KIRO-004",
+          "title": "Investigate session instability",
+          "priority": "P1",
+          "status": "PENDING",
+          "createdAt": "2026-01-27T22:30:00Z",
+          "createdBy": "Stress Test",
+          "notes": "Users get logged out during navigation. React state frequently resets."
+        }
+      ],
       "inProgress": [],
       "completed": [
         {
           "id": "KIRO-001",
           "title": "Implement AWS Transcribe Voice Notes",
-          "spec": "docs/KIRO_TRANSCRIBE_SPEC.md",
-          "priority": "P2",
           "status": "COMPLETED",
-          "createdAt": "2026-01-27T17:30:00Z",
-          "createdBy": "Clawd",
-          "completedAt": "2026-01-27T22:00:00Z",
-          "completedBy": "Kiro",
-          "notes": "Phase 19: createNurseWithValidation + rate limiting"
+          "completedAt": "2026-01-27T22:00:00Z"
         }
       ]
     },
     "antigravity": {
-      "description": "Frontend tasks: React components, UI/UX, styling",
-      "pending": [],
+      "description": "Frontend tasks",
+      "pending": [
+        {
+          "id": "ANTIGRAVITY-002",
+          "title": "P0: Fix admin login routing",
+          "priority": "P0",
+          "status": "PENDING",
+          "createdAt": "2026-01-27T22:30:00Z",
+          "createdBy": "Stress Test",
+          "notes": "Iniciar Sesión routes to Family Portal instead of Org Access. Add /login/family and /login/staff routes."
+        },
+        {
+          "id": "ANTIGRAVITY-003",
+          "title": "P0: Handle rate limit responses in Family Portal",
+          "priority": "P0",
+          "status": "PENDING",
+          "createdAt": "2026-01-27T22:30:00Z",
+          "createdBy": "Stress Test",
+          "notes": "Backend has rate limiting but frontend doesn't surface errors or show lockout message."
+        },
+        {
+          "id": "ANTIGRAVITY-004",
+          "title": "P1: Fix nurse nav buttons",
+          "priority": "P1",
+          "status": "PENDING",
+          "createdAt": "2026-01-27T22:30:00Z",
+          "createdBy": "Stress Test",
+          "notes": "Notifications icon opens Family Portal. Profile icon opens landing page. Fix onClick handlers."
+        },
+        {
+          "id": "ANTIGRAVITY-005",
+          "title": "P1: Translate login page to Spanish",
+          "priority": "P1",
+          "status": "PENDING",
+          "createdAt": "2026-01-27T22:30:00Z",
+          "createdBy": "Stress Test",
+          "notes": "Login shows English: ORGANIZATION ACCESS, EMAIL, PASSWORD, ENTER PLATFORM"
+        },
+        {
+          "id": "ANTIGRAVITY-006",
+          "title": "P1: Fix /family route",
+          "priority": "P1",
+          "status": "PENDING",
+          "createdAt": "2026-01-27T22:30:00Z",
+          "createdBy": "Stress Test",
+          "notes": "Direct /family route redirects to landing. Should work like /app?demo=family"
+        }
+      ],
       "inProgress": [],
       "completed": [
         {
           "id": "ANTIGRAVITY-001",
-          "title": "Build Admin CRUD Pages (Patients + Staff)",
-          "spec": "docs/FRONTEND_ADMIN_CRUD_SPEC.md",
-          "priority": "P0",
+          "title": "Build Admin CRUD Pages",
           "status": "COMPLETED",
-          "createdAt": "2026-01-27T21:30:00Z",
-          "createdBy": "Clawd",
-          "notes": "PatientsPage + StaffPage with forms",
-          "completedAt": "2026-01-27T22:00:00Z",
-          "completedBy": "Antigravity"
+          "completedAt": "2026-01-27T22:00:00Z"
         }
       ]
     }
   },
-  "lastUpdated": "2026-01-27T22:00:00Z"
+  "lastUpdated": "2026-01-27T22:30:00Z"
 }

@@ -1,0 +1,176 @@
+# IPS-ERP Stress Test Report
+**Date:** 2026-01-27  
+**Testers:** 4 Parallel AI Agents (Haiku)  
+**Target:** https://main.d2wwgecog8smmr.amplifyapp.com
+
+---
+
+## Executive Summary
+
+| Persona | Overall Status | Critical Issues |
+|---------|----------------|-----------------|
+| 👨‍💼 Admin | ❌ BLOCKED | Login routing broken |
+| 👩‍⚕️ Nurse | ⚠️ PARTIAL | Nav bugs, session instability |
+| 👨‍👩‍👧 Family | ⚠️ PARTIAL | Rate limiting not working, no notifications |
+| 🔍 UX/QA | ⚠️ PARTIAL | PWA broken, login page not localized |
+
+**Production Ready:** ❌ NO - Critical bugs must be fixed first
+
+---
+
+## 🔴 CRITICAL ISSUES (P0)
+
+### 1. Admin Login Routing Broken
+**Severity:** 🔴 CRITICAL - Blocks all admin access  
+**Owner:** Antigravity (Frontend)
+
+"Iniciar Sesión" button routes to Family Portal instead of Organization Access. ALL routes tested redirect to Family Portal:
+- `/login` → Family Portal
+- `/admin` → Family Portal
+- `/admin/dashboard` → Family Portal
+
+**Fix:** Add route differentiation:
+- `/login/family` → Family Portal
+- `/login/staff` → Organization Access
+
+---
+
+### 2. PWA Manifest Broken
+**Severity:** 🔴 CRITICAL - Blocks mobile installation  
+**Owner:** Kiro (Backend/Config)
+
+`manifest.webmanifest` returns HTML instead of JSON. SPA routing catches manifest request.
+
+**Console Error:** `Manifest: Line: 1, column: 1, Syntax error.`
+
+**Fix:** Configure Amplify rewrites to exclude manifest from SPA routing.
+
+---
+
+### 3. Rate Limiting Not Working in Frontend
+**Severity:** 🔴 CRITICAL - Security vulnerability  
+**Owner:** Antigravity (Frontend)
+
+Kiro implemented backend rate limiting, but frontend doesn't surface or enforce it. No attempt counter visible.
+
+**Fix:** Frontend must handle rate limit error responses and show lockout message.
+
+---
+
+## 🟠 MAJOR ISSUES (P1)
+
+### 4. Navigation Buttons Misdirect (Nurse App)
+**Severity:** 🟠 HIGH  
+**Owner:** Antigravity
+
+- Notifications icon → Opens Family Portal (wrong!)
+- Profile icon → Opens landing page (wrong!)
+
+**Fix:** Fix onClick handlers for these buttons.
+
+---
+
+### 5. Login Page Not Localized
+**Severity:** 🟠 HIGH  
+**Owner:** Antigravity
+
+Login page shows English labels in Spanish app:
+- "ORGANIZATION ACCESS" → "ACCESO ORGANIZACIONAL"
+- "EMAIL" → "CORREO ELECTRÓNICO"
+- "PASSWORD" → "CONTRASEÑA"
+- "ENTER PLATFORM" → "INGRESAR"
+
+---
+
+### 6. Session Instability
+**Severity:** 🟠 HIGH  
+**Owner:** Kiro/Antigravity
+
+Users get logged out during navigation. React state frequently resets.
+
+---
+
+### 7. GraphQL Notifications Auth Error
+**Severity:** 🟠 HIGH  
+**Owner:** Kiro (Backend)
+
+`"Not Authorized to access listNotifications on type Query"`
+
+---
+
+### 8. `/family` Route Broken
+**Severity:** 🟠 MEDIUM  
+**Owner:** Antigravity
+
+Direct `/family` route doesn't work. Must use `/app?demo=family`.
+
+---
+
+## 🟡 MINOR ISSUES (P2)
+
+### 9. Footer English Text
+"Billing Defense" should be "Defensa de Facturación"
+
+### 10. Deprecated Meta Tag
+`apple-mobile-web-app-capable` → Use `mobile-web-app-capable`
+
+### 11. Missing Autocomplete Attributes
+Password fields need `autocomplete="current-password"`
+
+### 12. No Family Notifications
+Family members have no upcoming visit alerts or notification system.
+
+### 13. No Test Data for Nurse Shifts
+"No hay turnos asignados" - can't test visit workflow.
+
+---
+
+## ✅ WHAT WORKS WELL
+
+| Feature | Score | Notes |
+|---------|-------|-------|
+| Landing Page | 9/10 | Beautiful, fully Spanish, professional |
+| Demo Mode Selector | 9/10 | Great 3-card design, clear roles |
+| Responsive Design | 9/10 | Works on mobile, tablet, desktop |
+| Performance | 8/10 | Fast loads, no lag |
+| Family Timeline | 8/10 | Shows visits, nurses, activities |
+| Family Vitals Chart | 8/10 | BP trend visualization works |
+| Nurse Statistics View | 8/10 | Shows sync status, counters |
+| Admin Route Protection | 10/10 | Nurse correctly blocked from admin |
+| Privacy Notice | 8/10 | Ley 1581 compliance messaging |
+
+---
+
+## Task Queue Generated
+
+### For Kiro (Backend):
+1. Fix PWA manifest routing in Amplify
+2. Fix GraphQL notifications authorization
+3. Investigate session instability
+
+### For Antigravity (Frontend):
+1. **P0:** Fix admin login routing
+2. **P0:** Handle rate limit responses in Family Portal
+3. **P1:** Fix nurse nav buttons (notifications, profile)
+4. **P1:** Translate login page to Spanish
+5. **P1:** Fix `/family` route
+6. **P2:** Translate footer text
+7. **P2:** Add autocomplete attributes
+
+---
+
+## Appendix: Test Coverage
+
+| Area | Tested | Passed | Failed | Blocked |
+|------|--------|--------|--------|---------|
+| Authentication | 4 | 1 | 2 | 1 |
+| Navigation | 4 | 2 | 2 | 0 |
+| CRUD Operations | 3 | 0 | 0 | 3 |
+| Data Display | 3 | 2 | 1 | 0 |
+| Security | 4 | 2 | 2 | 0 |
+| Localization | 3 | 1 | 2 | 0 |
+| Mobile/PWA | 2 | 1 | 1 | 0 |
+
+---
+
+*Report generated by Clawd orchestrating 4 Haiku test agents*
