@@ -379,7 +379,7 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
                             <h4 className="font-bold text-slate-900 mb-4">Producto</h4>
                             <ul className="space-y-2 text-sm text-slate-500">
                                 <li><a href="#" className="hover:text-[#2563eb]">Rostering</a></li>
-                                <li><a href="#" className="hover:text-[#2563eb]">Billing Defense</a></li>
+                                <li><a href="#" className="hover:text-[#2563eb]">Defensa de Facturación</a></li>
                                 <li><a href="#" className="hover:text-[#2563eb]">App Enfermería</a></li>
                             </ul>
                         </div>

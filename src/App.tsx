@@ -60,6 +60,19 @@ export default function App() {
   }, [setDemoState, trackEvent]);
 
   useEffect(() => {
+    // Basic routing for deep links
+    const path = window.location.pathname;
+    
+    if (path === '/family') {
+        // Direct access to Family Portal
+        setAuthStage('login'); // Not strictly needed but keeps state clean
+        setView('family');
+        // We trick the role check effectively by setting it temporarily or just handling the view rendering
+        // In this architecture, we should update the role to trigger the rendering
+        setDemoState('family', TENANTS[0]); 
+        return;
+    }
+
     if (role === 'admin') setView('dashboard');
     if (role === 'nurse') setView('nurse');
     if (role === 'family') setView('family');
@@ -72,7 +85,7 @@ export default function App() {
       identifyUser(role, { tenant: tenant.name, role });
       trackEvent('Session Started', { role });
     }
-  }, [role, tenant, identifyUser, trackEvent]);
+  }, [role, tenant, identifyUser, trackEvent, setDemoState]);
 
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault();

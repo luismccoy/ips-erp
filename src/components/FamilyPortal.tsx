@@ -8,6 +8,7 @@ import type { Patient } from '../types';
 import type { VisitSummary } from '../types/workflow';
 import { VitalsChart } from './VitalsChart';
 import { LoadingSpinner } from './ui/LoadingSpinner';
+import { NotificationBell } from './NotificationBell';
 
 export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
     // Auth State
@@ -15,7 +16,7 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
     const [accessCode, setAccessCode] = useState('');
     const [attemptCount, setAttemptCount] = useState(0);
     const [lockoutUntil, setLockoutUntil] = useState<number | null>(null);
-    
+
     // Rate limiting constants
     const MAX_ATTEMPTS = 5;
     const LOCKOUT_MINUTES = 15;
@@ -32,20 +33,20 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         // Check if currently locked out
         if (lockoutUntil && Date.now() < lockoutUntil) {
             const remainingMinutes = Math.ceil((lockoutUntil - Date.now()) / 60000);
             setAuthError(`Demasiados intentos fallidos. Cuenta bloqueada por ${remainingMinutes} minutos.`);
             return;
         }
-        
+
         // Clear lockout if expired
         if (lockoutUntil && Date.now() >= lockoutUntil) {
             setLockoutUntil(null);
             setAttemptCount(0);
         }
-        
+
         setIsCheckingAuth(true);
         setAuthError('');
 
@@ -56,10 +57,10 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
                     filter: { familyAccessCode: { eq: accessCode } },
                     limit: 1
                 });
-                
+
                 if (patientsRes.data && patientsRes.data.length > 0) {
                     const matchedPatient = patientsRes.data[0];
-                    
+
                     // SECURITY: Defense-in-depth - verify access code matches client-side
                     // This protects against backend filter failures or misconfigurations
                     if (matchedPatient.familyAccessCode && matchedPatient.familyAccessCode === accessCode) {
@@ -77,7 +78,7 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
                     // Failed attempt - increment counter
                     const newAttemptCount = attemptCount + 1;
                     setAttemptCount(newAttemptCount);
-                    
+
                     if (newAttemptCount >= MAX_ATTEMPTS) {
                         const lockoutTime = Date.now() + (LOCKOUT_MINUTES * 60 * 1000);
                         setLockoutUntil(lockoutTime);
@@ -91,7 +92,7 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
             } else {
                 // DEMO MODE: Accept '1234' for demo patient
                 await new Promise(resolve => setTimeout(resolve, 800));
-                
+
                 if (accessCode === '1234') {
                     setIsAuthenticated(true);
                     setAttemptCount(0); // Reset on success
@@ -100,7 +101,7 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
                     // Failed attempt in demo mode
                     const newAttemptCount = attemptCount + 1;
                     setAttemptCount(newAttemptCount);
-                    
+
                     if (newAttemptCount >= MAX_ATTEMPTS) {
                         const lockoutTime = Date.now() + (LOCKOUT_MINUTES * 60 * 1000);
                         setLockoutUntil(lockoutTime);
@@ -244,9 +245,17 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
                         <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Portal Seguro</p>
                     </div>
                 </div>
-                <button onClick={() => setIsAuthenticated(false)} className="bg-slate-100 hover:bg-slate-200 text-slate-600 p-2 rounded-lg transition-colors" title="Salir">
-                    <LogOut size={18} />
-                </button>
+                <div className="flex items-center gap-3">
+                    {patient && (
+                        <NotificationBell
+                            userId={patient.id}
+                            onNotificationClick={(n) => console.log('Family notification clicked', n)}
+                        />
+                    )}
+                    <button onClick={() => setIsAuthenticated(false)} className="bg-slate-100 hover:bg-slate-200 text-slate-600 p-2 rounded-lg transition-colors" title="Salir">
+                        <LogOut size={18} />
+                    </button>
+                </div>
             </header>
 
             <main className="p-4 max-w-lg mx-auto space-y-6 pb-20">
