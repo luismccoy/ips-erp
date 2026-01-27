@@ -20,3 +20,31 @@ frontend:
       headers:
         - key: Cache-Control
           value: 'public, max-age=0, must-revalidate'
+customRules:
+  # PWA assets - serve directly, don't rewrite to index.html
+  - source: /manifest.webmanifest
+    target: /manifest.webmanifest
+    status: '200'
+  - source: /sw.js
+    target: /sw.js
+    status: '200'
+  - source: /workbox-*.js
+    target: /workbox-*.js
+    status: '200'
+  # Static assets
+  - source: /*.ico
+    target: /*.ico
+    status: '200'
+  - source: /*.svg
+    target: /*.svg
+    status: '200'
+  - source: /*.png
+    target: /*.png
+    status: '200'
+  - source: /assets/<*>
+    target: /assets/<*>
+    status: '200'
+  # SPA fallback - must be LAST
+  - source: </^[^.]+$|\.(?!(css|gif|ico|jpg|jpeg|js|png|txt|svg|woff|woff2|ttf|map|json|webmanifest)$)([^.]+$)/>
+    target: /index.html
+    status: '200'
