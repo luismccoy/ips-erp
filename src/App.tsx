@@ -103,12 +103,12 @@ export default function App() {
           identifyUser(role, { tenant: tenant.name, role });
           trackEvent('Session Started', { role });
         }
+        
+        // Set initial view based on role (only on first login/role assignment)
+        if (role === 'admin') setView('dashboard');
+        else if (role === 'nurse') setView('nurse');
+        else if (role === 'family') setView('family');
       }
-      
-      // Always update view to match current role (fixes demo switching bug)
-      if (role === 'admin') setView('dashboard');
-      else if (role === 'nurse') setView('nurse');
-      else if (role === 'family') setView('family');
     } else {
       // Reset the flag when logged out so next session tracks properly
       initialViewSet.current = false;
