@@ -57,8 +57,14 @@ export default function App() {
   const [password, setPassword] = useState('');
   const [isSigningIn, setIsSigningIn] = useState(false);
 
-  // Ref to track if initial view has been set (prevents resetting view on navigation)
-  const initialViewSet = useRef(false);
+  // Track if initial view has been set (prevents resetting view on navigation)
+  // Using state instead of ref to be more "React-y" and avoid potential ref timing issues
+  const [initialViewSetForRole, setInitialViewSetForRole] = useState<string | null>(null);
+
+  // Debug logging for view changes
+  useEffect(() => {
+    console.log('[Navigation Debug] View changed to:', view, '| Role:', role, '| initialViewSetForRole:', initialViewSetForRole);
+  }, [view, role, initialViewSetForRole]);
 
   // Handle demo query param on page load (after demo mode redirect)
   useEffect(() => {
@@ -84,12 +90,15 @@ export default function App() {
   }, [setDemoState, trackEvent]);
 
   useEffect(() => {
+    console.log('[Navigation Debug] Main useEffect triggered | role:', role, '| initialViewSetForRole:', initialViewSetForRole);
+    
     // Deep link handling - always check this first
     const path = window.location.pathname;
     
     // Handle direct navigation to dashboard/admin
     // Note: enableDemoMode() already called at module level (see above)
     if ((path === '/dashboard' || path === '/admin') && !role) {
+      console.log('[Navigation Debug] Setting demo admin state from deep link');
       const savedRole = sessionStorage.getItem('ips-erp-demo-role');
       if (savedRole === 'admin' || !savedRole) {
         setDemoState('admin', TENANTS[0]);
@@ -100,7 +109,8 @@ export default function App() {
     // Handle direct navigation to app/nurse - ALWAYS force nurse role
     // (unlike /dashboard which respects session, /app explicitly means nurse view)
     // Note: enableDemoMode() already called at module level (see above)
-    if (path === '/app' || path === '/nurse') {
+    if ((path === '/app' || path === '/nurse') && !role) {
+      console.log('[Navigation Debug] Setting demo nurse state from deep link');
       setDemoState('nurse', TENANTS[0]);
       return;
     }
@@ -108,30 +118,36 @@ export default function App() {
     // Handle direct navigation to family portal
     // Note: enableDemoMode() already called at module level (see above)
     if (path === '/family' && !role) {
+      console.log('[Navigation Debug] Setting demo family state from deep link');
       setDemoState('family', TENANTS[0]);
       return;
     }
     
     // Set view when role is defined (supports demo switching)
-    if (role) {
-      // Only track session and identify on FIRST view set
-      if (!initialViewSet.current) {
-        initialViewSet.current = true;
-        if (tenant) {
-          identifyUser(role, { tenant: tenant.name, role });
-          trackEvent('Session Started', { role });
-        }
-        
-        // Set initial view based on role (only on first login/role assignment)
-        if (role === 'admin') setView('dashboard');
-        else if (role === 'nurse') setView('nurse');
-        else if (role === 'family') setView('family');
+    if (role && initialViewSetForRole !== role) {
+      // Only track session and identify on FIRST view set for this role
+      console.log('[Navigation Debug] First-time view setup for role:', role);
+      setInitialViewSetForRole(role);
+      
+      if (tenant) {
+        identifyUser(role, { tenant: tenant.name, role });
+        trackEvent('Session Started', { role });
       }
-    } else {
-      // Reset the flag when logged out so next session tracks properly
-      initialViewSet.current = false;
+      
+      // Set initial view based on role (only on first login/role assignment)
+      if (role === 'admin') setView('dashboard');
+      else if (role === 'nurse') setView('nurse');
+      else if (role === 'family') setView('family');
+    } else if (role) {
+      console.log('[Navigation Debug] Skipping view setup (already initialized for role:', role, ')');
     }
-  }, [role, tenant, setDemoState, identifyUser, trackEvent]);
+    
+    // Reset the initialization tracking when logged out so next session tracks properly
+    if (!role && initialViewSetForRole !== null) {
+      console.log('[Navigation Debug] Resetting initialization tracking');
+      setInitialViewSetForRole(null);
+    }
+  }, [role, tenant, setDemoState, identifyUser, trackEvent, initialViewSetForRole]);
 
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault();
