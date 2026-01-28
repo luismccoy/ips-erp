@@ -1,4 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
+import { motion } from 'framer-motion';
 import {
     Activity, ClipboardCheck, Package, Calendar, ShieldAlert,
     FileText, LogOut, DollarSign, ClipboardList, BarChart,
@@ -290,15 +291,18 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
 
 function NavItem({ icon: Icon, label, active, onClick, dataTour }: NavItemProps) {
     return (
-        <button
+        <motion.button
             onClick={onClick}
             data-tour={dataTour}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${active ? 'bg-[#2563eb] text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${active ? 'bg-[#2563eb] text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
                 }`}
+            whileHover={{ x: active ? 0 : 4 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
         >
             <Icon size={18} />
             <span className="text-sm font-bold">{label}</span>
-        </button>
+        </motion.button>
     );
 }
 
