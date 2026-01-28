@@ -27,7 +27,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { Activity, LogOut, FileText, Edit3, Clock, CheckCircle, XCircle, AlertCircle, FileCheck, HeartPulse, CloudOff } from 'lucide-react';
+import { Activity, LogOut, FileText, Edit3, Clock, CheckCircle, XCircle, AlertCircle, FileCheck, HeartPulse, CloudOff, ChevronRight } from 'lucide-react';
 import { client, isUsingRealBackend } from '../amplify-utils';
 import { createVisitDraft } from '../api/workflow-api';
 import { usePagination } from '../hooks/usePagination';
@@ -715,8 +715,19 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                         // _syncStatus is tracked on ShiftWithVisit level
                                         const visitSyncStatus: SyncStatusType = shift._syncStatus || 'synced';
 
+                                        // Determine if this card should be interactive (pending/in-progress without visit)
+                                        const isActionable = (shift.status === 'PENDING' || shift.status === 'IN_PROGRESS') && !shift.visit;
+                                        
                                         return (
-                                            <div key={shift.id} className="bg-slate-800 p-4 rounded-xl">
+                                            <div 
+                                                key={shift.id} 
+                                                className={`bg-slate-800 p-4 rounded-xl transition-all ${
+                                                    isActionable ? 'hover:bg-slate-750 hover:shadow-lg hover:border hover:border-blue-500/30 cursor-pointer' : ''
+                                                }`}
+                                                onClick={isActionable ? () => handleStartDocumentation(shift.id) : undefined}
+                                                role={isActionable ? 'button' : undefined}
+                                                tabIndex={isActionable ? 0 : undefined}
+                                            >
                                                 {/* Shift Header */}
                                                 <div className="flex justify-between items-start mb-2">
                                                     <div className="flex items-center gap-2">
@@ -726,6 +737,10 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                         {/* Sync status icon for the visit */}
                                                         {shift.visit && visitSyncStatus !== 'synced' && (
                                                             <SyncCloudIcon syncStatus={visitSyncStatus} size={14} />
+                                                        )}
+                                                        {/* Chevron indicator for actionable cards */}
+                                                        {isActionable && (
+                                                            <ChevronRight size={18} className="text-blue-400 ml-auto" />
                                                         )}
                                                     </div>
                                                     <span className={`px-2 py-1 rounded text-xs font-bold ${shift.status === 'COMPLETED'
@@ -776,6 +791,21 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                         <AlertCircle size={12} />
                                                         <span>Error al sincronizar - toque para reintentar</span>
                                                     </div>
+                                                )}
+
+                                                {/* SENTINEL FIX #1: Iniciar Visita for Pending/In-Progress Shifts */}
+                                                {(shift.status === 'PENDING' || shift.status === 'IN_PROGRESS') && !shift.visit && (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation(); // Prevent card click from triggering
+                                                            handleStartDocumentation(shift.id);
+                                                        }}
+                                                        disabled={isCreatingThisDraft}
+                                                        className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                                                    >
+                                                        <FileText size={18} />
+                                                        {isCreatingThisDraft ? 'Iniciando...' : 'Iniciar Visita'}
+                                                    </button>
                                                 )}
 
                                                 {/* Documentation Button - Requirements 1.1, 1.5 */}
