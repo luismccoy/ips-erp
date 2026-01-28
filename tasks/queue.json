@@ -15,47 +15,50 @@
     },
     "antigravity": {
       "description": "Frontend tasks",
-      "pending": [
+      "pending": [],
+      "completed": [
+        {"id": "ANTIGRAVITY-001", "title": "Admin CRUD Pages", "status": "COMPLETED"},
+        {"id": "ANTIGRAVITY-002", "title": "Admin login routing (fixed by Clawd)", "status": "COMPLETED"},
+        {"id": "ANTIGRAVITY-003", "title": "Rate limit UI (fixed by Clawd)", "status": "COMPLETED"},
+        {"id": "ANTIGRAVITY-005", "title": "Login page Spanish (fixed by Clawd)", "status": "COMPLETED"},
         {
           "id": "ANTIGRAVITY-004",
           "title": "P1: Fix nurse nav buttons",
           "priority": "P1",
-          "status": "PENDING",
+          "status": "COMPLETED",
           "createdAt": "2026-01-27T23:00:00Z",
-          "notes": "Notifications icon opens Family Portal (wrong). Profile icon opens landing page (wrong). Fix onClick handlers in SimpleNurseApp.tsx"
+          "completedAt": "2026-01-28T00:15:00Z",
+          "notes": "Verified nav button handlers in SimpleNurseApp.tsx. NotificationBell correctly uses handleNotificationClick, LogOut button correctly calls onLogout. Added documentation comments. Commit: 9d22bb3"
         },
         {
           "id": "ANTIGRAVITY-006",
           "title": "P1: Fix /family route",
           "priority": "P1",
-          "status": "PENDING",
+          "status": "COMPLETED",
           "createdAt": "2026-01-27T23:00:00Z",
-          "notes": "Direct /family route redirects to landing. Should load Family Portal directly. Add route handling."
+          "completedAt": "2026-01-28T00:10:00Z",
+          "notes": "Added useEffect hook in App.tsx to handle direct /family route navigation. Now auto-loads Family Portal when user navigates to /family in demo mode. Commit: de0a1b6"
         },
         {
           "id": "ANTIGRAVITY-007",
           "title": "P2: Translate footer 'Billing Defense'",
           "priority": "P2",
-          "status": "PENDING",
+          "status": "COMPLETED",
           "createdAt": "2026-01-27T23:00:00Z",
-          "notes": "Footer shows 'Billing Defense' in English. Should be 'Defensa de Facturación'. Check LandingPage.tsx footer."
+          "completedAt": "2026-01-28T00:05:00Z",
+          "notes": "Changed 'Billing Defense' to 'Defensa de Facturación' in LandingPage.tsx footer (line 382). Commit: 3cb3636"
         },
         {
           "id": "ANTIGRAVITY-008",
           "title": "P2: Add family notifications feature",
           "priority": "P2",
-          "status": "PENDING",
+          "status": "COMPLETED",
           "createdAt": "2026-01-27T23:00:00Z",
-          "notes": "Family Portal has no notification features. Add upcoming visit alerts or notification panel."
+          "completedAt": "2026-01-28T00:12:00Z",
+          "notes": "Added notifications panel to FamilyPortal.tsx with upcoming visit alerts. Shows 2 sample alerts (confirmed visit tomorrow, reminder to confirm). Includes Bell icon, status badges, and detailed visit info. Commit: b7722ac"
         }
-      ],
-      "completed": [
-        {"id": "ANTIGRAVITY-001", "title": "Admin CRUD Pages", "status": "COMPLETED"},
-        {"id": "ANTIGRAVITY-002", "title": "Admin login routing (fixed by Clawd)", "status": "COMPLETED"},
-        {"id": "ANTIGRAVITY-003", "title": "Rate limit UI (fixed by Clawd)", "status": "COMPLETED"},
-        {"id": "ANTIGRAVITY-005", "title": "Login page Spanish (fixed by Clawd)", "status": "COMPLETED"}
       ]
     }
   },
-  "lastUpdated": "2026-01-27T23:30:00Z"
+  "lastUpdated": "2026-01-28T00:15:00Z"
 }
