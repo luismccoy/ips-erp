@@ -68,7 +68,7 @@ export default function App() {
     
     // Handle direct navigation to dashboard/admin
     if ((path === '/dashboard' || path === '/admin') && !role) {
-      const savedRole = sessionStorage.getItem('ips-demo-role');
+      const savedRole = sessionStorage.getItem('ips-erp-demo-role');
       if (savedRole === 'admin' || !savedRole) {
         setDemoState('admin', TENANTS[0]);
       }
@@ -87,17 +87,24 @@ export default function App() {
       return;
     }
     
-    // Only set initial view ONCE when role first becomes defined
-    if (role && !initialViewSet.current) {
-      initialViewSet.current = true;
+    // Set view when role is defined (supports demo switching)
+    if (role) {
+      // Only track session and identify on FIRST view set
+      if (!initialViewSet.current) {
+        initialViewSet.current = true;
+        if (tenant) {
+          identifyUser(role, { tenant: tenant.name, role });
+          trackEvent('Session Started', { role });
+        }
+      }
+      
+      // Always update view to match current role (fixes demo switching bug)
       if (role === 'admin') setView('dashboard');
       else if (role === 'nurse') setView('nurse');
       else if (role === 'family') setView('family');
-      
-      if (tenant) {
-        identifyUser(role, { tenant: tenant.name, role });
-        trackEvent('Session Started', { role });
-      }
+    } else {
+      // Reset the flag when logged out so next session tracks properly
+      initialViewSet.current = false;
     }
   }, [role, tenant, setDemoState, identifyUser, trackEvent]);
 
@@ -152,9 +159,9 @@ export default function App() {
     // Handler for Organization Access login - clears any demo state first
     const handleOrgLogin = () => {
       // Clear demo state so org login form can show
-      sessionStorage.removeItem('ips-demo-role');
-      sessionStorage.removeItem('ips-demo-tenant');
-      sessionStorage.removeItem('ips-demo-mode');
+      sessionStorage.removeItem('ips-erp-demo-role');
+      sessionStorage.removeItem('ips-erp-demo-tenant');
+      sessionStorage.removeItem('ips-erp-demo-mode');
       logout(); // This clears role state
       setAuthStage('login');
     };
