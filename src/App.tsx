@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { Activity } from 'lucide-react';
 import LandingPage from './components/LandingPage';
 import DemoSelection from './components/DemoSelection';
@@ -36,6 +36,9 @@ export default function App() {
   const [password, setPassword] = useState('');
   const [isSigningIn, setIsSigningIn] = useState(false);
 
+  // Ref to track if initial view has been set (prevents resetting view on navigation)
+  const initialViewSet = useRef(false);
+
   // Handle demo query param on page load (after demo mode redirect)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -60,32 +63,27 @@ export default function App() {
   }, [setDemoState, trackEvent]);
 
   useEffect(() => {
-    // Basic routing for deep links
+    // Deep link handling - always check this first
     const path = window.location.pathname;
     
-    if (path === '/family') {
-        // Direct access to Family Portal
-        setAuthStage('login'); // Not strictly needed but keeps state clean
-        setView('family');
-        // We trick the role check effectively by setting it temporarily or just handling the view rendering
-        // In this architecture, we should update the role to trigger the rendering
-        setDemoState('family', TENANTS[0]); 
-        return;
+    if (path === '/family' && !role) {
+      setDemoState('family', TENANTS[0]);
+      return;
     }
-
-    if (role === 'admin') setView('dashboard');
-    if (role === 'nurse') setView('nurse');
-    if (role === 'family') setView('family');
-
-    if (!role) {
-      setView('login');
+    
+    // Only set initial view ONCE when role first becomes defined
+    if (role && !initialViewSet.current) {
+      initialViewSet.current = true;
+      if (role === 'admin') setView('dashboard');
+      else if (role === 'nurse') setView('nurse');
+      else if (role === 'family') setView('family');
+      
+      if (tenant) {
+        identifyUser(role, { tenant: tenant.name, role });
+        trackEvent('Session Started', { role });
+      }
     }
-
-    if (role && tenant) {
-      identifyUser(role, { tenant: tenant.name, role });
-      trackEvent('Session Started', { role });
-    }
-  }, [role, tenant, identifyUser, trackEvent, setDemoState]);
+  }, [role, tenant, setDemoState, identifyUser, trackEvent]);
 
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault();

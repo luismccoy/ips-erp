@@ -28,9 +28,9 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
                             </a>
                             <a href="#infrastructure" className="text-sm font-medium hover:text-[#2563eb] transition-colors">Infraestructura</a>
                         </div>
-                        <div className="flex items-center gap-4">
-                            <button onClick={onLogin} className="hidden md:block text-sm font-medium text-slate-900 hover:text-[#2563eb]">Iniciar Sesión</button>
-                            <button onClick={onViewDemo} className="bg-slate-900 text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-slate-800 transition-all hover:shadow-lg transform hover:-translate-y-0.5">
+                        <div className="flex items-center gap-3">
+                            <button onClick={onLogin} className="text-sm font-medium text-slate-900 hover:text-[#2563eb] transition-colors">Iniciar Sesión</button>
+                            <button onClick={onViewDemo} className="bg-slate-900 text-white px-4 sm:px-5 py-2.5 rounded-full text-sm font-medium hover:bg-slate-800 transition-all hover:shadow-lg transform hover:-translate-y-0.5">
                                 Agendar Demo
                             </button>
                         </div>
