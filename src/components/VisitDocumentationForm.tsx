@@ -155,6 +155,12 @@ export const VisitDocumentationForm: React.FC<VisitDocumentationFormProps> = ({
   const [medications, setMedications] = useState<MedicationAdminData[]>([]);
   const [tasks, setTasks] = useState<TaskCompletionData[]>([]);
 
+  // SENTINEL FIX #2: Track initial state for unsaved changes detection
+  const [initialKardex, setInitialKardex] = useState<KardexData>(EMPTY_KARDEX);
+  const [initialVitals, setInitialVitals] = useState<VitalsData>(EMPTY_VITALS);
+  const [initialMedications, setInitialMedications] = useState<MedicationAdminData[]>([]);
+  const [initialTasks, setInitialTasks] = useState<TaskCompletionData[]>([]);
+
   // Visit state
   const [_visitId, setVisitId] = useState<string | null>(null); // Track visit ID for future use
   const [visitStatus, setVisitStatus] = useState<VisitStatus>('DRAFT');
@@ -190,10 +196,19 @@ export const VisitDocumentationForm: React.FC<VisitDocumentationFormProps> = ({
           if (existingVisit) {
             setVisitId(existingVisit.id);
             setVisitStatus(existingVisit.status);
-            setKardex(existingVisit.kardex || EMPTY_KARDEX);
-            setVitals(existingVisit.vitalsRecorded || EMPTY_VITALS);
-            setMedications(existingVisit.medicationsAdministered || []);
-            setTasks(existingVisit.tasksCompleted || []);
+            const loadedKardex = existingVisit.kardex || EMPTY_KARDEX;
+            const loadedVitals = existingVisit.vitalsRecorded || EMPTY_VITALS;
+            const loadedMeds = existingVisit.medicationsAdministered || [];
+            const loadedTasks = existingVisit.tasksCompleted || [];
+            setKardex(loadedKardex);
+            setVitals(loadedVitals);
+            setMedications(loadedMeds);
+            setTasks(loadedTasks);
+            // SENTINEL FIX #2: Save initial state
+            setInitialKardex(loadedKardex);
+            setInitialVitals(loadedVitals);
+            setInitialMedications(loadedMeds);
+            setInitialTasks(loadedTasks);
           } else {
             // Create new draft in mock store
             const newVisit = {
@@ -220,36 +235,46 @@ export const VisitDocumentationForm: React.FC<VisitDocumentationFormProps> = ({
             setRejectionReason(visit.rejectionReason || null);
             
             // Parse KARDEX data if it's a JSON string
+            let loadedKardex = EMPTY_KARDEX;
             if (visit.kardex) {
-              const kardexData = typeof visit.kardex === 'string' 
+              loadedKardex = typeof visit.kardex === 'string' 
                 ? JSON.parse(visit.kardex) 
                 : visit.kardex;
-              setKardex(kardexData);
+              setKardex(loadedKardex);
             }
             
             // Parse vitals data
+            let loadedVitals = EMPTY_VITALS;
             if (visit.vitalsRecorded) {
-              const vitalsData = typeof visit.vitalsRecorded === 'string'
+              loadedVitals = typeof visit.vitalsRecorded === 'string'
                 ? JSON.parse(visit.vitalsRecorded)
                 : visit.vitalsRecorded;
-              setVitals(vitalsData);
+              setVitals(loadedVitals);
             }
             
             // Parse medications
+            let loadedMeds: MedicationAdminData[] = [];
             if (visit.medicationsAdministered) {
-              const medsData = typeof visit.medicationsAdministered === 'string'
+              loadedMeds = typeof visit.medicationsAdministered === 'string'
                 ? JSON.parse(visit.medicationsAdministered)
                 : visit.medicationsAdministered;
-              setMedications(medsData || []);
+              setMedications(loadedMeds || []);
             }
             
             // Parse tasks
+            let loadedTasks: TaskCompletionData[] = [];
             if (visit.tasksCompleted) {
-              const tasksData = typeof visit.tasksCompleted === 'string'
+              loadedTasks = typeof visit.tasksCompleted === 'string'
                 ? JSON.parse(visit.tasksCompleted)
                 : visit.tasksCompleted;
-              setTasks(tasksData || []);
+              setTasks(loadedTasks || []);
             }
+            
+            // SENTINEL FIX #2: Save initial state
+            setInitialKardex(loadedKardex);
+            setInitialVitals(loadedVitals);
+            setInitialMedications(loadedMeds || []);
+            setInitialTasks(loadedTasks || []);
           } else {
             // No existing visit, create a draft
             const createResult = await createVisitDraft(shiftId);
@@ -271,6 +296,43 @@ export const VisitDocumentationForm: React.FC<VisitDocumentationFormProps> = ({
 
     fetchVisitDraft();
   }, [shiftId]);
+
+  // ============================================================================
+  // SENTINEL FIX #2: Unsaved Changes Detection
+  // ============================================================================
+
+  /**
+   * Check if form has unsaved changes by comparing current state with initial state
+   */
+  const hasUnsavedChanges = useCallback((): boolean => {
+    // Compare kardex
+    const kardexChanged = JSON.stringify(kardex) !== JSON.stringify(initialKardex);
+    // Compare vitals
+    const vitalsChanged = JSON.stringify(vitals) !== JSON.stringify(initialVitals);
+    // Compare medications
+    const medsChanged = JSON.stringify(medications) !== JSON.stringify(initialMedications);
+    // Compare tasks
+    const tasksChanged = JSON.stringify(tasks) !== JSON.stringify(initialTasks);
+
+    return kardexChanged || vitalsChanged || medsChanged || tasksChanged;
+  }, [kardex, vitals, medications, tasks, initialKardex, initialVitals, initialMedications, initialTasks]);
+
+  /**
+   * Handle close with unsaved changes confirmation
+   * Prevents accidental data loss by confirming before closing dirty forms
+   */
+  const handleClose = useCallback(() => {
+    if (hasUnsavedChanges()) {
+      const confirmed = window.confirm(
+        "¿Descartar cambios?\n\nTiene documentación sin guardar. ¿Está seguro de cerrar sin guardar?"
+      );
+      if (!confirmed) {
+        return; // User cancelled, keep form open
+      }
+    }
+    // User confirmed or no changes, proceed with close
+    onClose();
+  }, [hasUnsavedChanges, onClose]);
 
   // ============================================================================
   // Save Functionality (Maintains DRAFT status)
@@ -296,6 +358,12 @@ export const VisitDocumentationForm: React.FC<VisitDocumentationFormProps> = ({
           tasksCompleted: tasks,
         };
 
+        // SENTINEL FIX #2: Update initial state after successful save
+        setInitialKardex(kardex);
+        setInitialVitals(vitals);
+        setInitialMedications(medications);
+        setInitialTasks(tasks);
+
         setSuccessMessage('Documentación guardada exitosamente');
         setTimeout(() => setSuccessMessage(null), 3000);
       } else {
@@ -312,6 +380,12 @@ export const VisitDocumentationForm: React.FC<VisitDocumentationFormProps> = ({
         const response = await (client.models as any).Visit?.update(updateData);
         
         if (response?.data) {
+          // SENTINEL FIX #2: Update initial state after successful save
+          setInitialKardex(kardex);
+          setInitialVitals(vitals);
+          setInitialMedications(medications);
+          setInitialTasks(tasks);
+
           setSuccessMessage('Documentación guardada exitosamente');
           setTimeout(() => setSuccessMessage(null), 3000);
         } else {
@@ -480,7 +554,7 @@ export const VisitDocumentationForm: React.FC<VisitDocumentationFormProps> = ({
               
               {/* Close Button */}
               <button
-                onClick={onClose}
+                onClick={handleClose}
                 className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
                 title="Cerrar"
               >
@@ -562,7 +636,7 @@ export const VisitDocumentationForm: React.FC<VisitDocumentationFormProps> = ({
             <div className="flex items-center gap-3">
               {/* Cancel Button */}
               <button
-                onClick={onClose}
+                onClick={handleClose}
                 disabled={isSaving || isSubmitting}
                 className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
