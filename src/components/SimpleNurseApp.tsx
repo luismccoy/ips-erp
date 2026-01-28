@@ -637,14 +637,24 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                 {/* Tab Navigation - Mobile optimized with 48px touch targets */}
                 <div className="flex gap-3 mb-6">
                     <button
-                        onClick={() => setActiveTab('route')}
+                        type="button"
+                        onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            setActiveTab('route');
+                        }}
                         className={`flex-1 py-4 min-h-[48px] rounded-xl font-bold text-base transition-colors ${activeTab === 'route' ? 'bg-[#2563eb] text-white' : 'bg-slate-800 text-slate-400 active:bg-slate-700'
                             }`}
                     >
                         Mi Ruta
                     </button>
                     <button
-                        onClick={() => setActiveTab('stats')}
+                        type="button"
+                        onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            setActiveTab('stats');
+                        }}
                         className={`flex-1 py-4 min-h-[48px] rounded-xl font-bold text-base transition-colors ${activeTab === 'stats' ? 'bg-[#2563eb] text-white' : 'bg-slate-800 text-slate-400 active:bg-slate-700'
                             }`}
                     >

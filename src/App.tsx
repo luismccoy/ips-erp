@@ -72,6 +72,7 @@ export default function App() {
   // Track if initial view has been set (prevents resetting view on navigation)
   // Using state instead of ref to be more "React-y" and avoid potential ref timing issues
   const [initialViewSetForRole, setInitialViewSetForRole] = useState<string | null>(null);
+  const [pendingDeepLinkRole, setPendingDeepLinkRole] = useState<string | null>(null);
 
   // Debug logging for view changes
   useEffect(() => {
@@ -122,13 +123,18 @@ export default function App() {
     
     // Handle direct navigation to dashboard/admin
     // Note: enableDemoMode() already called at module level (see above)
-    if ((path === '/dashboard' || path === '/admin') && !role) {
-      console.log('[Navigation Debug] Setting demo admin state from deep link');
-      const savedRole = sessionStorage.getItem('ips-erp-demo-role');
-      if (savedRole === 'admin' || !savedRole) {
+    if (path === '/dashboard' || path === '/admin') {
+      if (role !== 'admin') {
+        console.log('[Navigation Debug] Setting demo admin state from deep link');
+        if (pendingDeepLinkRole !== 'admin') {
+          setPendingDeepLinkRole('admin');
+        }
         setDemoState('admin', TENANTS[0]);
+        return;
       }
-      return;
+      if (pendingDeepLinkRole === 'admin') {
+        setPendingDeepLinkRole(null);
+      }
     }
     
     // Handle direct navigation to app/nurse - ALWAYS force nurse role
@@ -172,7 +178,7 @@ export default function App() {
       console.log('[Navigation Debug] Resetting initialization tracking');
       setInitialViewSetForRole(null);
     }
-  }, [role, tenant, setDemoState, identifyUser, trackEvent, initialViewSetForRole]);
+  }, [role, tenant, setDemoState, identifyUser, trackEvent, initialViewSetForRole, pendingDeepLinkRole]);
 
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault();
