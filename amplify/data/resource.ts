@@ -274,9 +274,9 @@ const schema = a.schema({
         startLng: a.float(),
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
-        // KIRO-004 Fix: Added 'subscribe' and 'listen' for GraphQL subscription support
-        allow.groups(['ADMIN']).to(['create', 'read', 'update', 'delete', 'subscribe', 'listen']),
-        allow.groups(['NURSE']).to(['read', 'subscribe', 'listen'])
+        // KIRO-005 Fix: Added 'list' operation for listShifts query (previous fix only added subscribe/listen)
+        allow.groups(['ADMIN']).to(['create', 'read', 'list', 'update', 'delete', 'subscribe', 'listen']),
+        allow.groups(['NURSE']).to(['read', 'list', 'subscribe', 'listen'])
     ]).secondaryIndexes(index => [
         // Task 4.1: Query shifts by nurse and date for roster optimization
         index('nurseId').sortKeys(['scheduledTime']).name('byNurseAndDate')
@@ -296,8 +296,8 @@ const schema = a.schema({
         expiryDate: a.string(), // ISO date string
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
-        allow.groups(['ADMIN']).to(['create', 'read', 'update', 'delete']),
-        allow.groups(['NURSE']).to(['read'])
+        allow.groups(['ADMIN']).to(['create', 'read', 'list', 'update', 'delete']),
+        allow.groups(['NURSE']).to(['read', 'list'])
     ]),
 
     // 6. VITAL SIGNS - Patient health metrics
@@ -363,7 +363,7 @@ const schema = a.schema({
         causaExterna: a.string(),          // External cause code (01-15 per RIPS spec)
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
-        allow.groups(['ADMIN']).to(['create', 'read', 'update', 'delete'])
+        allow.groups(['ADMIN']).to(['create', 'read', 'list', 'update', 'delete'])
     ]),
     
     // 8. VISIT - Phase 3: Clinical documentation workflow
@@ -438,9 +438,8 @@ const schema = a.schema({
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
         // Phase 16: Explicit group permissions for subscriptions
-        // KIRO-003 Fix: Added 'create' and explicit operations for list queries
-        // KIRO-004 Fix: Added 'subscribe' and 'listen' for GraphQL subscription support
-        allow.groups(['ADMIN', 'NURSE']).to(['create', 'read', 'update', 'delete', 'subscribe', 'listen'])
+        // KIRO-005 Fix: Added 'list' operation for listNotifications query (previous fix only added subscribe/listen)
+        allow.groups(['ADMIN', 'NURSE']).to(['create', 'read', 'list', 'update', 'delete', 'subscribe', 'listen'])
     ]).secondaryIndexes(index => [
         // Task 4.1: Query notifications by user (filter by read status in app)
         // Note: Boolean fields cannot be sort keys in DynamoDB GSIs
@@ -482,9 +481,9 @@ const schema = a.schema({
         visitId: a.id(),
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
-        allow.groups(['ADMIN']).to(['create', 'read', 'update', 'delete']),
-        allow.groups(['NURSE']).to(['create', 'read']),
-        allow.groups(['FAMILY']).to(['read'])
+        allow.groups(['ADMIN']).to(['create', 'read', 'list', 'update', 'delete']),
+        allow.groups(['NURSE']).to(['create', 'read', 'list']),
+        allow.groups(['FAMILY']).to(['read', 'list'])
     ]).secondaryIndexes(index => [
         // Query assessments by patient, sorted by date (most recent first)
         index('patientId').sortKeys(['assessedAt']).name('byPatient'),

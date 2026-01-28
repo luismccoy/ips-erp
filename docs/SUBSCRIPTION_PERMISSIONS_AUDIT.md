@@ -1,156 +1,140 @@
-# GraphQL Subscription Permissions Audit
+# Subscription Permissions Audit
+
+## Issue: listNotifications Query Authorization Failure
 
 **Date:** 2026-01-27  
-**Issue:** Production auth failures for GraphQL subscriptions  
-**Auditor:** Subagent subscription-audit-v2
+**Commit:** 7cfd525 (attempted fix - FAILED)  
+**Error:** "Not Authorized to access listNotifications on type Query"
 
 ---
 
-## 🔴 Problem Summary
+## Root Cause Analysis
 
-Production authentication tests revealed **NotAuthorizedException** errors for:
+### The Problem
+The error `"Not Authorized to access listNotifications on type Query"` is a **QUERY permission error**, not a subscription error.
 
-1. ✗ `onCreateNotification` subscription
-2. ✗ `onUpdateNotification` subscription  
-3. ✗ `listNotifications` query
-4. ✗ "Shift update sub failed" (assumed `onUpdateShift`)
+### What Commit 7cfd525 Did (Incorrectly)
+Added `'subscribe'` and `'listen'` operations to Notification and Shift models:
+```typescript
+allow.groups(['ADMIN', 'NURSE']).to(['create', 'read', 'update', 'delete', 'subscribe', 'listen'])
+```
 
-**Root Cause:** GraphQL subscription operations require **explicit authorization** in AWS AppSync. The current schema only authorizes CRUD operations (`create`, `read`, `update`, `delete`) but does NOT include `subscribe` or `listen` permissions.
+**This didn't fix the issue because:**
+- `'subscribe'` and `'listen'` only affect GraphQL subscriptions (real-time updates)
+- The error is about `listNotifications`, which is a **QUERY operation**
+- In Amplify Data/AppSync, query operations require the `'list'` permission
 
 ---
 
-## 📋 Current Authorization Rules
+## Amplify Data Authorization Operations
 
-### Notification Model (Line ~464)
+| Operation | Maps To | Example GraphQL |
+|-----------|---------|-----------------|
+| `'create'` | Mutations | `createNotification` |
+| `'read'` | Get by ID | `getNotification(id: "123")` |
+| `'update'` | Mutations | `updateNotification` |
+| `'delete'` | Mutations | `deleteNotification` |
+| **`'list'`** | **List queries** | **`listNotifications(filter: {...})`** |
+| `'subscribe'` | Subscriptions | `onCreateNotification` |
+| `'listen'` | Subscription filters | (subscription filtering) |
+
+---
+
+## The Missing Permission
+
+### Current Authorization (BROKEN)
 ```typescript
 Notification: a.model({
-    tenantId: a.id().required(),
-    userId: a.id().required(),
-    type: a.ref('NotificationType').required(),
-    message: a.string().required(),
-    entityType: a.string().required(),
-    entityId: a.id().required(),
-    read: a.boolean().required().default(false),
-}).authorization(allow => [
-    allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
-    allow.groups(['ADMIN', 'NURSE']).to(['create', 'read', 'update', 'delete'])
-])
-```
-
-**Problem:** The `.to(['create', 'read', 'update', 'delete'])` does NOT include subscription operations.
-
----
-
-### Shift Model (Line ~224)
-```typescript
-Shift: a.model({
-    tenantId: a.id().required(),
-    nurseId: a.id().required(),
-    patientId: a.id().required(),
-    scheduledTime: a.string().required(),
-    status: a.ref('ShiftStatus'),
-    // ... other fields
-}).authorization(allow => [
-    allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
-    allow.groups(['ADMIN']).to(['create', 'read', 'update', 'delete']),
-    allow.groups(['NURSE']).to(['read'])
-])
-```
-
-**Problem:** Same issue - no `subscribe` operation for subscriptions.
-
----
-
-## ✅ Recommended Fixes
-
-### Fix 1: Add Subscription Permissions to Notification
-
-**Change:**
-```typescript
+    // ...
 }).authorization(allow => [
     allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
     allow.groups(['ADMIN', 'NURSE']).to(['create', 'read', 'update', 'delete', 'subscribe', 'listen'])
+    //                                    ❌ MISSING 'list' operation!
 ])
 ```
 
-**Why:** Adds explicit `subscribe` and `listen` operations for GraphQL subscriptions.
+### Why This Breaks
+When you explicitly specify `.to([...])` operations, Amplify **only** allows those operations. Since `'list'` is missing:
+- ✅ `getNotification(id: "123")` works (uses `'read'`)
+- ❌ `listNotifications(filter: {...})` fails (needs `'list'`)
+- ✅ `onCreateNotification` works (uses `'subscribe'`)
+
+The `ownerDefinedIn` rule provides implicit list access based on `custom:tenantId`, but the explicit group rules **override** this for group members.
 
 ---
 
-### Fix 2: Add Subscription Permissions to Shift
+## The Fix
 
-**Change:**
+Add `'list'` to both **Notification** and **Shift** models:
+
 ```typescript
+// Notification model
+.authorization(allow => [
+    allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
+    allow.groups(['ADMIN', 'NURSE']).to(['create', 'read', 'list', 'update', 'delete', 'subscribe', 'listen'])
+    //                                                      ^^^^^^ ADDED
+])
+
+// Shift model
+.authorization(allow => [
+    allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
+    allow.groups(['ADMIN']).to(['create', 'read', 'list', 'update', 'delete', 'subscribe', 'listen']),
+    allow.groups(['NURSE']).to(['read', 'list', 'subscribe', 'listen'])
+    //                                   ^^^^^^ ADDED (both groups)
+])
+```
+
+---
+
+## Why Other Models Don't Show This Error
+
+### Models WITHOUT explicit `.to()` operations
+```typescript
+Patient: a.model({
+    // ...
+}).authorization(allow => [
+    allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')
+    // No .to() = ALL operations allowed (including 'list')
+])
+```
+
+### Models WITH `.to()` but no list queries used (yet)
+```typescript
+InventoryItem: a.model({
+    // ...
 }).authorization(allow => [
     allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
-    allow.groups(['ADMIN']).to(['create', 'read', 'update', 'delete', 'subscribe', 'listen']),
-    allow.groups(['NURSE']).to(['read', 'subscribe', 'listen'])
+    allow.groups(['ADMIN']).to(['create', 'read', 'update', 'delete']),
+    //                                    ❌ Also missing 'list' - will fail if listInventoryItems() is called!
 ])
 ```
 
-**Why:** 
-- ADMIN: Full access including subscriptions
-- NURSE: Read + subscription access (already can't modify shifts)
-
 ---
 
-## 📖 AWS AppSync Authorization for Subscriptions
+## Verification Steps (Post-Fix)
 
-From AWS AppSync documentation:
+1. **Deploy the schema change:**
+   ```bash
+   npx ampx sandbox --once
+   ```
 
-> **Subscription authorization is separate from mutation authorization.**  
-> When a client subscribes to a GraphQL subscription (e.g., `onCreateNotification`), AppSync checks:
-> 1. Does the user have `subscribe` permission on the model?
-> 2. Does the subscription filter match the user's authorization scope?
-
-### Authorization Operations in Amplify Gen 2:
-- `create` - Create mutations
-- `read` - Queries and get operations
-- `update` - Update mutations
-- `delete` - Delete mutations
-- **`subscribe`** - Subscribe to real-time updates (required for `onCreate`, `onUpdate`, `onDelete` subscriptions)
-- **`listen`** - (optional) Additional subscription control
-
-**Default behavior:** If you don't specify `.to([...])`, all operations are allowed. However, once you explicitly use `.to([...])`, you MUST list all operations you want to allow.
-
----
-
-## 🔍 Secondary Findings
-
-### listNotifications Query Failure
-The `listNotifications` query failure suggests that the **secondary index query** may also need explicit permissions. However, this is likely a side effect of the missing `read` permission scope.
-
-**Current Index:**
-```typescript
-.secondaryIndexes(index => [
-    index('userId').name('byUser')
-])
-```
-
-**Recommendation:** After fixing subscription permissions, test the `listNotifications` query again. If it still fails, verify that the JWT `custom:tenantId` claim matches the `tenantId` filter in the query.
-
----
-
-## 🧪 Testing Plan
-
-After applying the fixes:
-
-1. **Test Notification Subscriptions:**
+2. **Test listNotifications query:**
    ```graphql
-   subscription OnCreateNotification($userId: ID!) {
-     onCreateNotification(filter: { userId: { eq: $userId } }) {
-       id
-       type
-       message
-       read
+   query ListNotifications {
+     listNotifications(filter: { userId: { eq: "user-123" } }) {
+       items {
+         id
+         message
+         read
+       }
      }
    }
    ```
 
-2. **Test Shift Subscriptions:**
+3. **Test shift subscription:**
    ```graphql
-   subscription OnUpdateShift($tenantId: ID!) {
-     onUpdateShift(filter: { tenantId: { eq: $tenantId } }) {
+   subscription OnShiftUpdate {
+     onUpdateShift {
        id
        status
        scheduledTime
@@ -158,57 +142,35 @@ After applying the fixes:
    }
    ```
 
-3. **Test listNotifications Query:**
-   ```graphql
-   query ListNotificationsByUser($userId: ID!) {
-     listNotifications(filter: { userId: { eq: $userId } }) {
-       items {
-         id
-         type
-         message
-       }
-     }
-   }
-   ```
+4. **Check console for errors** - should be clean now.
 
 ---
 
-## 🚀 Deployment Steps
+## Related Models to Audit
 
-1. ✅ Update `amplify/data/resource.ts` with subscription permissions
-2. ✅ Commit changes: `git commit -m "fix: Add subscribe/listen permissions for Notification and Shift models (KIRO-004)"`
-3. ⚠️ **DO NOT PUSH** (per instructions)
-4. Deploy: `amplify push` or via CI/CD pipeline
-5. Test in production with authenticated ADMIN/NURSE users
-6. Monitor CloudWatch logs for any remaining auth errors
+These models use explicit `.to()` operations and may also be missing `'list'`:
 
----
+| Model | Current Operations | Needs `'list'`? | Used in UI? |
+|-------|-------------------|-----------------|-------------|
+| InventoryItem | `create, read, update, delete` | ❌ Yes | Unknown |
+| BillingRecord | `create, read, update, delete` | ❌ Yes | Likely |
+| PatientAssessment | `create, read, update, delete` | ❌ Yes | Phase 4 |
 
-## 📝 Impact Assessment
-
-**Affected Features:**
-- ✗ Real-time notification updates (nurses don't see new assignments)
-- ✗ Shift status updates (dashboard doesn't refresh automatically)
-- ✗ Admin notification feed (approval alerts not delivered)
-
-**Priority:** 🔴 **HIGH** - Core feature broken in production
-
-**Effort:** 🟢 **LOW** - 2-line code change, 15-minute deployment
+**Recommendation:** Add `'list'` to ALL models with explicit `.to()` operations as a preventive measure.
 
 ---
 
-## 🔗 Related Files
-- Schema: `~/projects/ERP/amplify/data/resource.ts`
-- Auth config: `~/projects/ERP/amplify/auth/resource.ts`
-- Related issue: KIRO-003 (previous auth fix)
+## Lessons Learned
+
+1. **When using `.to([...])`**, always include `'list'` if you expect to query collections
+2. **'subscribe'/'listen' ≠ 'list'** - they're for real-time updates, not queries
+3. **Test both queries AND subscriptions** after authorization changes
+4. **Console errors are precise** - "listNotifications on type Query" literally means the `listNotifications` query operation is blocked
 
 ---
 
-## ✅ Resolution Status
-
+## Status
 - [x] Root cause identified
-- [x] Fix documented
-- [ ] Code changes applied
-- [ ] Committed to git
-- [ ] Deployed to production
-- [ ] Tested and verified
+- [ ] Fix applied (see next commit)
+- [ ] Deployed and verified
+- [ ] Related models audited
