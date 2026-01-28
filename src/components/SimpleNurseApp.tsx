@@ -715,8 +715,8 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                         // _syncStatus is tracked on ShiftWithVisit level
                                         const visitSyncStatus: SyncStatusType = shift._syncStatus || 'synced';
 
-                                        // Determine if this card should be interactive (pending/in-progress without visit)
-                                        const isActionable = (shift.status === 'PENDING' || shift.status === 'IN_PROGRESS') && !shift.visit;
+                                        // Determine if this card should be interactive (pending/in-progress, regardless of visit status)
+                                        const isActionable = (shift.status === 'PENDING' || shift.status === 'IN_PROGRESS');
                                         
                                         return (
                                             <div 
@@ -724,7 +724,15 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                 className={`bg-slate-800 p-4 rounded-xl transition-all ${
                                                     isActionable ? 'hover:bg-slate-750 hover:shadow-lg hover:border hover:border-blue-500/30 cursor-pointer' : ''
                                                 }`}
-                                                onClick={isActionable ? () => handleStartDocumentation(shift.id) : undefined}
+                                                onClick={isActionable ? () => {
+                                                    // Route to appropriate handler based on visit status
+                                                    if (!shift.visit) {
+                                                        handleStartDocumentation(shift.id);
+                                                    } else if (shift.visit.status === 'DRAFT' || shift.visit.status === 'REJECTED' || shift.visit.status === 'APPROVED') {
+                                                        handleContinueDocumentation(shift.id);
+                                                    }
+                                                    // SUBMITTED visits don't do anything on card click
+                                                } : undefined}
                                                 role={isActionable ? 'button' : undefined}
                                                 tabIndex={isActionable ? 0 : undefined}
                                             >
@@ -793,19 +801,58 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                     </div>
                                                 )}
 
-                                                {/* SENTINEL FIX #1: Iniciar Visita for Pending/In-Progress Shifts */}
-                                                {(shift.status === 'PENDING' || shift.status === 'IN_PROGRESS') && !shift.visit && (
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation(); // Prevent card click from triggering
-                                                            handleStartDocumentation(shift.id);
-                                                        }}
-                                                        disabled={isCreatingThisDraft}
-                                                        className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-                                                    >
-                                                        <FileText size={18} />
-                                                        {isCreatingThisDraft ? 'Iniciando...' : 'Iniciar Visita'}
-                                                    </button>
+                                                {/* SENTINEL FIX #1: Action buttons for Pending/In-Progress Shifts */}
+                                                {(shift.status === 'PENDING' || shift.status === 'IN_PROGRESS') && (
+                                                    <>
+                                                        {/* No visit yet - show Iniciar Visita */}
+                                                        {!shift.visit && (
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleStartDocumentation(shift.id);
+                                                                }}
+                                                                disabled={isCreatingThisDraft}
+                                                                className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                                                            >
+                                                                <FileText size={18} />
+                                                                {isCreatingThisDraft ? 'Iniciando...' : 'Iniciar Visita'}
+                                                            </button>
+                                                        )}
+                                                        {/* Visit approved - show Ver Visita */}
+                                                        {shift.visit?.status === 'APPROVED' && (
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleContinueDocumentation(shift.id);
+                                                                }}
+                                                                className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-lg transition-colors shadow-lg"
+                                                            >
+                                                                <CheckCircle size={18} />
+                                                                Ver Visita Aprobada
+                                                            </button>
+                                                        )}
+                                                        {/* Visit submitted - show waiting status */}
+                                                        {shift.visit?.status === 'SUBMITTED' && (
+                                                            <div className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-3 bg-yellow-500/10 text-yellow-500 text-sm font-bold rounded-lg border border-yellow-500/20">
+                                                                <Clock size={18} />
+                                                                Esperando Revisión
+                                                            </div>
+                                                        )}
+                                                        {/* Visit draft or rejected - show continue/correct */}
+                                                        {(shift.visit?.status === 'DRAFT' || shift.visit?.status === 'REJECTED') && (
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleContinueDocumentation(shift.id);
+                                                                }}
+                                                                disabled={isCreatingThisDraft}
+                                                                className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                                                            >
+                                                                <Edit3 size={18} />
+                                                                {shift.visit?.status === 'REJECTED' ? 'Corregir Documentación' : 'Continuar Documentación'}
+                                                            </button>
+                                                        )}
+                                                    </>
                                                 )}
 
                                                 {/* Documentation Button - Requirements 1.1, 1.5 */}
