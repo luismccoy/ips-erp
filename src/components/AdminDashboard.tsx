@@ -1,4 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
+import { motion } from 'framer-motion';
 import {
     Activity, ClipboardCheck, Package, Calendar, ShieldAlert,
     FileText, LogOut, DollarSign, ClipboardList, BarChart,
@@ -24,8 +25,8 @@ const InventoryDashboard = lazy(() => import('./InventoryDashboard').then(m => (
 const RosterDashboard = lazy(() => import('./RosterDashboard').then(m => ({ default: m.RosterDashboard })));
 const ComplianceDashboard = lazy(() => import('./ComplianceDashboard').then(m => ({ default: m.ComplianceDashboard })));
 const ReportingDashboard = lazy(() => import('./ReportingDashboard').then(m => ({ default: m.ReportingDashboard })));
-const PatientManager = lazy(() => import('./PatientManager').then(m => ({ default: m.PatientManager })));
-const StaffManager = lazy(() => import('./StaffManager').then(m => ({ default: m.StaffManager })));
+const PatientsPage = lazy(() => import('../pages/admin/PatientsPage').then(m => ({ default: m.PatientsPage })));
+const StaffPage = lazy(() => import('../pages/admin/StaffPage').then(m => ({ default: m.StaffPage })));
 
 // Clinical Assessment Components
 import { ClinicalAlertsWidget } from './ClinicalAlertsWidget';
@@ -46,16 +47,16 @@ const PanelLoader = () => (
 export default function AdminDashboard({ view, setView, onLogout, tenant }: AdminDashboardProps) {
     // Mobile sidebar toggle
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    
+
     // Track visited panels for lazy mounting (only load when first visited, then keep mounted)
     const [visitedPanels, setVisitedPanels] = useState<Set<string>>(new Set(['dashboard']));
-    
+
     // Language toggle
     const { language, setLanguage } = useLanguage();
-    
+
     // Guided tour state (only show in demo mode)
     const [showTour, setShowTour] = useState(false);
-    
+
     // Check for demo mode after mount (enableDemoMode runs after component mounts)
     useEffect(() => {
         const checkDemoMode = () => {
@@ -68,14 +69,14 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
         const timer = setTimeout(checkDemoMode, 100);
         return () => clearTimeout(timer);
     }, []);
-    
+
     // Mark current view as visited
     useEffect(() => {
         if (!visitedPanels.has(view)) {
             setVisitedPanels(prev => new Set([...prev, view]));
         }
     }, [view, visitedPanels]);
-    
+
     /**
      * Handles visit approval from PendingReviewsPanel.
      * The PendingReviewsPanel handles the approval internally with its own modals.
@@ -115,12 +116,12 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
         <div className="flex h-screen bg-[#f8fafc]">
             {/* Mobile sidebar overlay */}
             {sidebarOpen && (
-                <div 
+                <div
                     className="fixed inset-0 bg-black/50 z-40 md:hidden"
                     onClick={() => setSidebarOpen(false)}
                 />
             )}
-            
+
             {/* Sidebar - hidden on mobile, slide in when open */}
             <aside className={`
                 fixed md:static inset-y-0 left-0 z-50
@@ -169,7 +170,7 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
             <main className="flex-1 overflow-y-auto">
                 <header className="bg-white/80 backdrop-blur-md border-b border-slate-100 px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-20">
                     {/* Mobile hamburger menu */}
-                    <button 
+                    <button
                         onClick={() => setSidebarOpen(!sidebarOpen)}
                         className="md:hidden p-2 -ml-2 mr-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg"
                     >
@@ -214,7 +215,7 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                 <div className="p-4 md:p-8">
                     {/* Dashboard is always mounted (default view) */}
                     <div className={view === 'dashboard' ? '' : 'hidden'}><DashboardView /></div>
-                    
+
                     {/* Lazy panels: only mount after first visit, then stay mounted */}
                     {visitedPanels.has('pending-reviews') && (
                         <Suspense fallback={<PanelLoader />}>
@@ -263,19 +264,19 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                     )}
                     {visitedPanels.has('patients') && (
                         <Suspense fallback={<PanelLoader />}>
-                            <div className={view === 'patients' ? '' : 'hidden'}><PatientManager /></div>
+                            <div className={view === 'patients' ? '' : 'hidden'}><PatientsPage /></div>
                         </Suspense>
                     )}
                     {visitedPanels.has('staff') && (
                         <Suspense fallback={<PanelLoader />}>
-                            <div className={view === 'staff' ? '' : 'hidden'}><StaffManager /></div>
+                            <div className={view === 'staff' ? '' : 'hidden'}><StaffPage /></div>
                         </Suspense>
                     )}
 
 
                 </div>
             </main>
-            
+
             {/* Guided Tour (Demo Mode Only) */}
             {showTour && (
                 <GuidedTour
@@ -290,15 +291,18 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
 
 function NavItem({ icon: Icon, label, active, onClick, dataTour }: NavItemProps) {
     return (
-        <button
+        <motion.button
             onClick={onClick}
             data-tour={dataTour}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${active ? 'bg-[#2563eb] text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${active ? 'bg-[#2563eb] text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
                 }`}
+            whileHover={{ x: active ? 0 : 4 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
         >
             <Icon size={18} />
             <span className="text-sm font-bold">{label}</span>
-        </button>
+        </motion.button>
     );
 }
 
@@ -420,17 +424,17 @@ function DashboardView() {
                     </div>
                 ))}
             </div>
-            
+
             {/* Clinical Alerts Widget */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ClinicalAlertsWidget 
+                <ClinicalAlertsWidget
                     onPatientClick={(patientId) => {
                         console.log('Navigate to patient:', patientId);
                         // TODO: Navigate to patient detail or assessments view
                     }}
                     maxItems={5}
                 />
-                
+
                 <div className="bg-white p-6 rounded-2xl border border-slate-100">
                     <h3 className="font-black text-slate-900 mb-4">Estado del Sistema</h3>
                     <div className="space-y-3">

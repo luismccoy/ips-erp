@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { Activity } from 'lucide-react';
 import LandingPage from './components/LandingPage';
 import DemoSelection from './components/DemoSelection';
@@ -6,7 +6,7 @@ import { useAuth } from './hooks/useAuth';
 import { useAnalytics } from './hooks/useAnalytics';
 import { TENANTS } from './data/mock-data';
 import { ToastProvider } from './components/ui/Toast';
-import { isDemoMode } from './amplify-utils';
+import { isDemoMode, enableDemoMode } from './amplify-utils';
 import { FeedbackWidget } from './components/FeedbackWidget';
 
 // Lazy loaded components for performance
@@ -24,6 +24,39 @@ const PageLoader = () => (
   </div>
 );
 
+// ============================================
+// CRITICAL FIX: Pre-enable demo mode for deep links
+// ============================================
+// This runs BEFORE React renders any components, preventing race conditions
+// where child components (like SimpleNurseApp) try to fetch data before
+// the useEffect in App has set sessionStorage['ips-erp-demo-mode'].
+//
+// Without this, direct navigation to /nurse, /dashboard, or /family could
+// result in isDemoMode() returning false, causing the app to try using
+// the real AWS backend instead of mock data, leading to auth errors and
+// empty patient lists.
+//
+// This ensures sessionStorage is set SYNCHRONOUSLY before ANY component mounts.
+//
+// ALSO: Clear demo state when landing on root/login paths to prevent
+// unwanted auto-restoration of previous demo sessions.
+if (typeof window !== 'undefined') {
+    const path = window.location.pathname;
+    
+    // Clear demo mode for landing/login paths
+    if (path === '/' || path === '/login') {
+        sessionStorage.removeItem('ips-erp-demo-mode');
+        sessionStorage.removeItem('ips-erp-demo-role');
+        sessionStorage.removeItem('ips-erp-demo-tenant');
+        console.log('🔄 Demo state cleared for landing/login path:', path);
+    }
+    // Enable demo mode for deep link paths
+    else if (path === '/nurse' || path === '/app' || path === '/dashboard' || path === '/admin' || path === '/family') {
+        enableDemoMode();
+        console.log('🎭 Demo mode pre-enabled for deep link:', path);
+    }
+}
+
 // Main App Component
 export default function App() {
   const { role, tenant, loading, error, login, logout, setDemoState } = useAuth();
@@ -35,6 +68,15 @@ export default function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSigningIn, setIsSigningIn] = useState(false);
+
+  // Track if initial view has been set (prevents resetting view on navigation)
+  // Using state instead of ref to be more "React-y" and avoid potential ref timing issues
+  const [initialViewSetForRole, setInitialViewSetForRole] = useState<string | null>(null);
+
+  // Debug logging for view changes
+  useEffect(() => {
+    console.log('[Navigation Debug] View changed to:', view, '| Role:', role, '| initialViewSetForRole:', initialViewSetForRole);
+  }, [view, role, initialViewSetForRole]);
 
   // Handle demo query param on page load (after demo mode redirect)
   useEffect(() => {
@@ -59,33 +101,78 @@ export default function App() {
     }
   }, [setDemoState, trackEvent]);
 
+  // Handle direct /family route navigation (ANTIGRAVITY-006)
   useEffect(() => {
-    // Basic routing for deep links
     const path = window.location.pathname;
     
-    if (path === '/family') {
-        // Direct access to Family Portal
-        setAuthStage('login'); // Not strictly needed but keeps state clean
-        setView('family');
-        // We trick the role check effectively by setting it temporarily or just handling the view rendering
-        // In this architecture, we should update the role to trigger the rendering
-        setDemoState('family', TENANTS[0]); 
-        return;
+    // If user navigates directly to /family, auto-load Family Portal
+    if (path === '/family' && !role && isDemoMode()) {
+      setDemoState('family', TENANTS[0]);
+      trackEvent('Direct Family Route Access', { source: 'url' });
+      // Clean URL
+      window.history.replaceState({}, '', '/');
     }
+  }, [role, setDemoState, trackEvent]);
 
-    if (role === 'admin') setView('dashboard');
-    if (role === 'nurse') setView('nurse');
-    if (role === 'family') setView('family');
-
-    if (!role) {
-      setView('login');
+  useEffect(() => {
+    console.log('[Navigation Debug] Main useEffect triggered | role:', role, '| initialViewSetForRole:', initialViewSetForRole);
+    
+    // Deep link handling - always check this first
+    const path = window.location.pathname;
+    
+    // Handle direct navigation to dashboard/admin
+    // Note: enableDemoMode() already called at module level (see above)
+    if ((path === '/dashboard' || path === '/admin') && !role) {
+      console.log('[Navigation Debug] Setting demo admin state from deep link');
+      const savedRole = sessionStorage.getItem('ips-erp-demo-role');
+      if (savedRole === 'admin' || !savedRole) {
+        setDemoState('admin', TENANTS[0]);
+      }
+      return;
     }
-
-    if (role && tenant) {
-      identifyUser(role, { tenant: tenant.name, role });
-      trackEvent('Session Started', { role });
+    
+    // Handle direct navigation to app/nurse - ALWAYS force nurse role
+    // (unlike /dashboard which respects session, /app explicitly means nurse view)
+    // Note: enableDemoMode() already called at module level (see above)
+    if ((path === '/app' || path === '/nurse') && !role) {
+      console.log('[Navigation Debug] Setting demo nurse state from deep link');
+      setDemoState('nurse', TENANTS[0]);
+      return;
     }
-  }, [role, tenant, identifyUser, trackEvent, setDemoState]);
+    
+    // Handle direct navigation to family portal
+    // Note: enableDemoMode() already called at module level (see above)
+    if (path === '/family' && !role) {
+      console.log('[Navigation Debug] Setting demo family state from deep link');
+      setDemoState('family', TENANTS[0]);
+      return;
+    }
+    
+    // Set view when role is defined (supports demo switching)
+    if (role && initialViewSetForRole !== role) {
+      // Only track session and identify on FIRST view set for this role
+      console.log('[Navigation Debug] First-time view setup for role:', role);
+      setInitialViewSetForRole(role);
+      
+      if (tenant) {
+        identifyUser(role, { tenant: tenant.name, role });
+        trackEvent('Session Started', { role });
+      }
+      
+      // Set initial view based on role (only on first login/role assignment)
+      if (role === 'admin') setView('dashboard');
+      else if (role === 'nurse') setView('nurse');
+      else if (role === 'family') setView('family');
+    } else if (role) {
+      console.log('[Navigation Debug] Skipping view setup (already initialized for role:', role, ')');
+    }
+    
+    // Reset the initialization tracking when logged out so next session tracks properly
+    if (!role && initialViewSetForRole !== null) {
+      console.log('[Navigation Debug] Resetting initialization tracking');
+      setInitialViewSetForRole(null);
+    }
+  }, [role, tenant, setDemoState, identifyUser, trackEvent, initialViewSetForRole]);
 
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault();
@@ -138,9 +225,9 @@ export default function App() {
     // Handler for Organization Access login - clears any demo state first
     const handleOrgLogin = () => {
       // Clear demo state so org login form can show
-      sessionStorage.removeItem('ips-demo-role');
-      sessionStorage.removeItem('ips-demo-tenant');
-      sessionStorage.removeItem('ips-demo-mode');
+      sessionStorage.removeItem('ips-erp-demo-role');
+      sessionStorage.removeItem('ips-erp-demo-tenant');
+      sessionStorage.removeItem('ips-erp-demo-mode');
       logout(); // This clears role state
       setAuthStage('login');
     };

@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 type Variant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'success';
 type Size = 'sm' | 'md' | 'lg';
@@ -38,9 +39,11 @@ export const Button: React.FC<ButtonProps> = ({
     };
 
     return (
-        <button
+        <motion.button
             className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
             disabled={disabled || isLoading}
+            whileTap={{ scale: disabled || isLoading ? 1 : 0.96 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
             {...props}
         >
             {isLoading && (
@@ -51,6 +54,6 @@ export const Button: React.FC<ButtonProps> = ({
             )}
             {!isLoading && icon}
             {children}
-        </button>
+        </motion.button>
     );
 };

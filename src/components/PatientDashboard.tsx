@@ -3,6 +3,7 @@ import { client, MOCK_USER } from '../amplify-utils';
 import { usePagination } from '../hooks/usePagination';
 import { type Patient, type Medication, type Task } from '../types';
 import { AssessmentForm, AssessmentHistory } from './clinical';
+import { Person, Medicines, Stethoscope } from 'healthicons-react/outline';
 
 export const PatientDashboard: React.FC = () => {
     const { items: patients, loadMore, hasMore, isLoading } = usePagination<Patient>();
@@ -109,10 +110,7 @@ export const PatientDashboard: React.FC = () => {
                     <div className="patient-card glass">
                         <div className="card-header">
                             <div className="avatar">
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                    <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
+                                <Person width={32} height={32} />
                             </div>
                             <div className="info">
                                 <h2>{selectedPatient.name}</h2>
@@ -151,10 +149,7 @@ export const PatientDashboard: React.FC = () => {
                     <section className="medications-section glass">
                         <div className="section-header">
                             <h3>Digital Kardex (Medicamentos)</h3>
-                            <svg className="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M4.83,21.17l-.33-.33c-2-2-2-5.17,0-7.17L13.67,4.83c2-2,5.17-2,7.17,0L21.17,5.17c2,2,2,5.17,0,7.17L12.33,21.17C10.33,23.17,7.17,23.17,5.17,21.17z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                <path d="M12.33,21.17l-7.17-7.17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
+                            <Medicines className="icon" width={24} height={24} />
                         </div>
                         <div className="med-list">
                             {medications.map(med => (
@@ -172,10 +167,7 @@ export const PatientDashboard: React.FC = () => {
                     <section className="tasks-section glass">
                         <div className="section-header">
                             <h3>Ruta de Cuidado (Tareas)</h3>
-                            <svg className="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9 11l3 3l8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                <path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
+                            <Stethoscope className="icon" width={24} height={24} />
                         </div>
                         <div className="task-list">
                             {tasks.map(task => (
