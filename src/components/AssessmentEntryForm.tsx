@@ -157,17 +157,19 @@ export function AssessmentEntryForm({
    * Prevents data loss by warning nurses before discarding clinical assessment data
    */
   const handleClose = useCallback(() => {
-    // Check if form has unsaved changes
     if (hasModifiedScales()) {
+      // Has unsaved changes - confirm before closing
       const confirmed = window.confirm(
         "¿Descartar cambios?\n\nTiene datos sin guardar en esta valoración clínica. ¿Está seguro de cerrar sin guardar?"
       );
-      if (!confirmed) {
-        return; // User cancelled, keep form open
+      if (confirmed) {
+        onCancel(); // User confirmed discard - close the form
       }
+      // If not confirmed, do nothing (stay open)
+    } else {
+      // No changes, close immediately
+      onCancel();
     }
-    // User confirmed or no changes, proceed with close
-    onCancel();
   }, [hasModifiedScales, onCancel]);
 
   const handleSubmit = async (e: React.FormEvent) => {
