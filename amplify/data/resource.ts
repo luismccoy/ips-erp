@@ -274,8 +274,9 @@ const schema = a.schema({
         startLng: a.float(),
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
-        allow.groups(['ADMIN']).to(['create', 'read', 'update', 'delete']),
-        allow.groups(['NURSE']).to(['read'])
+        // KIRO-004 Fix: Added 'subscribe' and 'listen' for GraphQL subscription support
+        allow.groups(['ADMIN']).to(['create', 'read', 'update', 'delete', 'subscribe', 'listen']),
+        allow.groups(['NURSE']).to(['read', 'subscribe', 'listen'])
     ]).secondaryIndexes(index => [
         // Task 4.1: Query shifts by nurse and date for roster optimization
         index('nurseId').sortKeys(['scheduledTime']).name('byNurseAndDate')
@@ -438,7 +439,8 @@ const schema = a.schema({
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
         // Phase 16: Explicit group permissions for subscriptions
         // KIRO-003 Fix: Added 'create' and explicit operations for list queries
-        allow.groups(['ADMIN', 'NURSE']).to(['create', 'read', 'update', 'delete'])
+        // KIRO-004 Fix: Added 'subscribe' and 'listen' for GraphQL subscription support
+        allow.groups(['ADMIN', 'NURSE']).to(['create', 'read', 'update', 'delete', 'subscribe', 'listen'])
     ]).secondaryIndexes(index => [
         // Task 4.1: Query notifications by user (filter by read status in app)
         // Note: Boolean fields cannot be sort keys in DynamoDB GSIs
