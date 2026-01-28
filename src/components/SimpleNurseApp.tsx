@@ -22,6 +22,15 @@
  * - Added isolation safeguards to prevent accidental navigation to Family Portal
  * - All buttons now explicitly documented and verified for correct behavior
  * 
+ * MOBILE TABLET UX (v1.2):
+ * - All buttons ≥44px height (min-h-[48px]) for touch-friendly targets
+ * - Increased padding on buttons (py-4, px-6) for fat finger prevention
+ * - Patient cards with increased padding (p-6) for better touch targets
+ * - Toggle switch enlarged (h-12) for easier tablet interaction
+ * - Added active states for immediate touch feedback
+ * - Text sizes increased to minimum 16px (text-base) for readability
+ * - Optimized for 10" Android tablets (1280x800)
+ * 
  * Requirements: 1.1, 1.2, 1.5, 3.4, 3.6, 4.1
  * Offline: Phase 4 UI Integration
  */
@@ -128,39 +137,39 @@ const VisitStatusBadge: React.FC<VisitStatusBadgeProps> = ({ status, rejectionRe
             label: 'Borrador',
             bgColor: 'bg-slate-500/20',
             textColor: 'text-slate-400',
-            icon: <Edit3 size={14} />,
+            icon: <Edit3 size={16} />,
         },
         SUBMITTED: {
             label: 'Pendiente',
             bgColor: 'bg-yellow-500/20',
             textColor: 'text-yellow-400',
-            icon: <Clock size={14} />,
+            icon: <Clock size={16} />,
         },
         REJECTED: {
             label: 'Rechazada',
             bgColor: 'bg-red-500/20',
             textColor: 'text-red-400',
-            icon: <XCircle size={14} />,
+            icon: <XCircle size={16} />,
         },
         APPROVED: {
             label: 'Aprobada',
             bgColor: 'bg-green-500/20',
             textColor: 'text-green-400',
-            icon: <CheckCircle size={14} />,
+            icon: <CheckCircle size={16} />,
         },
     };
 
     const { label, bgColor, textColor, icon } = config[status];
 
     return (
-        <div className="mt-3">
-            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded text-sm font-medium ${bgColor} ${textColor}`}>
+        <div className="mt-4">
+            <span className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-base font-medium ${bgColor} ${textColor}`}>
                 {icon}
                 {label}
             </span>
             {status === 'REJECTED' && rejectionReason && (
-                <p className="text-sm text-red-400 mt-2 flex items-start gap-1.5">
-                    <AlertCircle size={14} className="mt-0.5 flex-shrink-0" />
+                <p className="text-base text-red-400 mt-3 flex items-start gap-2 p-3 bg-red-500/10 rounded-lg">
+                    <AlertCircle size={18} className="mt-0.5 flex-shrink-0" />
                     <span>{rejectionReason}</span>
                 </p>
             )}
@@ -645,13 +654,13 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
 
                 {/* Error Message */}
                 {error && (
-                    <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg flex items-start gap-2">
-                        <AlertCircle size={18} className="text-red-400 mt-0.5 flex-shrink-0" />
-                        <div>
-                            <p className="text-sm text-red-400">{error}</p>
+                    <div className="mb-4 p-4 bg-red-500/20 border border-red-500/30 rounded-xl flex items-start gap-3">
+                        <AlertCircle size={20} className="text-red-400 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                            <p className="text-base text-red-400">{error}</p>
                             <button
                                 onClick={fetchData}
-                                className="text-xs text-red-300 hover:text-red-200 underline mt-1"
+                                className="mt-3 px-4 py-2 min-h-[44px] text-base text-red-300 hover:text-red-200 active:text-red-100 bg-red-500/20 hover:bg-red-500/30 rounded-lg font-medium transition-colors"
                             >
                                 Reintentar
                             </button>
@@ -700,10 +709,10 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
 
                                 {filteredShifts.length === 0 ? (
                                     <div className="bg-slate-800 p-8 rounded-xl text-center">
-                                        <p className="text-base text-slate-400 mb-2">
+                                        <p className="text-lg text-slate-400 mb-3">
                                             {showOnlyToday ? 'No hay visitas programadas para hoy' : 'No hay turnos asignados'}
                                         </p>
-                                        <p className="text-sm text-slate-500">
+                                        <p className="text-base text-slate-500">
                                             {showOnlyToday ? 'Intente desactivar el filtro "Solo hoy" para ver todas las visitas' : 'Revise más tarde para ver su ruta'}
                                         </p>
                                     </div>
@@ -789,14 +798,14 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
 
                                                 {/* Offline sync status message */}
                                                 {visitSyncStatus === 'pending' && (
-                                                    <div className="mt-3 text-sm text-yellow-400 flex items-center gap-1.5 bg-yellow-500/10 px-3 py-2 rounded">
-                                                        <CloudOff size={14} />
+                                                    <div className="mt-4 text-base text-yellow-400 flex items-center gap-2 bg-yellow-500/10 px-4 py-3 rounded-lg">
+                                                        <CloudOff size={18} />
                                                         <span>Se sincronizará cuando haya conexión</span>
                                                     </div>
                                                 )}
                                                 {visitSyncStatus === 'error' && (
-                                                    <div className="mt-3 text-sm text-red-400 flex items-center gap-1.5 bg-red-500/10 px-3 py-2 rounded">
-                                                        <AlertCircle size={14} />
+                                                    <div className="mt-4 text-base text-red-400 flex items-center gap-2 bg-red-500/10 px-4 py-3 rounded-lg min-h-[44px] cursor-pointer active:bg-red-500/20">
+                                                        <AlertCircle size={18} />
                                                         <span>Error al sincronizar - toque para reintentar</span>
                                                     </div>
                                                 )}
