@@ -6,7 +6,7 @@ import { useAuth } from './hooks/useAuth';
 import { useAnalytics } from './hooks/useAnalytics';
 import { TENANTS } from './data/mock-data';
 import { ToastProvider } from './components/ui/Toast';
-import { isDemoMode } from './amplify-utils';
+import { isDemoMode, enableDemoMode } from './amplify-utils';
 import { FeedbackWidget } from './components/FeedbackWidget';
 
 // Lazy loaded components for performance
@@ -67,9 +67,11 @@ export default function App() {
     const path = window.location.pathname;
     
     // Handle direct navigation to dashboard/admin
+    // BUGFIX: Must enable demo mode BEFORE setting demo state for mock data to work
     if ((path === '/dashboard' || path === '/admin') && !role) {
       const savedRole = sessionStorage.getItem('ips-erp-demo-role');
       if (savedRole === 'admin' || !savedRole) {
+        enableDemoMode();
         setDemoState('admin', TENANTS[0]);
       }
       return;
@@ -77,13 +79,17 @@ export default function App() {
     
     // Handle direct navigation to app/nurse - ALWAYS force nurse role
     // (unlike /dashboard which respects session, /app explicitly means nurse view)
+    // BUGFIX: Must enable demo mode for mock client to be used
     if (path === '/app' || path === '/nurse') {
+      enableDemoMode();
       setDemoState('nurse', TENANTS[0]);
       return;
     }
     
     // Handle direct navigation to family portal
+    // BUGFIX: Must enable demo mode for mock client to be used
     if (path === '/family' && !role) {
+      enableDemoMode();
       setDemoState('family', TENANTS[0]);
       return;
     }
