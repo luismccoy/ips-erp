@@ -15,11 +15,15 @@ frontend:
   cache:
     paths:
       - node_modules/**/*
-  customHeaders:
-    - pattern: '**/*'
-      headers:
-        - key: Cache-Control
-          value: 'public, max-age=0, must-revalidate'
+customHeaders:
+  - pattern: '**/*'
+    headers:
+      - key: Cache-Control
+        value: 'public, max-age=0, must-revalidate'
+  - pattern: '/manifest.webmanifest'
+    headers:
+      - key: Content-Type
+        value: 'application/manifest+json'
 customRules:
   # PWA assets - serve directly, don't rewrite to index.html
   - source: /manifest.webmanifest
