@@ -66,6 +66,22 @@ export default function App() {
     // Deep link handling - always check this first
     const path = window.location.pathname;
     
+    // Handle direct navigation to dashboard/admin
+    if ((path === '/dashboard' || path === '/admin') && !role) {
+      const savedRole = sessionStorage.getItem('ips-demo-role');
+      if (savedRole === 'admin' || !savedRole) {
+        setDemoState('admin', TENANTS[0]);
+      }
+      return;
+    }
+    
+    // Handle direct navigation to app/nurse
+    if ((path === '/app' || path === '/nurse') && !role) {
+      setDemoState('nurse', TENANTS[0]);
+      return;
+    }
+    
+    // Handle direct navigation to family portal
     if (path === '/family' && !role) {
       setDemoState('family', TENANTS[0]);
       return;
