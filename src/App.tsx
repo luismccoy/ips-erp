@@ -101,6 +101,19 @@ export default function App() {
     }
   }, [setDemoState, trackEvent]);
 
+  // Handle direct /family route navigation (ANTIGRAVITY-006)
+  useEffect(() => {
+    const path = window.location.pathname;
+    
+    // If user navigates directly to /family, auto-load Family Portal
+    if (path === '/family' && !role && isDemoMode()) {
+      setDemoState('family', TENANTS[0]);
+      trackEvent('Direct Family Route Access', { source: 'url' });
+      // Clean URL
+      window.history.replaceState({}, '', '/');
+    }
+  }, [role, setDemoState, trackEvent]);
+
   useEffect(() => {
     console.log('[Navigation Debug] Main useEffect triggered | role:', role, '| initialViewSetForRole:', initialViewSetForRole);
     
