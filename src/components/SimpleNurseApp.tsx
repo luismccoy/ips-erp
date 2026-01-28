@@ -128,39 +128,39 @@ const VisitStatusBadge: React.FC<VisitStatusBadgeProps> = ({ status, rejectionRe
             label: 'Borrador',
             bgColor: 'bg-slate-500/20',
             textColor: 'text-slate-400',
-            icon: <Edit3 size={12} />,
+            icon: <Edit3 size={14} />,
         },
         SUBMITTED: {
             label: 'Pendiente',
             bgColor: 'bg-yellow-500/20',
             textColor: 'text-yellow-400',
-            icon: <Clock size={12} />,
+            icon: <Clock size={14} />,
         },
         REJECTED: {
             label: 'Rechazada',
             bgColor: 'bg-red-500/20',
             textColor: 'text-red-400',
-            icon: <XCircle size={12} />,
+            icon: <XCircle size={14} />,
         },
         APPROVED: {
             label: 'Aprobada',
             bgColor: 'bg-green-500/20',
             textColor: 'text-green-400',
-            icon: <CheckCircle size={12} />,
+            icon: <CheckCircle size={14} />,
         },
     };
 
     const { label, bgColor, textColor, icon } = config[status];
 
     return (
-        <div className="mt-2">
-            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${bgColor} ${textColor}`}>
+        <div className="mt-3">
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded text-sm font-medium ${bgColor} ${textColor}`}>
                 {icon}
                 {label}
             </span>
             {status === 'REJECTED' && rejectionReason && (
-                <p className="text-xs text-red-400 mt-1 flex items-start gap-1">
-                    <AlertCircle size={12} className="mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-red-400 mt-2 flex items-start gap-1.5">
+                    <AlertCircle size={14} className="mt-0.5 flex-shrink-0" />
                     <span>{rejectionReason}</span>
                 </p>
             )}
@@ -199,9 +199,9 @@ const DocumentationButton: React.FC<DocumentationButtonProps> = ({
         return (
             <button
                 onClick={() => onGeneratePacket(shift.id)}
-                className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors"
+                className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-base font-medium rounded-lg transition-colors min-h-[48px]"
             >
-                <FileCheck size={16} />
+                <FileCheck size={18} />
                 Generar Paquete de Facturación
             </button>
         );
@@ -210,8 +210,8 @@ const DocumentationButton: React.FC<DocumentationButtonProps> = ({
     // If visit exists and is SUBMITTED, show "Pending Review" (disabled)
     if (visit && visit.status === 'SUBMITTED') {
         return (
-            <div className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 bg-yellow-500/10 text-yellow-500 text-sm font-medium rounded-lg border border-yellow-500/20">
-                <Clock size={16} />
+            <div className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-yellow-500/10 text-yellow-500 text-base font-medium rounded-lg border border-yellow-500/20 min-h-[48px]">
+                <Clock size={18} />
                 Esperando Revisión
             </div>
         );
@@ -223,9 +223,9 @@ const DocumentationButton: React.FC<DocumentationButtonProps> = ({
             <button
                 onClick={() => onContinueDocumentation(shift.id)}
                 disabled={isLoading}
-                className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white text-base font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
             >
-                <Edit3 size={16} />
+                <Edit3 size={18} />
                 {visit.status === 'REJECTED' ? 'Corregir Documentación' : 'Continuar Documentación'}
             </button>
         );
@@ -236,9 +236,9 @@ const DocumentationButton: React.FC<DocumentationButtonProps> = ({
         <button
             onClick={() => onStartDocumentation(shift.id)}
             disabled={isLoading}
-            className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 bg-[#2563eb] hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-[#2563eb] hover:bg-blue-700 text-white text-base font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
         >
-            <FileText size={16} />
+            <FileText size={18} />
             {isLoading ? 'Creando...' : 'Iniciar Documentación'}
         </button>
     );
@@ -615,28 +615,28 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                     {/* Logout button - only logs out, does not navigate to other portals */}
                     <button 
                         onClick={onLogout} 
-                        className="text-sm text-slate-400 hover:text-white p-2"
+                        className="text-sm text-slate-400 hover:text-white p-3 min-h-[44px] min-w-[44px] flex items-center justify-center"
                         aria-label="Cerrar sesión"
                         title="Cerrar sesión"
                     >
-                        <LogOut size={20} />
+                        <LogOut size={22} />
                     </button>
                 </div>
             </header>
 
             <div className="p-4">
-                {/* Tab Navigation */}
-                <div className="flex gap-2 mb-6">
+                {/* Tab Navigation - Mobile optimized with 48px touch targets */}
+                <div className="flex gap-3 mb-6">
                     <button
                         onClick={() => setActiveTab('route')}
-                        className={`flex-1 py-3 rounded-xl font-bold ${activeTab === 'route' ? 'bg-[#2563eb] text-white' : 'bg-slate-800 text-slate-400'
+                        className={`flex-1 py-4 min-h-[48px] rounded-xl font-bold text-base transition-colors ${activeTab === 'route' ? 'bg-[#2563eb] text-white' : 'bg-slate-800 text-slate-400 active:bg-slate-700'
                             }`}
                     >
                         Mi Ruta
                     </button>
                     <button
                         onClick={() => setActiveTab('stats')}
-                        className={`flex-1 py-3 rounded-xl font-bold ${activeTab === 'stats' ? 'bg-[#2563eb] text-white' : 'bg-slate-800 text-slate-400'
+                        className={`flex-1 py-4 min-h-[48px] rounded-xl font-bold text-base transition-colors ${activeTab === 'stats' ? 'bg-[#2563eb] text-white' : 'bg-slate-800 text-slate-400 active:bg-slate-700'
                             }`}
                     >
                         Estadísticas
@@ -668,13 +668,13 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                     <>
                         {/* Route Tab - Shift Cards with Visit Status */}
                         {activeTab === 'route' && (
-                            <div className="space-y-4">
-                                {/* Today Filter Toggle - Prominently displayed */}
-                                <div className="bg-slate-800 p-3 rounded-xl flex items-center justify-between">
-                                    <span className="text-sm font-semibold text-slate-300">Mostrar solo visitas de hoy</span>
+                            <div className="space-y-6">
+                                {/* Today Filter Toggle - Mobile optimized with 48px touch target */}
+                                <div className="bg-slate-800 p-5 rounded-xl flex items-center justify-between gap-4">
+                                    <span className="text-base font-semibold text-slate-300">Mostrar solo visitas de hoy</span>
                                     <button
                                         onClick={() => setShowOnlyToday(!showOnlyToday)}
-                                        className={`relative inline-flex items-center h-8 rounded-full w-16 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-[#2563eb] ${
+                                        className={`relative inline-flex items-center h-12 rounded-full w-24 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-[#2563eb] ${
                                             showOnlyToday ? 'bg-[#2563eb]' : 'bg-slate-600'
                                         }`}
                                         role="switch"
@@ -683,27 +683,27 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                     >
                                         <span
                                             className={`${
-                                                showOnlyToday ? 'translate-x-9' : 'translate-x-1'
-                                            } inline-block w-6 h-6 transform bg-white rounded-full transition-transform`}
+                                                showOnlyToday ? 'translate-x-[52px]' : 'translate-x-1'
+                                            } inline-block w-9 h-9 transform bg-white rounded-full transition-transform shadow-md`}
                                         />
                                     </button>
                                 </div>
 
                                 {/* SOLO HOY Badge - Visual indicator */}
                                 {showOnlyToday && (
-                                    <div className="bg-blue-500/20 border border-blue-500/30 p-3 rounded-xl flex items-center justify-center gap-2">
-                                        <Clock size={16} className="text-blue-400" />
-                                        <span className="text-sm font-bold text-blue-400">SOLO HOY</span>
-                                        <span className="text-xs text-blue-300">({filteredShifts.length} {filteredShifts.length === 1 ? 'visita' : 'visitas'})</span>
+                                    <div className="bg-blue-500/20 border border-blue-500/30 p-4 rounded-xl flex items-center justify-center gap-2">
+                                        <Clock size={18} className="text-blue-400" />
+                                        <span className="text-base font-bold text-blue-400">SOLO HOY</span>
+                                        <span className="text-sm text-blue-300">({filteredShifts.length} {filteredShifts.length === 1 ? 'visita' : 'visitas'})</span>
                                     </div>
                                 )}
 
                                 {filteredShifts.length === 0 ? (
                                     <div className="bg-slate-800 p-8 rounded-xl text-center">
-                                        <p className="text-slate-400 mb-2">
+                                        <p className="text-base text-slate-400 mb-2">
                                             {showOnlyToday ? 'No hay visitas programadas para hoy' : 'No hay turnos asignados'}
                                         </p>
-                                        <p className="text-xs text-slate-500">
+                                        <p className="text-sm text-slate-500">
                                             {showOnlyToday ? 'Intente desactivar el filtro "Solo hoy" para ver todas las visitas' : 'Revise más tarde para ver su ruta'}
                                         </p>
                                     </div>
@@ -721,7 +721,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                         return (
                                             <div 
                                                 key={shift.id} 
-                                                className={`bg-slate-800 p-4 rounded-xl transition-all ${
+                                                className={`bg-slate-800 p-5 rounded-xl transition-all ${
                                                     isActionable ? 'hover:bg-slate-750 hover:shadow-lg hover:border hover:border-blue-500/30 cursor-pointer' : ''
                                                 }`}
                                                 onClick={isActionable ? () => {
@@ -751,7 +751,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                             <ChevronRight size={18} className="text-blue-400 ml-auto" />
                                                         )}
                                                     </div>
-                                                    <span className={`px-2 py-1 rounded text-xs font-bold ${shift.status === 'COMPLETED'
+                                                    <span className={`px-2.5 py-1.5 rounded text-sm font-bold ${shift.status === 'COMPLETED'
                                                         ? 'bg-green-500/20 text-green-400'
                                                         : shift.status === 'IN_PROGRESS'
                                                             ? 'bg-blue-500/20 text-blue-400'
@@ -764,12 +764,12 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                 </div>
 
                                                 {/* Patient Address */}
-                                                <p className="text-sm text-slate-400 mb-2">
+                                                <p className="text-base text-slate-400 mb-2">
                                                     {patient?.address || shift.location || 'Dirección no disponible'}
                                                 </p>
 
                                                 {/* Scheduled Time */}
-                                                <p className="text-xs text-slate-500">
+                                                <p className="text-sm text-slate-500">
                                                     {new Date(shift.scheduledTime).toLocaleString('es-CO', {
                                                         weekday: 'short',
                                                         day: 'numeric',
@@ -789,14 +789,14 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
 
                                                 {/* Offline sync status message */}
                                                 {visitSyncStatus === 'pending' && (
-                                                    <div className="mt-2 text-xs text-yellow-400 flex items-center gap-1.5 bg-yellow-500/10 px-2 py-1.5 rounded">
-                                                        <CloudOff size={12} />
+                                                    <div className="mt-3 text-sm text-yellow-400 flex items-center gap-1.5 bg-yellow-500/10 px-3 py-2 rounded">
+                                                        <CloudOff size={14} />
                                                         <span>Se sincronizará cuando haya conexión</span>
                                                     </div>
                                                 )}
                                                 {visitSyncStatus === 'error' && (
-                                                    <div className="mt-2 text-xs text-red-400 flex items-center gap-1.5 bg-red-500/10 px-2 py-1.5 rounded">
-                                                        <AlertCircle size={12} />
+                                                    <div className="mt-3 text-sm text-red-400 flex items-center gap-1.5 bg-red-500/10 px-3 py-2 rounded">
+                                                        <AlertCircle size={14} />
                                                         <span>Error al sincronizar - toque para reintentar</span>
                                                     </div>
                                                 )}
@@ -874,15 +874,15 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                             });
                                                             setShowAssessmentForm(true);
                                                         }}
-                                                        className={`mt-2 w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                                                        className={`mt-4 w-full flex items-center justify-center gap-2 px-4 py-3.5 text-base font-medium rounded-lg transition-colors min-h-[48px] ${
                                                             isOffline 
                                                                 ? 'bg-pink-600/10 border border-pink-500/20 text-pink-400/70' 
                                                                 : 'bg-pink-600/20 border border-pink-500/30 text-pink-400 hover:bg-pink-600/30'
                                                         }`}
                                                     >
-                                                        <HeartPulse size={16} />
+                                                        <HeartPulse size={18} />
                                                         Registrar Valoración Clínica
-                                                        {isOffline && <span className="text-[10px] ml-1">(offline)</span>}
+                                                        {isOffline && <span className="text-xs ml-1">(offline)</span>}
                                                     </button>
                                                 )}
                                             </div>
@@ -893,7 +893,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                     <button
                                         onClick={handleLoadMore}
                                         disabled={isLoading}
-                                        className="w-full py-4 text-sm font-bold text-slate-400 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all disabled:opacity-50 mt-4"
+                                        className="w-full py-4 text-base font-bold text-slate-400 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all disabled:opacity-50 mt-6 min-h-[52px]"
                                     >
                                         {isLoading ? 'Cargando más...' : 'Cargar Más Turnos'}
                                     </button>
@@ -903,62 +903,62 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
 
                         {/* Stats Tab */}
                         {activeTab === 'stats' && (
-                            <div className="space-y-4">
+                            <div className="space-y-6">
                                 {/* Total Shifts */}
                                 <div className="bg-slate-800 p-6 rounded-xl text-center">
                                     <div className="text-4xl font-black text-emerald-400 mb-2">{totalShifts}</div>
-                                    <div className="text-sm text-slate-400">Total de Turnos</div>
+                                    <div className="text-base text-slate-400">Total de Turnos</div>
                                 </div>
 
                                 {/* Completion Rate */}
                                 <div className="bg-slate-800 p-6 rounded-xl text-center">
                                     <div className="text-4xl font-black text-blue-400 mb-2">{completionRate}%</div>
-                                    <div className="text-sm text-slate-400">Tasa de Completado</div>
+                                    <div className="text-base text-slate-400">Tasa de Completado</div>
                                 </div>
 
                                 {/* Visit Status Summary */}
-                                <div className="bg-slate-800 p-4 rounded-xl">
-                                    <h4 className="text-sm font-semibold text-slate-300 mb-3">Estado de Visitas</h4>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        <div className="text-center p-2 bg-yellow-500/10 rounded-lg">
-                                            <div className="text-xl font-bold text-yellow-400">{pendingApproval}</div>
-                                            <div className="text-xs text-slate-400">Pendientes</div>
+                                <div className="bg-slate-800 p-5 rounded-xl">
+                                    <h4 className="text-base font-semibold text-slate-300 mb-4">Estado de Visitas</h4>
+                                    <div className="grid grid-cols-3 gap-3">
+                                        <div className="text-center p-3 bg-yellow-500/10 rounded-lg">
+                                            <div className="text-2xl font-bold text-yellow-400">{pendingApproval}</div>
+                                            <div className="text-sm text-slate-400">Pendientes</div>
                                         </div>
-                                        <div className="text-center p-2 bg-red-500/10 rounded-lg">
-                                            <div className="text-xl font-bold text-red-400">{rejectedVisits}</div>
-                                            <div className="text-xs text-slate-400">Rechazadas</div>
+                                        <div className="text-center p-3 bg-red-500/10 rounded-lg">
+                                            <div className="text-2xl font-bold text-red-400">{rejectedVisits}</div>
+                                            <div className="text-sm text-slate-400">Rechazadas</div>
                                         </div>
-                                        <div className="text-center p-2 bg-green-500/10 rounded-lg">
-                                            <div className="text-xl font-bold text-green-400">{approvedVisits}</div>
-                                            <div className="text-xs text-slate-400">Aprobadas</div>
+                                        <div className="text-center p-3 bg-green-500/10 rounded-lg">
+                                            <div className="text-2xl font-bold text-green-400">{approvedVisits}</div>
+                                            <div className="text-sm text-slate-400">Aprobadas</div>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Backend Status */}
                                 <div className="bg-slate-800 p-6 rounded-xl text-center">
-                                    <div className="text-sm text-slate-500 mb-2">
+                                    <div className="text-base text-slate-500 mb-2">
                                         {isUsingRealBackend() ? '🟢 Datos en Vivo' : '🟡 Datos de Prueba'}
                                     </div>
                                 </div>
 
                                 {/* Sync Status */}
-                                <div className="bg-slate-800 p-4 rounded-xl">
-                                    <h4 className="text-sm font-semibold text-slate-300 mb-3">Estado de Sincronización</h4>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <div className="text-center p-2 bg-slate-700/50 rounded-lg">
-                                            <div className={`text-xl font-bold ${isOnline ? 'text-green-400' : 'text-red-400'}`}>
+                                <div className="bg-slate-800 p-5 rounded-xl">
+                                    <h4 className="text-base font-semibold text-slate-300 mb-4">Estado de Sincronización</h4>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="text-center p-3 bg-slate-700/50 rounded-lg">
+                                            <div className={`text-2xl font-bold ${isOnline ? 'text-green-400' : 'text-red-400'}`}>
                                                 {isOnline ? '🟢' : '🔴'}
                                             </div>
-                                            <div className="text-xs text-slate-400">
+                                            <div className="text-sm text-slate-400">
                                                 {isOnline ? 'Conectado' : 'Sin conexión'}
                                             </div>
                                         </div>
-                                        <div className="text-center p-2 bg-slate-700/50 rounded-lg">
-                                            <div className={`text-xl font-bold ${pendingCount > 0 ? 'text-yellow-400' : 'text-green-400'}`}>
+                                        <div className="text-center p-3 bg-slate-700/50 rounded-lg">
+                                            <div className={`text-2xl font-bold ${pendingCount > 0 ? 'text-yellow-400' : 'text-green-400'}`}>
                                                 {pendingCount}
                                             </div>
-                                            <div className="text-xs text-slate-400">Pendientes</div>
+                                            <div className="text-sm text-slate-400">Pendientes</div>
                                         </div>
                                     </div>
                                     {lastSyncTimeFormatted && (
