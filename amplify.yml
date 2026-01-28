@@ -25,17 +25,21 @@ customHeaders:
       - key: Content-Type
         value: 'application/manifest+json'
 customRules:
-  # PWA assets - serve directly, don't rewrite to index.html
+  # PWA manifest - MUST be before SPA fallback
   - source: /manifest.webmanifest
     target: /manifest.webmanifest
     status: '200'
+    headers:
+      - key: Content-Type
+        value: 'application/manifest+json'
+  # Service Worker and Workbox - serve directly
   - source: /sw.js
     target: /sw.js
     status: '200'
   - source: /workbox-*.js
     target: /workbox-*.js
     status: '200'
-  # Static assets
+  # Static assets - serve directly
   - source: /*.ico
     target: /*.ico
     status: '200'
@@ -48,7 +52,8 @@ customRules:
   - source: /assets/<*>
     target: /assets/<*>
     status: '200'
-  # SPA fallback - must be LAST
-  - source: </^[^.]+$|\.(?!(css|gif|ico|jpg|jpeg|js|png|txt|svg|woff|woff2|ttf|map|json|webmanifest)$)([^.]+$)/>
+  # SPA fallback - MUST be LAST
+  - source: /<*>
     target: /index.html
     status: '200'
+    condition: null
