@@ -37,9 +37,21 @@ const PageLoader = () => (
 // empty patient lists.
 //
 // This ensures sessionStorage is set SYNCHRONOUSLY before ANY component mounts.
+//
+// ALSO: Clear demo state when landing on root/login paths to prevent
+// unwanted auto-restoration of previous demo sessions.
 if (typeof window !== 'undefined') {
     const path = window.location.pathname;
-    if (path === '/nurse' || path === '/app' || path === '/dashboard' || path === '/admin' || path === '/family') {
+    
+    // Clear demo mode for landing/login paths
+    if (path === '/' || path === '/login') {
+        sessionStorage.removeItem('ips-erp-demo-mode');
+        sessionStorage.removeItem('ips-erp-demo-role');
+        sessionStorage.removeItem('ips-erp-demo-tenant');
+        console.log('🔄 Demo state cleared for landing/login path:', path);
+    }
+    // Enable demo mode for deep link paths
+    else if (path === '/nurse' || path === '/app' || path === '/dashboard' || path === '/admin' || path === '/family') {
         enableDemoMode();
         console.log('🎭 Demo mode pre-enabled for deep link:', path);
     }
