@@ -691,10 +691,10 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
 
                                 {/* SOLO HOY Badge - Visual indicator */}
                                 {showOnlyToday && (
-                                    <div className="bg-blue-500/20 border border-blue-500/30 p-4 rounded-xl flex items-center justify-center gap-2">
-                                        <Clock size={18} className="text-blue-400" />
-                                        <span className="text-base font-bold text-blue-400">SOLO HOY</span>
-                                        <span className="text-sm text-blue-300">({filteredShifts.length} {filteredShifts.length === 1 ? 'visita' : 'visitas'})</span>
+                                    <div className="bg-blue-500/20 border border-blue-500/30 p-5 rounded-xl flex items-center justify-center gap-3">
+                                        <Clock size={20} className="text-blue-400" />
+                                        <span className="text-lg font-bold text-blue-400">SOLO HOY</span>
+                                        <span className="text-base text-blue-300">({filteredShifts.length} {filteredShifts.length === 1 ? 'visita' : 'visitas'})</span>
                                     </div>
                                 )}
 
@@ -721,8 +721,8 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                         return (
                                             <div 
                                                 key={shift.id} 
-                                                className={`bg-slate-800 p-5 rounded-xl transition-all ${
-                                                    isActionable ? 'hover:bg-slate-750 hover:shadow-lg hover:border hover:border-blue-500/30 cursor-pointer' : ''
+                                                className={`bg-slate-800 p-6 rounded-xl transition-all ${
+                                                    isActionable ? 'hover:bg-slate-750 hover:shadow-lg hover:border hover:border-blue-500/30 cursor-pointer active:bg-slate-700' : ''
                                                 }`}
                                                 onClick={isActionable ? () => {
                                                     // Route to appropriate handler based on visit status
@@ -751,7 +751,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                             <ChevronRight size={18} className="text-blue-400 ml-auto" />
                                                         )}
                                                     </div>
-                                                    <span className={`px-2.5 py-1.5 rounded text-sm font-bold ${shift.status === 'COMPLETED'
+                                                    <span className={`px-3 py-2 rounded-lg text-sm font-bold ${shift.status === 'COMPLETED'
                                                         ? 'bg-green-500/20 text-green-400'
                                                         : shift.status === 'IN_PROGRESS'
                                                             ? 'bg-blue-500/20 text-blue-400'
@@ -812,9 +812,9 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                                     handleStartDocumentation(shift.id);
                                                                 }}
                                                                 disabled={isCreatingThisDraft}
-                                                                className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                                                                className="mt-4 w-full flex items-center justify-center gap-2 px-6 py-4 min-h-[48px] bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-base font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                                                             >
-                                                                <FileText size={18} />
+                                                                <FileText size={20} />
                                                                 {isCreatingThisDraft ? 'Iniciando...' : 'Iniciar Visita'}
                                                             </button>
                                                         )}
@@ -825,16 +825,16 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                                     e.stopPropagation();
                                                                     handleContinueDocumentation(shift.id);
                                                                 }}
-                                                                className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-lg transition-colors shadow-lg"
+                                                                className="mt-4 w-full flex items-center justify-center gap-2 px-6 py-4 min-h-[48px] bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-base font-bold rounded-lg transition-colors shadow-lg"
                                                             >
-                                                                <CheckCircle size={18} />
+                                                                <CheckCircle size={20} />
                                                                 Ver Visita Aprobada
                                                             </button>
                                                         )}
                                                         {/* Visit submitted - show waiting status */}
                                                         {shift.visit?.status === 'SUBMITTED' && (
-                                                            <div className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-3 bg-yellow-500/10 text-yellow-500 text-sm font-bold rounded-lg border border-yellow-500/20">
-                                                                <Clock size={18} />
+                                                            <div className="mt-4 w-full flex items-center justify-center gap-2 px-6 py-4 min-h-[48px] bg-yellow-500/10 text-yellow-500 text-base font-bold rounded-lg border border-yellow-500/20">
+                                                                <Clock size={20} />
                                                                 Esperando Revisión
                                                             </div>
                                                         )}
@@ -846,9 +846,9 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                                     handleContinueDocumentation(shift.id);
                                                                 }}
                                                                 disabled={isCreatingThisDraft}
-                                                                className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                                                                className="mt-4 w-full flex items-center justify-center gap-2 px-6 py-4 min-h-[48px] bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-base font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                                                             >
-                                                                <Edit3 size={18} />
+                                                                <Edit3 size={20} />
                                                                 {shift.visit?.status === 'REJECTED' ? 'Corregir Documentación' : 'Continuar Documentación'}
                                                             </button>
                                                         )}
@@ -893,7 +893,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                     <button
                                         onClick={handleLoadMore}
                                         disabled={isLoading}
-                                        className="w-full py-4 text-base font-bold text-slate-400 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all disabled:opacity-50 mt-6 min-h-[52px]"
+                                        className="w-full py-4 px-6 text-base font-bold text-slate-400 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 rounded-xl transition-all disabled:opacity-50 mt-6 min-h-[52px]"
                                     >
                                         {isLoading ? 'Cargando más...' : 'Cargar Más Turnos'}
                                     </button>
