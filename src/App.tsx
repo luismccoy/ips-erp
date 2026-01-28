@@ -75,8 +75,9 @@ export default function App() {
       return;
     }
     
-    // Handle direct navigation to app/nurse
-    if ((path === '/app' || path === '/nurse') && !role) {
+    // Handle direct navigation to app/nurse - ALWAYS force nurse role
+    // (unlike /dashboard which respects session, /app explicitly means nurse view)
+    if (path === '/app' || path === '/nurse') {
       setDemoState('nurse', TENANTS[0]);
       return;
     }
