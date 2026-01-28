@@ -24,6 +24,27 @@ const PageLoader = () => (
   </div>
 );
 
+// ============================================
+// CRITICAL FIX: Pre-enable demo mode for deep links
+// ============================================
+// This runs BEFORE React renders any components, preventing race conditions
+// where child components (like SimpleNurseApp) try to fetch data before
+// the useEffect in App has set sessionStorage['ips-erp-demo-mode'].
+//
+// Without this, direct navigation to /nurse, /dashboard, or /family could
+// result in isDemoMode() returning false, causing the app to try using
+// the real AWS backend instead of mock data, leading to auth errors and
+// empty patient lists.
+//
+// This ensures sessionStorage is set SYNCHRONOUSLY before ANY component mounts.
+if (typeof window !== 'undefined') {
+    const path = window.location.pathname;
+    if (path === '/nurse' || path === '/app' || path === '/dashboard' || path === '/admin' || path === '/family') {
+        enableDemoMode();
+        console.log('🎭 Demo mode pre-enabled for deep link:', path);
+    }
+}
+
 // Main App Component
 export default function App() {
   const { role, tenant, loading, error, login, logout, setDemoState } = useAuth();
@@ -67,11 +88,10 @@ export default function App() {
     const path = window.location.pathname;
     
     // Handle direct navigation to dashboard/admin
-    // BUGFIX: Must enable demo mode BEFORE setting demo state for mock data to work
+    // Note: enableDemoMode() already called at module level (see above)
     if ((path === '/dashboard' || path === '/admin') && !role) {
       const savedRole = sessionStorage.getItem('ips-erp-demo-role');
       if (savedRole === 'admin' || !savedRole) {
-        enableDemoMode();
         setDemoState('admin', TENANTS[0]);
       }
       return;
@@ -79,17 +99,15 @@ export default function App() {
     
     // Handle direct navigation to app/nurse - ALWAYS force nurse role
     // (unlike /dashboard which respects session, /app explicitly means nurse view)
-    // BUGFIX: Must enable demo mode for mock client to be used
+    // Note: enableDemoMode() already called at module level (see above)
     if (path === '/app' || path === '/nurse') {
-      enableDemoMode();
       setDemoState('nurse', TENANTS[0]);
       return;
     }
     
     // Handle direct navigation to family portal
-    // BUGFIX: Must enable demo mode for mock client to be used
+    // Note: enableDemoMode() already called at module level (see above)
     if (path === '/family' && !role) {
-      enableDemoMode();
       setDemoState('family', TENANTS[0]);
       return;
     }
