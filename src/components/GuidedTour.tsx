@@ -8,6 +8,7 @@
 import { useState, useEffect } from 'react';
 import Joyride, { STATUS, EVENTS } from 'react-joyride';
 import type { Step, CallBackProps } from 'react-joyride';
+import { STORAGE_KEYS } from '../constants/navigation';
 
 interface GuidedTourProps {
     /** Current view in the admin dashboard */
@@ -74,13 +75,13 @@ export function GuidedTour({ currentView, onViewChange, autoStart = false }: Gui
         setRun(false);
         setStepIndex(0);
         setShowWelcome(false);
-        sessionStorage.setItem('ips-demo-tour-completed', 'true');
+        sessionStorage.setItem(STORAGE_KEYS.TOUR_COMPLETED, 'true');
         onViewChange('dashboard');
     };
 
     // Check if user has seen the tour before
     useEffect(() => {
-        const hasSeenTour = sessionStorage.getItem('ips-demo-tour-completed');
+        const hasSeenTour = sessionStorage.getItem(STORAGE_KEYS.TOUR_COMPLETED);
         if (!hasSeenTour && autoStart) {
             setShowWelcome(true);
         }
@@ -383,7 +384,7 @@ export function RestartTourButton({ onClick }: { onClick: () => void }) {
     return (
         <button
             onClick={() => {
-                sessionStorage.removeItem('ips-demo-tour-completed');
+                sessionStorage.removeItem(STORAGE_KEYS.TOUR_COMPLETED);
                 onClick();
             }}
             className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors"

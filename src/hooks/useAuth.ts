@@ -6,13 +6,7 @@ import type { Tenant } from '../types';
 import { isUsingRealBackend, isDemoMode } from '../amplify-utils';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '../../amplify/data/resource';
-
-// Valid user roles (priority order for group resolution)
-type UserRole = 'superadmin' | 'admin' | 'nurse' | 'family';
-
-// Keys for persisting demo state across refreshes
-const DEMO_ROLE_KEY = 'ips-erp-demo-role';
-const DEMO_TENANT_KEY = 'ips-erp-demo-tenant';
+import { STORAGE_KEYS, type UserRole } from '../constants/navigation';
 
 /**
  * Custom hook for managing authentication state via AWS Amplify.
@@ -165,8 +159,8 @@ export function useAuth() {
                 }
             } else {
                 // Mock/Demo mode - restore persisted demo state if available
-                const savedRole = sessionStorage.getItem(DEMO_ROLE_KEY) as UserRole | null;
-                const savedTenantJson = sessionStorage.getItem(DEMO_TENANT_KEY);
+                const savedRole = sessionStorage.getItem(STORAGE_KEYS.DEMO_ROLE) as UserRole | null;
+                const savedTenantJson = sessionStorage.getItem(STORAGE_KEYS.DEMO_TENANT);
                 
                 if (isDemoMode() && savedRole) {
                     setRole(savedRole);
@@ -218,8 +212,8 @@ export function useAuth() {
             setTenant(null);
             
             // Clear persisted demo state
-            sessionStorage.removeItem(DEMO_ROLE_KEY);
-            sessionStorage.removeItem(DEMO_TENANT_KEY);
+            sessionStorage.removeItem(STORAGE_KEYS.DEMO_ROLE);
+            sessionStorage.removeItem(STORAGE_KEYS.DEMO_TENANT);
         } catch (error) {
             console.error('Logout failed', error);
         }
@@ -232,11 +226,11 @@ export function useAuth() {
         setTenant(newTenant);
         
         // Persist to sessionStorage for refresh survival
-        sessionStorage.setItem(DEMO_ROLE_KEY, newRole);
+        sessionStorage.setItem(STORAGE_KEYS.DEMO_ROLE, newRole);
         if (newTenant) {
-            sessionStorage.setItem(DEMO_TENANT_KEY, JSON.stringify(newTenant));
+            sessionStorage.setItem(STORAGE_KEYS.DEMO_TENANT, JSON.stringify(newTenant));
         } else {
-            sessionStorage.removeItem(DEMO_TENANT_KEY);
+            sessionStorage.removeItem(STORAGE_KEYS.DEMO_TENANT);
         }
     };
     

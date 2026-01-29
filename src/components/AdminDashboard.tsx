@@ -11,6 +11,7 @@ import { GuidedTour, RestartTourButton } from './GuidedTour';
 import type { AdminDashboardProps, NavItemProps } from '../types/components';
 import { graphqlToFrontendSafe } from '../utils/inventory-transforms';
 import { useLanguage } from '../contexts/LanguageContext';
+import { STORAGE_KEYS } from '../constants/navigation';
 
 import { NotificationBell } from './NotificationBell';
 import type { NotificationItem } from '../types/workflow';
@@ -44,7 +45,10 @@ const PanelLoader = () => (
 
 
 
-export default function AdminDashboard({ view, setView, onLogout, tenant }: AdminDashboardProps) {
+export default function AdminDashboard({ onLogout, tenant }: AdminDashboardProps) {
+    // View state - controls which dashboard panel is displayed
+    const [view, setView] = useState<string>('dashboard');
+    
     // Mobile sidebar toggle
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -60,7 +64,7 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
     // Check for demo mode after mount (enableDemoMode runs after component mounts)
     useEffect(() => {
         const checkDemoMode = () => {
-            if (isDemoMode() && !sessionStorage.getItem('ips-demo-tour-completed')) {
+            if (isDemoMode() && !sessionStorage.getItem(STORAGE_KEYS.TOUR_COMPLETED)) {
                 setShowTour(true);
             }
         };
