@@ -23,6 +23,18 @@ import {
 
 // ... [Keep all the existing imports, icons, and mock store code] ...
 
+type MockVisitDraft = {
+  id: string;
+  status: VisitStatus;
+  kardex: KardexData;
+  vitalsRecorded?: VitalsData;
+  medicationsAdministered?: MedicationAdminData[];
+  tasksCompleted?: TaskCompletionData[];
+  assessment?: Partial<PatientAssessment> | null;
+};
+
+const mockVisitStore: Record<string, MockVisitDraft> = {};
+
 export const VisitDocumentationForm: React.FC<VisitDocumentationFormProps> = ({
   shiftId,
   patientId,
