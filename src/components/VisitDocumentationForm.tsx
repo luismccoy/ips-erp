@@ -1,7 +1,6 @@
 // Update the imports at the top
 import React, { useState, useEffect, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/data';
-import { useNavigate } from 'react-router-dom';
 import { isUsingRealBackend, client, getUserId, getTenantId } from '../amplify-utils';
 import { KardexForm } from './KardexForm';
 import { AssessmentForm } from './clinical/AssessmentForm';
