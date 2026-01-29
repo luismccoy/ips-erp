@@ -165,3 +165,19 @@ export const DEMO_PERSONAS = {
 export const isUsingRealBackend = (): boolean => {
     return !isDemoMode() && (import.meta.env.PROD || import.meta.env.VITE_USE_REAL_BACKEND === 'true');
 };
+
+export const getUserId = (): string => {
+    if (isDemoMode()) {
+        return MOCK_USER.attributes.sub;
+    }
+    // In production, this would get the actual user ID from Amplify Auth
+    return 'demo-user'; // Placeholder - replace with actual implementation
+};
+
+export const getTenantId = (): string => {
+    if (isDemoMode()) {
+        return MOCK_USER.attributes['custom:tenantId'];
+    }
+    // In production, this would get the actual tenant ID from Amplify Auth
+    return 'demo-tenant'; // Placeholder - replace with actual implementation
+};
