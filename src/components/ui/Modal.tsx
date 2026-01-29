@@ -69,10 +69,10 @@ export const Modal: React.FC<ModalProps> = ({
                     <h2 className="text-xl font-black text-slate-900">{title}</h2>
                     <button
                         onClick={onClose}
-                        className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-                        aria-label="Close modal"
+                        className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                        aria-label="Cerrar"
                     >
-                        <X size={20} />
+                        <X size={24} />
                     </button>
                 </div>
 
