@@ -17,6 +17,7 @@ import type {
 } from '../types/workflow';
 import {
   EMPTY_KARDEX,
+  EMPTY_VITALS,
   validateKardex,
   validateVitals,
 } from '../types/workflow';
