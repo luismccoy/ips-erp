@@ -49,6 +49,9 @@ export default function AdminDashboard({ onLogout, tenant }: AdminDashboardProps
     // View state - controls which dashboard panel is displayed
     const [view, setView] = useState<string>('dashboard');
     
+    // Track which role's initial view has been set
+    const [initialViewSetForRole, setInitialViewSetForRole] = useState<string | null>(null);
+    
     // Mobile sidebar toggle
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -61,8 +64,21 @@ export default function AdminDashboard({ onLogout, tenant }: AdminDashboardProps
     // Guided tour state (only show in demo mode)
     const [showTour, setShowTour] = useState(false);
 
-    // Check for demo mode after mount (enableDemoMode runs after component mounts)
+    // Handle initial view setup and demo mode
     useEffect(() => {
+        // Initial view setup based on role
+        if (tenant?.role && initialViewSetForRole !== tenant.role) {
+            setInitialViewSetForRole(tenant.role);
+            if (tenant.role === 'admin') {
+                setView('dashboard');
+            }
+        }
+        
+        if (!tenant?.role && initialViewSetForRole !== null) {
+            setInitialViewSetForRole(null);
+        }
+
+        // Demo mode check
         const checkDemoMode = () => {
             if (isDemoMode() && !sessionStorage.getItem(STORAGE_KEYS.TOUR_COMPLETED)) {
                 setShowTour(true);
@@ -72,7 +88,7 @@ export default function AdminDashboard({ onLogout, tenant }: AdminDashboardProps
         checkDemoMode();
         const timer = setTimeout(checkDemoMode, 100);
         return () => clearTimeout(timer);
-    }, []);
+    }, [tenant?.role, initialViewSetForRole]);
 
     // Mark current view as visited
     useEffect(() => {
