@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useUnsavedChangesWarning } from '../hooks/useUnsavedChangesWarning';
-import { Modal } from './Modal';
+import { Modal } from './Modal'; // Assuming we have a Modal component
 
-interface KardexFormProps {
+interface PatientFormProps {
   onSubmit: (data: any) => void;
   onClose: () => void;
   initialData?: any;
 }
 
-export const KardexForm: React.FC<KardexFormProps> = ({
+export const PatientForm: React.FC<PatientFormProps> = ({
   onSubmit,
   onClose,
   initialData,
@@ -48,29 +48,10 @@ export const KardexForm: React.FC<KardexFormProps> = ({
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* KARDEX Fields */}
-        <div className="space-y-4">
-          {/* Medication Section */}
-          <div className="border-b pb-4">
-            <h3 className="text-lg font-medium mb-3">Medicamentos</h3>
-            {/* Medication fields would go here */}
-          </div>
-
-          {/* Treatment Plan Section */}
-          <div className="border-b pb-4">
-            <h3 className="text-lg font-medium mb-3">Plan de Tratamiento</h3>
-            {/* Treatment plan fields would go here */}
-          </div>
-
-          {/* Care Instructions Section */}
-          <div>
-            <h3 className="text-lg font-medium mb-3">Instrucciones de Cuidado</h3>
-            {/* Care instruction fields would go here */}
-          </div>
-        </div>
-
-        <div className="flex justify-end space-x-4">
+      <form onSubmit={handleSubmit}>
+        {/* Form fields go here */}
+        
+        <div className="flex justify-end space-x-4 mt-4">
           <button
             type="button"
             onClick={handleDiscard}
@@ -82,7 +63,7 @@ export const KardexForm: React.FC<KardexFormProps> = ({
             type="submit"
             className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700"
           >
-            Guardar KARDEX
+            Guardar
           </button>
         </div>
       </form>

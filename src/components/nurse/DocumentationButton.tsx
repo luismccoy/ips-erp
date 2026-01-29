@@ -17,59 +17,69 @@ const DocumentationButton = memo(({
     isLoading,
     onGeneratePacket,
 }: DocumentationButtonProps) => {
-    // Only show button for COMPLETED shifts
-    if (shift.status !== 'COMPLETED') {
-        return null;
-    }
-
     const visit = shift.visit;
 
-    // If visit APPROVED, show "Generate Packet" (New Feature from UX Audit)
-    if (visit && visit.status === 'APPROVED') {
-        return (
-            <button
-                onClick={() => onGeneratePacket(shift.id)}
-                className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors"
-            >
-                <FileCheck size={16} />
-                Generar Paquete de Facturación
-            </button>
-        );
-    }
+    // Determine button state based on conditions
+    const getButtonConfig = () => {
+        // Generate Packet State
+        if (visit?.status === 'APPROVED') {
+            return {
+                onClick: () => onGeneratePacket(shift.id),
+                icon: <FileCheck size={16} />,
+                text: 'Generar Paquete',
+                className: 'bg-emerald-600 hover:bg-emerald-700 text-white',
+                disabled: false
+            };
+        }
 
-    // If visit exists and is SUBMITTED, show "Pending Review" (disabled)
-    if (visit && visit.status === 'SUBMITTED') {
-        return (
-            <div className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 bg-yellow-500/10 text-yellow-500 text-sm font-medium rounded-lg border border-yellow-500/20">
-                <Clock size={16} />
-                Esperando Revisión
-            </div>
-        );
-    }
+        // Pending Review State
+        if (visit?.status === 'SUBMITTED') {
+            return {
+                onClick: undefined,
+                icon: <Clock size={16} />,
+                text: 'Esperando Revisión',
+                className: 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20',
+                disabled: true
+            };
+        }
 
-    // If visit exists and is DRAFT or REJECTED, show "Continue Documentation"
-    if (visit && (visit.status === 'DRAFT' || visit.status === 'REJECTED')) {
-        return (
-            <button
-                onClick={() => onContinueDocumentation(shift.id)}
-                disabled={isLoading}
-                className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-                <Edit3 size={16} />
-                {visit.status === 'REJECTED' ? 'Corregir Documentación' : 'Continuar Documentación'}
-            </button>
-        );
-    }
+        // Continue/Correct Documentation State
+        if (visit?.status === 'DRAFT' || visit?.status === 'REJECTED') {
+            return {
+                onClick: () => onContinueDocumentation(shift.id),
+                icon: <Edit3 size={16} />,
+                text: visit.status === 'REJECTED' ? 'Corregir Documentación' : 'Continuar',
+                className: 'bg-indigo-600 hover:bg-indigo-700 text-white',
+                disabled: isLoading
+            };
+        }
 
-    // No visit exists, show "Start Documentation"
+        // Start Documentation State (Default)
+        return {
+            onClick: () => onStartDocumentation(shift.id),
+            icon: <FileText size={16} />,
+            text: isLoading ? 'Creando...' : 'Iniciar',
+            className: 'bg-[#2563eb] hover:bg-blue-700 text-white',
+            disabled: isLoading || shift.status === 'CANCELLED'
+        };
+    };
+
+    const config = getButtonConfig();
+
     return (
         <button
-            onClick={() => onStartDocumentation(shift.id)}
-            disabled={isLoading}
-            className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 bg-[#2563eb] hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={config.onClick}
+            disabled={config.disabled}
+            className={`
+                w-full flex items-center justify-center gap-2 px-3 py-2
+                text-sm font-medium rounded-lg transition-colors
+                relative z-30
+                disabled:opacity-50 disabled:cursor-not-allowed
+                ${config.className}
+            `}
         >
-            <FileText size={16} />
-            {isLoading ? 'Creando...' : 'Iniciar Documentación'}
+            {config.icon}
+            <span className="whitespace-nowrap">{config.text}</span>
         </button>
     );
 });

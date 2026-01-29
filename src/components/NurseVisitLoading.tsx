@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLoadingTimeout } from '../hooks/useLoadingTimeout';
 
-export const AdminDashboard: React.FC = () => {
+export const NurseVisitLoading: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { 
     hasTimedOut, 
@@ -10,16 +10,16 @@ export const AdminDashboard: React.FC = () => {
   } = useLoadingTimeout(isLoading, {
     timeoutMs: 30000, // 30 seconds
     onTimeout: () => {
-      console.warn('Carga de datos del panel de administración demorada');
+      console.warn('Carga de visita de enfermería demorada');
     },
     retryCount: 1
   });
 
-  const fetchAdminData = async () => {
+  const loadNurseVisit = async () => {
     setIsLoading(true);
     try {
-      // Simulated data fetch
-      await fetchData();
+      // Simulated visit loading
+      await fetchVisitDetails();
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
@@ -29,8 +29,8 @@ export const AdminDashboard: React.FC = () => {
   if (hasTimedOut) {
     return (
       <div className="error-container">
-        <h2>Error de Carga</h2>
-        <p>Los datos tardan demasiado en cargar. Por favor, inténtelo de nuevo.</p>
+        <h2>Error de Carga de Visita</h2>
+        <p>Los detalles de la visita tardan demasiado en cargar. Por favor, inténtelo de nuevo.</p>
         <button onClick={retry}>
           Reintentar Carga {currentRetryCount > 0 ? `(Intento ${currentRetryCount})` : ''}
         </button>
@@ -40,8 +40,8 @@ export const AdminDashboard: React.FC = () => {
 
   return (
     <div>
-      {/* Normal dashboard content */}
-      {isLoading && <p>Cargando datos...</p>}
+      {/* Normal nurse visit content */}
+      {isLoading && <p>Cargando detalles de la visita...</p>}
     </div>
   );
 };

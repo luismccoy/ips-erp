@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useUnsavedChangesWarning } from '../hooks/useUnsavedChangesWarning';
 import { Modal } from './Modal';
 
-interface KardexFormProps {
+interface BillingFormProps {
   onSubmit: (data: any) => void;
   onClose: () => void;
   initialData?: any;
 }
 
-export const KardexForm: React.FC<KardexFormProps> = ({
+export const BillingForm: React.FC<BillingFormProps> = ({
   onSubmit,
   onClose,
   initialData,
@@ -49,24 +49,24 @@ export const KardexForm: React.FC<KardexFormProps> = ({
   return (
     <>
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* KARDEX Fields */}
+        {/* Billing Form Fields */}
         <div className="space-y-4">
-          {/* Medication Section */}
+          {/* Services Section */}
           <div className="border-b pb-4">
-            <h3 className="text-lg font-medium mb-3">Medicamentos</h3>
-            {/* Medication fields would go here */}
+            <h3 className="text-lg font-medium mb-3">Servicios Prestados</h3>
+            {/* Services fields would go here */}
           </div>
 
-          {/* Treatment Plan Section */}
+          {/* Payment Information */}
           <div className="border-b pb-4">
-            <h3 className="text-lg font-medium mb-3">Plan de Tratamiento</h3>
-            {/* Treatment plan fields would go here */}
+            <h3 className="text-lg font-medium mb-3">Información de Pago</h3>
+            {/* Payment fields would go here */}
           </div>
 
-          {/* Care Instructions Section */}
+          {/* Insurance Information */}
           <div>
-            <h3 className="text-lg font-medium mb-3">Instrucciones de Cuidado</h3>
-            {/* Care instruction fields would go here */}
+            <h3 className="text-lg font-medium mb-3">Información del Seguro</h3>
+            {/* Insurance fields would go here */}
           </div>
         </div>
 
@@ -82,7 +82,7 @@ export const KardexForm: React.FC<KardexFormProps> = ({
             type="submit"
             className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700"
           >
-            Guardar KARDEX
+            Procesar Facturación
           </button>
         </div>
       </form>

@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useUnsavedChangesWarning } from '../hooks/useUnsavedChangesWarning';
 import { Modal } from './Modal';
 
-interface KardexFormProps {
+interface AssessmentFormProps {
   onSubmit: (data: any) => void;
   onClose: () => void;
   initialData?: any;
 }
 
-export const KardexForm: React.FC<KardexFormProps> = ({
+export const AssessmentForm: React.FC<AssessmentFormProps> = ({
   onSubmit,
   onClose,
   initialData,
@@ -49,25 +49,24 @@ export const KardexForm: React.FC<KardexFormProps> = ({
   return (
     <>
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* KARDEX Fields */}
+        {/* Clinical Assessment Fields */}
         <div className="space-y-4">
-          {/* Medication Section */}
-          <div className="border-b pb-4">
-            <h3 className="text-lg font-medium mb-3">Medicamentos</h3>
-            {/* Medication fields would go here */}
-          </div>
-
-          {/* Treatment Plan Section */}
-          <div className="border-b pb-4">
-            <h3 className="text-lg font-medium mb-3">Plan de Tratamiento</h3>
-            {/* Treatment plan fields would go here */}
-          </div>
-
-          {/* Care Instructions Section */}
+          {/* Pain Scale Field */}
           <div>
-            <h3 className="text-lg font-medium mb-3">Instrucciones de Cuidado</h3>
-            {/* Care instruction fields would go here */}
+            <label className="text-sm font-medium">
+              Escala de Dolor (0-10)
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="10"
+              value={formData.painScale || 0}
+              onChange={(e) => handleChange('painScale', e.target.value)}
+              className="w-full"
+            />
           </div>
+
+          {/* Other assessment fields would go here */}
         </div>
 
         <div className="flex justify-end space-x-4">
@@ -82,7 +81,7 @@ export const KardexForm: React.FC<KardexFormProps> = ({
             type="submit"
             className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700"
           >
-            Guardar KARDEX
+            Guardar Evaluación
           </button>
         </div>
       </form>
