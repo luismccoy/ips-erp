@@ -7,6 +7,23 @@ const aiClient = new AIClient();
 export const handler: Schema["generateRoster"]["functionHandler"] = async (event) => {
     const { nurses, unassignedShifts } = event.arguments;
 
+    // Extract identity from AppSync event
+    const identity = event.identity as { sub?: string; claims?: Record<string, unknown> } | undefined;
+    const userId = identity?.sub;
+    const tenantId = identity?.claims?.['custom:tenantId'];
+    const userGroups = identity?.claims?.['cognito:groups'] as string[] || [];
+
+    // P0 FIX: Require Admin or Nurse role for AI functions
+    if (!userGroups.includes('Admin') && !userGroups.includes('ADMIN') && 
+        !userGroups.includes('Nurse') && !userGroups.includes('NURSE')) {
+        console.error(`[SECURITY] Unauthorized AI function access: userId=${userId}, groups=${userGroups}`);
+        throw new Error('Unauthorized: Admin or Nurse role required');
+    }
+
+    if (!tenantId) {
+        throw new Error('Unauthorized: Missing tenant ID');
+    }
+
     // 1. Construct the Prompt
     const prompt = `
     You are an expert Home Care Roster Coordinator for a Colombian IPS.
