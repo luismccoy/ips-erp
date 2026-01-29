@@ -34,7 +34,7 @@ export function PatientsPage() {
             setPatients(response.data || []);
         } catch (err) {
             console.error('Error fetching patients:', err);
-            showToast('error', 'Failed to load patients list');
+            showToast('error', 'Error al cargar la lista de pacientes');
         } finally {
             setLoading(false);
         }
@@ -51,20 +51,20 @@ export function PatientsPage() {
     };
 
     const handleDeleteClick = async (patient: Patient) => {
-        if (!confirm(`Are you sure you want to delete ${patient.name}?`)) return;
+        if (!confirm(`¿Está seguro de eliminar a ${patient.name}?`)) return;
 
         try {
             if (isUsingRealBackend()) {
                 await (client.models.Patient as any).delete({ id: patient.id });
                 setPatients(prev => prev.filter(p => p.id !== patient.id));
-                showToast('success', 'Patient deleted successfully');
+                showToast('success', 'Paciente eliminado correctamente');
             } else {
-                showToast('info', 'Mock Mode: Delete simulated');
+                showToast('info', 'Modo Demo: Eliminación simulada');
                 setPatients(prev => prev.filter(p => p.id !== patient.id));
             }
         } catch (err) {
             console.error('Error deleting patient:', err);
-            showToast('error', 'Failed to delete patient');
+            showToast('error', 'Error al eliminar paciente');
         }
     };
 
@@ -80,7 +80,7 @@ export function PatientsPage() {
                     });
                     // Optimistic update of local state
                     setPatients(prev => prev.map(p => p.id === selectedPatient.id ? result.data : p));
-                    showToast('success', 'Patient updated successfully');
+                    showToast('success', 'Paciente actualizado correctamente');
                 } else {
                     // Create
                     const result = await (client.models.Patient as any).create({
@@ -88,10 +88,10 @@ export function PatientsPage() {
                         ...data
                     });
                     setPatients(prev => [...prev, result.data]);
-                    showToast('success', 'Patient created successfully');
+                    showToast('success', 'Paciente creado correctamente');
                 }
             } else {
-                showToast('info', 'Mock Mode: Changes saved to session');
+                showToast('info', 'Modo Demo: Cambios guardados en sesión');
                 if (selectedPatient) {
                     setPatients(prev => prev.map(p => p.id === selectedPatient.id ? { ...p, ...data } : p));
                 } else {
@@ -108,7 +108,7 @@ export function PatientsPage() {
             setShowFormModal(false);
         } catch (err) {
             console.error('Error saving patient:', err);
-            showToast('error', 'Failed to save patient');
+            showToast('error', 'Error al guardar paciente');
         } finally {
             setFormLoading(false);
         }
@@ -191,7 +191,7 @@ export function PatientsPage() {
                                         <td className="px-6 py-4">
                                             <div className="flex items-start gap-2 text-slate-600 text-xs">
                                                 <MapPin size={14} className="text-slate-400 mt-0.5 shrink-0" />
-                                                <span className="truncate max-w-[150px]">{patient.address || 'Address not listed'}</span>
+                                                <span className="truncate max-w-[150px]">{patient.address || 'Sin dirección registrada'}</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
@@ -201,7 +201,7 @@ export function PatientsPage() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="flex items-center justify-end gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                                 <button
                                                     onClick={() => {
                                                         setSelectedPatient(patient);

@@ -22,9 +22,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
+import { useNavigate } from 'react-router-dom';
 import type { Schema } from '../../../amplify/data/resource';
 import { isDemoMode } from '../../amplify-utils';
 import { RiskIndicatorBadge } from './RiskIndicatorBadge';
+import { PainScaleInput } from './PainScaleInput';
+import { useUnsavedChangesWarning } from '../../hooks/useUnsavedChangesWarning';
 import type {
   PatientAssessment,
   GlasgowScore,
@@ -94,8 +97,38 @@ export const AssessmentForm: React.FC<AssessmentFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
+const navigate = useNavigate();
+  const [isDirty, setIsDirty] = useState(false);
   const [activeTab, setActiveTab] = useState<ScaleTab>('glasgow');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { showWarningModal, handleDiscard, handleContinueEditing, warningMessages } = useUnsavedChangesWarning({
+    isDirty,
+    onDiscard: () => {
+      setIsDirty(false);
+      // Reset form data to initial values if needed
+      onCancel?.();
+    }
+  });
+
+  useEffect(() => {
+    setIsDirty(true);
+  }, [
+    painScore,
+    glasgowScore.eye, glasgowScore.verbal, glasgowScore.motor,
+    bradenScore.sensoryPerception, bradenScore.moisture, bradenScore.activity,
+    bradenScore.mobility, bradenScore.nutrition, bradenScore.frictionShear,
+    morseScore.historyOfFalling, morseScore.secondaryDiagnosis, morseScore.ambulatoryAid,
+    morseScore.ivHeparinLock, morseScore.gait, morseScore.mentalStatus,
+    newsScore.respirationRate, newsScore.oxygenSaturation, newsScore.supplementalO2,
+    newsScore.temperature, newsScore.systolicBP, newsScore.heartRate, newsScore.consciousness,
+    notes,
+  ]);
+
+  // Reset dirty state on successful save
+  useEffect(() => {
+    if (!isSubmitting) setIsDirty(false);
+  }, [isSubmitting]);
 
   // Form state for each scale
   const [glasgowScore, setGlasgowScore] = useState<GlasgowScore>(
@@ -375,29 +408,11 @@ export const AssessmentForm: React.FC<AssessmentFormProps> = ({
               </h3>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Intensidad del Dolor (0-10)
-              </label>
-              <input
-                type="range"
-                min="0"
-                max="10"
-                value={painScore}
-                onChange={(e) => setPainScore(parseInt(e.target.value))}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-              />
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
-                <span>Sin dolor</span>
-                <span>Dolor severo</span>
-              </div>
-            </div>
-
-            <div className="rounded-lg bg-blue-50 p-4">
-              <p className="text-sm font-medium text-blue-900">
-                Puntaje: <span className="text-2xl">{painScore}</span> / 10
-              </p>
-            </div>
+            <PainScaleInput
+              value={painScore}
+              onChange={setPainScore}
+              disabled={isSubmitting}
+            />
           </div>
         )}
 

@@ -8,6 +8,8 @@ import { TENANTS } from './data/mock-data';
 import { ToastProvider } from './components/ui/Toast';
 import { isDemoMode, enableDemoMode } from './amplify-utils';
 import { FeedbackWidget } from './components/FeedbackWidget';
+import { RouteGuard } from './components/RouteGuard';
+import { STORAGE_KEYS, shouldClearDemoState, shouldEnableDemoMode, getDefaultRouteForRole } from './constants/navigation';
 
 // Lazy loaded components for performance
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
@@ -43,15 +45,15 @@ const PageLoader = () => (
 if (typeof window !== 'undefined') {
     const path = window.location.pathname;
     
-    // Clear demo mode for landing/login paths
-    if (path === '/' || path === '/login') {
-        sessionStorage.removeItem('ips-erp-demo-mode');
-        sessionStorage.removeItem('ips-erp-demo-role');
-        sessionStorage.removeItem('ips-erp-demo-tenant');
+    // Clear demo state for landing/login paths
+    if (shouldClearDemoState(path)) {
+        sessionStorage.removeItem(STORAGE_KEYS.DEMO_MODE);
+        sessionStorage.removeItem(STORAGE_KEYS.DEMO_ROLE);
+        sessionStorage.removeItem(STORAGE_KEYS.DEMO_TENANT);
         console.log('🔄 Demo state cleared for landing/login path:', path);
     }
     // Enable demo mode for deep link paths
-    else if (path === '/nurse' || path === '/app' || path === '/dashboard' || path === '/admin' || path === '/family') {
+    else if (shouldEnableDemoMode(path)) {
         enableDemoMode();
         console.log('🎭 Demo mode pre-enabled for deep link:', path);
     }
@@ -61,7 +63,6 @@ if (typeof window !== 'undefined') {
 export default function App() {
   const { role, tenant, loading, error, login, logout, setDemoState } = useAuth();
   const { trackEvent, identifyUser } = useAnalytics();
-  const [view, setView] = useState<string>('login');
   const [authStage, setAuthStage] = useState<'landing' | 'demo' | 'login'>('landing');
 
   // Login form state
@@ -69,14 +70,10 @@ export default function App() {
   const [password, setPassword] = useState('');
   const [isSigningIn, setIsSigningIn] = useState(false);
 
-  // Track if initial view has been set (prevents resetting view on navigation)
-  // Using state instead of ref to be more "React-y" and avoid potential ref timing issues
-  const [initialViewSetForRole, setInitialViewSetForRole] = useState<string | null>(null);
-
-  // Debug logging for view changes
-  useEffect(() => {
-    console.log('[Navigation Debug] View changed to:', view, '| Role:', role, '| initialViewSetForRole:', initialViewSetForRole);
-  }, [view, role, initialViewSetForRole]);
+  // Track if initial session has been set for current role (prevents duplicate analytics)
+  // Using ref instead of state since this doesn't affect rendering
+  const initialViewSetForRole = useRef<string | null>(null);
+  const [pendingDeepLinkRole, setPendingDeepLinkRole] = useState<string | null>(null);
 
   // Handle demo query param on page load (after demo mode redirect)
   useEffect(() => {
@@ -115,64 +112,42 @@ export default function App() {
   }, [role, setDemoState, trackEvent]);
 
   useEffect(() => {
-    console.log('[Navigation Debug] Main useEffect triggered | role:', role, '| initialViewSetForRole:', initialViewSetForRole);
+    console.log('[Navigation Debug] Main useEffect triggered | role:', role, '| initialViewSetForRole:', initialViewSetForRole.current);
     
-    // Deep link handling - always check this first
+    // Deep link handling - REMOVED AUTOMATIC ROLE PROMOTION (Security Fix P0-2)
+    // Previous code automatically promoted users to admin/nurse/family based on URL
+    // This was a critical security vulnerability - users could access any portal by changing URL
+    // Now handled by RouteGuard component which enforces RBAC
+    
     const path = window.location.pathname;
     
-    // Handle direct navigation to dashboard/admin
-    // Note: enableDemoMode() already called at module level (see above)
-    if ((path === '/dashboard' || path === '/admin') && !role) {
-      console.log('[Navigation Debug] Setting demo admin state from deep link');
-      const savedRole = sessionStorage.getItem('ips-erp-demo-role');
-      if (savedRole === 'admin' || !savedRole) {
-        setDemoState('admin', TENANTS[0]);
-      }
+    // For demo mode deep links WITHOUT existing role, prompt user to select demo portal
+    // This maintains demo mode UX while preventing unauthorized access
+    if (isDemoMode() && !role && (path === '/dashboard' || path === '/admin' || path === '/app' || path === '/nurse' || path === '/family')) {
+      console.log('[Navigation Debug] Deep link to protected route without role - showing demo selection');
+      // User will be prompted to select a demo role, then RouteGuard will verify access
+      setAuthStage('demo');
       return;
     }
     
-    // Handle direct navigation to app/nurse - ALWAYS force nurse role
-    // (unlike /dashboard which respects session, /app explicitly means nurse view)
-    // Note: enableDemoMode() already called at module level (see above)
-    if ((path === '/app' || path === '/nurse') && !role) {
-      console.log('[Navigation Debug] Setting demo nurse state from deep link');
-      setDemoState('nurse', TENANTS[0]);
-      return;
-    }
-    
-    // Handle direct navigation to family portal
-    // Note: enableDemoMode() already called at module level (see above)
-    if (path === '/family' && !role) {
-      console.log('[Navigation Debug] Setting demo family state from deep link');
-      setDemoState('family', TENANTS[0]);
-      return;
-    }
-    
-    // Set view when role is defined (supports demo switching)
-    if (role && initialViewSetForRole !== role) {
-      // Only track session and identify on FIRST view set for this role
-      console.log('[Navigation Debug] First-time view setup for role:', role);
-      setInitialViewSetForRole(role);
+    // Track analytics when role is first set (prevents duplicate tracking on subsequent renders)
+    if (role && initialViewSetForRole.current !== role) {
+      // Only track session and identify on FIRST time this role is set
+      console.log('[Navigation Debug] First-time session tracking for role:', role);
+      initialViewSetForRole.current = role;
       
       if (tenant) {
         identifyUser(role, { tenant: tenant.name, role });
         trackEvent('Session Started', { role });
       }
-      
-      // Set initial view based on role (only on first login/role assignment)
-      if (role === 'admin') setView('dashboard');
-      else if (role === 'nurse') setView('nurse');
-      else if (role === 'family') setView('family');
-    } else if (role) {
-      console.log('[Navigation Debug] Skipping view setup (already initialized for role:', role, ')');
     }
     
     // Reset the initialization tracking when logged out so next session tracks properly
-    if (!role && initialViewSetForRole !== null) {
+    if (!role && initialViewSetForRole.current !== null) {
       console.log('[Navigation Debug] Resetting initialization tracking');
-      setInitialViewSetForRole(null);
+      initialViewSetForRole.current = null;
     }
-  }, [role, tenant, setDemoState, identifyUser, trackEvent, initialViewSetForRole]);
+  }, [role, tenant, setDemoState, identifyUser, trackEvent, setAuthStage]);
 
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault();
@@ -225,9 +200,9 @@ export default function App() {
     // Handler for Organization Access login - clears any demo state first
     const handleOrgLogin = () => {
       // Clear demo state so org login form can show
-      sessionStorage.removeItem('ips-erp-demo-role');
-      sessionStorage.removeItem('ips-erp-demo-tenant');
-      sessionStorage.removeItem('ips-erp-demo-mode');
+      sessionStorage.removeItem(STORAGE_KEYS.DEMO_ROLE);
+      sessionStorage.removeItem(STORAGE_KEYS.DEMO_TENANT);
+      sessionStorage.removeItem(STORAGE_KEYS.DEMO_MODE);
       logout(); // This clears role state
       setAuthStage('login');
     };
@@ -317,14 +292,53 @@ export default function App() {
     );
   }
 
+  // Handler for unauthorized route access
+  const handleUnauthorized = () => {
+    console.warn('[SECURITY] Unauthorized access detected, redirecting to appropriate portal');
+    
+    if (role) {
+      // User has a role but wrong permissions - redirect to their portal
+      const defaultRoute = getDefaultRouteForRole(role);
+      window.location.href = defaultRoute;
+    } else {
+      // No role - redirect to login
+      handleLogout();
+    }
+  };
+
   // Use Suspense to handle loading state of lazy components
   // Wrap everything with ToastProvider for global notifications
+  // SECURITY FIX P0-2: Wrap all protected components with RouteGuard
   return (
     <ToastProvider>
       <Suspense fallback={<PageLoader />}>
-        {role === 'nurse' && <SimpleNurseApp onLogout={handleLogout} />}
-        {role === 'family' && <FamilyPortal onLogout={handleLogout} />}
-        {role === 'admin' && <AdminDashboard view={view} setView={setView} onLogout={handleLogout} tenant={tenant} />}
+        {role === 'nurse' && (
+          <RouteGuard 
+            userRole={role} 
+            currentPath={window.location.pathname}
+            onUnauthorized={handleUnauthorized}
+          >
+            <SimpleNurseApp onLogout={handleLogout} />
+          </RouteGuard>
+        )}
+        {role === 'family' && (
+          <RouteGuard 
+            userRole={role} 
+            currentPath={window.location.pathname}
+            onUnauthorized={handleUnauthorized}
+          >
+            <FamilyPortal onLogout={handleLogout} />
+          </RouteGuard>
+        )}
+        {role === 'admin' && (
+          <RouteGuard 
+            userRole={role} 
+            currentPath={window.location.pathname}
+            onUnauthorized={handleUnauthorized}
+          >
+            <AdminDashboard onLogout={handleLogout} tenant={tenant} />
+          </RouteGuard>
+        )}
       </Suspense>
       {/* Floating feedback button - always visible for beta testers */}
       <FeedbackWidget />

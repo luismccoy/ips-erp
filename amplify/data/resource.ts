@@ -188,7 +188,8 @@ const schema = a.schema({
         notifications: a.hasMany('Notification', 'tenantId'),
         assessments: a.hasMany('PatientAssessment', 'tenantId'), // Phase 4: Clinical assessments
     }).authorization(allow => [
-        allow.authenticated()
+        allow.groups(['SUPERADMIN']).to(['create', 'read', 'update', 'delete', 'list']),
+        // Regular users can only read their own tenant via relationship
     ]),
 
     // 2. PATIENT - Home care patients
@@ -396,10 +397,8 @@ const schema = a.schema({
         approvedAt: a.datetime(),
         approvedBy: a.id(),
     }).authorization(allow => [
-        // Tenant isolation
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
-        // Only admin and assigned nurse can access (enforced in Lambda)
-        allow.authenticated()
+        allow.groups(['ADMIN', 'NURSE']).to(['create', 'read', 'update', 'list'])
     ]).secondaryIndexes(index => [
         // Task 4.1: Query visits by tenant and status for admin dashboard
         index('tenantId').sortKeys(['status']).name('byTenantAndStatus')
@@ -419,9 +418,8 @@ const schema = a.schema({
         details: a.json(),
         ipAddress: a.string(),
     }).authorization(allow => [
-        // Only admins can read audit logs
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
-        allow.authenticated()
+        allow.groups(['ADMIN', 'SUPERADMIN']).to(['read', 'list'])
     ]),
     
     // 10. NOTIFICATION - Phase 3: User notifications

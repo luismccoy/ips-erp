@@ -6,25 +6,25 @@ import type { Schema } from '../amplify/data/resource';
 
 import { Amplify } from 'aws-amplify';
 import outputs from '../amplify_outputs.json';
+import { STORAGE_KEYS } from './constants/navigation';
 
 // ============================================
 // DEMO MODE DETECTION
 // ============================================
 // Demo mode is set when users click "View Demo" from landing page
 // This allows production site to show pre-seeded sample data for sales demos
-const DEMO_MODE_KEY = 'ips-erp-demo-mode';
 
 export function isDemoMode(): boolean {
     if (typeof window === 'undefined') return false;
     
     // Check sessionStorage
-    if (sessionStorage.getItem(DEMO_MODE_KEY) === 'true') return true;
+    if (sessionStorage.getItem(STORAGE_KEYS.DEMO_MODE) === 'true') return true;
     
     // Also check for ?demo= query param (handles fresh page load after redirect)
     const params = new URLSearchParams(window.location.search);
     if (params.get('demo')) {
         // Auto-enable demo mode if we see the query param
-        sessionStorage.setItem(DEMO_MODE_KEY, 'true');
+        sessionStorage.setItem(STORAGE_KEYS.DEMO_MODE, 'true');
         return true;
     }
     
@@ -33,14 +33,14 @@ export function isDemoMode(): boolean {
 
 export function enableDemoMode(): void {
     if (typeof window !== 'undefined') {
-        sessionStorage.setItem(DEMO_MODE_KEY, 'true');
+        sessionStorage.setItem(STORAGE_KEYS.DEMO_MODE, 'true');
         console.log('🎭 Demo Mode Enabled - Using sample data');
     }
 }
 
 export function disableDemoMode(): void {
     if (typeof window !== 'undefined') {
-        sessionStorage.removeItem(DEMO_MODE_KEY);
+        sessionStorage.removeItem(STORAGE_KEYS.DEMO_MODE);
         console.log('🔐 Demo Mode Disabled - Using real backend');
     }
 }
@@ -164,4 +164,20 @@ export const DEMO_PERSONAS = {
 // ============================================
 export const isUsingRealBackend = (): boolean => {
     return !isDemoMode() && (import.meta.env.PROD || import.meta.env.VITE_USE_REAL_BACKEND === 'true');
+};
+
+export const getUserId = (): string => {
+    if (isDemoMode()) {
+        return MOCK_USER.attributes.sub;
+    }
+    // In production, this would get the actual user ID from Amplify Auth
+    return 'demo-user'; // Placeholder - replace with actual implementation
+};
+
+export const getTenantId = (): string => {
+    if (isDemoMode()) {
+        return MOCK_USER.attributes['custom:tenantId'];
+    }
+    // In production, this would get the actual tenant ID from Amplify Auth
+    return 'demo-tenant'; // Placeholder - replace with actual implementation
 };

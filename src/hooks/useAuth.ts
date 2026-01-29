@@ -1,18 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getCurrentUser, signIn, signOut, fetchUserAttributes, fetchAuthSession, type SignInInput, type AuthUser } from 'aws-amplify/auth';
+import { getCurrentUser, signIn, fetchUserAttributes, fetchAuthSession, type SignInInput, type AuthUser } from 'aws-amplify/auth';
 import { Hub } from 'aws-amplify/utils';
 import { TENANTS } from '../data/mock-data';
 import type { Tenant } from '../types';
 import { isUsingRealBackend, isDemoMode } from '../amplify-utils';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '../../amplify/data/resource';
-
-// Valid user roles (priority order for group resolution)
-type UserRole = 'superadmin' | 'admin' | 'nurse' | 'family';
-
-// Keys for persisting demo state across refreshes
-const DEMO_ROLE_KEY = 'ips-erp-demo-role';
-const DEMO_TENANT_KEY = 'ips-erp-demo-tenant';
+import { STORAGE_KEYS, type UserRole } from '../constants/navigation';
+import { logout as centralizedLogout } from '../utils/auth';
 
 /**
  * Custom hook for managing authentication state via AWS Amplify.
@@ -94,9 +89,10 @@ export function useAuth() {
         if (normalizedGroups.includes('nurse')) return 'nurse';
         if (normalizedGroups.includes('family')) return 'family';
         
-        // Default fallback (shouldn't happen with proper user setup)
-        console.warn('User has no recognized group, defaulting to admin');
-        return 'admin';
+        // SECURITY FIX P1-SEC-002: Default to LEAST privilege, not admin
+        // This prevents privilege escalation when users have no Cognito group
+        console.error('[SECURITY] User has no recognized Cognito group - defaulting to least privilege');
+        return 'family';
     }
 
     /**
@@ -165,8 +161,8 @@ export function useAuth() {
                 }
             } else {
                 // Mock/Demo mode - restore persisted demo state if available
-                const savedRole = sessionStorage.getItem(DEMO_ROLE_KEY) as UserRole | null;
-                const savedTenantJson = sessionStorage.getItem(DEMO_TENANT_KEY);
+                const savedRole = sessionStorage.getItem(STORAGE_KEYS.DEMO_ROLE) as UserRole | null;
+                const savedTenantJson = sessionStorage.getItem(STORAGE_KEYS.DEMO_TENANT);
                 
                 if (isDemoMode() && savedRole) {
                     setRole(savedRole);
@@ -209,20 +205,13 @@ export function useAuth() {
     }
 
     async function logout() {
-        try {
-            if (isUsingRealBackend()) {
-                await signOut();
-            }
-            setUser(null);
-            setRole(null);
-            setTenant(null);
-            
-            // Clear persisted demo state
-            sessionStorage.removeItem(DEMO_ROLE_KEY);
-            sessionStorage.removeItem(DEMO_TENANT_KEY);
-        } catch (error) {
-            console.error('Logout failed', error);
-        }
+        // Use centralized logout function for complete session teardown
+        // This will clear ALL state and force a hard redirect to '/'
+        await centralizedLogout();
+        
+        // Note: State reset (setUser/setRole/setTenant) not needed here
+        // because centralizedLogout() does window.location.href = '/'
+        // which completely reloads the app and resets all React state
     }
 
     // Manual overrides for demo/mocking purposes
@@ -232,11 +221,11 @@ export function useAuth() {
         setTenant(newTenant);
         
         // Persist to sessionStorage for refresh survival
-        sessionStorage.setItem(DEMO_ROLE_KEY, newRole);
+        sessionStorage.setItem(STORAGE_KEYS.DEMO_ROLE, newRole);
         if (newTenant) {
-            sessionStorage.setItem(DEMO_TENANT_KEY, JSON.stringify(newTenant));
+            sessionStorage.setItem(STORAGE_KEYS.DEMO_TENANT, JSON.stringify(newTenant));
         } else {
-            sessionStorage.removeItem(DEMO_TENANT_KEY);
+            sessionStorage.removeItem(STORAGE_KEYS.DEMO_TENANT);
         }
     };
     

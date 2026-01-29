@@ -1,96 +1,75 @@
 import { useState, useEffect, useCallback } from 'react';
 
 interface UseLoadingTimeoutOptions {
-    /** Timeout in milliseconds before showing error state (default: 15000) */
-    timeoutMs?: number;
-    /** Callback when timeout is reached */
-    onTimeout?: () => void;
+  timeoutMs?: number;
+  maxRetries?: number;
+  onTimeout?: () => void;
 }
 
-interface UseLoadingTimeoutReturn {
-    /** Whether we're in loading state */
-    isLoading: boolean;
-    /** Whether timeout was reached */
-    hasTimedOut: boolean;
-    /** Error message if timed out */
-    timeoutError: string | null;
-    /** Start loading (resets timeout) */
-    startLoading: () => void;
-    /** Stop loading (success) */
-    stopLoading: () => void;
-    /** Reset to initial state */
-    reset: () => void;
-    /** Retry function - resets and starts loading again */
-    retry: () => void;
-}
+export const useLoadingTimeout = (
+  isLoading: boolean,
+  {
+    timeoutMs = 30000,
+    maxRetries = 1,
+    onTimeout,
+  }: UseLoadingTimeoutOptions = {}
+) => {
+  const [hasTimedOut, setHasTimedOut] = useState(false);
+  const [currentRetryCount, setCurrentRetryCount] = useState(0);
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
-/**
- * Hook to manage loading states with automatic timeout.
- * Prevents infinite loading spinners by showing error state after timeout.
- * 
- * @example
- * const { isLoading, hasTimedOut, startLoading, stopLoading, retry } = useLoadingTimeout({
- *   timeoutMs: 10000,
- *   onTimeout: () => console.log('Loading timed out!')
- * });
- */
-export function useLoadingTimeout(options: UseLoadingTimeoutOptions = {}): UseLoadingTimeoutReturn {
-    const { timeoutMs = 15000, onTimeout } = options;
-    
-    const [isLoading, setIsLoading] = useState(false);
-    const [hasTimedOut, setHasTimedOut] = useState(false);
-    const [timeoutError, setTimeoutError] = useState<string | null>(null);
+  const clearTimeoutTimer = useCallback(() => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      setTimeoutId(null);
+    }
+  }, [timeoutId]);
 
-    useEffect(() => {
-        let timer: ReturnType<typeof setTimeout> | null = null;
+  const startTimeoutTimer = useCallback(() => {
+    clearTimeoutTimer();
+    const id = setTimeout(() => {
+      setHasTimedOut(true);
+      onTimeout?.();
+    }, timeoutMs);
+    setTimeoutId(id);
+  }, [timeoutMs, clearTimeoutTimer, onTimeout]);
 
-        if (isLoading && !hasTimedOut) {
-            timer = setTimeout(() => {
-                setHasTimedOut(true);
-                setIsLoading(false);
-                setTimeoutError(`La solicitud tardó demasiado (>${timeoutMs / 1000}s). Por favor, intente de nuevo.`);
-                onTimeout?.();
-            }, timeoutMs);
-        }
+  useEffect(() => {
+    if (isLoading) {
+      startTimeoutTimer();
+    } else {
+      clearTimeoutTimer();
+      setHasTimedOut(false);
+    }
 
-        return () => {
-            if (timer) clearTimeout(timer);
-        };
-    }, [isLoading, hasTimedOut, timeoutMs, onTimeout]);
-
-    const startLoading = useCallback(() => {
-        setIsLoading(true);
-        setHasTimedOut(false);
-        setTimeoutError(null);
-    }, []);
-
-    const stopLoading = useCallback(() => {
-        setIsLoading(false);
-    }, []);
-
-    const reset = useCallback(() => {
-        setIsLoading(false);
-        setHasTimedOut(false);
-        setTimeoutError(null);
-    }, []);
-
-    const retry = useCallback(() => {
-        reset();
-        // Small delay before starting again to ensure state is reset
-        setTimeout(() => {
-            startLoading();
-        }, 100);
-    }, [reset, startLoading]);
-
-    return {
-        isLoading,
-        hasTimedOut,
-        timeoutError,
-        startLoading,
-        stopLoading,
-        reset,
-        retry,
+    return () => {
+      clearTimeoutTimer();
     };
-}
+  }, [isLoading, startTimeoutTimer, clearTimeoutTimer]);
+
+  const retry = useCallback(() => {
+    if (currentRetryCount < maxRetries) {
+      setHasTimedOut(false);
+      setCurrentRetryCount(prev => prev + 1);
+      startTimeoutTimer();
+      return true;
+    }
+    return false;
+  }, [currentRetryCount, maxRetries, startTimeoutTimer]);
+
+  const reset = useCallback(() => {
+    setHasTimedOut(false);
+    setCurrentRetryCount(0);
+    clearTimeoutTimer();
+  }, [clearTimeoutTimer]);
+
+  return {
+    hasTimedOut,
+    currentRetryCount,
+    canRetry: currentRetryCount < maxRetries,
+    retry,
+    reset,
+  };
+};
 
 export default useLoadingTimeout;

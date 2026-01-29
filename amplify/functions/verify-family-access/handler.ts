@@ -23,7 +23,12 @@ const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
  * @returns { authorized: boolean, patientName?: string, error?: string, remainingAttempts?: number }
  */
 export const handler: Schema['verifyFamilyAccessCode']['functionHandler'] = async (event) => {
-    console.log('🔐 Family Portal Access Verification:', JSON.stringify(event, null, 2));
+    console.log('🔐 Family Portal Access Verification:', {
+        patientId: event.arguments.patientId,
+        callerSub: (event as any).identity?.sub || 'anonymous',
+        timestamp: new Date().toISOString()
+        // SECURITY: Never log accessCode, tokens, or passwords
+    });
     
     const { patientId, accessCode } = event.arguments;
     const identity = (event as any).identity;
@@ -78,7 +83,8 @@ export const handler: Schema['verifyFamilyAccessCode']['functionHandler'] = asyn
         
         // Verify access code
         if (patient.accessCode === accessCode) {
-            console.log('✅ Access granted for patient:', patient.name);
+            console.log('✅ Access granted for patient:', patientId);
+            // SECURITY: Don't log patient names to CloudWatch
             
             // Reset failed attempts on success
             await resetFailedAttempts(rateLimitKey);

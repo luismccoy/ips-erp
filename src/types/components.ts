@@ -18,8 +18,6 @@ export interface SimpleNurseAppProps {
  * Props for the main Admin Dashboard shell.
  */
 export interface AdminDashboardProps {
-    view: string;
-    setView: (view: string) => void;
     onLogout: () => Promise<void> | void;
     tenant: Tenant | null;
 }
