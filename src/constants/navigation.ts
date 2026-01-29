@@ -142,3 +142,67 @@ export function getRoleForPath(pathname: string): UserRole | null {
   const config = getRouteConfig(pathname);
   return config?.role ?? null;
 }
+
+// ============================================
+// ROUTE PERMISSIONS (RBAC)
+// ============================================
+
+/**
+ * Route-based access control matrix
+ * Maps routes to allowed user roles
+ * '*' means publicly accessible
+ */
+export const ROUTE_PERMISSIONS = {
+  '/': ['*'], // Public landing page
+  '/login': ['*'], // Public login page
+  '/dashboard': ['admin', 'superadmin'],
+  '/admin': ['admin', 'superadmin'],
+  '/nurse': ['nurse'],
+  '/app': ['nurse'],
+  '/family': ['family'],
+} as const;
+
+/**
+ * Check if a user role is authorized to access a given route
+ * @param pathname - Route pathname
+ * @param userRole - Current user's role
+ * @returns True if authorized, false otherwise
+ */
+export function isAuthorizedForRoute(pathname: string, userRole: UserRole | null): boolean {
+  const allowedRoles = ROUTE_PERMISSIONS[pathname as keyof typeof ROUTE_PERMISSIONS];
+  
+  // Route not in permissions map - deny by default (secure by default)
+  if (!allowedRoles) {
+    console.warn(`Route ${pathname} not in ROUTE_PERMISSIONS map - denying access`);
+    return false;
+  }
+  
+  // Public routes
+  if (allowedRoles.includes('*')) return true;
+  
+  // No user role - unauthorized
+  if (!userRole) return false;
+  
+  // Check if user's role is in allowed roles
+  return allowedRoles.includes(userRole);
+}
+
+/**
+ * Get the default route for a given user role
+ * Used for redirecting users to their appropriate portal
+ * @param userRole - User's role
+ * @returns Default route pathname for that role
+ */
+export function getDefaultRouteForRole(userRole: UserRole): string {
+  switch (userRole) {
+    case 'superadmin':
+    case 'admin':
+      return '/dashboard';
+    case 'nurse':
+      return '/app';
+    case 'family':
+      return '/family';
+    default:
+      return '/';
+  }
+}

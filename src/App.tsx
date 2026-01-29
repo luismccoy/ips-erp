@@ -8,7 +8,8 @@ import { TENANTS } from './data/mock-data';
 import { ToastProvider } from './components/ui/Toast';
 import { isDemoMode, enableDemoMode } from './amplify-utils';
 import { FeedbackWidget } from './components/FeedbackWidget';
-import { STORAGE_KEYS, shouldClearDemoState, shouldEnableDemoMode } from './constants/navigation';
+import { RouteGuard } from './components/RouteGuard';
+import { STORAGE_KEYS, shouldClearDemoState, shouldEnableDemoMode, getDefaultRouteForRole } from './constants/navigation';
 
 // Lazy loaded components for performance
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
@@ -113,39 +114,19 @@ export default function App() {
   useEffect(() => {
     console.log('[Navigation Debug] Main useEffect triggered | role:', role, '| initialViewSetForRole:', initialViewSetForRole.current);
     
-    // Deep link handling - always check this first
+    // Deep link handling - REMOVED AUTOMATIC ROLE PROMOTION (Security Fix P0-2)
+    // Previous code automatically promoted users to admin/nurse/family based on URL
+    // This was a critical security vulnerability - users could access any portal by changing URL
+    // Now handled by RouteGuard component which enforces RBAC
+    
     const path = window.location.pathname;
     
-    // Handle direct navigation to dashboard/admin
-    // Note: enableDemoMode() already called at module level (see above)
-    if (path === '/dashboard' || path === '/admin') {
-      if (role !== 'admin') {
-        console.log('[Navigation Debug] Setting demo admin state from deep link');
-        if (pendingDeepLinkRole !== 'admin') {
-          setPendingDeepLinkRole('admin');
-        }
-        setDemoState('admin', TENANTS[0]);
-        return;
-      }
-      if (pendingDeepLinkRole === 'admin') {
-        setPendingDeepLinkRole(null);
-      }
-    }
-    
-    // Handle direct navigation to app/nurse - ALWAYS force nurse role
-    // (unlike /dashboard which respects session, /app explicitly means nurse view)
-    // Note: enableDemoMode() already called at module level (see above)
-    if ((path === '/app' || path === '/nurse') && !role) {
-      console.log('[Navigation Debug] Setting demo nurse state from deep link');
-      setDemoState('nurse', TENANTS[0]);
-      return;
-    }
-    
-    // Handle direct navigation to family portal
-    // Note: enableDemoMode() already called at module level (see above)
-    if (path === '/family' && !role) {
-      console.log('[Navigation Debug] Setting demo family state from deep link');
-      setDemoState('family', TENANTS[0]);
+    // For demo mode deep links WITHOUT existing role, prompt user to select demo portal
+    // This maintains demo mode UX while preventing unauthorized access
+    if (isDemoMode() && !role && (path === '/dashboard' || path === '/admin' || path === '/app' || path === '/nurse' || path === '/family')) {
+      console.log('[Navigation Debug] Deep link to protected route without role - showing demo selection');
+      // User will be prompted to select a demo role, then RouteGuard will verify access
+      setAuthStage('demo');
       return;
     }
     
@@ -166,7 +147,7 @@ export default function App() {
       console.log('[Navigation Debug] Resetting initialization tracking');
       initialViewSetForRole.current = null;
     }
-  }, [role, tenant, setDemoState, identifyUser, trackEvent, pendingDeepLinkRole]);
+  }, [role, tenant, setDemoState, identifyUser, trackEvent, setAuthStage]);
 
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault();
@@ -311,14 +292,53 @@ export default function App() {
     );
   }
 
+  // Handler for unauthorized route access
+  const handleUnauthorized = () => {
+    console.warn('[SECURITY] Unauthorized access detected, redirecting to appropriate portal');
+    
+    if (role) {
+      // User has a role but wrong permissions - redirect to their portal
+      const defaultRoute = getDefaultRouteForRole(role);
+      window.location.href = defaultRoute;
+    } else {
+      // No role - redirect to login
+      handleLogout();
+    }
+  };
+
   // Use Suspense to handle loading state of lazy components
   // Wrap everything with ToastProvider for global notifications
+  // SECURITY FIX P0-2: Wrap all protected components with RouteGuard
   return (
     <ToastProvider>
       <Suspense fallback={<PageLoader />}>
-        {role === 'nurse' && <SimpleNurseApp onLogout={handleLogout} />}
-        {role === 'family' && <FamilyPortal onLogout={handleLogout} />}
-        {role === 'admin' && <AdminDashboard onLogout={handleLogout} tenant={tenant} />}
+        {role === 'nurse' && (
+          <RouteGuard 
+            userRole={role} 
+            currentPath={window.location.pathname}
+            onUnauthorized={handleUnauthorized}
+          >
+            <SimpleNurseApp onLogout={handleLogout} />
+          </RouteGuard>
+        )}
+        {role === 'family' && (
+          <RouteGuard 
+            userRole={role} 
+            currentPath={window.location.pathname}
+            onUnauthorized={handleUnauthorized}
+          >
+            <FamilyPortal onLogout={handleLogout} />
+          </RouteGuard>
+        )}
+        {role === 'admin' && (
+          <RouteGuard 
+            userRole={role} 
+            currentPath={window.location.pathname}
+            onUnauthorized={handleUnauthorized}
+          >
+            <AdminDashboard onLogout={handleLogout} tenant={tenant} />
+          </RouteGuard>
+        )}
       </Suspense>
       {/* Floating feedback button - always visible for beta testers */}
       <FeedbackWidget />
