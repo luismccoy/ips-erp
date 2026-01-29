@@ -3,6 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     
+    <!-- SECURITY FIX P1-SEC-001: Prevent browser caching of protected pages -->
+    <!-- This stops back-button attacks after logout from showing cached content -->
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
     <!-- PWA Meta Tags -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#2563eb" />

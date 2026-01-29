@@ -89,9 +89,10 @@ export function useAuth() {
         if (normalizedGroups.includes('nurse')) return 'nurse';
         if (normalizedGroups.includes('family')) return 'family';
         
-        // Default fallback (shouldn't happen with proper user setup)
-        console.warn('User has no recognized group, defaulting to admin');
-        return 'admin';
+        // SECURITY FIX P1-SEC-002: Default to LEAST privilege, not admin
+        // This prevents privilege escalation when users have no Cognito group
+        console.error('[SECURITY] User has no recognized Cognito group - defaulting to least privilege');
+        return 'family';
     }
 
     /**

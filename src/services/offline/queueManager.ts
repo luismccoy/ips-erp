@@ -62,6 +62,11 @@ const listeners = new Set<QueueListener>();
 /**
  * Save queue to persistent storage (localStorage as fallback)
  * In production, should use IndexedDB for larger capacity
+ * 
+ * ⚠️ SECURITY WARNING (P2-SEC-001): Mutation data stored here may contain
+ * sensitive PHI (Protected Health Information) including patient vitals,
+ * assessments, and visit notes. Consider implementing encryption-at-rest
+ * for production deployments (e.g., Web Crypto API with user-derived keys).
  */
 function persistQueue(): void {
   try {

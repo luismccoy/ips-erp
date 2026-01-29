@@ -1,0 +1,742 @@
+/**
+ * IPS-ERP Healthcare Design Tokens
+ * Version: 1.0.0
+ * 
+ * A comprehensive design token system for healthcare applications.
+ * Import this file before Tailwind CSS for proper cascade.
+ * 
+ * Documentation: docs/DESIGN_TOKENS.md
+ */
+
+:root {
+  /* ============================================
+   * 1. COLOR PALETTE
+   * ============================================ */
+
+  /* 1.1 Primary Colors (Trust Blue)
+   * Establishes trust and professionalism in healthcare contexts */
+  --color-primary-50: #EFF6FF;
+  --color-primary-100: #DBEAFE;
+  --color-primary-200: #BFDBFE;
+  --color-primary-300: #93C5FD;
+  --color-primary-400: #60A5FA;
+  --color-primary-500: #3B82F6;
+  --color-primary-600: #2563EB;
+  --color-primary-700: #1D4ED8;
+  --color-primary-800: #1E40AF;
+  --color-primary-900: #1E3A8A;
+
+  /* 1.2 Secondary Colors (Calming Teal)
+   * Represents positive health outcomes and wellness */
+  --color-secondary-50: #F0FDFA;
+  --color-secondary-100: #CCFBF1;
+  --color-secondary-200: #99F6E4;
+  --color-secondary-300: #5EEAD4;
+  --color-secondary-400: #2DD4BF;
+  --color-secondary-500: #14B8A6;
+  --color-secondary-600: #0D9488;
+  --color-secondary-700: #0F766E;
+  --color-secondary-800: #115E59;
+  --color-secondary-900: #134E4A;
+
+  /* 1.3 Semantic Colors - Success (Green) */
+  --color-success-50: #F0FDF4;
+  --color-success-100: #DCFCE7;
+  --color-success-200: #BBF7D0;
+  --color-success-300: #86EFAC;
+  --color-success-400: #4ADE80;
+  --color-success-500: #22C55E;
+  --color-success-600: #16A34A;
+  --color-success-700: #15803D;
+  --color-success-800: #166534;
+  --color-success-900: #14532D;
+
+  /* 1.3 Semantic Colors - Warning (Amber) */
+  --color-warning-50: #FFFBEB;
+  --color-warning-100: #FEF3C7;
+  --color-warning-200: #FDE68A;
+  --color-warning-300: #FCD34D;
+  --color-warning-400: #FBBF24;
+  --color-warning-500: #F59E0B;
+  --color-warning-600: #D97706;
+  --color-warning-700: #B45309;
+  --color-warning-800: #92400E;
+  --color-warning-900: #78350F;
+
+  /* 1.3 Semantic Colors - Error (Red) */
+  --color-error-50: #FEF2F2;
+  --color-error-100: #FEE2E2;
+  --color-error-200: #FECACA;
+  --color-error-300: #FCA5A5;
+  --color-error-400: #F87171;
+  --color-error-500: #EF4444;
+  --color-error-600: #DC2626;
+  --color-error-700: #B91C1C;
+  --color-error-800: #991B1B;
+  --color-error-900: #7F1D1D;
+
+  /* 1.3 Semantic Colors - Info (Sky Blue) */
+  --color-info-50: #F0F9FF;
+  --color-info-100: #E0F2FE;
+  --color-info-200: #BAE6FD;
+  --color-info-300: #7DD3FC;
+  --color-info-400: #38BDF8;
+  --color-info-500: #0EA5E9;
+  --color-info-600: #0284C7;
+  --color-info-700: #0369A1;
+  --color-info-800: #075985;
+  --color-info-900: #0C4A6E;
+
+  /* 1.4 Neutral Grays */
+  --color-neutral-50: #F8FAFC;
+  --color-neutral-100: #F1F5F9;
+  --color-neutral-200: #E2E8F0;
+  --color-neutral-300: #CBD5E1;
+  --color-neutral-400: #94A3B8;
+  --color-neutral-500: #64748B;
+  --color-neutral-600: #475569;
+  --color-neutral-700: #334155;
+  --color-neutral-800: #1E293B;
+  --color-neutral-900: #0F172A;
+
+  /* 1.5 Background Variants */
+  --bg-page: #F8FAFC;
+  --bg-card: #FFFFFF;
+  --bg-elevated: #FFFFFF;
+  --bg-overlay: rgba(15, 23, 42, 0.5);
+  --bg-hover: rgba(59, 130, 246, 0.08);
+  --bg-active: rgba(59, 130, 246, 0.12);
+  --bg-muted: #F1F5F9;
+
+  /* 1.6 Text Colors */
+  --text-primary: #1E293B;
+  --text-secondary: #475569;
+  --text-tertiary: #64748B;
+  --text-disabled: #94A3B8;
+  --text-inverse: #FFFFFF;
+  --text-link: #2563EB;
+  --text-link-hover: #1D4ED8;
+  --text-on-primary: #FFFFFF;
+  --text-on-secondary: #FFFFFF;
+
+  /* ============================================
+   * 2. TYPOGRAPHY
+   * ============================================ */
+
+  /* 2.1 Font Families */
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+
+  /* 2.2 Font Sizes (Mobile-First, rem-based) */
+  --text-xs: 0.75rem;      /* 12px - metadata only */
+  --text-sm: 0.875rem;     /* 14px - secondary info */
+  --text-base: 1rem;       /* 16px - body text minimum */
+  --text-lg: 1.125rem;     /* 18px - emphasized body */
+  --text-xl: 1.25rem;      /* 20px - section headings */
+  --text-2xl: 1.5rem;      /* 24px - card titles */
+  --text-3xl: 1.875rem;    /* 30px - page titles */
+  --text-4xl: 2.25rem;     /* 36px - dashboard KPIs */
+  --text-5xl: 3rem;        /* 48px - hero text */
+  --text-6xl: 3.75rem;     /* 60px - large displays */
+
+  /* 2.3 Line Heights */
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+
+  /* 2.4 Font Weights */
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+
+  /* 2.5 Letter Spacing */
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+
+  /* ============================================
+   * 3. SPACING SYSTEM
+   * Base unit: 4px (0.25rem)
+   * ============================================ */
+
+  --space-0: 0;
+  --space-px: 1px;
+  --space-0-5: 0.125rem;   /* 2px */
+  --space-1: 0.25rem;      /* 4px */
+  --space-1-5: 0.375rem;   /* 6px */
+  --space-2: 0.5rem;       /* 8px */
+  --space-2-5: 0.625rem;   /* 10px */
+  --space-3: 0.75rem;      /* 12px */
+  --space-3-5: 0.875rem;   /* 14px */
+  --space-4: 1rem;         /* 16px - standard padding */
+  --space-5: 1.25rem;      /* 20px - card padding */
+  --space-6: 1.5rem;       /* 24px - section gaps */
+  --space-7: 1.75rem;      /* 28px */
+  --space-8: 2rem;         /* 32px - component gaps */
+  --space-9: 2.25rem;      /* 36px */
+  --space-10: 2.5rem;      /* 40px - large sections */
+  --space-11: 2.75rem;     /* 44px - touch target min */
+  --space-12: 3rem;        /* 48px - comfortable touch */
+  --space-14: 3.5rem;      /* 56px - spacious touch */
+  --space-16: 4rem;        /* 64px - page sections */
+  --space-20: 5rem;        /* 80px - major sections */
+  --space-24: 6rem;        /* 96px - hero sections */
+  --space-32: 8rem;        /* 128px */
+  --space-40: 10rem;       /* 160px */
+  --space-48: 12rem;       /* 192px */
+  --space-56: 14rem;       /* 224px */
+  --space-64: 16rem;       /* 256px */
+
+  /* Touch Targets (WCAG 2.1 compliant) */
+  --touch-target-min: 44px;         /* WCAG minimum */
+  --touch-target-comfortable: 48px; /* Recommended */
+  --touch-target-spacious: 56px;    /* Primary actions */
+
+  /* ============================================
+   * 4. COMPONENT TOKENS
+   * ============================================ */
+
+  /* 4.1 Border Radius */
+  --radius-none: 0;
+  --radius-sm: 0.25rem;    /* 4px - badges */
+  --radius-md: 0.375rem;   /* 6px - inputs */
+  --radius-lg: 0.5rem;     /* 8px - buttons, cards */
+  --radius-xl: 0.75rem;    /* 12px - modals */
+  --radius-2xl: 1rem;      /* 16px - large cards */
+  --radius-3xl: 1.5rem;    /* 24px - feature cards */
+  --radius-full: 9999px;   /* circles, pills */
+
+  /* 4.2 Shadows */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.25);
+  --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-none: none;
+  
+  /* Colored shadows for emphasis */
+  --shadow-primary: 0 4px 14px rgba(59, 130, 246, 0.4);
+  --shadow-secondary: 0 4px 14px rgba(20, 184, 166, 0.4);
+  --shadow-success: 0 4px 14px rgba(34, 197, 94, 0.4);
+  --shadow-warning: 0 4px 14px rgba(245, 158, 11, 0.4);
+  --shadow-error: 0 4px 14px rgba(239, 68, 68, 0.4);
+
+  /* 4.3 Transitions */
+  --duration-instant: 0ms;
+  --duration-fast: 100ms;
+  --duration-base: 150ms;
+  --duration-moderate: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
+  --duration-slowest: 700ms;
+  
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* Shorthand transitions */
+  --transition-base: var(--duration-base) var(--ease-in-out);
+  --transition-fast: var(--duration-fast) var(--ease-in-out);
+  --transition-slow: var(--duration-slow) var(--ease-in-out);
+  --transition-colors: color var(--duration-base) var(--ease-in-out), 
+                       background-color var(--duration-base) var(--ease-in-out), 
+                       border-color var(--duration-base) var(--ease-in-out);
+  --transition-transform: transform var(--duration-base) var(--ease-in-out);
+  --transition-opacity: opacity var(--duration-base) var(--ease-in-out);
+  --transition-shadow: box-shadow var(--duration-base) var(--ease-in-out);
+  --transition-all: all var(--duration-base) var(--ease-in-out);
+
+  /* 4.4 Z-Index Layers */
+  --z-deep: -1;
+  --z-base: 0;
+  --z-raised: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-drawer: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+  --z-tooltip: 600;
+  --z-max: 9999;
+
+  /* 4.5 Borders */
+  --border-width-thin: 1px;
+  --border-width-default: 1px;
+  --border-width-thick: 2px;
+  --border-width-heavy: 4px;
+  
+  --border-default: var(--border-width-default) solid var(--color-neutral-200);
+  --border-focus: var(--border-width-thick) solid var(--color-primary-500);
+  --border-error: var(--border-width-default) solid var(--color-error-500);
+
+  /* ============================================
+   * 5. HEALTHCARE-SPECIFIC TOKENS
+   * ============================================ */
+
+  /* 5.1 Patient Status */
+  --status-patient-active: #22C55E;
+  --status-patient-active-bg: #F0FDF4;
+  --status-patient-scheduled: #3B82F6;
+  --status-patient-scheduled-bg: #EFF6FF;
+  --status-patient-pending: #F59E0B;
+  --status-patient-pending-bg: #FFFBEB;
+  --status-patient-discharged: #64748B;
+  --status-patient-discharged-bg: #F1F5F9;
+  --status-patient-deceased: #1E293B;
+  --status-patient-deceased-bg: #E2E8F0;
+  --status-patient-critical: #DC2626;
+  --status-patient-critical-bg: #FEF2F2;
+
+  /* 5.2 Visit Status */
+  --status-visit-scheduled: #3B82F6;
+  --status-visit-scheduled-bg: #EFF6FF;
+  --status-visit-confirmed: #14B8A6;
+  --status-visit-confirmed-bg: #F0FDFA;
+  --status-visit-in-progress: #8B5CF6;
+  --status-visit-in-progress-bg: #F5F3FF;
+  --status-visit-completed: #22C55E;
+  --status-visit-completed-bg: #F0FDF4;
+  --status-visit-cancelled: #EF4444;
+  --status-visit-cancelled-bg: #FEF2F2;
+  --status-visit-no-show: #F59E0B;
+  --status-visit-no-show-bg: #FFFBEB;
+  --status-visit-rescheduled: #6366F1;
+  --status-visit-rescheduled-bg: #EEF2FF;
+
+  /* 5.3 Priority Indicators */
+  --priority-critical: #DC2626;
+  --priority-critical-bg: #FEE2E2;
+  --priority-critical-border: #FECACA;
+  --priority-high: #F97316;
+  --priority-high-bg: #FFEDD5;
+  --priority-high-border: #FED7AA;
+  --priority-medium: #EAB308;
+  --priority-medium-bg: #FEF9C3;
+  --priority-medium-border: #FEF08A;
+  --priority-low: #22C55E;
+  --priority-low-bg: #DCFCE7;
+  --priority-low-border: #BBF7D0;
+  --priority-none: #94A3B8;
+  --priority-none-bg: #F1F5F9;
+  --priority-none-border: #E2E8F0;
+
+  /* 5.4 Alert & Notification Colors */
+  --alert-emergency: #7F1D1D;
+  --alert-emergency-bg: #FEE2E2;
+  --alert-emergency-border: #FECACA;
+  --alert-warning: #92400E;
+  --alert-warning-bg: #FEF3C7;
+  --alert-warning-border: #FDE68A;
+  --alert-info: #1E40AF;
+  --alert-info-bg: #DBEAFE;
+  --alert-info-border: #BFDBFE;
+  --alert-success: #166534;
+  --alert-success-bg: #DCFCE7;
+  --alert-success-border: #BBF7D0;
+
+  /* 5.5 Compliance Indicators */
+  --compliance-compliant: #22C55E;
+  --compliance-compliant-bg: #F0FDF4;
+  --compliance-compliant-border: #BBF7D0;
+  --compliance-partial: #F59E0B;
+  --compliance-partial-bg: #FFFBEB;
+  --compliance-partial-border: #FDE68A;
+  --compliance-at-risk: #F97316;
+  --compliance-at-risk-bg: #FFF7ED;
+  --compliance-at-risk-border: #FED7AA;
+  --compliance-non-compliant: #EF4444;
+  --compliance-non-compliant-bg: #FEF2F2;
+  --compliance-non-compliant-border: #FECACA;
+  --compliance-expired: #6B7280;
+  --compliance-expired-bg: #F3F4F6;
+  --compliance-expired-border: #E5E7EB;
+
+  /* 5.6 Clinical Assessment Scales */
+  --scale-severe: #7F1D1D;
+  --scale-severe-bg: #FEE2E2;
+  --scale-moderate: #C2410C;
+  --scale-moderate-bg: #FFEDD5;
+  --scale-mild: #CA8A04;
+  --scale-mild-bg: #FEF9C3;
+  --scale-minimal: #65A30D;
+  --scale-minimal-bg: #ECFCCB;
+  --scale-none: #16A34A;
+  --scale-none-bg: #DCFCE7;
+
+  /* 5.7 Medication & Inventory Status */
+  --inventory-in-stock: #22C55E;
+  --inventory-in-stock-bg: #F0FDF4;
+  --inventory-low-stock: #F59E0B;
+  --inventory-low-stock-bg: #FFFBEB;
+  --inventory-out-of-stock: #EF4444;
+  --inventory-out-of-stock-bg: #FEF2F2;
+  --inventory-expired: #7F1D1D;
+  --inventory-expired-bg: #FEE2E2;
+  --inventory-expiring-soon: #F97316;
+  --inventory-expiring-soon-bg: #FFF7ED;
+
+  /* 5.8 Shift/Schedule Status */
+  --shift-available: #22C55E;
+  --shift-available-bg: #F0FDF4;
+  --shift-assigned: #3B82F6;
+  --shift-assigned-bg: #EFF6FF;
+  --shift-in-progress: #8B5CF6;
+  --shift-in-progress-bg: #F5F3FF;
+  --shift-completed: #64748B;
+  --shift-completed-bg: #F1F5F9;
+  --shift-conflict: #EF4444;
+  --shift-conflict-bg: #FEF2F2;
+
+  /* ============================================
+   * 6. LAYOUT TOKENS
+   * ============================================ */
+
+  /* Container widths */
+  --container-xs: 20rem;   /* 320px */
+  --container-sm: 24rem;   /* 384px */
+  --container-md: 28rem;   /* 448px */
+  --container-lg: 32rem;   /* 512px */
+  --container-xl: 36rem;   /* 576px */
+  --container-2xl: 42rem;  /* 672px */
+  --container-3xl: 48rem;  /* 768px */
+  --container-4xl: 56rem;  /* 896px */
+  --container-5xl: 64rem;  /* 1024px */
+  --container-6xl: 72rem;  /* 1152px */
+  --container-7xl: 80rem;  /* 1280px */
+  --container-full: 100%;
+  --container-prose: 65ch;
+
+  /* Breakpoints (for documentation, use @media in practice) */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+
+  /* ============================================
+   * 7. FOCUS & ACCESSIBILITY
+   * ============================================ */
+
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+  --focus-ring-color: var(--color-primary-500);
+  --focus-ring: 0 0 0 var(--focus-ring-offset) var(--bg-card), 
+                0 0 0 calc(var(--focus-ring-width) + var(--focus-ring-offset)) var(--focus-ring-color);
+  
+  /* High contrast mode support */
+  --focus-ring-high-contrast: 0 0 0 3px #000000;
+
+  /* ============================================
+   * 8. COMPONENT-SPECIFIC TOKENS
+   * ============================================ */
+
+  /* Buttons */
+  --btn-padding-y: var(--space-3);
+  --btn-padding-x: var(--space-4);
+  --btn-padding-y-sm: var(--space-2);
+  --btn-padding-x-sm: var(--space-3);
+  --btn-padding-y-lg: var(--space-4);
+  --btn-padding-x-lg: var(--space-6);
+  --btn-min-height: var(--touch-target-comfortable);
+  --btn-border-radius: var(--radius-lg);
+  --btn-font-weight: var(--font-medium);
+  --btn-font-size: var(--text-base);
+
+  /* Inputs */
+  --input-padding-y: var(--space-3);
+  --input-padding-x: var(--space-4);
+  --input-min-height: var(--touch-target-comfortable);
+  --input-border-radius: var(--radius-md);
+  --input-border-color: var(--color-neutral-300);
+  --input-border-color-focus: var(--color-primary-500);
+  --input-border-color-error: var(--color-error-500);
+  --input-bg: var(--bg-card);
+  --input-bg-disabled: var(--color-neutral-100);
+
+  /* Cards */
+  --card-padding: var(--space-5);
+  --card-padding-sm: var(--space-4);
+  --card-padding-lg: var(--space-6);
+  --card-border-radius: var(--radius-xl);
+  --card-shadow: var(--shadow-sm);
+  --card-shadow-hover: var(--shadow-md);
+  --card-bg: var(--bg-card);
+  --card-border-color: var(--color-neutral-200);
+
+  /* Modals */
+  --modal-padding: var(--space-6);
+  --modal-border-radius: var(--radius-xl);
+  --modal-shadow: var(--shadow-xl);
+  --modal-max-width: var(--container-lg);
+  --modal-backdrop: var(--bg-overlay);
+
+  /* Tables */
+  --table-cell-padding-y: var(--space-3);
+  --table-cell-padding-x: var(--space-4);
+  --table-header-bg: var(--color-neutral-50);
+  --table-row-hover-bg: var(--bg-hover);
+  --table-border-color: var(--color-neutral-200);
+
+  /* Badges */
+  --badge-padding-y: var(--space-1);
+  --badge-padding-x: var(--space-2);
+  --badge-border-radius: var(--radius-full);
+  --badge-font-size: var(--text-sm);
+  --badge-font-weight: var(--font-medium);
+
+  /* Navigation */
+  --nav-item-padding-y: var(--space-3);
+  --nav-item-padding-x: var(--space-4);
+  --nav-item-min-height: var(--touch-target-comfortable);
+  --nav-item-border-radius: var(--radius-lg);
+
+  /* Sidebar */
+  --sidebar-width: 280px;
+  --sidebar-width-collapsed: 72px;
+  --sidebar-bg: var(--bg-card);
+  --sidebar-border-color: var(--color-neutral-200);
+}
+
+/* ============================================
+ * DARK MODE OVERRIDES
+ * ============================================ */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Background variants */
+    --bg-page: #0F172A;
+    --bg-card: #1E293B;
+    --bg-elevated: #334155;
+    --bg-overlay: rgba(0, 0, 0, 0.7);
+    --bg-hover: rgba(59, 130, 246, 0.15);
+    --bg-active: rgba(59, 130, 246, 0.2);
+    --bg-muted: #1E293B;
+
+    /* Text colors */
+    --text-primary: #F1F5F9;
+    --text-secondary: #CBD5E1;
+    --text-tertiary: #94A3B8;
+    --text-disabled: #64748B;
+    --text-link: #60A5FA;
+    --text-link-hover: #93C5FD;
+
+    /* Borders */
+    --border-default: var(--border-width-default) solid var(--color-neutral-700);
+    --card-border-color: var(--color-neutral-700);
+    --table-border-color: var(--color-neutral-700);
+    --input-border-color: var(--color-neutral-600);
+    --sidebar-border-color: var(--color-neutral-700);
+
+    /* Component backgrounds */
+    --card-bg: var(--bg-card);
+    --input-bg: var(--bg-card);
+    --input-bg-disabled: var(--color-neutral-800);
+    --table-header-bg: var(--color-neutral-800);
+    --sidebar-bg: var(--bg-card);
+  }
+}
+
+/* ============================================
+ * UTILITY CLASSES
+ * ============================================ */
+
+/* Touch-friendly sizing utilities */
+.touch-target {
+  min-height: var(--touch-target-comfortable);
+  min-width: var(--touch-target-comfortable);
+}
+
+.touch-target-min {
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+}
+
+.touch-target-spacious {
+  min-height: var(--touch-target-spacious);
+  min-width: var(--touch-target-spacious);
+}
+
+/* Focus visible styles */
+.focus-ring:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Transition utilities */
+.transition-base {
+  transition: var(--transition-all);
+}
+
+.transition-colors {
+  transition: var(--transition-colors);
+}
+
+.transition-transform {
+  transition: var(--transition-transform);
+}
+
+/* Healthcare status badge base */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  padding: var(--badge-padding-y) var(--badge-padding-x);
+  border-radius: var(--badge-border-radius);
+  font-size: var(--badge-font-size);
+  font-weight: var(--badge-font-weight);
+  line-height: var(--leading-tight);
+}
+
+/* Priority indicator base */
+.priority-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  border-left: var(--border-width-heavy) solid;
+}
+
+/* Alert base styles */
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid;
+}
+
+/* Card base */
+.card {
+  background-color: var(--card-bg);
+  border-radius: var(--card-border-radius);
+  border: 1px solid var(--card-border-color);
+  box-shadow: var(--card-shadow);
+  padding: var(--card-padding);
+  transition: var(--transition-shadow);
+}
+
+.card:hover {
+  box-shadow: var(--card-shadow-hover);
+}
+
+/* Button base */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--btn-min-height);
+  padding: var(--btn-padding-y) var(--btn-padding-x);
+  border-radius: var(--btn-border-radius);
+  font-weight: var(--btn-font-weight);
+  font-size: var(--btn-font-size);
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--transition-all);
+  border: none;
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.btn-primary {
+  background-color: var(--color-primary-600);
+  color: var(--text-on-primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-700);
+  box-shadow: var(--shadow-primary);
+}
+
+.btn-secondary {
+  background-color: var(--color-secondary-600);
+  color: var(--text-on-secondary);
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-secondary-700);
+  box-shadow: var(--shadow-secondary);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: var(--border-width-thick) solid var(--color-primary-600);
+  color: var(--color-primary-600);
+}
+
+.btn-outline:hover {
+  background-color: var(--color-primary-600);
+  color: var(--text-on-primary);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--color-primary-600);
+}
+
+.btn-ghost:hover {
+  background-color: var(--bg-hover);
+}
+
+.btn-danger {
+  background-color: var(--color-error-600);
+  color: var(--text-inverse);
+}
+
+.btn-danger:hover {
+  background-color: var(--color-error-700);
+  box-shadow: var(--shadow-error);
+}
+
+/* Input base */
+.input {
+  width: 100%;
+  min-height: var(--input-min-height);
+  padding: var(--input-padding-y) var(--input-padding-x);
+  background-color: var(--input-bg);
+  border: 1px solid var(--input-border-color);
+  border-radius: var(--input-border-radius);
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  transition: var(--transition-colors);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--input-border-color-focus);
+  box-shadow: var(--focus-ring);
+}
+
+.input:disabled {
+  background-color: var(--input-bg-disabled);
+  color: var(--text-disabled);
+  cursor: not-allowed;
+}
+
+.input-error {
+  border-color: var(--input-border-color-error);
+}
+
+.input-error:focus {
+  border-color: var(--input-border-color-error);
+  box-shadow: 0 0 0 var(--focus-ring-offset) var(--bg-card), 
+              0 0 0 calc(var(--focus-ring-width) + var(--focus-ring-offset)) var(--color-error-500);
+}

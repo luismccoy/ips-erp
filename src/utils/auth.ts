@@ -76,6 +76,11 @@ export async function logout(): Promise<void> {
     // - All React state is reset
     // - No cached components remain in memory
     // - User cannot use back button to restore session
+    
+    // SECURITY FIX P1-SEC-001: Clear browser history state to prevent
+    // back button from showing cached protected content after logout
+    window.history.replaceState(null, '', '/');
+    
     window.location.href = '/';
     
   } catch (error) {
@@ -85,6 +90,7 @@ export async function logout(): Promise<void> {
     // (defensive programming - prefer to clear everything than leave session active)
     localStorage.clear();
     sessionStorage.clear();
+    window.history.replaceState(null, '', '/');
     window.location.href = '/';
   }
 }
