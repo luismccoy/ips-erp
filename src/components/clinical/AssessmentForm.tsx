@@ -22,7 +22,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
-import { useNavigate } from 'react-router-dom';
 import type { Schema } from '../../../amplify/data/resource';
 import { isDemoMode } from '../../amplify-utils';
 import { RiskIndicatorBadge } from './RiskIndicatorBadge';
@@ -97,7 +96,6 @@ export const AssessmentForm: React.FC<AssessmentFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
-const navigate = useNavigate();
   const [isDirty, setIsDirty] = useState(false);
   const [activeTab, setActiveTab] = useState<ScaleTab>('glasgow');
   const [isSubmitting, setIsSubmitting] = useState(false);
