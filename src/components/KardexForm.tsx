@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useUnsavedChangesWarning } from '../hooks/useUnsavedChangesWarning';
-import { Modal } from './Modal';
+import { Modal } from './ui/Modal';
 
 interface KardexFormProps {
   onSubmit: (data: any) => void;

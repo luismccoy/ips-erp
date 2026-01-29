@@ -3,6 +3,7 @@ import { client, MOCK_USER } from '../amplify-utils';
 import { type Shift } from '../types';
 import { ShiftAction } from './ShiftAction';
 import { useApiCall } from '../hooks/useApiCall';
+import { useLoadingTimeout } from '../hooks/useLoadingTimeout';
 import { ErrorAlert } from './ui/ErrorAlert';
 import { Button } from './ui/Button';
 import { Card } from './ui/Card';
@@ -15,6 +16,14 @@ type BadgeVariant = 'info' | 'warning' | 'success' | 'error' | 'default';
 export const NurseDashboard: React.FC = () => {
     const api = useApiCall();
     const [shifts, setShifts] = useState<Shift[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const { hasTimedOut, retry, currentRetryCount } = useLoadingTimeout(isLoading, {
+        timeoutMs: 30000,
+        onTimeout: () => {
+            console.warn('Carga de datos del panel de enfermería demorada');
+        }
+    });
 
     useEffect(() => {
         // Real-time subscription to assignments for this tenant
@@ -25,8 +34,14 @@ export const NurseDashboard: React.FC = () => {
         });
 
         const sub = (query as any).subscribe({
-            next: (data: any) => setShifts([...data.items]),
-            error: (err: Error) => console.error('Subscription error:', err)
+            next: (data: any) => {
+                setShifts([...data.items]);
+                setIsLoading(false);
+            },
+            error: (err: Error) => {
+                console.error('Subscription error:', err);
+                setIsLoading(false);
+            }
         });
 
         return () => sub.unsubscribe();
@@ -75,9 +90,21 @@ export const NurseDashboard: React.FC = () => {
 
     return (
         <div className={styles.nurseDashboard}>
-            {api.error && (
-                <ErrorAlert message={api.error.message} className="mb-4" onDismiss={api.reset} />
-            )}
+            {hasTimedOut ? (
+                <Card className={styles.errorCard}>
+                    <div className="text-center py-8">
+                        <h2 className="text-xl font-semibold text-gray-900 mb-2">Error de Carga</h2>
+                        <p className="text-gray-600 mb-4">Los datos tardan demasiado en cargar. Por favor, inténtelo de nuevo.</p>
+                        <Button onClick={retry}>
+                            Reintentar Carga {currentRetryCount > 0 ? `(Intento ${currentRetryCount})` : ''}
+                        </Button>
+                    </div>
+                </Card>
+            ) : (
+                <>
+                    {api.error && (
+                        <ErrorAlert message={api.error.message} className="mb-4" onDismiss={api.reset} />
+                    )}
 
             <div className={styles.dashboardHeader}>
                 <Card className={styles.userInfoCard} noPadding>
@@ -175,6 +202,8 @@ export const NurseDashboard: React.FC = () => {
                     )}
                 </div>
             </Card>
+                </>
+            )}
         </div>
     );
 };

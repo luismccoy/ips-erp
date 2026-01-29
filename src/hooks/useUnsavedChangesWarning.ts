@@ -1,74 +1,79 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 interface UseUnsavedChangesWarningProps {
   isDirty: boolean;
   onDiscard?: () => void;
+  warningTitle?: string;
+  warningMessage?: string;
+  continueEditingText?: string;
+  discardText?: string;
 }
 
 export const useUnsavedChangesWarning = ({
   isDirty,
   onDiscard,
+  warningTitle = "¿Descartar cambios?",
+  warningMessage = "Tienes cambios sin guardar. Si cierras ahora, se perderán.",
+  continueEditingText = "Seguir Editando",
+  discardText = "Descartar"
 }: UseUnsavedChangesWarningProps) => {
   const [showWarningModal, setShowWarningModal] = useState(false);
-  const [pendingPath, setPendingPath] = useState<string | null>(null);
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Handle browser back/forward/refresh
+  // Handle browser navigation events
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (isDirty) {
-        // Show browser's native warning
         e.preventDefault();
-        e.returnValue = '';
+        e.returnValue = warningMessage;
+        return warningMessage;
       }
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [isDirty]);
-
-  // Handle navigation within the app
-  useEffect(() => {
-    if (!isDirty) {
-      setPendingPath(null);
-      return;
+    if (isDirty) {
+      window.addEventListener('beforeunload', handleBeforeUnload);
     }
 
-    // Set up navigation blocker
-    const unblock = navigate((nextLocation) => {
-      if (location.pathname === nextLocation.pathname) {
-        return true;
-      }
-      
-      setPendingPath(nextLocation.pathname);
-      setShowWarningModal(true);
-      return false;
-    });
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [isDirty, warningMessage]);
 
-    return unblock;
-  }, [isDirty, location, navigate]);
+  // Handle in-app navigation
+  useEffect(() => {
+    if (pendingNavigation && !showWarningModal) {
+      navigate(pendingNavigation);
+      setPendingNavigation(null);
+    }
+  }, [pendingNavigation, showWarningModal, navigate]);
+
+  const handleNavigation = useCallback((nextLocation: string) => {
+    if (isDirty) {
+      setShowWarningModal(true);
+      setPendingNavigation(nextLocation);
+      return false;
+    }
+    return true;
+  }, [isDirty]);
 
   const handleDiscard = useCallback(() => {
     setShowWarningModal(false);
     onDiscard?.();
-    if (pendingPath) {
-      navigate(pendingPath);
-    }
-    setPendingPath(null);
-  }, [navigate, pendingPath, onDiscard]);
+  }, [onDiscard]);
 
   const handleContinueEditing = useCallback(() => {
     setShowWarningModal(false);
-    setPendingPath(null);
+    setPendingNavigation(null);
   }, []);
 
   const warningMessages = {
-    title: '¿Descartar cambios?',
-    message: 'Tienes cambios sin guardar. Si cierras ahora, se perderán.', // HIPAA-compliant warning in Spanish
-    discardButton: 'Descartar',
-    continueButton: 'Seguir Editando'
+    title: warningTitle,
+    message: warningMessage,
+    continueEditing: continueEditingText,
+    discard: discardText,
   };
 
   return {
@@ -76,5 +81,8 @@ export const useUnsavedChangesWarning = ({
     handleDiscard,
     handleContinueEditing,
     warningMessages,
+    handleNavigation,
   };
 };
+
+export default useUnsavedChangesWarning;
