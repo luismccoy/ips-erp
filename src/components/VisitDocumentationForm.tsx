@@ -4,7 +4,7 @@ import { generateClient } from 'aws-amplify/data';
 import { isUsingRealBackend, client, getUserId, getTenantId } from '../amplify-utils';
 import { KardexForm } from './KardexForm';
 import { AssessmentForm } from './clinical/AssessmentForm';
-import { createVisitDraft, submitVisit } from '../api/workflow-api';
+import { createVisitDraft, submitVisit, simulateNetworkDelay } from '../api/workflow-api';
 import type {
   VisitDocumentationFormProps,
   KardexData,

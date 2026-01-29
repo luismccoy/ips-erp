@@ -444,7 +444,7 @@ export async function listApprovedVisitSummaries(patientId: string): Promise<Lis
  * Simulates network delay for mock mode.
  * Provides realistic UX during development.
  */
-async function simulateNetworkDelay(minMs: number = 300, maxMs: number = 800): Promise<void> {
+export async function simulateNetworkDelay(minMs: number = 300, maxMs: number = 800): Promise<void> {
   const delay = Math.random() * (maxMs - minMs) + minMs;
   await new Promise(resolve => setTimeout(resolve, delay));
 }

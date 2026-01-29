@@ -1,23 +1,17 @@
 {
-  "name": "ips-erp",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "name": "erp-performance-audit",
+  "version": "1.0.0",
+  "description": "Performance audit for ERP application",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview",
-    "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage",
-    "test:run": "vitest run"
+    "audit": "playwright test performance_audit.js"
   },
   "dependencies": {
     "@aws-amplify/backend": "^1.20.0",
     "@aws-amplify/backend-cli": "^1.8.2",
     "@aws-sdk/client-bedrock-runtime": "^3.972.0",
     "aws-amplify": "^6.15.10",
+    "aws-cdk-lib": "^2.236.0",
+    "constructs": "^10.4.5",
     "csstype": "^3.2.3",
     "framer-motion": "^12.29.2",
     "healthicons-react": "^3.5.0",
@@ -29,6 +23,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@playwright/test": "^1.58.0",
     "@tailwindcss/vite": "^4.1.18",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -46,6 +41,7 @@
     "globals": "^16.5.0",
     "hermes-parser": "^0.33.3",
     "jsdom": "^27.4.0",
+    "playwright": "^1.58.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.18",
     "typescript": "~5.9.3",
@@ -54,5 +50,21 @@
     "vite": "^7.2.4",
     "vite-plugin-pwa": "^1.2.0",
     "vitest": "^4.0.17"
-  }
+  },
+  "main": "demo_mode_audit.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luismccoy/ips-erp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/luismccoy/ips-erp/issues"
+  },
+  "homepage": "https://github.com/luismccoy/ips-erp#readme"
 }
