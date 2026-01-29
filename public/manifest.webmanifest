@@ -2,6 +2,7 @@
   "name": "IPS ERP - Enfermería",
   "short_name": "IPS Nurse",
   "description": "Sistema de gestión para enfermería domiciliaria - IPS ERP",
+  "lang": "es",
   "theme_color": "#2563eb",
   "background_color": "#0f172a",
   "display": "standalone",
