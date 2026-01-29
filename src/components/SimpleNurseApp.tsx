@@ -519,7 +519,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
     const handleGeneratePacket = useCallback((shiftId: string) => {
         // In backend, this would check if a BillingRecord exists or create one
         console.log('Generating packet for shift:', shiftId);
-        alert('Packet Generated! It has been sent to the Billing Department.');
+        alert('¡Paquete generado! Ha sido enviado al departamento de facturación.');
     }, []);
 
     /**

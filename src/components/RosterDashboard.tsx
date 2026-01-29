@@ -95,10 +95,10 @@ export function RosterDashboard() {
             setItems(prev => [tempShift, ...prev]);
             setIsCreateModalOpen(false);
             resetForm();
-            alert('Shift Created (Optimistic Update)');
+            alert('Turno creado correctamente');
         } catch (error) {
             console.error('Failed to create shift:', error);
-            alert('Could not create shift');
+            alert('No se pudo crear el turno');
         } finally {
             setIsSubmitting(false);
         }

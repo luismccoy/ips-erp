@@ -33,7 +33,7 @@ export function StaffPage() {
             setNurses(response.data || []);
         } catch (err) {
             console.error('Error fetching staff:', err);
-            showToast('error', 'Failed to load staff list');
+            showToast('error', 'Error al cargar la lista de personal');
         } finally {
             setLoading(false);
         }
@@ -53,20 +53,20 @@ export function StaffPage() {
     // The spec doesn't explicitly ask for delete, but standard CRUD usually implies it.
     // I will include soft delete logic if possible, or mapping to delete mutation.
     const handleDeleteClick = async (nurse: Nurse) => {
-        if (!confirm(`Are you sure you want to delete ${nurse.name}? Note: This does not delete their Cognito login.`)) return;
+        if (!confirm(`¿Está seguro de eliminar a ${nurse.name}? Nota: Esto no elimina su acceso al sistema.`)) return;
 
         try {
             if (isUsingRealBackend()) {
                 await (client.models.Nurse as any).delete({ id: nurse.id });
                 setNurses(prev => prev.filter(n => n.id !== nurse.id));
-                showToast('success', 'Staff deleted successfully');
+                showToast('success', 'Personal eliminado correctamente');
             } else {
                 showToast('info', 'Mock Mode: Delete simulated');
                 setNurses(prev => prev.filter(n => n.id !== nurse.id));
             }
         } catch (err) {
             console.error('Error deleting staff:', err);
-            showToast('error', 'Failed to delete staff member');
+            showToast('error', 'Error al eliminar el personal');
         }
     };
 
@@ -81,7 +81,7 @@ export function StaffPage() {
                         ...data
                     });
                     setNurses(prev => prev.map(n => n.id === selectedNurse.id ? result.data : n));
-                    showToast('success', 'Staff updated successfully');
+                    showToast('success', 'Personal actualizado correctamente');
                 } else {
                     // Create
                     const result = await (client.models.Nurse as any).create({
@@ -91,7 +91,7 @@ export function StaffPage() {
                         ...data
                     });
                     setNurses(prev => [...prev, result.data]);
-                    showToast('success', 'Staff created successfully. Remember to create Cognito user.');
+                    showToast('success', 'Personal creado. Recuerde crear el acceso al sistema.');
                 }
             } else {
                 showToast('info', 'Mock Mode: Changes saved to session');
@@ -110,7 +110,7 @@ export function StaffPage() {
             setShowFormModal(false);
         } catch (err) {
             console.error('Error saving staff:', err);
-            showToast('error', 'Failed to save staff member');
+            showToast('error', 'Error al guardar el personal');
         } finally {
             setFormLoading(false);
         }

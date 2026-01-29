@@ -121,7 +121,7 @@ export function InventoryDashboard() {
             // In future: Show toast
         } catch (error) {
             console.error('Failed to add item:', error);
-            alert('Could not add item (Backend permission pending)');
+            alert('No se pudo agregar el artículo');
         } finally {
             setIsSubmitting(false);
         }
