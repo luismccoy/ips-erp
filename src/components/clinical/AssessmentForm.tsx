@@ -100,6 +100,33 @@ export const AssessmentForm: React.FC<AssessmentFormProps> = ({
   const [activeTab, setActiveTab] = useState<ScaleTab>('glasgow');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Form state for each scale
+  const [glasgowScore, setGlasgowScore] = useState<GlasgowScore>(
+    existingAssessment?.glasgowScore || { ...DEFAULT_GLASGOW }
+  );
+  const [painScore, setPainScore] = useState<number>(
+    existingAssessment?.painScore ?? 0
+  );
+  const [bradenScore, setBradenScore] = useState<BradenScore>(
+    existingAssessment?.bradenScore || { ...DEFAULT_BRADEN }
+  );
+  const [morseScore, setMorseScore] = useState<MorseScore>(
+    existingAssessment?.morseScore || { ...DEFAULT_MORSE }
+  );
+  const [newsScore, setNEWSScore] = useState<NEWSScore>(
+    existingAssessment?.newsScore || { ...DEFAULT_NEWS }
+  );
+  const [barthelScore, setBarthelScore] = useState<BarthelScore>(
+    existingAssessment?.barthelScore || { ...DEFAULT_BARTHEL }
+  );
+  const [nortonScore, setNortonScore] = useState<NortonScore>(
+    existingAssessment?.nortonScore || { ...DEFAULT_NORTON }
+  );
+  const [rassScore, setRassScore] = useState<number>(
+    existingAssessment?.rassScore ?? 0
+  );
+  const [notes, setNotes] = useState<string>(existingAssessment?.notes || '');
+
   const { showWarningModal, handleDiscard, handleContinueEditing, warningMessages } = useUnsavedChangesWarning({
     isDirty,
     onDiscard: () => {
@@ -127,33 +154,6 @@ export const AssessmentForm: React.FC<AssessmentFormProps> = ({
   useEffect(() => {
     if (!isSubmitting) setIsDirty(false);
   }, [isSubmitting]);
-
-  // Form state for each scale
-  const [glasgowScore, setGlasgowScore] = useState<GlasgowScore>(
-    existingAssessment?.glasgowScore || { ...DEFAULT_GLASGOW }
-  );
-  const [painScore, setPainScore] = useState<number>(
-    existingAssessment?.painScore ?? 0
-  );
-  const [bradenScore, setBradenScore] = useState<BradenScore>(
-    existingAssessment?.bradenScore || { ...DEFAULT_BRADEN }
-  );
-  const [morseScore, setMorseScore] = useState<MorseScore>(
-    existingAssessment?.morseScore || { ...DEFAULT_MORSE }
-  );
-  const [newsScore, setNEWSScore] = useState<NEWSScore>(
-    existingAssessment?.newsScore || { ...DEFAULT_NEWS }
-  );
-  const [barthelScore, setBarthelScore] = useState<BarthelScore>(
-    existingAssessment?.barthelScore || { ...DEFAULT_BARTHEL }
-  );
-  const [nortonScore, setNortonScore] = useState<NortonScore>(
-    existingAssessment?.nortonScore || { ...DEFAULT_NORTON }
-  );
-  const [rassScore, setRassScore] = useState<number>(
-    existingAssessment?.rassScore ?? 0
-  );
-  const [notes, setNotes] = useState<string>(existingAssessment?.notes || '');
 
   // Auto-calculate totals when component values change
   useEffect(() => {
