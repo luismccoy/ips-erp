@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getCurrentUser, signIn, signOut, fetchUserAttributes, fetchAuthSession, type SignInInput, type AuthUser } from 'aws-amplify/auth';
+import { getCurrentUser, signIn, fetchUserAttributes, fetchAuthSession, type SignInInput, type AuthUser } from 'aws-amplify/auth';
 import { Hub } from 'aws-amplify/utils';
 import { TENANTS } from '../data/mock-data';
 import type { Tenant } from '../types';
@@ -7,6 +7,7 @@ import { isUsingRealBackend, isDemoMode } from '../amplify-utils';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '../../amplify/data/resource';
 import { STORAGE_KEYS, type UserRole } from '../constants/navigation';
+import { logout as centralizedLogout } from '../utils/auth';
 
 /**
  * Custom hook for managing authentication state via AWS Amplify.
@@ -203,20 +204,13 @@ export function useAuth() {
     }
 
     async function logout() {
-        try {
-            if (isUsingRealBackend()) {
-                await signOut();
-            }
-            setUser(null);
-            setRole(null);
-            setTenant(null);
-            
-            // Clear persisted demo state
-            sessionStorage.removeItem(STORAGE_KEYS.DEMO_ROLE);
-            sessionStorage.removeItem(STORAGE_KEYS.DEMO_TENANT);
-        } catch (error) {
-            console.error('Logout failed', error);
-        }
+        // Use centralized logout function for complete session teardown
+        // This will clear ALL state and force a hard redirect to '/'
+        await centralizedLogout();
+        
+        // Note: State reset (setUser/setRole/setTenant) not needed here
+        // because centralizedLogout() does window.location.href = '/'
+        // which completely reloads the app and resets all React state
     }
 
     // Manual overrides for demo/mocking purposes
