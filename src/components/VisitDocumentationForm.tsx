@@ -16,6 +16,7 @@ import type {
   PatientAssessment,
 } from '../types/workflow';
 import {
+  EMPTY_KARDEX,
   validateKardex,
   validateVitals,
 } from '../types/workflow';

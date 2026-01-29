@@ -108,6 +108,22 @@ export interface KardexData {
   internalNotes?: string;
 }
 
+/**
+ * Empty KARDEX data structure for initializing new forms.
+ * Only generalObservations is required, all other fields are optional.
+ */
+export const EMPTY_KARDEX: KardexData = {
+  generalObservations: '',
+  skinCondition: '',
+  mobilityStatus: '',
+  nutritionIntake: '',
+  painLevel: undefined,
+  mentalStatus: '',
+  environmentalSafety: '',
+  caregiverSupport: '',
+  internalNotes: '',
+};
+
 // ============================================================================
 // Visit Types
 // ============================================================================
