@@ -1,11 +1,10 @@
 // Update the imports at the top
 import React, { useState, useEffect, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/data';
-import { useNavigate } from 'react-router-dom';
 import { isUsingRealBackend, client, getUserId, getTenantId } from '../amplify-utils';
 import { KardexForm } from './KardexForm';
 import { AssessmentForm } from './clinical/AssessmentForm';
-import { createVisitDraft, submitVisit } from '../api/workflow-api';
+import { createVisitDraft, submitVisit, simulateNetworkDelay } from '../api/workflow-api';
 import type {
   VisitDocumentationFormProps,
   KardexData,
@@ -16,11 +15,25 @@ import type {
   PatientAssessment,
 } from '../types/workflow';
 import {
+  EMPTY_KARDEX,
+  EMPTY_VITALS,
   validateKardex,
   validateVitals,
 } from '../types/workflow';
 
 // ... [Keep all the existing imports, icons, and mock store code] ...
+
+type MockVisitDraft = {
+  id: string;
+  status: VisitStatus;
+  kardex: KardexData;
+  vitalsRecorded?: VitalsData;
+  medicationsAdministered?: MedicationAdminData[];
+  tasksCompleted?: TaskCompletionData[];
+  assessment?: Partial<PatientAssessment> | null;
+};
+
+const mockVisitStore: Record<string, MockVisitDraft> = {};
 
 export const VisitDocumentationForm: React.FC<VisitDocumentationFormProps> = ({
   shiftId,

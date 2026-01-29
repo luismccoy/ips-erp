@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
     Plus, Search, Edit, Trash2, Mail, MoreVertical,
     Shield, Briefcase, CheckCircle, XCircle
@@ -13,8 +13,10 @@ export function StaffPage() {
     const { showToast } = useToast();
     const [nurses, setNurses] = useState<Nurse[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [roleFilter, setRoleFilter] = useState<'ALL' | 'ADMIN' | 'NURSE' | 'COORDINATOR'>('ALL');
+    const isMountedRef = useRef(true);
 
     // Modal states
     const [showFormModal, setShowFormModal] = useState(false);
@@ -22,22 +24,55 @@ export function StaffPage() {
     const [selectedNurse, setSelectedNurse] = useState<Nurse | null>(null);
     const [formLoading, setFormLoading] = useState(false);
 
-    useEffect(() => {
-        fetchNurses();
-    }, []);
-
-    const fetchNurses = async () => {
+    const fetchNurses = useCallback(async () => {
+        setLoadError(null);
         setLoading(true);
+
+        let timeoutId: ReturnType<typeof setTimeout> | null = null;
         try {
-            const response = await (client.models.Nurse as any).list();
-            setNurses(response.data || []);
+            const timeoutPromise = new Promise<never>((_, reject) => {
+                timeoutId = setTimeout(() => reject(new Error('timeout')), 8000);
+            });
+
+            const response = await Promise.race([
+                (client.models.Nurse as any).list(),
+                timeoutPromise
+            ]);
+            const data = Array.isArray(response?.data)
+                ? response.data
+                : Array.isArray(response?.data?.items)
+                    ? response.data.items
+                    : [];
+
+            if (isMountedRef.current) {
+                setNurses(data || []);
+            }
         } catch (err) {
             console.error('Error fetching staff:', err);
+            if (isMountedRef.current) {
+                setNurses([]);
+                setLoadError(
+                    err instanceof Error && err.message === 'timeout'
+                        ? 'La carga de personal tardó demasiado. Intenta de nuevo.'
+                        : 'No se pudo cargar el personal.'
+                );
+            }
             showToast('error', 'Error al cargar la lista de personal');
         } finally {
-            setLoading(false);
+            if (timeoutId) clearTimeout(timeoutId);
+            if (isMountedRef.current) {
+                setLoading(false);
+            }
         }
-    };
+    }, [showToast]);
+
+    useEffect(() => {
+        isMountedRef.current = true;
+        fetchNurses();
+        return () => {
+            isMountedRef.current = false;
+        };
+    }, [fetchNurses]);
 
     const handleCreateClick = () => {
         setSelectedNurse(null);
@@ -167,6 +202,21 @@ export function StaffPage() {
                 </div>
             </div>
 
+            {loadError && (
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-800">
+                    <div>
+                        <div className="font-bold">No se pudo cargar el personal</div>
+                        <div className="text-sm">{loadError}</div>
+                    </div>
+                    <button
+                        onClick={fetchNurses}
+                        className="px-4 py-2 rounded-lg bg-amber-600 text-white font-bold hover:bg-amber-700 transition-colors"
+                    >
+                        Reintentar
+                    </button>
+                </div>
+            )}
+
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="min-w-full w-full">
@@ -183,32 +233,38 @@ export function StaffPage() {
                             {filteredNurses.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="px-6 py-12 text-center text-slate-400">
-                                        No se encontró personal con los filtros actuales.
+                                        {loadError
+                                            ? 'No hay datos disponibles. Reintenta más tarde.'
+                                            : 'No se encontró personal con los filtros actuales.'}
                                     </td>
                                 </tr>
                             ) : (
-                                filteredNurses.map((nurse) => (
-                                    <tr key={nurse.id} className="hover:bg-slate-50 transition-colors group">
+                                filteredNurses.map((nurse) => {
+                                    const displayName = nurse.name?.trim() || 'Sin nombre';
+                                    const displayEmail = nurse.email?.trim() || 'No email';
+                                    const displayRole = nurse.role || 'NURSE';
+                                    return (
+                                        <tr key={nurse.id} className="hover:bg-slate-50 transition-colors group">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="h-10 w-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center font-bold">
-                                                    {nurse.name.charAt(0)}
+                                                    {displayName.charAt(0)}
                                                 </div>
                                                 <div>
-                                                    <div className="font-bold text-slate-900">{nurse.name}</div>
+                                                    <div className="font-bold text-slate-900">{displayName}</div>
                                                     <div className="flex items-center gap-1.5 text-xs text-slate-500">
                                                         <Mail size={10} />
-                                                        {nurse.email || 'No email'}
+                                                        {displayEmail}
                                                     </div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase ${nurse.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' :
-                                                    nurse.role === 'COORDINATOR' ? 'bg-orange-100 text-orange-700' :
+                                            <span className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase ${displayRole === 'ADMIN' ? 'bg-purple-100 text-purple-700' :
+                                                    displayRole === 'COORDINATOR' ? 'bg-orange-100 text-orange-700' :
                                                         'bg-blue-100 text-blue-700'
                                                 }`}>
-                                                {nurse.role}
+                                                {displayRole}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
@@ -257,7 +313,8 @@ export function StaffPage() {
                                             </div>
                                         </td>
                                     </tr>
-                                ))
+                                    );
+                                })
                             )}
                         </tbody>
                     </table>

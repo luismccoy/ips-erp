@@ -1,5 +1,4 @@
 import { useEffect, useCallback, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 
 interface UseUnsavedChangesWarningProps {
   isDirty: boolean;
@@ -10,6 +9,16 @@ interface UseUnsavedChangesWarningProps {
   discardText?: string;
 }
 
+/**
+ * Hook to warn users about unsaved changes.
+ * 
+ * NOTE: This app does NOT use React Router, so we only handle:
+ * - Browser beforeunload events (refresh, close tab)
+ * - Manual callback-based navigation (via onDiscard prop)
+ * 
+ * For apps using React Router, you would also block navigation
+ * with useBlocker() or similar.
+ */
 export const useUnsavedChangesWarning = ({
   isDirty,
   onDiscard,
@@ -19,44 +28,22 @@ export const useUnsavedChangesWarning = ({
   discardText = "Descartar"
 }: UseUnsavedChangesWarningProps) => {
   const [showWarningModal, setShowWarningModal] = useState(false);
-  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
-  const navigate = useNavigate();
-  const location = useLocation();
 
-  // Handle browser navigation events
+  // Handle browser navigation events (refresh, close tab)
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (isDirty) {
         e.preventDefault();
-        e.returnValue = warningMessage;
-        return warningMessage;
+        // Chrome requires returnValue to be set
+        e.returnValue = '';
       }
     };
 
-    if (isDirty) {
-      window.addEventListener('beforeunload', handleBeforeUnload);
-    }
+    window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [isDirty, warningMessage]);
-
-  // Handle in-app navigation
-  useEffect(() => {
-    if (pendingNavigation && !showWarningModal) {
-      navigate(pendingNavigation);
-      setPendingNavigation(null);
-    }
-  }, [pendingNavigation, showWarningModal, navigate]);
-
-  const handleNavigation = useCallback((nextLocation: string) => {
-    if (isDirty) {
-      setShowWarningModal(true);
-      setPendingNavigation(nextLocation);
-      return false;
-    }
-    return true;
   }, [isDirty]);
 
   const handleDiscard = useCallback(() => {
@@ -66,14 +53,13 @@ export const useUnsavedChangesWarning = ({
 
   const handleContinueEditing = useCallback(() => {
     setShowWarningModal(false);
-    setPendingNavigation(null);
   }, []);
 
   const warningMessages = {
     title: warningTitle,
     message: warningMessage,
-    continueEditing: continueEditingText,
-    discard: discardText,
+    continueEditingText,
+    discardText
   };
 
   return {
@@ -81,8 +67,5 @@ export const useUnsavedChangesWarning = ({
     handleDiscard,
     handleContinueEditing,
     warningMessages,
-    handleNavigation,
   };
 };
-
-export default useUnsavedChangesWarning;

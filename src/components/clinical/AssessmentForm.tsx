@@ -22,7 +22,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
-import { useNavigate } from 'react-router-dom';
 import type { Schema } from '../../../amplify/data/resource';
 import { isDemoMode } from '../../amplify-utils';
 import { RiskIndicatorBadge } from './RiskIndicatorBadge';
@@ -97,10 +96,36 @@ export const AssessmentForm: React.FC<AssessmentFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
-const navigate = useNavigate();
   const [isDirty, setIsDirty] = useState(false);
   const [activeTab, setActiveTab] = useState<ScaleTab>('glasgow');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Form state for each scale
+  const [glasgowScore, setGlasgowScore] = useState<GlasgowScore>(
+    existingAssessment?.glasgowScore || { ...DEFAULT_GLASGOW }
+  );
+  const [painScore, setPainScore] = useState<number>(
+    existingAssessment?.painScore ?? 0
+  );
+  const [bradenScore, setBradenScore] = useState<BradenScore>(
+    existingAssessment?.bradenScore || { ...DEFAULT_BRADEN }
+  );
+  const [morseScore, setMorseScore] = useState<MorseScore>(
+    existingAssessment?.morseScore || { ...DEFAULT_MORSE }
+  );
+  const [newsScore, setNEWSScore] = useState<NEWSScore>(
+    existingAssessment?.newsScore || { ...DEFAULT_NEWS }
+  );
+  const [barthelScore, setBarthelScore] = useState<BarthelScore>(
+    existingAssessment?.barthelScore || { ...DEFAULT_BARTHEL }
+  );
+  const [nortonScore, setNortonScore] = useState<NortonScore>(
+    existingAssessment?.nortonScore || { ...DEFAULT_NORTON }
+  );
+  const [rassScore, setRassScore] = useState<number>(
+    existingAssessment?.rassScore ?? 0
+  );
+  const [notes, setNotes] = useState<string>(existingAssessment?.notes || '');
 
   const { showWarningModal, handleDiscard, handleContinueEditing, warningMessages } = useUnsavedChangesWarning({
     isDirty,
@@ -129,33 +154,6 @@ const navigate = useNavigate();
   useEffect(() => {
     if (!isSubmitting) setIsDirty(false);
   }, [isSubmitting]);
-
-  // Form state for each scale
-  const [glasgowScore, setGlasgowScore] = useState<GlasgowScore>(
-    existingAssessment?.glasgowScore || { ...DEFAULT_GLASGOW }
-  );
-  const [painScore, setPainScore] = useState<number>(
-    existingAssessment?.painScore ?? 0
-  );
-  const [bradenScore, setBradenScore] = useState<BradenScore>(
-    existingAssessment?.bradenScore || { ...DEFAULT_BRADEN }
-  );
-  const [morseScore, setMorseScore] = useState<MorseScore>(
-    existingAssessment?.morseScore || { ...DEFAULT_MORSE }
-  );
-  const [newsScore, setNEWSScore] = useState<NEWSScore>(
-    existingAssessment?.newsScore || { ...DEFAULT_NEWS }
-  );
-  const [barthelScore, setBarthelScore] = useState<BarthelScore>(
-    existingAssessment?.barthelScore || { ...DEFAULT_BARTHEL }
-  );
-  const [nortonScore, setNortonScore] = useState<NortonScore>(
-    existingAssessment?.nortonScore || { ...DEFAULT_NORTON }
-  );
-  const [rassScore, setRassScore] = useState<number>(
-    existingAssessment?.rassScore ?? 0
-  );
-  const [notes, setNotes] = useState<string>(existingAssessment?.notes || '');
 
   // Auto-calculate totals when component values change
   useEffect(() => {

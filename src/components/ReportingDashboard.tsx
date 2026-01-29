@@ -26,50 +26,37 @@ export const ReportingDashboard: React.FC = () => {
     const fetchData = useCallback(async () => {
         startLoading();
         try {
-            // Fetch Counts directly
-            const [patientsRes, staffRes] = await Promise.all([
-                (client.models.Patient as any).list({ limit: 1 }), // Just need counts effectively, but Amplify doesn't have count query easily accessible without list
+            await Promise.all([
+                (client.models.Patient as any).list({ limit: 1 }),
                 (client.models.Nurse as any).list({ limit: 1 }),
             ]);
 
-            // Fetch Data for Aggregation
-            // We use the pagination helpers to get a reasonable chunk of recent data
-            loadBills(async (token) => {
-                const res = await (client.models.BillingRecord as any).list({
-                    limit: 100, // Fetch last 100 bills for stats
-                    nextToken: token
-                });
-                return { data: res.data || [], nextToken: res.nextToken };
-            }, true);
-
-            loadShifts(async (token) => {
-                const res = await (client.models.Shift as any).list({
-                    filter: { status: { eq: 'COMPLETED' } },
-                    limit: 100, // Fetch last 100 completed shifts
-                    nextToken: token
-                });
-                return { data: res.data || [], nextToken: res.nextToken };
-            }, true);
-
-            // Update simple counters (mocking total count based on list + approximation if huge, 
-            // but for now we trust the length of fetched lists or just use the mock lengths for demo 
-            // if we assume these lists return all. A real app would use a specific analytics API).
-            // For MVP: we use the length of what we fetched or a placeholder if simple list.
-
-            // To be accurate without fetching EVERYTHING:
-            // In a real scenario, use an AppSync resolver for "count".
-            // Here, we'll assume the lists we fetch are representative or we'd need to loop to fetch all.
-            // For the dashboard, we'll trust the loaded items for calculations.
+            await Promise.all([
+                loadBills(async (token) => {
+                    const res = await (client.models.BillingRecord as any).list({
+                        limit: 100, // Fetch last 100 bills for stats
+                        nextToken: token
+                    });
+                    return { data: res.data || [], nextToken: res.nextToken };
+                }, true),
+                loadShifts(async (token) => {
+                    const res = await (client.models.Shift as any).list({
+                        filter: { status: { eq: 'COMPLETED' } },
+                        limit: 100, // Fetch last 100 completed shifts
+                        nextToken: token
+                    });
+                    return { data: res.data || [], nextToken: res.nextToken };
+                }, true)
+            ]);
 
             setStats(prev => ({
                 ...prev,
                 staffCount: 12, // Placeholder for valid count as list limit is small
                 activePatients: 8, // Placeholder
             }));
-
-            stopLoading();
         } catch (error) {
             console.error('Error fetching reporting data:', error);
+        } finally {
             stopLoading();
         }
     }, [loadBills, loadShifts, startLoading, stopLoading]);
@@ -435,4 +422,3 @@ export const ReportingDashboard: React.FC = () => {
         </div>
     );
 };
-
