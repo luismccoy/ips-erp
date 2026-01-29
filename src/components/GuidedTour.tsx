@@ -5,7 +5,7 @@
  * Walks users through key features of the IPS ERP system.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Joyride, { STATUS, EVENTS } from 'react-joyride';
 import type { Step, CallBackProps } from 'react-joyride';
 import { STORAGE_KEYS } from '../constants/navigation';
@@ -69,15 +69,34 @@ export function GuidedTour({ currentView, onViewChange, autoStart = false }: Gui
     const [run, setRun] = useState(false);
     const [stepIndex, setStepIndex] = useState(0);
     const [showWelcome, setShowWelcome] = useState(true);
+    
+    // Guard to prevent double-cleanup which could cause state issues
+    const isCleaningUp = useRef(false);
 
     // Centralized cleanup function to ensure consistent state reset
-    const cleanupTour = () => {
+    // Wrapped in useCallback to prevent recreating on every render
+    const cleanupTour = useCallback(() => {
+        // Prevent double-cleanup
+        if (isCleaningUp.current) {
+            console.log('[GuidedTour] Skipping duplicate cleanup');
+            return;
+        }
+        isCleaningUp.current = true;
+        
         setRun(false);
         setStepIndex(0);
         setShowWelcome(false);
         sessionStorage.setItem(STORAGE_KEYS.TOUR_COMPLETED, 'true');
+        
+        // Only call onViewChange if we're not already on dashboard
+        // This prevents unnecessary state updates
         onViewChange('dashboard');
-    };
+        
+        // Reset guard after a short delay to allow for legitimate re-cleanups
+        setTimeout(() => {
+            isCleaningUp.current = false;
+        }, 100);
+    }, [onViewChange]);
 
     // Check if user has seen the tour before
     useEffect(() => {
