@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin User Journey - IPS ERP</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 40px 20px;
+      margin: 0;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #60a5fa;
+      margin-bottom: 10px;
+    }
+    h2 {
+      color: #818cf8;
+      margin-top: 40px;
+      border-bottom: 2px solid #334155;
+      padding-bottom: 10px;
+    }
+    .subtitle {
+      color: #94a3b8;
+      margin-bottom: 30px;
+    }
+    .diagram {
+      background: #1e293b;
+      padding: 30px;
+      border-radius: 12px;
+      margin: 20px 0;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    .info-box {
+      background: #334155;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 4px solid #60a5fa;
+    }
+    .info-box h3 {
+      margin-top: 0;
+      color: #60a5fa;
+    }
+    .persona {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .persona-card {
+      background: #1e293b;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+    }
+    .persona-card h4 {
+      color: #60a5fa;
+      margin-top: 0;
+    }
+    .touchpoint {
+      background: #334155;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 10px 0;
+    }
+    .touchpoint-title {
+      font-weight: bold;
+      color: #60a5fa;
+      margin-bottom: 5px;
+    }
+    code {
+      background: #0f172a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>👨‍💼 Admin User Journey</h1>
+    <p class="subtitle">Complete workflow for administrative personnel managing IPS operations</p>
+
+    <div class="info-box">
+      <h3>🎯 Admin Role Overview</h3>
+      <p><strong>Primary Goal:</strong> Manage day-to-day operations, optimize scheduling, prevent billing losses</p>
+      <p><strong>Key Responsibilities:</strong></p>
+      <ul>
+        <li>Assign nurses to patient visits (rostering)</li>
+        <li>Monitor shift completion and compliance</li>
+        <li>Defend against EPS billing rejections (glosas)</li>
+        <li>Manage inventory and supply chain</li>
+        <li>Generate reports for leadership</li>
+      </ul>
+    </div>
+
+    <div class="persona">
+      <div class="persona-card">
+        <h4>👤 Persona: Dr. Martínez</h4>
+        <p><strong>Role:</strong> Operations Director</p>
+        <p><strong>Experience:</strong> 8 years in home care</p>
+        <p><strong>Pain Points:</strong></p>
+        <ul>
+          <li>Manual shift scheduling takes 3+ hours daily</li>
+          <li>Glosas cost 15% of monthly revenue</li>
+          <li>Inventory shortages cause visit cancellations</li>
+        </ul>
+      </div>
+      <div class="persona-card">
+        <h4>💻 Tech Profile</h4>
+        <p><strong>Devices:</strong> Desktop PC + Tablet</p>
+        <p><strong>Skills:</strong> Intermediate (Excel power user)</p>
+        <p><strong>Usage:</strong> 6-8 hours/day</p>
+        <p><strong>Priorities:</strong></p>
+        <ul>
+          <li>Speed > aesthetics</li>
+          <li>Clear error messages</li>
+          <li>Keyboard shortcuts</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>📊 Daily Workflow Journey</h2>
+    
+    <div class="diagram">
+      <pre class="mermaid">
+journey
+    title Admin Daily Workflow (8:00 AM - 6:00 PM)
+    section Morning Review (8:00-9:00)
+      Login to dashboard: 5: Admin
+      Review overnight notifications: 4: Admin
+      Check pending visit approvals: 3: Admin
+      Identify staffing gaps: 2: Admin
+    section Rostering (9:00-11:00)
+      Open Roster Architect: 5: Admin
+      AI suggests optimal assignments: 5: Admin, AI
+      Review skill matching: 4: Admin
+      Approve auto-generated shifts: 5: Admin
+      Handle conflicts manually: 3: Admin
+    section Midday Operations (11:00-2:00)
+      Monitor live visit status: 4: Admin
+      Respond to nurse questions: 3: Admin
+      Handle emergency rescheduling: 2: Admin
+      Update patient records: 4: Admin
+    section Billing Defense (2:00-4:00)
+      Review EPS rejections: 3: Admin
+      Launch Glosa Defender AI: 5: Admin, AI
+      Review AI-generated justifications: 4: Admin
+      Submit RIPS corrections: 4: Admin
+    section End of Day (4:00-6:00)
+      Generate compliance reports: 4: Admin
+      Plan next day assignments: 3: Admin
+      Review inventory alerts: 3: Admin
+      Sign off pending approvals: 4: Admin
+      </pre>
+    </div>
+
+    <h2>🔄 Detailed User Flow: Rostering</h2>
+
+    <div class="diagram">
+      <pre class="mermaid">
+flowchart TD
+    Start([Admin opens Roster Architect]) --> Check{Staffing<br/>gaps?}
+    Check -->|Yes| AI[AI analyzes:<br/>- Patient location<br/>- Nurse skills<br/>- Travel time<br/>- Certifications]
+    Check -->|No| View[View balanced schedule]
+    AI --> Suggestions[Display AI-recommended<br/>assignments]
+    Suggestions --> Review{Admin<br/>reviews}
+    Review -->|Approve| Auto[Auto-assign shifts]
+    Review -->|Modify| Manual[Manual adjustment]
+    Manual --> Auto
+    Auto --> Notify[Notify nurses via SMS]
+    Notify --> Confirm[Nurses confirm availability]
+    Confirm --> Calendar[Update master calendar]
+    View --> End([Done])
+    Calendar --> End
+    
+    style AI fill:#60a5fa,stroke:#1e40af,color:#000
+    style Auto fill:#34d399,stroke:#059669,color:#000
+    style Manual fill:#fbbf24,stroke:#d97706,color:#000
+      </pre>
+    </div>
+
+    <h2>🛡️ Critical User Flow: Glosa Defense</h2>
+
+    <div class="diagram">
+      <pre class="mermaid">
+sequenceDiagram
+    participant Admin
+    participant Dashboard
+    participant GlosaAI as Glosa Defender AI
+    participant DB as Database
+    participant EPS
+    
+    Admin->>Dashboard: Navigate to Billing
+    Dashboard->>DB: Fetch rejected invoices
+    DB-->>Dashboard: Show 2 pending glosas
+    Dashboard-->>Admin: Display rejections
+    
+    Admin->>GlosaAI: Launch AI analysis
+    Note over GlosaAI: Uses Claude 3.5 Sonnet<br/>via AWS Bedrock
+    
+    GlosaAI->>DB: Fetch patient clinical history
+    GlosaAI->>DB: Fetch related visit notes
+    GlosaAI->>DB: Fetch vital signs data
+    
+    GlosaAI->>GlosaAI: Analyze against<br/>Resolution 3100
+    GlosaAI-->>Admin: Generate legal justification PDF
+    
+    Admin->>Admin: Review AI justification
+    Admin->>Dashboard: Approve and submit
+    Dashboard->>EPS: Submit RIPS correction
+    EPS-->>Dashboard: Acknowledge receipt
+    Dashboard-->>Admin: Confirm submission
+      </pre>
+    </div>
+
+    <h2>🎨 UI Touchpoints & Interactions</h2>
+
+    <div class="touchpoint">
+      <div class="touchpoint-title">1. Dashboard (Landing Page)</div>
+      <p><strong>First Impression:</strong> Executive summary with KPIs</p>
+      <p><strong>Key Elements:</strong></p>
+      <ul>
+        <li>Monthly revenue trend: <code>$42.5M (+12%)</code></li>
+        <li>Shift completion rate: <code>485/500 (98%)</code></li>
+        <li>Active glosas: <code>2 (Action Required)</code></li>
+        <li>Quick actions: Approve Shifts, Review Glosas</li>
+      </ul>
+      <p><strong>Pain Point Solved:</strong> Instant visibility into operations health</p>
+    </div>
+
+    <div class="touchpoint">
+      <div class="touchpoint-title">2. Roster Architect (AI-Powered Scheduling)</div>
+      <p><strong>User Goal:</strong> Assign 50+ shifts in <15 minutes (vs. 3 hours manual)</p>
+      <p><strong>Interaction Flow:</strong></p>
+      <ol>
+        <li>Click "Roster Architect" in sidebar</li>
+        <li>AI shows staffing gaps highlighted in red</li>
+        <li>Click "Auto-Assign" → AI calculates optimal matches</li>
+        <li>Review assignments in drag-drop calendar</li>
+        <li>Override specific assignments if needed</li>
+        <li>Click "Finalize & Notify" → SMS sent to nurses</li>
+      </ol>
+      <p><strong>AI Value Prop:</strong> Reduces travel costs by 25% through location optimization</p>
+    </div>
+
+    <div class="touchpoint">
+      <div class="touchpoint-title">3. Billing & RIPS Validation</div>
+      <p><strong>User Goal:</strong> Prevent revenue loss from EPS rejections</p>
+      <p><strong>Critical Moment:</strong> EPS rejects $8M invoice for "lack of oxygen therapy support"</p>
+      <p><strong>AI Rescue Flow:</strong></p>
+      <ol>
+        <li>Dashboard shows glosa notification</li>
+        <li>Admin clicks "Defend with AI"</li>
+        <li>Glosa Defender analyzes patient SpO2 readings (88%, 85%)</li>
+        <li>AI generates legal justification citing Resolution 3100</li>
+        <li>Admin downloads PDF and submits to EPS</li>
+        <li>EPS accepts justification → Revenue recovered</li>
+      </ol>
+      <p><strong>Emotional Impact:</strong> From panic to relief in 5 minutes</p>
+    </div>
+
+    <div class="touchpoint">
+      <div class="touchpoint-title">4. Inventory Management</div>
+      <p><strong>User Goal:</strong> Prevent stockouts that cancel visits</p>
+      <p><strong>Alert System:</strong></p>
+      <ul>
+        <li>🔴 Low stock: <code>Jeringa 5cc (12 remaining)</code></li>
+        <li>🟢 Adequate: <code>Guantes Nitrilo (45 remaining)</code></li>
+      </ul>
+      <p><strong>Action Flow:</strong></p>
+      <ol>
+        <li>Click "Inventory" in sidebar</li>
+        <li>Filter by "Low Stock"</li>
+        <li>Click "Reorder" → Pre-filled supplier form</li>
+        <li>Confirm order → Update restock ETA</li>
+      </ol>
+    </div>
+
+    <div class="touchpoint">
+      <div class="touchpoint-title">5. Pending Reviews (Clinical Audits)</div>
+      <p><strong>User Goal:</strong> Approve visit documentation before billing</p>
+      <p><strong>Review Flow:</strong></p>
+      <ol>
+        <li>Click "Pending Reviews" (shows notification badge)</li>
+        <li>See list of completed visits awaiting approval</li>
+        <li>Click visit → View full documentation</li>
+        <li>Check KARDEX, vitals, clinical scales</li>
+        <li>Approve or request corrections</li>
+      </ol>
+      <p><strong>Compliance Note:</strong> Required before RIPS submission</p>
+    </div>
+
+    <h2>🔗 Module Interactions (Admin Perspective)</h2>
+
+    <div class="diagram">
+      <pre class="mermaid">
+graph LR
+    Admin[👨‍💼 Admin Portal]
+    
+    Admin --> Roster[📅 Roster Architect]
+    Admin --> Billing[💰 Billing & RIPS]
+    Admin --> Inventory[📦 Inventory]
+    Admin --> Reports[📊 Reports]
+    Admin --> Staff[👥 Staff Management]
+    
+    Roster --> AI1[🤖 Roster AI Agent]
+    Billing --> AI2[🤖 Glosa Defender AI]
+    Billing --> RIPS[RIPS Validator AI]
+    
+    AI1 --> GQL[GraphQL API]
+    AI2 --> Bedrock[AWS Bedrock]
+    RIPS --> Bedrock
+    
+    GQL --> DDB[(DynamoDB)]
+    GQL --> Cognito[🔐 Cognito Auth]
+    
+    Nurse[📱 Nurse App] -.updates.-> GQL
+    Family[👨‍👩‍👧 Family Portal] -.views.-> GQL
+    
+    style Admin fill:#60a5fa,stroke:#1e40af
+    style AI1 fill:#a78bfa,stroke:#7c3aed
+    style AI2 fill:#a78bfa,stroke:#7c3aed
+    style RIPS fill:#a78bfa,stroke:#7c3aed
+    style Bedrock fill:#f59e0b,stroke:#d97706
+      </pre>
+    </div>
+
+    <h2>📈 Success Metrics (Admin KPIs)</h2>
+
+    <div class="persona">
+      <div class="persona-card">
+        <h4>⏱️ Time Savings</h4>
+        <ul>
+          <li><strong>Before:</strong> 3 hours/day scheduling</li>
+          <li><strong>After:</strong> 15 minutes/day</li>
+          <li><strong>Saved:</strong> 2h 45m daily</li>
+        </ul>
+      </div>
+      <div class="persona-card">
+        <h4>💰 Revenue Protection</h4>
+        <ul>
+          <li><strong>Glosa Loss (Before):</strong> 15%</li>
+          <li><strong>Glosa Loss (After):</strong> 3%</li>
+          <li><strong>Monthly Recovery:</strong> $5.1M</li>
+        </ul>
+      </div>
+      <div class="persona-card">
+        <h4>🎯 Operational Efficiency</h4>
+        <ul>
+          <li><strong>Shift Completion:</strong> 98%</li>
+          <li><strong>Travel Cost Reduction:</strong> 25%</li>
+          <li><strong>Compliance Rate:</strong> 100%</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <h3>💡 Key Insights</h3>
+      <p><strong>Most Used Feature:</strong> Roster Architect (6-8x daily)</p>
+      <p><strong>Highest Value Feature:</strong> Glosa Defender AI (saves $60K avg per defended glosa)</p>
+      <p><strong>Biggest Friction Point:</strong> Manual RIPS XML generation (future automation target)</p>
+      <p><strong>Mobile Usage:</strong> 30% of sessions (mostly for approvals on-the-go)</p>
+    </div>
+
+  </div>
+
+  <script>
+    mermaid.initialize({ 
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        primaryColor: '#60a5fa',
+        primaryTextColor: '#0f172a',
+        primaryBorderColor: '#1e40af',
+        lineColor: '#94a3b8',
+        secondaryColor: '#818cf8',
+        tertiaryColor: '#34d399'
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,221 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - img [ref=e9]
+        - generic [ref=e11]: IPS ERP
+      - generic [ref=e12]:
+        - link "Plataforma" [ref=e13] [cursor=pointer]:
+          - /url: "#features"
+        - link "IA Generativa" [ref=e14] [cursor=pointer]:
+          - /url: "#ai"
+          - img [ref=e15]
+          - text: IA Generativa
+        - link "Infraestructura" [ref=e18] [cursor=pointer]:
+          - /url: "#infrastructure"
+      - generic [ref=e19]:
+        - button "Iniciar Sesión" [ref=e20]
+        - button "Agendar Demo" [ref=e21]
+  - generic [ref=e23]:
+    - generic [ref=e24]: Impulsado por Modelos de IA Generativa
+    - heading "No gestione pacientes. Gestione su Margen." [level=1] [ref=e28]:
+      - text: No gestione pacientes.
+      - text: Gestione su Margen.
+    - paragraph [ref=e29]:
+      - text: El primer ERP "Admin-First" para Atención Domiciliaria. Proteja su facturación, elimine glosas y automatice sus turnos con
+      - strong [ref=e30]: Inteligencia Artificial Predictiva
+      - text: .
+    - button "Ver Demo Interactivo" [ref=e32]:
+      - text: Ver Demo Interactivo
+      - img [ref=e33]
+    - generic [ref=e37]:
+      - generic [ref=e44]:
+        - img [ref=e45]
+        - text: dashboard.ipserp.com/admin
+      - generic [ref=e57]:
+        - generic [ref=e59]:
+          - heading "Resumen General" [level=2] [ref=e60]
+          - paragraph [ref=e61]: Bienvenido de nuevo, Dr. Martinez
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - generic [ref=e64]:
+              - img [ref=e66]
+              - generic [ref=e68]: +12%
+            - generic [ref=e69]: $42.5M
+            - generic [ref=e70]: Facturación Mes
+          - generic [ref=e71]:
+            - generic [ref=e72]:
+              - img [ref=e74]
+              - generic [ref=e77]: 98%
+            - generic [ref=e78]: 485/500
+            - generic [ref=e79]: Turnos Completados
+          - generic [ref=e82]:
+            - generic [ref=e83]:
+              - img [ref=e85]
+              - generic [ref=e87]: Acción Requerida
+            - generic [ref=e88]: 2 Glosas
+            - generic [ref=e89]: Falta Soporte GPS
+  - generic [ref=e91]:
+    - paragraph [ref=e92]: Confían en IPS ERP más de 50 agencias en Colombia
+    - generic [ref=e93]:
+      - generic [ref=e94]:
+        - img [ref=e95]
+        - text: IPS Cuidar
+      - generic [ref=e97]:
+        - img [ref=e98]
+        - text: SaludCasa
+      - generic [ref=e100]:
+        - img [ref=e101]
+        - text: MedicaLife
+      - generic [ref=e103]:
+        - img [ref=e104]
+        - text: VitalHome
+  - generic [ref=e107]:
+    - generic [ref=e108]:
+      - heading "La Suite Completa" [level=2] [ref=e109]
+      - paragraph [ref=e110]: Todo lo que su IPS necesita para escalar.
+    - generic [ref=e111]:
+      - generic [ref=e112]:
+        - generic [ref=e114]:
+          - img [ref=e116]
+          - heading "Rostering Inteligente" [level=3] [ref=e118]
+          - paragraph [ref=e119]: Nuestro agente de IA analiza la ubicación del paciente y las habilidades de la enfermera para asignar el turno perfecto en segundos. Optimice costos de desplazamiento automáticamente.
+        - img [ref=e122]
+      - generic [ref=e126]:
+        - img [ref=e128]
+        - heading "Modo \"Zona Roja\"" [level=3] [ref=e135]
+        - paragraph [ref=e136]: La App de Enfermería funciona 100% offline. Sincronización automática cuando vuelve la señal.
+      - generic [ref=e137]:
+        - img [ref=e139]
+        - heading "Habilitación 3100" [level=3] [ref=e142]
+        - paragraph [ref=e143]: Alertas automáticas de vencimiento de documentos ReTHUS y calibración de equipos biomédicos.
+      - generic [ref=e145]:
+        - generic [ref=e146]:
+          - img [ref=e148]
+          - heading "Control de Farmacia" [level=3] [ref=e152]
+          - paragraph [ref=e153]: Kardex Digital. Cada procedimiento registrado descuenta automáticamente los insumos del inventario virtual de la enfermera. Detecte fugas al instante.
+        - generic [ref=e154]:
+          - generic [ref=e155]:
+            - generic [ref=e156]: ITEM
+            - generic [ref=e157]: STOCK
+          - generic [ref=e158]:
+            - generic [ref=e159]: Jeringa 5cc
+            - generic [ref=e160]: Bajo (12)
+          - generic [ref=e161]:
+            - generic [ref=e162]: Guantes Nitrilo
+            - generic [ref=e163]: OK (45)
+  - generic [ref=e168]:
+    - generic [ref=e169]:
+      - generic [ref=e170]:
+        - img [ref=e171]
+        - text: Powered by AWS Bedrock
+      - heading "Su Defensa contra las Glosas es una IA Generativa." [level=2] [ref=e174]
+      - paragraph [ref=e175]:
+        - text: Nuestro agente "Glosa Defender" utiliza
+        - strong [ref=e176]: Large Language Models (LLMs)
+        - text: para analizar historiales clínicos y la normativa vigente, redactando justificaciones legales automáticamente ante rechazos de las EPS.
+      - list [ref=e177]:
+        - listitem [ref=e178]:
+          - img [ref=e179]
+          - generic [ref=e182]: Validación automática de JSON RIPS (Res 2275).
+        - listitem [ref=e183]:
+          - img [ref=e184]
+          - generic [ref=e187]: Motores predictivos para auditoría de notas clínicas.
+      - button "Probar IA Ahora" [ref=e188]
+    - generic [ref=e191]:
+      - generic [ref=e193]: "La EPS rechazó la factura #1092 por falta de soportes de oxigenoterapia."
+      - generic [ref=e195]:
+        - generic [ref=e196]:
+          - img [ref=e197]
+          - text: Glosa Defender
+        - paragraph [ref=e200]: Analizando historial del paciente Roberto Gomez...
+        - paragraph [ref=e201]: He generado una carta de justificación citando los registros de SpO2 del 12/01 (88%) y 13/01 (85%), que justifican el soporte según la Res 3100. El PDF está listo para descargar.
+        - generic [ref=e202] [cursor=pointer]:
+          - img [ref=e203]
+          - generic [ref=e206]: Justificacion_Glosa_1092.pdf
+  - generic [ref=e208]:
+    - generic [ref=e209]:
+      - heading "Infraestructura de Clase Mundial" [level=2] [ref=e210]
+      - paragraph [ref=e211]: IPS ERP es un software 100% en la nube, impulsado por el proveedor líder mundial para garantizar que sus datos estén seguros y disponibles 24/7.
+    - generic [ref=e213]:
+      - generic [ref=e214]:
+        - generic [ref=e215]:
+          - generic [ref=e216]: AWS
+          - generic [ref=e217]: Socio Tecnológico
+        - heading "Infraestructura Nativa en la Nube" [level=3] [ref=e218]
+        - list [ref=e219]:
+          - listitem [ref=e220]:
+            - img [ref=e222]
+            - generic [ref=e224]:
+              - text: 99.99% SLA Uptime
+              - paragraph [ref=e225]: Arquitectura sin servidor (Serverless) para máxima disponibilidad.
+          - listitem [ref=e226]:
+            - img [ref=e228]
+            - generic [ref=e231]:
+              - text: Seguridad Grado Hospitalario
+              - paragraph [ref=e232]: Encriptación AES-256 en reposo y TLS 1.3 en tránsito.
+          - listitem [ref=e233]:
+            - img [ref=e235]
+            - generic [ref=e238]:
+              - text: Residencia de Datos Local
+              - paragraph [ref=e239]: Cumplimiento de soberanía de datos utilizando AWS Local Zones (Bogotá).
+      - generic [ref=e242]:
+        - generic [ref=e243]:
+          - generic [ref=e244]: ● Sistema Operativo
+          - generic [ref=e245]: us-east-1 / bog-1
+        - generic [ref=e246]:
+          - generic [ref=e247]:
+            - generic [ref=e248]: Latencia BD
+            - generic [ref=e249]: 12ms
+          - generic [ref=e250]:
+            - generic [ref=e251]: Encriptación
+            - generic [ref=e252]: Activo (KMS)
+          - generic [ref=e253]:
+            - generic [ref=e254]: Respaldos
+            - generic [ref=e255]: Cada hora (PITR)
+  - contentinfo [ref=e258]:
+    - generic [ref=e259]:
+      - generic [ref=e260]:
+        - generic [ref=e261]:
+          - generic [ref=e262]:
+            - img [ref=e264]
+            - generic [ref=e266]: IPS ERP
+          - paragraph [ref=e267]: Tecnología diseñada en Bogotá para el sector salud colombiano.
+        - generic [ref=e268]:
+          - heading "Producto" [level=4] [ref=e269]
+          - list [ref=e270]:
+            - listitem [ref=e271]:
+              - link "Rostering" [ref=e272] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e273]:
+              - link "Defensa de Facturación" [ref=e274] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e275]:
+              - link "App Enfermería" [ref=e276] [cursor=pointer]:
+                - /url: "#"
+        - generic [ref=e277]:
+          - heading "Legal" [level=4] [ref=e278]
+          - list [ref=e279]:
+            - listitem [ref=e280]:
+              - link "Habeas Data" [ref=e281] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e282]:
+              - link "Términos" [ref=e283] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e284]:
+              - link "SLA" [ref=e285] [cursor=pointer]:
+                - /url: "#"
+        - generic [ref=e286]:
+          - heading "Contacto" [level=4] [ref=e287]
+          - list [ref=e288]:
+            - listitem [ref=e289]: ventas@ipserp.com
+            - listitem [ref=e290]: Bogotá, Colombia
+      - generic [ref=e291]:
+        - paragraph [ref=e292]: © 2026 IPS ERP S.A.S. Todos los derechos reservados.
+        - generic [ref=e293]:
+          - img [ref=e294]
+          - text: Powered by AWS LatAm
+```
