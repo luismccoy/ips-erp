@@ -31,3 +31,18 @@ customHeaders:
     headers:
       - key: Content-Type
         value: 'application/manifest+json'
+customRules:
+  # Serve static files directly - NO rewrites
+  - source: /manifest.webmanifest
+    target: /manifest.webmanifest
+    status: '200'
+  - source: /sw.js
+    target: /sw.js
+    status: '200'
+  - source: /homepage/index.html
+    target: /homepage/index.html
+    status: '200'
+  # React SPA fallback - LAST
+  - source: '</^[^.]+$|\.(?!(css|gif|ico|jpg|js|png|txt|svg|woff|woff2|ttf|map|json|webp)$)([^.]+$)/>'
+    target: /index.html
+    status: '200'
