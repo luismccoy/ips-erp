@@ -63,6 +63,9 @@ customRules:
     target: /assets/<*>
     status: '200'
   # Homepage and images - serve directly
+  - source: /homepage/
+    target: /homepage/index.html
+    status: '200'
   - source: /homepage
     target: /homepage/index.html
     status: '200'
