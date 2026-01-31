@@ -1,0 +1,79 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci
+        - echo "VITE_USE_REAL_BACKEND=$VITE_USE_REAL_BACKEND"
+    build:
+      commands:
+        - npm run build
+        # Vite plugin now handles copying homepage/ and images/
+        # Verify the files are in place
+        - echo "=== Verifying dist contents ==="
+        - ls -la dist/homepage/ 2>&1 || echo "⚠ homepage not found"
+        - ls -la dist/images/ 2>&1 || echo "⚠ images not found"
+        - echo "=== Homepage file size (should be ~30KB) ==="
+        - wc -c dist/homepage/index.html 2>&1 || echo "⚠ homepage/index.html missing"
+  artifacts:
+    baseDirectory: dist
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
+customHeaders:
+  - pattern: '**/*'
+    headers:
+      - key: Cache-Control
+        value: 'public, max-age=0, must-revalidate'
+  - pattern: '/manifest.webmanifest'
+    headers:
+      - key: Content-Type
+        value: 'application/manifest+json'
+customRules:
+  # PWA manifest - MUST be before SPA fallback
+  - source: /manifest.webmanifest
+    target: /manifest.webmanifest
+    status: '200'
+    headers:
+      - key: Content-Type
+        value: 'application/manifest+json'
+  # Service Worker and Workbox - serve directly
+  - source: /sw.js
+    target: /sw.js
+    status: '200'
+  - source: /workbox-*.js
+    target: /workbox-*.js
+    status: '200'
+  # Static assets - serve directly
+  - source: /*.ico
+    target: /*.ico
+    status: '200'
+  - source: /*.svg
+    target: /*.svg
+    status: '200'
+  - source: /*.png
+    target: /*.png
+    status: '200'
+  - source: /*.jpg
+    target: /*.jpg
+    status: '200'
+  - source: /assets/<*>
+    target: /assets/<*>
+    status: '200'
+  # Homepage and images - serve directly (BEFORE SPA fallback)
+  - source: /homepage
+    target: /homepage/index.html
+    status: '200'
+  - source: /homepage/<*>
+    target: /homepage/<*>
+    status: '200'
+  - source: /images/<*>
+    target: /images/<*>
+    status: '200'
+  # SPA fallback - MUST be LAST
+  - source: /<*>
+    target: /index.html
+    status: '200'
+    condition: null

@@ -36,12 +36,13 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { Activity, LogOut, FileText, Edit3, Clock, CheckCircle, XCircle, AlertCircle, FileCheck, HeartPulse, CloudOff, ChevronRight } from 'lucide-react';
+import { Activity, LogOut, FileText, Edit3, Clock, CheckCircle, XCircle, AlertCircle, FileCheck, HeartPulse, CloudOff, ChevronRight, ArrowLeft } from 'lucide-react';
 import { client, isUsingRealBackend } from '../amplify-utils';
 import { createVisitDraft } from '../api/workflow-api';
 import { usePagination } from '../hooks/usePagination';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
 import { useSyncStatus } from '../hooks/useSyncStatus';
+import { NavigationStateManager } from '../utils/navigationState';
 import { NotificationBell } from './NotificationBell';
 import { VisitDocumentationForm } from './VisitDocumentationForm';
 import { AssessmentEntryForm } from './AssessmentEntryForm';
@@ -281,6 +282,57 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
 
     // Current user ID (in real app, this would come from auth context)
     const currentUserId = 'nurse-1';
+
+    // ========================================================================
+    // Navigation State Persistence & Restoration
+    // ========================================================================
+    
+    // Restore navigation state on mount
+    useEffect(() => {
+        const restored = NavigationStateManager.restore();
+        if (restored) {
+            setActiveTab(restored.activeTab);
+            setShowOnlyToday(restored.showOnlyToday);
+            setShowDocumentationForm(restored.showDocumentationForm);
+            // selectedShift will be restored after shifts are loaded
+        }
+    }, []);
+
+    useEffect(() => {
+        const restored = NavigationStateManager.restore();
+        if (restored?.selectedShiftId && shifts.length > 0 && !selectedShift) {
+            const shift = shifts.find(s => s.id === restored.selectedShiftId);
+            if (shift) setSelectedShift(shift);
+        }
+    }, [shifts, selectedShift]);
+
+    // Setup browser back button handler
+    useEffect(() => {
+        const cleanup = NavigationStateManager.setupPopStateHandler(() => {
+            // Handle back button - return to route list
+            setShowDocumentationForm(false);
+            setSelectedShift(null);
+            NavigationStateManager.save({
+                showDocumentationForm: false,
+                selectedShiftId: null,
+                activeTab,
+                showOnlyToday
+            });
+        });
+        return cleanup;
+    }, [activeTab, showOnlyToday]);
+
+    // Save navigation state whenever it changes
+    useEffect(() => {
+        if (!loadingPatients) {
+            NavigationStateManager.save({
+                showDocumentationForm,
+                selectedShiftId: selectedShift?.id || null,
+                activeTab,
+                showOnlyToday
+            });
+        }
+    }, [showDocumentationForm, selectedShift, activeTab, showOnlyToday, loadingPatients]);
 
     // ========================================================================
     // Offline Hooks (Phase 4)

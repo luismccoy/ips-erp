@@ -8,6 +8,13 @@ frontend:
     build:
       commands:
         - npm run build
+        - echo "Copying public files to dist..."
+        - ls -la public/
+        - cp -rv public/homepage dist/
+        - cp -rv public/images dist/
+        - echo "Verifying dist contents..."
+        - ls -la dist/homepage/ || echo "homepage not found!"
+        - ls -la dist/images/ || echo "images not found!"
   artifacts:
     baseDirectory: dist
     files:
@@ -25,35 +32,17 @@ customHeaders:
       - key: Content-Type
         value: 'application/manifest+json'
 customRules:
-  # PWA manifest - MUST be before SPA fallback
+  # Serve static files directly - NO rewrites
   - source: /manifest.webmanifest
     target: /manifest.webmanifest
     status: '200'
-    headers:
-      - key: Content-Type
-        value: 'application/manifest+json'
-  # Service Worker and Workbox - serve directly
   - source: /sw.js
     target: /sw.js
     status: '200'
-  - source: /workbox-*.js
-    target: /workbox-*.js
+  - source: /homepage/index.html
+    target: /homepage/index.html
     status: '200'
-  # Static assets - serve directly
-  - source: /*.ico
-    target: /*.ico
-    status: '200'
-  - source: /*.svg
-    target: /*.svg
-    status: '200'
-  - source: /*.png
-    target: /*.png
-    status: '200'
-  - source: /assets/<*>
-    target: /assets/<*>
-    status: '200'
-  # SPA fallback - MUST be LAST
-  - source: /<*>
+  # React SPA fallback - LAST
+  - source: '</^[^.]+$|\.(?!(css|gif|ico|jpg|js|png|txt|svg|woff|woff2|ttf|map|json|webp)$)([^.]+$)/>'
     target: /index.html
     status: '200'
-    condition: null

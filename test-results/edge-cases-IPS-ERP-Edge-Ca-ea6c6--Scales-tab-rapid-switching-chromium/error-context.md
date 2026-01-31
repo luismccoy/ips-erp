@@ -1,0 +1,84 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - img [ref=e6]
+        - generic [ref=e8]: IPS ERP - Enfermería
+      - generic [ref=e9]:
+        - status "Conectado" [ref=e10]:
+          - img [ref=e12]
+        - button "Notificaciones (2 sin leer)" [ref=e15]:
+          - img [ref=e16]
+          - generic [ref=e18]: "2"
+        - button "Cerrar sesión" [ref=e19]:
+          - img [ref=e20]
+    - generic [ref=e23]:
+      - generic [ref=e24]:
+        - button "Mi Ruta" [ref=e25]
+        - button "Estadísticas" [ref=e26]
+      - generic [ref=e27]:
+        - generic [ref=e28]:
+          - generic [ref=e29]: Mostrar solo visitas de hoy
+          - switch "Filtrar solo hoy" [checked] [ref=e30]
+        - generic [ref=e32]:
+          - img [ref=e33]
+          - generic [ref=e36]: SOLO HOY
+          - generic [ref=e37]: (3 visitas)
+        - 'button "Carlos Eduardo Vives En Progreso Avenida 19 #100-50, Chicó, Bogotá vie, 30 de ene, 02:36 a. m. Borrador Continuar Documentación" [ref=e38] [cursor=pointer]':
+          - generic [ref=e39]:
+            - generic [ref=e40]:
+              - heading "Carlos Eduardo Vives" [level=3] [ref=e41]
+              - img [ref=e42]
+            - generic [ref=e44]: En Progreso
+          - paragraph [ref=e45]: "Avenida 19 #100-50, Chicó, Bogotá"
+          - paragraph [ref=e46]: vie, 30 de ene, 02:36 a. m.
+          - generic [ref=e48]:
+            - img [ref=e49]
+            - text: Borrador
+          - button "Continuar Documentación" [ref=e51]:
+            - img [ref=e52]
+            - text: Continuar Documentación
+        - 'button "Jorge Luis Borges Pendiente Carrera 15 #90-20, Chicó Norte, Bogotá vie, 30 de ene, 05:36 a. m. Aprobada Ver Visita Aprobada" [ref=e54] [cursor=pointer]':
+          - generic [ref=e55]:
+            - generic [ref=e56]:
+              - heading "Jorge Luis Borges" [level=3] [ref=e57]
+              - img [ref=e58]
+            - generic [ref=e60]: Pendiente
+          - paragraph [ref=e61]: "Carrera 15 #90-20, Chicó Norte, Bogotá"
+          - paragraph [ref=e62]: vie, 30 de ene, 05:36 a. m.
+          - generic [ref=e64]:
+            - img [ref=e65]
+            - text: Aprobada
+          - button "Ver Visita Aprobada" [ref=e68]:
+            - img [ref=e69]
+            - text: Ver Visita Aprobada
+        - 'button "Roberto Gómez Bolaños Pendiente Calle 100 #15-20, Chapinero, Bogotá vie, 30 de ene, 07:36 a. m. Iniciar Visita" [ref=e72] [cursor=pointer]':
+          - generic [ref=e73]:
+            - generic [ref=e74]:
+              - heading "Roberto Gómez Bolaños" [level=3] [ref=e75]
+              - img [ref=e76]
+            - generic [ref=e78]: Pendiente
+          - paragraph [ref=e79]: "Calle 100 #15-20, Chapinero, Bogotá"
+          - paragraph [ref=e80]: vie, 30 de ene, 07:36 a. m.
+          - button "Iniciar Visita" [ref=e81]:
+            - img [ref=e82]
+            - text: Iniciar Visita
+    - generic [ref=e87]:
+      - navigation "Sections" [ref=e89]:
+        - button "KARDEX" [ref=e90]
+        - button "Escalas Clínicas" [ref=e91]
+      - generic [ref=e92]:
+        - generic [ref=e93]:
+          - heading "Medicamentos" [level=3] [ref=e95]
+          - heading "Plan de Tratamiento" [level=3] [ref=e97]
+          - heading "Instrucciones de Cuidado" [level=3] [ref=e99]
+        - generic [ref=e100]:
+          - button "Cancelar" [ref=e101]
+          - button "Guardar KARDEX" [ref=e102]
+  - button "¡Tu opinión importa!" [ref=e103]:
+    - img [ref=e104]
+    - generic [ref=e106]: ¡Tu opinión importa!
+```

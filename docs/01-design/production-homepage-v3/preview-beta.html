@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPS-ERP - Homepage V3 Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        .animation-delay-500 {
+            animation-delay: 500ms;
+        }
+        .animation-delay-1000 {
+            animation-delay: 1000ms;
+        }
+    </style>
+</head>
+<body class="bg-white">
+
+<!-- HERO SECTION -->
+<section class="relative min-h-screen flex items-center overflow-hidden">
+    <!-- Background Image -->
+    <div class="absolute inset-0 z-0">
+        <img src="./images/hero-nurse-patient.jpg" alt="Enfermera profesional brindando cuidado domiciliario a paciente adulto mayor" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-r from-blue-900/95 via-blue-800/85 to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-blue-900/60 via-transparent to-blue-900/30"></div>
+    </div>
+
+    <!-- Floating Trust Badge -->
+    <div class="absolute top-32 right-10 hidden xl:block z-10 animate-float">
+        <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-4 flex items-center space-x-3">
+            <div class="flex items-center justify-center w-12 h-12 bg-green-500 rounded-full">
+                <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+            </div>
+            <div>
+                <p class="text-sm font-bold text-gray-900">100% Cumplimiento</p>
+                <p class="text-xs text-gray-500">Normativa colombiana</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 lg:px-8 relative z-10">
+        <div class="max-w-3xl pt-20 lg:pt-32">
+            <!-- Badge -->
+            <div class="inline-flex items-center space-x-2 px-4 py-2 bg-orange-500/20 backdrop-blur-sm border border-orange-400/30 rounded-full mb-8">
+                <span class="relative flex h-2.5 w-2.5">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-300 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-400"></span>
+                </span>
+                <span class="text-sm font-semibold text-orange-100">🚀 Programa Beta - Lanzamiento Q2 2026</span>
+            </div>
+
+            <!-- Headline -->
+            <h1 class="text-4xl lg:text-6xl font-bold text-white leading-tight mb-6">
+                Sea de las primeras IPS en 
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-cyan-300 to-blue-300">
+                    transformar su operación
+                </span> 
+                con Agentes IA
+            </h1>
+
+            <!-- Subheadline -->
+            <p class="text-xl lg:text-2xl text-blue-100 leading-relaxed mb-10">
+                Únase al programa beta de IPS-ERP. Automatice glosas, RIPS, planillas y cumplimiento normativo. 
+                Cupos limitados para IPS pioneras.
+            </p>
+
+            <!-- CTA Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 mb-16">
+                <a href="#beta" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-teal-500 rounded-xl shadow-xl hover:shadow-2xl hover:bg-teal-600 transition-all transform hover:-translate-y-0.5 group">
+                    Solicitar Acceso Beta
+                    <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                    </svg>
+                </a>
+                <a href="#soluciones" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-white/10 backdrop-blur-sm border border-white/30 rounded-xl hover:bg-white/20 transition-all">
+                    Ver Soluciones
+                </a>
+            </div>
+
+            <!-- Stats Grid - Beta Version -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-all">
+                    <p class="text-3xl font-bold text-white mb-1">Q2 2026</p>
+                    <p class="text-sm font-medium text-blue-200">Lanzamiento</p>
+                    <p class="text-xs text-blue-300">oficial</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-all">
+                    <p class="text-3xl font-bold text-white mb-1">100%</p>
+                    <p class="text-sm font-medium text-blue-200">RIPS Compliance</p>
+                    <p class="text-xs text-blue-300">garantizado</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-all">
+                    <p class="text-3xl font-bold text-white mb-1">AWS</p>
+                    <p class="text-sm font-medium text-blue-200">Bedrock Claude</p>
+                    <p class="text-xs text-blue-300">tecnología IA</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-all">
+                    <p class="text-3xl font-bold text-white mb-1">24/7</p>
+                    <p class="text-sm font-medium text-blue-200">Soporte</p>
+                    <p class="text-xs text-blue-300">incluido</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-10 animate-bounce">
+        <div class="flex flex-col items-center text-white/70">
+            <span class="text-xs font-medium mb-2">Descubra más</span>
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+        </div>
+    </div>
+</section>
+
+<!-- CHALLENGES SECTION -->
+<section id="soluciones" class="py-20 lg:py-28 bg-gradient-to-b from-white to-gray-50">
+    <div class="container mx-auto px-4 lg:px-8">
+        <!-- Section Header -->
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <span class="inline-block px-4 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 rounded-full mb-4">
+                LOS DESAFÍOS
+            </span>
+            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
+                Los desafíos que enfrentan las IPS 
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500">
+                    domiciliarias hoy
+                </span>
+            </h2>
+            <p class="text-lg text-gray-600 leading-relaxed">
+                Sabemos lo difícil que es gestionar una IPS de atención domiciliaria en Colombia. 
+                La presión regulatoria, las glosas y la complejidad operativa consumen tiempo 
+                que debería dedicarse al cuidado del paciente.
+            </p>
+        </div>
+
+        <!-- Challenges Grid -->
+        <div class="grid md:grid-cols-2 gap-6 lg:gap-8">
+            <!-- Challenge 1: Glosadas -->
+            <div class="bg-red-50 border-red-100 border-2 rounded-2xl overflow-hidden transition-all hover:shadow-xl group hover:border-red-200">
+                <div class="relative h-48 overflow-hidden bg-gray-100">
+                    <img src="./images/challenge-glosadas.jpg" alt="Documentos médicos con sellos de rechazo y glosas" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                    <div class="absolute top-4 left-4 text-red-500 bg-white rounded-xl p-3 shadow-lg">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-xl px-4 py-2">
+                        <p class="text-2xl font-bold text-red-600">30%</p>
+                        <p class="text-xs text-gray-600">de facturas rechazadas promedio</p>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <span class="text-xs font-bold uppercase tracking-wider text-red-600">GLOSADAS</span>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3 mt-2 group-hover:text-blue-700 transition-colors">
+                        ¿Glosas consumiendo sus ingresos?
+                    </h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Las EPS rechazan hasta el 30% de las facturas por errores de codificación, documentación incompleta o inconsistencias RIPS. Cada glosa significa meses de trabajo y dinero perdido.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Challenge 2: Manuales -->
+            <div class="bg-amber-50 border-amber-100 border-2 rounded-2xl overflow-hidden transition-all hover:shadow-xl group hover:border-amber-200">
+                <div class="relative h-48 overflow-hidden bg-gray-100">
+                    <img src="./images/challenge-manuales.jpg" alt="Profesional rodeado de pilas de documentos y formularios" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                    <div class="absolute top-4 left-4 text-amber-500 bg-white rounded-xl p-3 shadow-lg">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-xl px-4 py-2">
+                        <p class="text-2xl font-bold text-amber-600">8+ hrs</p>
+                        <p class="text-xs text-gray-600">semanales en tareas manuales</p>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-600">MANUALES</span>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3 mt-2 group-hover:text-blue-700 transition-colors">
+                        ¿Procesos manuales consumiendo tiempo?
+                    </h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Los procesos administrativos manuales consumen horas valiosas de su equipo. La transcripción de datos, verificación de documentos y gestión de casos genera ineficiencias y errores costosos.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Challenge 3: Planillas -->
+            <div class="bg-orange-50 border-orange-100 border-2 rounded-2xl overflow-hidden transition-all hover:shadow-xl group hover:border-orange-200">
+                <div class="relative h-48 overflow-hidden bg-gray-100">
+                    <img src="./images/challenge-planillas.jpg" alt="Pantalla de computadora con hojas de cálculo complejas" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                    <div class="absolute top-4 left-4 text-orange-500 bg-white rounded-xl p-3 shadow-lg">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-xl px-4 py-2">
+                        <p class="text-2xl font-bold text-orange-600">25%</p>
+                        <p class="text-xs text-gray-600">de tiempo improductivo estimado</p>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <span class="text-xs font-bold uppercase tracking-wider text-orange-600">PLANILLAS</span>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3 mt-2 group-hover:text-blue-700 transition-colors">
+                        ¿Programación de turnos caótica?
+                    </h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Coordinar enfermeras, terapeutas y visitas domiciliarias en Excel genera ineficiencias, gastos de transporte innecesarios y pacientes desatendidos. Las planillas no optimizan rutas ni disponibilidad.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Challenge 4: Cumplimiento -->
+            <div class="bg-purple-50 border-purple-100 border-2 rounded-2xl overflow-hidden transition-all hover:shadow-xl group hover:border-purple-200">
+                <div class="relative h-48 overflow-hidden bg-gray-100">
+                    <img src="./images/challenge-cumplimiento.jpg" alt="Lista de verificación de cumplimiento regulatorio" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                    <div class="absolute top-4 left-4 text-purple-500 bg-white rounded-xl p-3 shadow-lg">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                    </div>
+                    <div class="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-xl px-4 py-2">
+                        <p class="text-2xl font-bold text-purple-600">$$</p>
+                        <p class="text-xs text-gray-600">en multas potenciales</p>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <span class="text-xs font-bold uppercase tracking-wider text-purple-600">CUMPLIMIENTO</span>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3 mt-2 group-hover:text-blue-700 transition-colors">
+                        ¿Riesgo de sanciones regulatorias?
+                    </h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Supersalud y las secretarías de salud exigen cumplimiento estricto de normatividad (Res. 3374, 3100, RIPS). La documentación incompleta puede resultar en multas, suspensiones o pérdida de habilitación.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Solution Teaser -->
+        <div class="mt-16 text-center">
+            <div class="inline-flex flex-col items-center">
+                <p class="text-blue-700 font-semibold mb-2">
+                    Descubra cómo nuestra plataforma resuelve cada uno de estos desafíos
+                </p>
+                <svg class="w-6 h-6 text-blue-500 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- BETA SIGNUP SECTION -->
+<section id="beta" class="py-20 lg:py-28 bg-gradient-to-br from-blue-900 via-blue-800 to-teal-700 relative overflow-hidden">
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 opacity-10">
+        <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="1"/>
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+        </svg>
+    </div>
+
+    <!-- Decorative Circles -->
+    <div class="absolute top-0 right-0 w-96 h-96 bg-teal-500/20 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
+    <div class="absolute bottom-0 left-0 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2" />
+
+    <div class="container mx-auto px-4 lg:px-8 relative z-10">
+        <div class="max-w-5xl mx-auto">
+            <div class="bg-white/10 backdrop-blur-sm rounded-3xl p-8 lg:p-12 border border-white/20">
+                <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+                    <!-- Content Side -->
+                    <div>
+                        <span class="inline-flex items-center space-x-2 px-3 py-1 text-xs font-semibold text-orange-300 bg-orange-900/30 rounded-full mb-6">
+                            <span class="relative flex h-2 w-2">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                            </span>
+                            <span>PROGRAMA BETA - CUPOS LIMITADOS</span>
+                        </span>
+
+                        <h2 class="text-3xl lg:text-4xl font-bold text-white mb-6">
+                            Únase al programa beta y{' '}
+                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-cyan-300">
+                                sea pionero en IA
+                            </span>
+                        </h2>
+
+                        <p class="text-lg text-white/80 leading-relaxed mb-8">
+                            Estamos seleccionando IPS visionarias para participar en nuestro programa beta.
+                            Obtenga acceso anticipado, influya en el desarrollo del producto, y prepare su 
+                            organización para el futuro de la atención domiciliaria.
+                        </p>
+
+                        <!-- Benefits List -->
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-center space-x-3 text-white/90">
+                                <div class="flex-shrink-0 w-5 h-5 bg-teal-500 rounded-full flex items-center justify-center">
+                                    <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                <span>Acceso anticipado a todas las funcionalidades</span>
+                            </li>
+                            <li class="flex items-center space-x-3 text-white/90">
+                                <div class="flex-shrink-0 w-5 h-5 bg-teal-500 rounded-full flex items-center justify-center">
+                                    <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                <span>Pricing preferencial de lanzamiento (lifetime)</span>
+                            </li>
+                            <li class="flex items-center space-x-3 text-white/90">
+                                <div class="flex-shrink-0 w-5 h-5 bg-teal-500 rounded-full flex items-center justify-center">
+                                    <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                <span>Soporte directo con el equipo de desarrollo</span>
+                            </li>
+                            <li class="flex items-center space-x-3 text-white/90">
+                                <div class="flex-shrink-0 w-5 h-5 bg-teal-500 rounded-full flex items-center justify-center">
+                                    <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                <span>Influya en el roadmap del producto</span>
+                            </li>
+                        </ul>
+
+                        <!-- Trust Badge -->
+                        <div class="flex items-center space-x-3 text-white/60">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                            <span class="text-sm">Respuesta en 24 horas. Sin compromiso de compra.</span>
+                        </div>
+                    </div>
+
+                    <!-- Form Side -->
+                    <div class="bg-white rounded-2xl p-8 shadow-2xl">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Solicitar Acceso Beta</h3>
+                        <p class="text-sm text-gray-500 mb-6">Complete el formulario y le contactaremos en menos de 24 horas</p>
+
+                        <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST" class="space-y-4">
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Nombre Completo *
+                                </label>
+                                <input
+                                    type="text"
+                                    id="name"
+                                    name="name"
+                                    required
+                                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                    placeholder="Juan Pérez"
+                                />
+                            </div>
+
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Email Corporativo *
+                                </label>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    required
+                                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                    placeholder="juan@ips-ejemplo.com"
+                                />
+                            </div>
+
+                            <div>
+                                <label for="ips" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Nombre de IPS *
+                                </label>
+                                <input
+                                    type="text"
+                                    id="ips"
+                                    name="ips"
+                                    required
+                                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                    placeholder="IPS Ejemplo S.A.S."
+                                />
+                            </div>
+
+                            <div>
+                                <label for="position" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Cargo *
+                                </label>
+                                <select
+                                    id="position"
+                                    name="position"
+                                    required
+                                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                >
+                                    <option value="">Seleccione...</option>
+                                    <option value="director">Director/a General</option>
+                                    <option value="admin">Administrador/a</option>
+                                    <option value="coord">Coordinador/a Operativo</option>
+                                    <option value="ti">Responsable TI</option>
+                                    <option value="otro">Otro</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="team-size" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Tamaño del equipo asistencial
+                                </label>
+                                <select
+                                    id="team-size"
+                                    name="team_size"
+                                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                >
+                                    <option value="">Seleccione...</option>
+                                    <option value="1-10">1-10 profesionales</option>
+                                    <option value="11-25">11-25 profesionales</option>
+                                    <option value="26-50">26-50 profesionales</option>
+                                    <option value="51+">Más de 50 profesionales</option>
+                                </select>
+                            </div>
+
+                            <div class="flex items-start space-x-3">
+                                <input
+                                    type="checkbox"
+                                    id="consent"
+                                    name="consent"
+                                    required
+                                    class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                />
+                                <label for="consent" class="text-xs text-gray-600">
+                                    Acepto recibir actualizaciones sobre IPS-ERP y el programa beta. 
+                                    Puedo cancelar en cualquier momento.
+                                </label>
+                            </div>
+
+                            <button
+                                type="submit"
+                                class="w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-teal-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all transform hover:-translate-y-0.5"
+                            >
+                                Solicitar Acceso Beta →
+                            </button>
+
+                            <p class="text-xs text-gray-500 text-center">
+                                Responderemos a todas las solicitudes en un plazo máximo de 24 horas.
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Simple Footer -->
+<footer class="bg-gray-900 text-white py-12">
+    <div class="container mx-auto px-4 lg:px-8 text-center">
+        <p class="text-lg font-semibold mb-2">IPS-ERP</p>
+        <p class="text-gray-400 text-sm">Transformando la atención domiciliaria con IA</p>
+        <p class="text-gray-500 text-xs mt-4">© 2026 IPS-ERP. Todos los derechos reservados.</p>
+    </div>
+</footer>
+
+</body>
+</html>

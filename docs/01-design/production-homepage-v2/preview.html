@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPS-ERP - Software para Atención Domiciliaria | Landing Page Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes float-delayed {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        .animate-float-delayed {
+            animation: float-delayed 5s ease-in-out infinite;
+            animation-delay: 1s;
+        }
+        
+        .gradient-blue-teal {
+            background: linear-gradient(135deg, #1565C0 0%, #00897B 100%);
+        }
+        
+        .gradient-text-blue-teal {
+            background: linear-gradient(to right, #1565C0, #00897B);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body class="bg-white">
+    <!-- Navigation Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-white shadow-md py-3">
+        <div class="container mx-auto px-4 lg:px-8">
+            <div class="flex items-center justify-between">
+                <a href="#" class="flex items-center space-x-2">
+                    <div class="text-2xl font-bold text-blue-700">IPS-ERP</div>
+                    <span class="text-xs font-medium px-2 py-0.5 bg-teal-100 text-teal-700 rounded-full">Domiciliario</span>
+                </a>
+                <nav class="hidden lg:flex items-center space-x-8">
+                    <a href="#soluciones" class="text-sm font-medium text-gray-700 hover:text-teal-600">Soluciones</a>
+                    <a href="#plataforma" class="text-sm font-medium text-gray-700 hover:text-teal-600">Plataforma</a>
+                    <a href="#ia" class="text-sm font-medium text-gray-700 hover:text-teal-600">IA</a>
+                    <a href="#cumplimiento" class="text-sm font-medium text-gray-700 hover:text-teal-600">Cumplimiento</a>
+                    <a href="#historias" class="text-sm font-medium text-gray-700 hover:text-teal-600">Historias</a>
+                </nav>
+                <div class="hidden lg:flex items-center space-x-4">
+                    <a href="#contacto" class="text-sm font-medium text-gray-700">Contacto</a>
+                    <a href="#demo" class="inline-flex items-center px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-teal-500 rounded-lg hover:opacity-90 transition-all">
+                        Agendar Demo
+                        <svg class="ml-2 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center overflow-hidden pt-16">
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=1920&q=80" alt="Enfermera cuidando paciente en casa" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-r from-blue-900/95 via-blue-800/85 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-blue-900/60 via-transparent to-blue-900/30"></div>
+        </div>
+
+        <div class="relative z-10 container mx-auto px-4 lg:px-8 py-20">
+            <div class="max-w-3xl">
+                <div class="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-8">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
+                    </span>
+                    <span class="text-sm text-white/90 font-medium">Nuevo: Roster Architect AI — Optimización automática de turnos</span>
+                </div>
+
+                <h1 class="text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
+                    Software que <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-cyan-300">protege su facturación</span> y optimiza su operación domiciliaria
+                </h1>
+
+                <p class="text-xl text-white/80 leading-relaxed mb-10 max-w-2xl">
+                    Plataforma integral con inteligencia artificial diseñada por expertos colombianos para IPS de atención domiciliaria. Defienda sus glosas, optimice su roster y garantice cumplimiento RIPS.
+                </p>
+
+                <div class="flex flex-col sm:flex-row gap-4 mb-16">
+                    <a href="#demo" class="inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-blue-900 bg-white rounded-xl hover:bg-gray-50 transition-all shadow-xl">
+                        Agendar Demo Personalizada
+                        <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-white border-2 border-white/30 rounded-xl hover:bg-white/10 transition-all">
+                        <svg class="mr-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                        </svg>
+                        Ver Plataforma en Acción
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="absolute bottom-0 left-0 right-0 z-20">
+            <div class="bg-white/95 backdrop-blur-md border-t border-gray-100">
+                <div class="container mx-auto px-4 lg:px-8">
+                    <div class="grid grid-cols-2 lg:grid-cols-4 divide-x divide-gray-200">
+                        <div class="py-6 lg:py-8 px-4 lg:px-8 text-center lg:text-left">
+                            <p class="text-3xl lg:text-4xl font-bold text-blue-700 mb-1">500+</p>
+                            <p class="text-sm font-semibold text-gray-900">IPS Activas</p>
+                            <p class="text-xs text-gray-500">en Colombia</p>
+                        </div>
+                        <div class="py-6 lg:py-8 px-4 lg:px-8 text-center lg:text-left">
+                            <p class="text-3xl lg:text-4xl font-bold text-blue-700 mb-1">92%</p>
+                            <p class="text-sm font-semibold text-gray-900">Glosas Defendidas</p>
+                            <p class="text-xs text-gray-500">con éxito</p>
+                        </div>
+                        <div class="py-6 lg:py-8 px-4 lg:px-8 text-center lg:text-left">
+                            <p class="text-3xl lg:text-4xl font-bold text-blue-700 mb-1">$5.1M</p>
+                            <p class="text-sm font-semibold text-gray-900">Recuperados</p>
+                            <p class="text-xs text-gray-500">mensualmente</p>
+                        </div>
+                        <div class="py-6 lg:py-8 px-4 lg:px-8 text-center lg:text-left">
+                            <p class="text-3xl lg:text-4xl font-bold text-blue-700 mb-1">98%</p>
+                            <p class="text-sm font-semibold text-gray-900">Compliance</p>
+                            <p class="text-xs text-gray-500">RIPS garantizado</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Logos Section -->
+    <section class="py-12 bg-gray-50 border-b border-gray-100 mt-48">
+        <div class="container mx-auto px-4 lg:px-8">
+            <div class="text-center mb-8">
+                <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Certificaciones & Cumplimiento Regulatorio</p>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-center gap-8 lg:gap-12">
+                <div class="flex items-center space-x-3 group cursor-default">
+                    <svg class="w-8 h-8 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-700">RIPS Compliant</p>
+                        <p class="text-xs text-gray-500">Resolución 3374</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3 group cursor-default">
+                    <svg class="w-8 h-8 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-700">ISO 27001</p>
+                        <p class="text-xs text-gray-500">Seguridad de Datos</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3 group cursor-default">
+                    <svg class="w-8 h-8 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-700">Supersalud</p>
+                        <p class="text-xs text-gray-500">Compatible</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3 group cursor-default">
+                    <svg class="w-8 h-8 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-700">Resolución 3100</p>
+                        <p class="text-xs text-gray-500">Habilitación</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-10">
+                <p class="text-sm text-gray-500">Más de <span class="font-semibold text-blue-700">500 IPS</span> confían en nuestra plataforma para su operación diaria</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section id="demo" class="py-20 lg:py-28 bg-gradient-to-br from-blue-900 via-blue-800 to-teal-700 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-teal-500/20 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
+        <div class="absolute bottom-0 left-0 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
+
+        <div class="container mx-auto px-4 lg:px-8 relative z-10">
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-white/10 backdrop-blur-sm rounded-3xl p-8 lg:p-12 border border-white/20">
+                    <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+                        <div>
+                            <span class="inline-flex items-center space-x-2 px-3 py-1 text-xs font-semibold text-teal-300 bg-teal-900/30 rounded-full mb-6">
+                                <span class="relative flex h-2 w-2">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
+                                </span>
+                                <span>DISPONIBLE PARA NUEVAS IPS</span>
+                            </span>
+
+                            <h2 class="text-3xl lg:text-4xl font-bold text-white mb-6">
+                                Transforme su IPS <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-cyan-300">con un socio estratégico</span>
+                            </h2>
+
+                            <p class="text-lg text-white/80 leading-relaxed mb-8">
+                                No vendemos software. Construimos relaciones de largo plazo con IPS que buscan excelencia operacional. Agende una demo y descubra cómo podemos ser su socio tecnológico.
+                            </p>
+
+                            <ul class="space-y-3 mb-8">
+                                <li class="flex items-center space-x-3 text-white/90">
+                                    <div class="flex-shrink-0 w-5 h-5 bg-teal-500 rounded-full flex items-center justify-center">
+                                        <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                    </div>
+                                    <span>Demo personalizada para su IPS</span>
+                                </li>
+                                <li class="flex items-center space-x-3 text-white/90">
+                                    <div class="flex-shrink-0 w-5 h-5 bg-teal-500 rounded-full flex items-center justify-center">
+                                        <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                    </div>
+                                    <span>Análisis gratuito de su operación actual</span>
+                                </li>
+                                <li class="flex items-center space-x-3 text-white/90">
+                                    <div class="flex-shrink-0 w-5 h-5 bg-teal-500 rounded-full flex items-center justify-center">
+                                        <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                    </div>
+                                    <span>Propuesta de valor clara sin compromisos</span>
+                                </li>
+                                <li class="flex items-center space-x-3 text-white/90">
+                                    <div class="flex-shrink-0 w-5 h-5 bg-teal-500 rounded-full flex items-center justify-center">
+                                        <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                    </div>
+                                    <span>Implementación en menos de 30 días</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-white rounded-2xl p-8 shadow-2xl">
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">Agendar Demo Gratuita</h3>
+                            <p class="text-sm text-gray-500 mb-6">Complete el formulario y le contactaremos en menos de 24 horas</p>
+
+                            <form class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
+                                    <input type="text" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Dr. Juan Pérez">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Correo Corporativo</label>
+                                    <input type="email" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="juan@miips.com">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono / WhatsApp</label>
+                                    <input type="tel" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="+57 300 123 4567">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de su IPS</label>
+                                    <input type="text" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="IPS Cuidado Domiciliario">
+                                </div>
+
+                                <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-teal-500 text-white font-semibold py-4 rounded-xl hover:opacity-90 transition-all shadow-lg">
+                                    Solicitar Demo Gratuita
+                                </button>
+                            </form>
+
+                            <p class="text-xs text-gray-400 text-center mt-4">Al enviar acepta nuestra política de privacidad</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-16">
+        <div class="container mx-auto px-4 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mb-12">
+                <div class="col-span-2 lg:col-span-2">
+                    <a href="/" class="inline-block mb-6">
+                        <div class="text-2xl font-bold text-white">IPS-ERP</div>
+                        <div class="text-xs text-gray-400 mt-1">Atención Domiciliaria</div>
+                    </a>
+                    <p class="text-gray-400 text-sm leading-relaxed max-w-xs">
+                        Plataforma integral para IPS de atención domiciliaria en Colombia. Su socio tecnológico para la excelencia operacional.
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="text-sm font-semibold text-white uppercase tracking-wider mb-4">Plataforma</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Historia Clínica</a></li>
+                        <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Facturación</a></li>
+                        <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">RIPS Automático</a></li>
+                        <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">App Móvil</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-sm font-semibold text-white uppercase tracking-wider mb-4">Empresa</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Sobre Nosotros</a></li>
+                        <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Contacto</a></li>
+                        <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Carreras</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 pt-8">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <p class="text-sm text-gray-500">© 2026 IPS-ERP. Todos los derechos reservados.</p>
+                    <div class="flex flex-wrap items-center gap-4 text-sm">
+                        <a href="#" class="text-gray-500 hover:text-white transition-colors">Términos de Servicio</a>
+                        <a href="#" class="text-gray-500 hover:text-white transition-colors">Política de Privacidad</a>
+                        <a href="#" class="text-gray-500 hover:text-white transition-colors">Política de Cookies</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

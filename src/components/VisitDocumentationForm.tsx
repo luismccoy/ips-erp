@@ -1,5 +1,6 @@
 // Update the imports at the top
 import React, { useState, useEffect, useCallback } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { generateClient } from 'aws-amplify/data';
 import { isUsingRealBackend, client, getUserId, getTenantId } from '../amplify-utils';
 import { KardexForm } from './KardexForm';
@@ -386,7 +387,20 @@ export const VisitDocumentationForm: React.FC<VisitDocumentationFormProps> = ({
     <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-start justify-center z-50 overflow-y-auto py-8">
       <div className="bg-slate-100 rounded-2xl shadow-2xl max-w-5xl w-full mx-4 my-auto">
         {/* Header */}
-        {/* ... [Keep existing header JSX] ... */}
+        <div className="relative px-6 py-4 border-b border-slate-200">
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute left-4 top-4 p-2 hover:bg-slate-200 rounded-lg transition-colors"
+            aria-label="Volver"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-slate-900">Documentación de visita</h2>
+            <p className="text-sm text-slate-600">{patientName}</p>
+          </div>
+        </div>
 
         {/* Messages */}
         {/* ... [Keep existing messages JSX] ... */}
