@@ -47,8 +47,28 @@
 </head>
 <body class="bg-white">
 
+<!-- HEADER -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200">
+    <div class="container mx-auto px-4 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-blue-600 rounded-lg"></div>
+                <span class="text-lg font-semibold text-gray-900">IPS-ERP</span>
+            </div>
+            <nav class="hidden md:flex items-center space-x-6">
+                <a href="#soluciones" class="text-sm font-medium text-gray-600 hover:text-gray-900">Soluciones</a>
+                <a href="#beta" class="text-sm font-medium text-gray-600 hover:text-gray-900">Programa Beta</a>
+                <a href="/nurse?demo=true" class="text-sm font-medium text-gray-600 hover:text-gray-900">Demo</a>
+            </nav>
+            <a href="/" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                Iniciar Sesión
+            </a>
+        </div>
+    </div>
+</header>
+
 <!-- HERO SECTION -->
-<section class="relative min-h-screen flex items-center overflow-hidden">
+<section class="relative min-h-screen flex items-center overflow-hidden pt-16">
     <!-- Background Image -->
     <div class="absolute inset-0 z-0">
         <img src="/images/hero-nurse-patient.jpg" alt="Enfermera profesional brindando cuidado domiciliario a paciente adulto mayor" class="w-full h-full object-cover">
@@ -176,15 +196,6 @@
                 <div class="relative h-48 overflow-hidden bg-gray-100">
                     <img src="/images/challenge-glosadas.jpg" alt="Documentos médicos con sellos de rechazo y glosas" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                    <div class="absolute top-4 left-4 text-red-500 bg-white rounded-xl p-3 shadow-lg">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <div class="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-xl px-4 py-2">
-                        <p class="text-2xl font-bold text-red-600">30%</p>
-                        <p class="text-xs text-gray-600">de facturas rechazadas promedio</p>
-                    </div>
                 </div>
                 <div class="p-6">
                     <span class="text-xs font-bold uppercase tracking-wider text-red-600">GLOSADAS</span>
@@ -202,15 +213,6 @@
                 <div class="relative h-48 overflow-hidden bg-gray-100">
                     <img src="/images/challenge-manuales.jpg" alt="Profesional rodeado de pilas de documentos y formularios" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                    <div class="absolute top-4 left-4 text-amber-500 bg-white rounded-xl p-3 shadow-lg">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                    </div>
-                    <div class="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-xl px-4 py-2">
-                        <p class="text-2xl font-bold text-amber-600">8+ hrs</p>
-                        <p class="text-xs text-gray-600">semanales en tareas manuales</p>
-                    </div>
                 </div>
                 <div class="p-6">
                     <span class="text-xs font-bold uppercase tracking-wider text-amber-600">MANUALES</span>
@@ -228,15 +230,6 @@
                 <div class="relative h-48 overflow-hidden bg-gray-100">
                     <img src="/images/challenge-planillas.jpg" alt="Pantalla de computadora con hojas de cálculo complejas" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                    <div class="absolute top-4 left-4 text-blue-600 bg-white rounded-xl p-3 shadow-lg">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                        </svg>
-                    </div>
-                    <div class="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-xl px-4 py-2">
-                        <p class="text-2xl font-bold text-orange-600">25%</p>
-                        <p class="text-xs text-gray-600">de tiempo improductivo estimado</p>
-                    </div>
                 </div>
                 <div class="p-6">
                     <span class="text-xs font-bold uppercase tracking-wider text-orange-600">PLANILLAS</span>
@@ -254,15 +247,6 @@
                 <div class="relative h-48 overflow-hidden bg-gray-100">
                     <img src="/images/challenge-cumplimiento.jpg" alt="Lista de verificación de cumplimiento regulatorio" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                    <div class="absolute top-4 left-4 text-purple-500 bg-white rounded-xl p-3 shadow-lg">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                        </svg>
-                    </div>
-                    <div class="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-xl px-4 py-2">
-                        <p class="text-2xl font-bold text-purple-600">$$</p>
-                        <p class="text-xs text-gray-600">en multas potenciales</p>
-                    </div>
                 </div>
                 <div class="p-6">
                     <span class="text-xs font-bold uppercase tracking-wider text-purple-600">CUMPLIMIENTO</span>
@@ -291,7 +275,7 @@
 </section>
 
 <!-- BETA SIGNUP SECTION -->
-<section id="beta" class="py-20 lg:py-28 bg-gradient-to-br from-blue-900 via-blue-800 to-teal-700 relative overflow-hidden">
+<section id="beta" class="py-20 lg:py-28 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 relative">
     <!-- Background Pattern -->
     <div class="absolute inset-0 opacity-10">
         <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -498,10 +482,39 @@
 
 <!-- Simple Footer -->
 <footer class="bg-gray-900 text-white py-12">
-    <div class="container mx-auto px-4 lg:px-8 text-center">
-        <p class="text-lg font-semibold mb-2">IPS-ERP</p>
-        <p class="text-gray-400 text-sm">Transformando la atención domiciliaria con IA</p>
-        <p class="text-gray-500 text-xs mt-4">© 2026 IPS-ERP. Todos los derechos reservados.</p>
+    <div class="container mx-auto px-4 lg:px-8">
+        <div class="grid md:grid-cols-4 gap-8 mb-8">
+            <div>
+                <p class="text-lg font-semibold mb-4">IPS-ERP</p>
+                <p class="text-gray-400 text-sm">Transformando la atención domiciliaria con IA</p>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-3">Producto</h4>
+                <ul class="space-y-2 text-sm text-gray-400">
+                    <li><a href="/nurse?demo=true" class="hover:text-white">Demo</a></li>
+                    <li><a href="#soluciones" class="hover:text-white">Soluciones</a></li>
+                    <li><a href="#beta" class="hover:text-white">Programa Beta</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-3">Legal</h4>
+                <ul class="space-y-2 text-sm text-gray-400">
+                    <li><a href="#" class="hover:text-white">Términos de Servicio</a></li>
+                    <li><a href="#" class="hover:text-white">Política de Privacidad</a></li>
+                    <li><a href="#" class="hover:text-white">Habeas Data</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-3">Contacto</h4>
+                <ul class="space-y-2 text-sm text-gray-400">
+                    <li>soporte@ips-erp.com</li>
+                    <li>ventas@ips-erp.com</li>
+                </ul>
+            </div>
+        </div>
+        <div class="border-t border-gray-800 pt-6 text-center">
+            <p class="text-gray-500 text-xs">© 2026 IPS-ERP. Todos los derechos reservados.</p>
+        </div>
     </div>
 </footer>
 
