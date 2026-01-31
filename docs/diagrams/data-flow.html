@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Flow Diagrams - IPS ERP</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 40px 20px;
+      margin: 0;
+    }
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #818cf8;
+      margin-bottom: 10px;
+    }
+    h2 {
+      color: #a78bfa;
+      margin-top: 50px;
+      border-bottom: 2px solid #334155;
+      padding-bottom: 10px;
+    }
+    h3 {
+      color: #60a5fa;
+      margin-top: 30px;
+    }
+    .subtitle {
+      color: #94a3b8;
+      margin-bottom: 30px;
+      font-size: 1.1em;
+    }
+    .diagram {
+      background: #1e293b;
+      padding: 30px;
+      border-radius: 12px;
+      margin: 20px 0;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      overflow-x: auto;
+    }
+    .diagram-title {
+      color: #f472b6;
+      font-weight: 600;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .info-box {
+      background: #334155;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 4px solid #818cf8;
+    }
+    .info-box h3 {
+      margin-top: 0;
+      color: #818cf8;
+    }
+    .info-box.warning {
+      border-left-color: #f59e0b;
+    }
+    .info-box.warning h3 {
+      color: #f59e0b;
+    }
+    .info-box.success {
+      border-left-color: #10b981;
+    }
+    .info-box.success h3 {
+      color: #10b981;
+    }
+    .tech-stack {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .tech-card {
+      background: #1e293b;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+    }
+    .tech-card h4 {
+      color: #818cf8;
+      margin-top: 0;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    code {
+      background: #0f172a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #60a5fa;
+    }
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 15px;
+      margin: 15px 0;
+      padding: 15px;
+      background: #1e293b;
+      border-radius: 8px;
+    }
+    .flow-step-number {
+      background: #818cf8;
+      color: #0f172a;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    .flow-step-content h4 {
+      margin: 0 0 5px 0;
+      color: #e2e8f0;
+    }
+    .flow-step-content p {
+      margin: 0;
+      color: #94a3b8;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-right: 5px;
+    }
+    .status-offline { background: #ef4444; color: white; }
+    .status-syncing { background: #f59e0b; color: #0f172a; }
+    .status-online { background: #10b981; color: white; }
+    .status-pending { background: #3b82f6; color: white; }
+    .status-approved { background: #8b5cf6; color: white; }
+    .toc {
+      background: #1e293b;
+      padding: 25px;
+      border-radius: 12px;
+      margin-bottom: 40px;
+    }
+    .toc h3 {
+      margin-top: 0;
+      color: #818cf8;
+    }
+    .toc ul {
+      list-style: none;
+      padding: 0;
+    }
+    .toc li {
+      padding: 8px 0;
+      border-bottom: 1px solid #334155;
+    }
+    .toc li:last-child {
+      border-bottom: none;
+    }
+    .toc a {
+      color: #60a5fa;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .toc a:hover {
+      color: #818cf8;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #334155;
+    }
+    th {
+      background: #334155;
+      color: #818cf8;
+    }
+    tr:hover {
+      background: #1e293b;
+    }
+    .ai-agent {
+      background: linear-gradient(135deg, #1e293b 0%, #312e81 100%);
+      border: 1px solid #4f46e5;
+      padding: 20px;
+      border-radius: 12px;
+      margin: 15px 0;
+    }
+    .ai-agent h4 {
+      color: #c4b5fd;
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔄 Data Flow Diagrams</h1>
+    <p class="subtitle">Comprehensive view of how data moves through IPS-ERP Healthcare Platform</p>
+
+    <div class="toc">
+      <h3>📑 Table of Contents</h3>
+      <ul>
+        <li><a href="#overview">🎯 Data Flow Overview</a></li>
+        <li><a href="#offline-sync">📴 Offline → Online Sync Flow (Critical)</a></li>
+        <li><a href="#visit-flow">📋 Visit Documentation Flow</a></li>
+        <li><a href="#realtime">⚡ Real-Time Subscription Flow</a></li>
+        <li><a href="#ai-agents">🤖 AI Agent Data Flows</a></li>
+        <li><a href="#conflict">🔀 Conflict Resolution Strategy</a></li>
+      </ul>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- OVERVIEW SECTION -->
+    <!-- ============================================ -->
+    <h2 id="overview">🎯 Data Flow Overview</h2>
+
+    <div class="info-box">
+      <h3>📋 System Context</h3>
+      <p><strong>Architecture:</strong> React PWA → AWS AppSync (GraphQL) → Lambda → DynamoDB</p>
+      <p><strong>Offline Strategy:</strong> IndexedDB queue with background sync when online</p>
+      <p><strong>Real-Time:</strong> GraphQL subscriptions for instant status updates</p>
+      <p><strong>AI Processing:</strong> Amazon Bedrock (Claude) for optimization & validation</p>
+    </div>
+
+    <div class="diagram">
+      <div class="diagram-title">🌐 High-Level Data Flow Architecture</div>
+      <pre class="mermaid">
+flowchart TB
+    subgraph CLIENT["📱 Client Layer"]
+        direction LR
+        NurseApp["👩‍⚕️ Nurse Mobile<br/>(PWA)"]
+        AdminApp["👨‍💼 Admin Portal"]
+        FamilyApp["👨‍👩‍👧 Family Portal"]
+    end
+    
+    subgraph OFFLINE["💾 Offline Storage"]
+        IndexedDB[(IndexedDB<br/>Visit Queue)]
+        LocalCache[(localStorage<br/>Metadata)]
+    end
+    
+    subgraph SYNC["🔄 Sync Layer"]
+        ServiceWorker[Service Worker<br/>Background Sync]
+        SyncManager[Sync Manager<br/>Conflict Resolution]
+    end
+    
+    subgraph API["🌐 API Layer"]
+        AppSync[AWS AppSync<br/>GraphQL API]
+        Subscriptions[Real-Time<br/>Subscriptions]
+    end
+    
+    subgraph COMPUTE["⚡ Compute Layer"]
+        Lambda[Lambda Functions<br/>Business Logic]
+        Bedrock[Amazon Bedrock<br/>AI Agents]
+    end
+    
+    subgraph DATA["🗄️ Data Layer"]
+        DynamoDB[(DynamoDB<br/>Primary Store)]
+        S3[(S3 Buckets<br/>Documents)]
+    end
+    
+    NurseApp <-->|Offline writes| IndexedDB
+    NurseApp <-->|Auth & prefs| LocalCache
+    AdminApp --> AppSync
+    FamilyApp --> AppSync
+    
+    IndexedDB --> ServiceWorker
+    ServiceWorker --> SyncManager
+    SyncManager --> AppSync
+    
+    AppSync --> Lambda
+    AppSync <--> Subscriptions
+    
+    Lambda --> DynamoDB
+    Lambda --> S3
+    Lambda <--> Bedrock
+    
+    Subscriptions -.->|Push updates| NurseApp
+    Subscriptions -.->|Push updates| AdminApp
+    
+    style NurseApp fill:#34d399,stroke:#059669,color:#0f172a
+    style AdminApp fill:#60a5fa,stroke:#1e40af,color:#0f172a
+    style FamilyApp fill:#f472b6,stroke:#be185d,color:#0f172a
+    style IndexedDB fill:#f59e0b,stroke:#d97706,color:#0f172a
+    style Bedrock fill:#8b5cf6,stroke:#6d28d9,color:#fff
+    style DynamoDB fill:#818cf8,stroke:#4f46e5,color:#0f172a
+      </pre>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- OFFLINE TO ONLINE SYNC -->
+    <!-- ============================================ -->
+    <h2 id="offline-sync">📴 Offline → Online Sync Flow</h2>
+
+    <div class="info-box warning">
+      <h3>⚠️ Critical for Field Operations</h3>
+      <p>Nurses work in rural areas with intermittent connectivity. The offline-first architecture ensures:</p>
+      <ul>
+        <li><strong>Zero data loss:</strong> All changes queued locally in IndexedDB</li>
+        <li><strong>Automatic sync:</strong> Background sync when connectivity returns</li>
+        <li><strong>Conflict resolution:</strong> Last-write-wins with admin override capability</li>
+        <li><strong>Optimistic UI:</strong> Changes reflected immediately, synced transparently</li>
+      </ul>
+    </div>
+
+    <div class="diagram">
+      <div class="diagram-title">📴 Offline Data Persistence & Sync Mechanism</div>
+      <pre class="mermaid">
+sequenceDiagram
+    participant Nurse as 👩‍⚕️ Nurse App
+    participant UI as React State
+    participant IDB as IndexedDB
+    participant SW as Service Worker
+    participant Net as Network Monitor
+    participant API as GraphQL API
+    participant DB as DynamoDB
+    
+    Note over Nurse,UI: 📴 OFFLINE MODE (Rural area - no connectivity)
+    
+    Nurse->>UI: Fill KARDEX form
+    UI->>UI: Validate locally
+    UI->>IDB: Store visit draft
+    IDB-->>UI: ✅ Saved with timestamp
+    UI-->>Nurse: "Saved locally ✓"
+    
+    Nurse->>UI: Add clinical scales
+    UI->>IDB: Update visit record
+    IDB-->>UI: Queue for sync
+    
+    Nurse->>UI: Submit for approval
+    UI->>IDB: Mark status: PENDING_SYNC
+    UI-->>Nurse: "Will sync when online"
+    
+    Note over Net,API: 🌐 CONNECTIVITY RESTORED
+    
+    Net->>SW: online event fired
+    SW->>IDB: Query PENDING_SYNC items
+    IDB-->>SW: Return 3 queued visits
+    
+    loop For each pending visit
+        SW->>API: mutation syncVisit()
+        API->>DB: Conditional write
+        alt No conflict
+            DB-->>API: Success
+            API-->>SW: Synced ✓
+            SW->>IDB: Update status: SYNCED
+        else Version conflict
+            DB-->>API: ConditionalCheckFailed
+            API-->>SW: Conflict detected
+            SW->>IDB: Mark for resolution
+        end
+    end
+    
+    SW-->>Nurse: 🔔 Push: "All visits synced"
+      </pre>
+    </div>
+
+    <h3>Offline Storage Schema</h3>
+    <div class="tech-stack">
+      <div class="tech-card">
+        <h4>📦 IndexedDB Structure</h4>
+        <code>
+IPS_ERP_OFFLINE_DB<br/>
+├── visits (object store)<br/>
+│   ├── key: visitId<br/>
+│   ├── data: { kardex, vitals, assessments }<br/>
+│   ├── status: DRAFT|PENDING_SYNC|SYNCED<br/>
+│   ├── localTimestamp: ISO date<br/>
+│   └── version: number<br/>
+├── queue (object store)<br/>
+│   ├── key: auto-increment<br/>
+│   ├── operation: CREATE|UPDATE|DELETE<br/>
+│   ├── entityType: Visit|Assessment<br/>
+│   ├── payload: JSON<br/>
+│   └── retryCount: number<br/>
+└── metadata (object store)<br/>
+    ├── lastSyncTimestamp<br/>
+    └── pendingCount
+        </code>
+      </div>
+      
+      <div class="tech-card">
+        <h4>🔄 Sync Status Lifecycle</h4>
+        <table>
+          <tr>
+            <th>Status</th>
+            <th>UI Display</th>
+          </tr>
+          <tr>
+            <td><span class="status-badge status-offline">DRAFT</span></td>
+            <td>Gray dot - saved locally</td>
+          </tr>
+          <tr>
+            <td><span class="status-badge status-syncing">PENDING_SYNC</span></td>
+            <td>Yellow spinner - waiting</td>
+          </tr>
+          <tr>
+            <td><span class="status-badge status-online">SYNCED</span></td>
+            <td>Green check - confirmed</td>
+          </tr>
+          <tr>
+            <td><span class="status-badge status-pending">CONFLICT</span></td>
+            <td>Orange warning - needs review</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="diagram">
+      <div class="diagram-title">🔄 Background Sync Queue Processing</div>
+      <pre class="mermaid">
+flowchart TD
+    Start([Service Worker<br/>Activated]) --> CheckQueue{Check<br/>Sync Queue}
+    
+    CheckQueue -->|Empty| Sleep[Sleep until<br/>network event]
+    CheckQueue -->|Has items| Batch[Batch items<br/>max 10 per batch]
+    
+    Batch --> NetCheck{Network<br/>available?}
+    
+    NetCheck -->|No| Wait[Wait for<br/>online event]
+    Wait --> NetCheck
+    
+    NetCheck -->|Yes| Process[Process batch<br/>sequentially]
+    
+    Process --> Sync[Send to<br/>GraphQL API]
+    
+    Sync --> Result{Response?}
+    
+    Result -->|Success| UpdateIDB[Update IndexedDB<br/>status: SYNCED]
+    Result -->|Conflict| HandleConflict[Mark for<br/>conflict resolution]
+    Result -->|Network Error| Retry{Retry<br/>count < 3?}
+    
+    Retry -->|Yes| Backoff[Exponential<br/>backoff wait]
+    Retry -->|No| MarkFailed[Mark as<br/>SYNC_FAILED]
+    
+    Backoff --> Sync
+    
+    UpdateIDB --> More{More items<br/>in batch?}
+    HandleConflict --> More
+    MarkFailed --> More
+    
+    More -->|Yes| Process
+    More -->|No| Notify[Push notification<br/>to user]
+    
+    Notify --> CheckQueue
+    
+    style Start fill:#818cf8,stroke:#4f46e5,color:#0f172a
+    style Notify fill:#10b981,stroke:#059669,color:#0f172a
+    style HandleConflict fill:#f59e0b,stroke:#d97706,color:#0f172a
+    style MarkFailed fill:#ef4444,stroke:#b91c1c,color:#fff
+      </pre>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- VISIT DOCUMENTATION FLOW -->
+    <!-- ============================================ -->
+    <h2 id="visit-flow">📋 Visit Documentation Flow</h2>
+
+    <div class="info-box">
+      <h3>📋 End-to-End Visit Lifecycle</h3>
+      <p>From nurse filling KARDEX → Admin approval → RIPS generation for EPS billing</p>
+    </div>
+
+    <div class="diagram">
+      <div class="diagram-title">📋 Complete Visit Documentation Journey</div>
+      <pre class="mermaid">
+sequenceDiagram
+    participant N as 👩‍⚕️ Nurse
+    participant App as Nurse App
+    participant API as GraphQL API
+    participant WF as Workflow Engine
+    participant AI as RIPS Validator AI
+    participant Admin as 👨‍💼 Admin
+    participant EPS as 🏥 EPS System
+    
+    Note over N,App: STEP 1: Visit Documentation
+    
+    N->>App: Start visit for shift #123
+    App->>API: createVisitDraft(shiftId)
+    API-->>App: Visit draft created (status: DRAFT)
+    
+    N->>App: Fill KARDEX
+    Note right of App: - Medications administered<br/>- Vital signs<br/>- General observations<br/>- Wound care notes
+    
+    N->>App: Complete Clinical Scales
+    Note right of App: - Glasgow: 15/15<br/>- Braden: 18 (Low risk)<br/>- Norton: 16 (Not at risk)<br/>- Downton: 2 (Low fall risk)
+    
+    App->>App: Auto-calculate scores
+    App->>API: saveVisitProgress(visitId, data)
+    API-->>App: Progress saved ✓
+    
+    Note over N,Admin: STEP 2: Submit for Review
+    
+    N->>App: Submit for approval
+    App->>API: submitVisit(visitId)
+    API->>WF: Validate completeness
+    
+    WF->>WF: Check required fields
+    WF->>AI: Validate clinical data
+    AI-->>WF: Validation passed ✓
+    
+    WF->>API: Update status: SUBMITTED
+    API-->>App: Submitted successfully
+    App-->>N: "Sent for review ✓"
+    
+    Note over Admin,EPS: STEP 3: Admin Review & Approval
+    
+    API->>Admin: 🔔 New visit pending
+    Admin->>API: getVisitDetails(visitId)
+    API-->>Admin: Full visit data
+    
+    Admin->>Admin: Review documentation
+    
+    alt Approved
+        Admin->>API: approveVisit(visitId)
+        API->>WF: Process approval
+        WF->>WF: Generate RIPS XML
+        WF->>AI: Final RIPS validation
+        AI-->>WF: RIPS valid ✓
+        WF->>API: Update status: APPROVED
+        API-->>Admin: Approved ✓
+        API->>N: 🔔 Visit approved
+    else Rejected (needs corrections)
+        Admin->>API: rejectVisit(visitId, reason)
+        API->>WF: Process rejection
+        WF->>API: Update status: CORRECTIONS_NEEDED
+        API-->>Admin: Rejected ✓
+        API->>N: 🔔 Corrections needed
+        N->>App: Make corrections
+        N->>App: Re-submit
+    end
+    
+    Note over Admin,EPS: STEP 4: RIPS Generation & Submission
+    
+    Admin->>API: generateRIPSBatch(visitIds[])
+    API->>WF: Batch RIPS generation
+    WF->>WF: Create AC, AP, AT, US records
+    WF-->>API: RIPS XML files ready
+    API-->>Admin: Download links
+    
+    Admin->>EPS: Submit RIPS via EPS portal
+    EPS-->>Admin: Acknowledgment
+      </pre>
+    </div>
+
+    <h3>Visit Status State Machine</h3>
+    <div class="diagram">
+      <div class="diagram-title">🔄 Visit Status Transitions</div>
+      <pre class="mermaid">
+stateDiagram-v2
+    [*] --> DRAFT: createVisitDraft()
+    
+    DRAFT --> DRAFT: saveProgress()
+    DRAFT --> SUBMITTED: submitVisit()
+    
+    SUBMITTED --> APPROVED: approveVisit()
+    SUBMITTED --> CORRECTIONS_NEEDED: rejectVisit()
+    
+    CORRECTIONS_NEEDED --> SUBMITTED: reSubmitVisit()
+    
+    APPROVED --> RIPS_GENERATED: generateRIPS()
+    RIPS_GENERATED --> BILLED: markBilled()
+    
+    BILLED --> [*]
+    
+    note right of DRAFT
+        Nurse can edit
+        Auto-save enabled
+    end note
+    
+    note right of SUBMITTED
+        Locked for nurse
+        Admin review queue
+    end note
+    
+    note right of APPROVED
+        Ready for RIPS
+        Cannot be modified
+    end note
+      </pre>
+    </div>
+
+    <div class="tech-stack">
+      <div class="tech-card">
+        <h4>📄 KARDEX Data Structure</h4>
+        <code>
+{<br/>
+  "medications": [<br/>
+    {<br/>
+      "name": "Metformina 850mg",<br/>
+      "dose": "1 tableta",<br/>
+      "route": "oral",<br/>
+      "time": "08:00",<br/>
+      "administered": true,<br/>
+      "nurseNotes": "Tomada con alimento"<br/>
+    }<br/>
+  ],<br/>
+  "vitals": {<br/>
+    "bloodPressure": "120/80",<br/>
+    "heartRate": 72,<br/>
+    "temperature": 36.5,<br/>
+    "respiratoryRate": 16,<br/>
+    "oxygenSaturation": 98,<br/>
+    "painLevel": 2<br/>
+  },<br/>
+  "woundCare": {<br/>
+    "location": "Sacra",<br/>
+    "size": "2x3cm",<br/>
+    "condition": "Granulating",<br/>
+    "dressing": "Hydrocolloid"<br/>
+  },<br/>
+  "generalObservations": "Paciente..."<br/>
+}
+        </code>
+      </div>
+      
+      <div class="tech-card">
+        <h4>📊 Clinical Scale Scores</h4>
+        <code>
+{<br/>
+  "assessments": [<br/>
+    {<br/>
+      "type": "GLASGOW",<br/>
+      "components": {<br/>
+        "eyeResponse": 4,<br/>
+        "verbalResponse": 5,<br/>
+        "motorResponse": 6<br/>
+      },<br/>
+      "totalScore": 15,<br/>
+      "interpretation": "Normal"<br/>
+    },<br/>
+    {<br/>
+      "type": "BRADEN",<br/>
+      "components": {<br/>
+        "sensoryPerception": 4,<br/>
+        "moisture": 4,<br/>
+        "activity": 3,<br/>
+        "mobility": 3,<br/>
+        "nutrition": 3,<br/>
+        "frictionShear": 2<br/>
+      },<br/>
+      "totalScore": 19,<br/>
+      "riskLevel": "Low Risk"<br/>
+    }<br/>
+  ]<br/>
+}
+        </code>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- REAL-TIME SUBSCRIPTIONS -->
+    <!-- ============================================ -->
+    <h2 id="realtime">⚡ Real-Time Subscription Flow</h2>
+
+    <div class="info-box">
+      <h3>⚡ GraphQL Subscriptions</h3>
+      <p>WebSocket-based real-time updates via AWS AppSync. Key use cases:</p>
+      <ul>
+        <li><strong>Admin Dashboard:</strong> Live visit submission counter</li>
+        <li><strong>Nurse App:</strong> Instant approval/rejection notifications</li>
+        <li><strong>Family Portal:</strong> Care update notifications</li>
+      </ul>
+    </div>
+
+    <div class="diagram">
+      <div class="diagram-title">⚡ Real-Time Subscription Architecture</div>
+      <pre class="mermaid">
+flowchart TB
+    subgraph Clients["📱 Connected Clients"]
+        N1["👩‍⚕️ Nurse 1"]
+        N2["👩‍⚕️ Nurse 2"]
+        A1["👨‍💼 Admin"]
+        F1["👨‍👩‍👧 Family"]
+    end
+    
+    subgraph AppSync["AWS AppSync"]
+        WS["WebSocket<br/>Connection Manager"]
+        PubSub["Pub/Sub<br/>Engine"]
+        Filter["Subscription<br/>Filters"]
+    end
+    
+    subgraph Mutations["🔄 Mutations (Triggers)"]
+        Submit["submitVisit()"]
+        Approve["approveVisit()"]
+        Reject["rejectVisit()"]
+        Update["updateShift()"]
+    end
+    
+    subgraph Subscriptions["📡 Subscription Topics"]
+        OnVisit["onVisitStatusChange"]
+        OnShift["onShiftAssignment"]
+        OnApproval["onVisitApproval"]
+    end
+    
+    N1 & N2 & A1 & F1 -.->|WSS connect| WS
+    WS --> PubSub
+    
+    Submit --> PubSub
+    Approve --> PubSub
+    Reject --> PubSub
+    Update --> PubSub
+    
+    PubSub --> Filter
+    Filter --> OnVisit & OnShift & OnApproval
+    
+    OnVisit -.->|nurseId filter| N1
+    OnVisit -.->|nurseId filter| N2
+    OnApproval -.->|all pending| A1
+    OnShift -.->|patientId filter| F1
+    
+    style WS fill:#818cf8,stroke:#4f46e5,color:#0f172a
+    style PubSub fill:#f59e0b,stroke:#d97706,color:#0f172a
+      </pre>
+    </div>
+
+    <div class="diagram">
+      <div class="diagram-title">📡 Subscription Message Flow</div>
+      <pre class="mermaid">
+sequenceDiagram
+    participant Admin as 👨‍💼 Admin
+    participant API as AppSync
+    participant Sub as Subscription<br/>Engine
+    participant Nurse as 👩‍⚕️ Nurse App
+    
+    Note over Nurse,Sub: Nurse establishes subscription
+    
+    Nurse->>API: subscription { onVisitStatusChange(nurseId: "nurse-001") }
+    API->>Sub: Register subscription
+    Sub-->>Nurse: WebSocket connected ✓
+    
+    Note over Admin,API: Admin approves visit
+    
+    Admin->>API: mutation approveVisit(visitId: "v-123")
+    API->>API: Process mutation
+    API->>Sub: Publish to topic
+    
+    Sub->>Sub: Filter by nurseId
+    Sub-->>Nurse: { data: { onVisitStatusChange: { visitId: "v-123", newStatus: "APPROVED" } } }
+    
+    Nurse->>Nurse: Update local state
+    Nurse->>Nurse: Show toast notification
+    Nurse-->>Nurse: 🔔 "Visit #123 approved!"
+      </pre>
+    </div>
+
+    <h3>Subscription Schema</h3>
+    <div class="tech-card" style="max-width: 600px;">
+      <h4>📜 GraphQL Subscription Types</h4>
+      <code style="white-space: pre-wrap;">
+type Subscription {
+  # Nurse receives own visit updates
+  onVisitStatusChange(nurseId: ID!): VisitStatusEvent
+    @aws_subscribe(mutations: ["submitVisit", "approveVisit", "rejectVisit"])
+  
+  # Admin receives all submissions
+  onNewVisitSubmission: VisitSubmissionEvent
+    @aws_subscribe(mutations: ["submitVisit"])
+  
+  # Family receives care updates
+  onCareUpdate(patientId: ID!): CareUpdateEvent
+    @aws_subscribe(mutations: ["approveVisit", "createNote"])
+  
+  # Real-time shift changes
+  onShiftChange(nurseId: ID): ShiftChangeEvent
+    @aws_subscribe(mutations: ["assignShift", "updateShift"])
+}
+
+type VisitStatusEvent {
+  visitId: ID!
+  previousStatus: VisitStatus
+  newStatus: VisitStatus!
+  updatedBy: String
+  reason: String
+  timestamp: AWSDateTime!
+}
+      </code>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- AI AGENT DATA FLOWS -->
+    <!-- ============================================ -->
+    <h2 id="ai-agents">🤖 AI Agent Data Flows</h2>
+
+    <div class="info-box success">
+      <h3>🧠 Amazon Bedrock Integration</h3>
+      <p>Three specialized AI agents powered by Claude models:</p>
+      <ul>
+        <li><strong>Roster Architect:</strong> Claude 3.7 Sonnet - Shift optimization</li>
+        <li><strong>Glosa Defender:</strong> Claude Opus 4.5 - Legal justification generation</li>
+        <li><strong>RIPS Validator:</strong> Claude 3.7 Sonnet - Billing compliance validation</li>
+      </ul>
+    </div>
+
+    <h3>🗓️ Roster Architect AI</h3>
+    <div class="ai-agent">
+      <h4>🗓️ Roster Architect - Shift Optimization</h4>
+      <p><strong>Purpose:</strong> Optimally assign nurses to shifts considering skills, location, and availability</p>
+      <p><strong>Model:</strong> Claude 3.7 Sonnet | <strong>Cost:</strong> ~$0.003/optimization</p>
+    </div>
+
+    <div class="diagram">
+      <div class="diagram-title">🗓️ Roster Architect Data Flow</div>
+      <pre class="mermaid">
+flowchart LR
+    subgraph Input["📥 Input Data"]
+        Shifts["Unassigned Shifts<br/>- Patient location<br/>- Required skills<br/>- Time window"]
+        Nurses["Available Nurses<br/>- Current location<br/>- Certifications<br/>- Preferences"]
+        History["Historical Data<br/>- Past assignments<br/>- Performance scores"]
+    end
+    
+    subgraph Process["🧠 AI Processing"]
+        Lambda["Lambda Function<br/>roster-optimizer"]
+        Context["Build Context<br/>JSON payload"]
+        Bedrock["Amazon Bedrock<br/>Claude 3.7 Sonnet"]
+        Parse["Parse Response<br/>Extract assignments"]
+    end
+    
+    subgraph Output["📤 Output"]
+        Assignments["Optimal Assignments<br/>JSON array"]
+        Metrics["Optimization Metrics<br/>- Total travel time<br/>- Skill match %<br/>- Coverage gaps"]
+        DDB["Save to DynamoDB<br/>Shift.assignedNurseId"]
+    end
+    
+    Shifts --> Lambda
+    Nurses --> Lambda
+    History --> Lambda
+    
+    Lambda --> Context
+    Context --> Bedrock
+    Bedrock --> Parse
+    
+    Parse --> Assignments
+    Parse --> Metrics
+    Assignments --> DDB
+    
+    style Bedrock fill:#8b5cf6,stroke:#6d28d9,color:#fff
+    style DDB fill:#818cf8,stroke:#4f46e5,color:#0f172a
+      </pre>
+    </div>
+
+    <div class="diagram">
+      <div class="diagram-title">🗓️ Roster Optimization Sequence</div>
+      <pre class="mermaid">
+sequenceDiagram
+    participant Admin as 👨‍💼 Admin
+    participant API as GraphQL API
+    participant Lambda as Roster Lambda
+    participant DB as DynamoDB
+    participant AI as Bedrock Claude
+    
+    Admin->>API: optimizeRoster(date: "2026-01-30")
+    API->>Lambda: Invoke roster-optimizer
+    
+    Lambda->>DB: Query unassigned shifts
+    DB-->>Lambda: 15 shifts found
+    
+    Lambda->>DB: Query available nurses
+    DB-->>Lambda: 8 nurses available
+    
+    Lambda->>Lambda: Build optimization context
+    Note right of Lambda: {<br/>  "shifts": [...],<br/>  "nurses": [...],<br/>  "constraints": {<br/>    "maxShiftsPerNurse": 3,<br/>    "maxTravelKm": 50<br/>  }<br/>}
+    
+    Lambda->>AI: Invoke with prompt
+    Note right of AI: "Given these shifts and nurses,<br/>create optimal assignments<br/>minimizing travel time..."
+    
+    AI-->>Lambda: JSON response with assignments
+    
+    Lambda->>Lambda: Validate & parse
+    
+    loop For each assignment
+        Lambda->>DB: UpdateItem Shift
+    end
+    
+    Lambda-->>API: Optimization result
+    API-->>Admin: {<br/>  "assigned": 14,<br/>  "unassigned": 1,<br/>  "avgTravelKm": 12.5,<br/>  "estimatedSavings": "25%"<br/>}
+      </pre>
+    </div>
+
+    <h3>🛡️ Glosa Defender AI</h3>
+    <div class="ai-agent">
+      <h4>🛡️ Glosa Defender - EPS Rejection Appeals</h4>
+      <p><strong>Purpose:</strong> Generate legally sound justification documents for rejected claims</p>
+      <p><strong>Model:</strong> Claude Opus 4.5 | <strong>Cost:</strong> ~$0.15/defense</p>
+    </div>
+
+    <div class="diagram">
+      <div class="diagram-title">🛡️ Glosa Defender Data Flow</div>
+      <pre class="mermaid">
+flowchart TB
+    subgraph Trigger["⚡ Trigger"]
+        Rejection["EPS Rejection<br/>Glosa received"]
+    end
+    
+    subgraph Gather["📚 Data Gathering"]
+        Patient["Patient Record<br/>- Demographics<br/>- Medical history<br/>- Active conditions"]
+        Visits["Related Visits<br/>- KARDEX documentation<br/>- Clinical scales<br/>- Vitals over time"]
+        RIPS["Original RIPS<br/>- AC, AP, AT records<br/>- Procedure codes<br/>- Diagnosis codes"]
+        Legal["Legal Framework<br/>- Resolución 3100<br/>- EPS contract terms<br/>- Clinical guidelines"]
+    end
+    
+    subgraph AI["🧠 AI Defense Generation"]
+        Lambda["Lambda Function<br/>glosa-defender"]
+        Opus["Claude Opus 4.5<br/>Deep reasoning"]
+        Generate["Generate Justification<br/>- Medical necessity<br/>- Legal citations<br/>- Clinical evidence"]
+    end
+    
+    subgraph Output["📄 Output"]
+        PDF["PDF Document<br/>Formal justification"]
+        S3["Store in S3<br/>glosa-defenses/"]
+        Notify["Notify Admin<br/>Defense ready"]
+    end
+    
+    Rejection --> Lambda
+    
+    Lambda --> Patient
+    Lambda --> Visits
+    Lambda --> RIPS
+    Lambda --> Legal
+    
+    Patient & Visits & RIPS & Legal --> Opus
+    Opus --> Generate
+    Generate --> PDF
+    PDF --> S3
+    S3 --> Notify
+    
+    style Opus fill:#c4b5fd,stroke:#8b5cf6,color:#0f172a
+    style PDF fill:#10b981,stroke:#059669,color:#0f172a
+      </pre>
+    </div>
+
+    <div class="diagram">
+      <div class="diagram-title">🛡️ Glosa Defense Generation Sequence</div>
+      <pre class="mermaid">
+sequenceDiagram
+    participant Admin as 👨‍💼 Admin
+    participant API as GraphQL API
+    participant Lambda as Glosa Lambda
+    participant DB as DynamoDB
+    participant AI as Claude Opus 4.5
+    participant S3 as S3 Storage
+    
+    Admin->>API: defendGlosa(rejectionId: "rej-456")
+    API->>Lambda: Invoke glosa-defender
+    
+    Lambda->>DB: Get rejection details
+    DB-->>Lambda: Rejection reason: "Procedimiento no autorizado"
+    
+    Lambda->>DB: Get patient history
+    DB-->>Lambda: 24 months of records
+    
+    Lambda->>DB: Get all related visits
+    DB-->>Lambda: 15 home visits
+    
+    Lambda->>Lambda: Build comprehensive context
+    Note right of Lambda: 50KB+ clinical context<br/>+ legal framework<br/>+ EPS guidelines
+    
+    Lambda->>AI: Generate defense document
+    Note right of AI: Deep reasoning mode<br/>Extended thinking enabled<br/>Legal + Medical analysis
+    
+    AI-->>Lambda: Structured justification<br/>with citations
+    
+    Lambda->>Lambda: Generate PDF
+    Lambda->>S3: Upload PDF
+    S3-->>Lambda: URL: s3://bucket/defenses/def-789.pdf
+    
+    Lambda->>DB: Create DefenseRecord
+    Lambda-->>API: Defense ready
+    API-->>Admin: { pdfUrl: "...", summary: "..." }
+      </pre>
+    </div>
+
+    <h3>✅ RIPS Validator AI</h3>
+    <div class="ai-agent">
+      <h4>✅ RIPS Validator - Pre-Submission Validation</h4>
+      <p><strong>Purpose:</strong> Validate RIPS XML before EPS submission to prevent rejections</p>
+      <p><strong>Model:</strong> Claude 3.7 Sonnet | <strong>Cost:</strong> ~$0.002/validation</p>
+    </div>
+
+    <div class="diagram">
+      <div class="diagram-title">✅ RIPS Validation Data Flow</div>
+      <pre class="mermaid">
+flowchart LR
+    subgraph Input["📥 Input"]
+        Visit["Approved Visit<br/>Ready for RIPS"]
+        Rules["Validation Rules<br/>- Field requirements<br/>- Code mappings<br/>- Business rules"]
+    end
+    
+    subgraph Generate["⚙️ RIPS Generation"]
+        Builder["RIPS Builder<br/>Create XML structure"]
+        AC["AC Record<br/>Consulta"]
+        AP["AP Record<br/>Procedimiento"]
+        AT["AT Record<br/>Otros servicios"]
+        US["US Record<br/>Usuario"]
+    end
+    
+    subgraph Validate["🧠 AI Validation"]
+        Lambda["Lambda Function<br/>rips-validator"]
+        Sonnet["Claude 3.7 Sonnet<br/>Pattern matching"]
+        Check["Validation Checks<br/>- Required fields<br/>- Code validity<br/>- Logical consistency"]
+    end
+    
+    subgraph Output["📤 Output"]
+        Valid["✅ Valid RIPS<br/>Ready for submission"]
+        Errors["❌ Errors Found<br/>List for correction"]
+    end
+    
+    Visit --> Builder
+    Rules --> Builder
+    
+    Builder --> AC & AP & AT & US
+    
+    AC & AP & AT & US --> Lambda
+    Lambda --> Sonnet
+    Sonnet --> Check
+    
+    Check -->|Pass| Valid
+    Check -->|Fail| Errors
+    
+    style Sonnet fill:#8b5cf6,stroke:#6d28d9,color:#fff
+    style Valid fill:#10b981,stroke:#059669,color:#0f172a
+    style Errors fill:#ef4444,stroke:#b91c1c,color:#fff
+      </pre>
+    </div>
+
+    <div class="diagram">
+      <div class="diagram-title">🤖 AI Agent Comparison</div>
+      <pre class="mermaid">
+flowchart TB
+    subgraph RosterAI["🗓️ Roster Architect"]
+        R_In["Input:<br/>Shifts + Nurses"]
+        R_Model["Claude 3.7 Sonnet<br/>$3/M tokens"]
+        R_Out["Output:<br/>Assignments JSON"]
+        R_In --> R_Model --> R_Out
+    end
+    
+    subgraph GlosaAI["🛡️ Glosa Defender"]
+        G_In["Input:<br/>Rejection + History"]
+        G_Model["Claude Opus 4.5<br/>$15/M tokens"]
+        G_Out["Output:<br/>Legal PDF"]
+        G_In --> G_Model --> G_Out
+    end
+    
+    subgraph RIPSAI["✅ RIPS Validator"]
+        V_In["Input:<br/>RIPS XML Draft"]
+        V_Model["Claude 3.7 Sonnet<br/>$3/M tokens"]
+        V_Out["Output:<br/>Valid/Errors"]
+        V_In --> V_Model --> V_Out
+    end
+    
+    style R_Model fill:#60a5fa,stroke:#1e40af,color:#0f172a
+    style G_Model fill:#c4b5fd,stroke:#8b5cf6,color:#0f172a
+    style V_Model fill:#60a5fa,stroke:#1e40af,color:#0f172a
+      </pre>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- CONFLICT RESOLUTION -->
+    <!-- ============================================ -->
+    <h2 id="conflict">🔀 Conflict Resolution Strategy</h2>
+
+    <div class="info-box warning">
+      <h3>⚠️ When Conflicts Occur</h3>
+      <p>Conflicts happen when the same record is modified both offline and by another user online. Our strategy:</p>
+      <ol>
+        <li><strong>Detection:</strong> Version check on sync (DynamoDB conditional write)</li>
+        <li><strong>Default:</strong> Last-write-wins with full history preserved</li>
+        <li><strong>Critical data:</strong> Flag for admin review</li>
+        <li><strong>Audit:</strong> Both versions stored in audit log</li>
+      </ol>
+    </div>
+
+    <div class="diagram">
+      <div class="diagram-title">🔀 Conflict Detection & Resolution Flow</div>
+      <pre class="mermaid">
+flowchart TD
+    Start([Sync Attempt]) --> CondWrite{Conditional<br/>Write}
+    
+    CondWrite -->|Version matches| Success[✅ Write succeeds]
+    CondWrite -->|Version mismatch| Conflict[⚠️ Conflict detected]
+    
+    Conflict --> Fetch[Fetch server version]
+    Fetch --> Compare{Compare<br/>changes}
+    
+    Compare -->|Same field modified| Critical[🔴 Critical conflict]
+    Compare -->|Different fields| Mergeable[🟡 Auto-mergeable]
+    
+    Critical --> SaveBoth[Save both versions<br/>to audit log]
+    SaveBoth --> Flag[Flag for admin<br/>review]
+    Flag --> Notify[Notify affected<br/>users]
+    
+    Mergeable --> Merge[Auto-merge<br/>non-conflicting fields]
+    Merge --> Write[Write merged<br/>version]
+    Write --> Log[Log merge<br/>decision]
+    
+    Success --> Done([Sync complete])
+    Log --> Done
+    Notify --> Done
+    
+    style Conflict fill:#f59e0b,stroke:#d97706,color:#0f172a
+    style Critical fill:#ef4444,stroke:#b91c1c,color:#fff
+    style Mergeable fill:#fbbf24,stroke:#f59e0b,color:#0f172a
+    style Success fill:#10b981,stroke:#059669,color:#0f172a
+      </pre>
+    </div>
+
+    <div class="diagram">
+      <div class="diagram-title">🔀 Conflict Resolution Sequence</div>
+      <pre class="mermaid">
+sequenceDiagram
+    participant N1 as 👩‍⚕️ Nurse (Offline)
+    participant N2 as 👩‍⚕️ Nurse 2 (Online)
+    participant SW as Service Worker
+    participant API as GraphQL API
+    participant DB as DynamoDB
+    participant Admin as 👨‍💼 Admin
+    
+    Note over N1,N2: Both modify same visit
+    
+    N1->>N1: Edit vitals offline<br/>BP: 120/80 → 130/85
+    N2->>API: Edit notes online<br/>Add new observation
+    API->>DB: Update (version 2)
+    
+    Note over N1,SW: Nurse 1 comes online
+    
+    SW->>API: Sync visit (version 1)
+    API->>DB: Conditional write (version=1)
+    DB-->>API: ❌ ConditionalCheckFailed<br/>(current version=2)
+    
+    API-->>SW: Conflict response
+    
+    SW->>API: Get current version
+    API->>DB: GetItem
+    DB-->>API: Version 2 data
+    API-->>SW: Server version
+    
+    SW->>SW: Compare changes
+    Note right of SW: Local: vitals changed<br/>Server: notes changed<br/>→ Different fields!
+    
+    SW->>SW: Auto-merge
+    SW->>API: Write merged (version 3)
+    API->>DB: Put with merged data
+    DB-->>API: Success
+    
+    API-->>SW: Merged successfully
+    SW-->>N1: ✅ Changes synced<br/>(auto-merged)
+    
+    Note over Admin: If critical conflict...
+    API->>Admin: 🔔 Conflict needs review
+      </pre>
+    </div>
+
+    <div class="tech-stack">
+      <div class="tech-card">
+        <h4>📋 Conflict Resolution Rules</h4>
+        <table>
+          <tr>
+            <th>Scenario</th>
+            <th>Resolution</th>
+          </tr>
+          <tr>
+            <td>Different fields modified</td>
+            <td>Auto-merge both changes</td>
+          </tr>
+          <tr>
+            <td>Same field, same value</td>
+            <td>Accept (no conflict)</td>
+          </tr>
+          <tr>
+            <td>Same field, different values</td>
+            <td>Flag for admin review</td>
+          </tr>
+          <tr>
+            <td>Status changed server-side</td>
+            <td>Server wins, notify user</td>
+          </tr>
+          <tr>
+            <td>Visit already approved</td>
+            <td>Reject local changes</td>
+          </tr>
+        </table>
+      </div>
+      
+      <div class="tech-card">
+        <h4>🔍 Audit Log Entry</h4>
+        <code style="white-space: pre-wrap;">
+{
+  "conflictId": "conf-789",
+  "entityType": "Visit",
+  "entityId": "visit-123",
+  "localVersion": {
+    "version": 1,
+    "modifiedAt": "2026-01-30T10:00:00Z",
+    "modifiedBy": "nurse-001",
+    "changes": { "vitals.bp": "130/85" }
+  },
+  "serverVersion": {
+    "version": 2,
+    "modifiedAt": "2026-01-30T10:05:00Z",
+    "modifiedBy": "nurse-002",
+    "changes": { "notes": "Added observation" }
+  },
+  "resolution": "AUTO_MERGED",
+  "mergedVersion": 3,
+  "resolvedAt": "2026-01-30T10:30:00Z"
+}
+        </code>
+      </div>
+    </div>
+
+    <div class="info-box success">
+      <h3>✅ Data Flow Summary</h3>
+      <ul>
+        <li><strong>Offline-First:</strong> IndexedDB + Service Worker ensures zero data loss</li>
+        <li><strong>Visit Workflow:</strong> Draft → Submit → Review → Approve → RIPS</li>
+        <li><strong>Real-Time:</strong> GraphQL subscriptions for instant status updates</li>
+        <li><strong>AI Integration:</strong> 3 specialized agents (Roster, Glosa, RIPS)</li>
+        <li><strong>Conflict Resolution:</strong> Auto-merge when possible, admin review when critical</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <script>
+    mermaid.initialize({ 
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        primaryColor: '#818cf8',
+        primaryTextColor: '#e2e8f0',
+        primaryBorderColor: '#4f46e5',
+        lineColor: '#94a3b8',
+        secondaryColor: '#a78bfa',
+        tertiaryColor: '#334155',
+        background: '#1e293b',
+        mainBkg: '#1e293b',
+        secondBkg: '#334155',
+        noteTextColor: '#e2e8f0',
+        noteBkgColor: '#334155',
+        noteBorderColor: '#4f46e5',
+        actorTextColor: '#e2e8f0',
+        actorBkg: '#334155',
+        actorBorder: '#818cf8',
+        signalColor: '#94a3b8',
+        signalTextColor: '#e2e8f0',
+        labelTextColor: '#e2e8f0',
+        loopTextColor: '#e2e8f0',
+        activationBkgColor: '#334155',
+        activationBorderColor: '#818cf8',
+        sequenceNumberColor: '#0f172a'
+      },
+      flowchart: {
+        curve: 'basis',
+        padding: 20
+      },
+      sequence: {
+        mirrorActors: false,
+        bottomMarginAdj: 10,
+        actorFontSize: 14,
+        noteFontSize: 12,
+        messageFontSize: 13
+      }
+    });
+  </script>
+</body>
+</html>
