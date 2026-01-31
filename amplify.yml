@@ -8,7 +8,13 @@ frontend:
     build:
       commands:
         - npm run build
-        - cp -r public/* dist/ || true
+        - echo "Copying public files to dist..."
+        - ls -la public/
+        - cp -rv public/homepage dist/
+        - cp -rv public/images dist/
+        - echo "Verifying dist contents..."
+        - ls -la dist/homepage/ || echo "homepage not found!"
+        - ls -la dist/images/ || echo "images not found!"
   artifacts:
     baseDirectory: dist
     files:
