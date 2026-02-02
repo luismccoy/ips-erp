@@ -46,3 +46,9 @@ customRules:
   - source: '</^[^.]+$|\.(?!(css|gif|ico|jpg|js|png|txt|svg|woff|woff2|ttf|map|json|webp)$)([^.]+$)/>'
     target: /index.html
     status: '200'
+backend:
+  phases:
+    build:
+      commands:
+        - npm install --prefix amplify/functions/roster-architect
+        - npm run build --prefix amplify/functions/roster-architect
