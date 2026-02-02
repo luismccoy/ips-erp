@@ -3,7 +3,7 @@ frontend:
   phases:
     preBuild:
       commands:
-        - npm ci
+        - npm ci --legacy-peer-deps
         - echo "VITE_USE_REAL_BACKEND=$VITE_USE_REAL_BACKEND"
     build:
       commands:
