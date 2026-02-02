@@ -5,9 +5,9 @@ import {
     Globe, Cloud, X, DollarSign, CalendarCheck, AlertTriangle, Map,
     Shield, Heart, PlusCircle, Users, CheckCircle, ArrowUpRight, Menu
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
+import { Button } from './ui/Button';
+import { Input } from './ui/Input';
+import { Card, CardContent } from './ui/Card';
 import {
     BillingAuditIcon,
     ProcessFlowIcon,
@@ -17,7 +17,7 @@ import {
     PricingIcon,
     RoadmapIcon,
     VipSupportIcon
-} from '@/components/ui/healthcare-icons';
+} from './ui/healthcare-icons';
 import FeatureSection from './FeatureSection';
 
 export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => void, onViewDemo: () => void }) {

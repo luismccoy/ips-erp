@@ -19,7 +19,7 @@ export const Card: React.FC<CardProps> = ({
             initial={disableAnimation ? false : { opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             whileHover={disableAnimation ? {} : { scale: 1.01 }}
-            transition={{ 
+            transition={{
                 duration: 0.2,
                 ease: "easeOut"
             }}
@@ -28,4 +28,8 @@ export const Card: React.FC<CardProps> = ({
             {children}
         </motion.div>
     );
+};
+
+export const CardContent: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, ...props }) => {
+    return <div className={`p-6 pt-0 ${className}`} {...props} />;
 };
