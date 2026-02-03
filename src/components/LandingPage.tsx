@@ -139,6 +139,14 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
                         >
                             SOLICITAR ACCESO BETA <ArrowRight className="h-5 w-5 ml-2" />
                         </Button>
+                        <Button
+                            size="xl"
+                            variant="outline"
+                            className="w-full sm:w-auto text-base font-bold text-white border-white/20 bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all tracking-wide"
+                            onClick={onViewDemo}
+                        >
+                            VER DEMO <PlayCircle className="h-5 w-5 ml-2" />
+                        </Button>
                         <div className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 text-xs font-bold text-blue-200 uppercase tracking-widest hover:bg-white/10 transition-colors">
                             <ShieldCheck className="h-4 w-4 text-green-400" />
                             100% Cumplimiento Normativo

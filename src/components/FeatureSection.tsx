@@ -12,13 +12,13 @@ const FEATURES = [
         id: 'glosas',
         title: 'Glosas',
         label: 'Glosas',
-        description: 'Automatice el soporte RIPS 2275 y reduzca tiempos de objeción con auditoría de IA en tiempo real.',
+        description: 'Reduzca objeciones con auditoría de IA en tiempo real.',
         points: [
-            'Detección automática de inconsistencias antes del envío.',
-            'Generación de respuestas legales basadas en normativa vigente.',
-            'Trazabilidad total de cada objeción y su resolución.'
+            'Detección automática de inconsistencias.',
+            'Respuestas legales basadas en normativa.',
+            'Trazabilidad total de cada objeción.'
         ],
-        image: '/images/challenge-glosadas-new.jpg',
+        image: '/images/challenge-glosadas.png',
         icon: BillingAuditIcon,
         color: '#ef4444'
     },
@@ -26,13 +26,13 @@ const FEATURES = [
         id: 'manuales',
         title: 'Manuales',
         label: 'Manuales',
-        description: 'Digitalice el 100% de su operación. Desde la captación hasta el cobro, sin un solo papel.',
+        description: 'Digitalice su operación. Cero papel.',
         points: [
-            'Conversión de documentos físicos a registros digitales estructurados.',
-            'Estandarización de procesos asistenciales y administrativos.',
-            'Acceso instantáneo a la información desde cualquier lugar.'
+            'Conversión a registros digitales.',
+            'Estandarización de procesos.',
+            'Acceso desde cualquier lugar.'
         ],
-        image: '/images/challenge-manuales-new.jpg',
+        image: '/images/challenge-manuales.png',
         icon: ProcessFlowIcon,
         color: '#f59e0b'
     },
@@ -40,13 +40,13 @@ const FEATURES = [
         id: 'planillas',
         title: 'Planillas',
         label: 'Planillas',
-        description: 'Optimize rutas y turnos basados en geolocalización. Menos desplazamientos, más visitas.',
+        description: 'Rutas y turnos optimizados por IA.',
         points: [
-            'Asignación inteligente de personal basada en ubicación.',
-            'Seguimiento en tiempo real del progreso de las visitas.',
-            'Reducción de costos operativos y tiempos de traslado.'
+            'Asignación inteligente por ubicación.',
+            'Seguimiento en tiempo real.',
+            'Reducción de costos operativos.'
         ],
-        image: '/images/challenge-planillas-new.jpg',
+        image: '/images/challenge-planillas.png',
         icon: SchedulingIcon,
         color: '#3b82f6'
     },
@@ -54,13 +54,13 @@ const FEATURES = [
         id: 'cumplimiento',
         title: 'Cumplimiento',
         label: 'Cumplimiento',
-        description: 'Asegure cumplimiento total con Res. 3100 de 2019. Alertas automáticas y trazabilidad total.',
+        description: 'Cumplimiento total con Res. 3100.',
         points: [
-            'Monitoreo constante de indicadores de calidad exigidos.',
-            'Alertas preventivas ante posibles vencimientos o fallas.',
-            'Reportes automáticos para entes de control y vigilancia.'
+            'Monitoreo de indicadores de calidad.',
+            'Alertas preventivas automáticas.',
+            'Reportes para entes de control.'
         ],
-        image: '/images/challenge-cumplimiento-new.jpg',
+        image: '/images/challenge-cumplimiento.png',
         icon: ComplianceShieldIcon,
         color: '#8b5cf6'
     }
@@ -157,27 +157,27 @@ export default function FeatureSection() {
                                     <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-slate-50/50 -rotate-12 translate-x-1/2 -translate-y-1/2 rounded-[100px] -z-0" />
 
                                     {/* Content Text */}
-                                    <div className="flex-[4] space-y-8 lg:space-y-10 relative z-10">
-                                        <div className="flex items-center gap-4 lg:gap-6">
-                                            <div className="p-4 lg:p-5 rounded-[20px] bg-white text-primary border border-slate-100 shadow-xl shadow-blue-500/5">
-                                                {React.createElement(FEATURES[activeIndex].icon, { size: 40 })}
+                                    <div className="flex-[4] space-y-6 lg:space-y-8 relative z-10">
+                                        <div className="flex items-center gap-3 lg:gap-5">
+                                            <div className="p-3 lg:p-4 rounded-2xl bg-white text-primary border border-slate-100 shadow-lg shadow-blue-500/5">
+                                                {React.createElement(FEATURES[activeIndex].icon, { size: 32 })}
                                             </div>
-                                            <div className="space-y-1">
-                                                <div className="text-[10px] font-black text-slate-400 uppercase tracking-[3px]">Sistema IPS-ERP</div>
-                                                <div className="text-primary font-bold text-sm tracking-wide">
+                                            <div className="space-y-0.5">
+                                                <div className="text-[9px] font-black text-slate-400 uppercase tracking-[2px]">Sistema IPS-ERP</div>
+                                                <div className="text-primary font-bold text-xs tracking-wide">
                                                     Módulo: <span className="text-slate-900">{FEATURES[activeIndex].label}</span>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <h3 className="text-2xl lg:text-4xl font-semibold text-slate-900 tracking-tight leading-[1.25] lg:leading-[1.2]">
+                                        <h3 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-slate-900 tracking-tight leading-snug" style={{ fontSize: 'clamp(1.25rem, 2.5vw, 2rem)' }}>
                                             {FEATURES[activeIndex].description}
                                         </h3>
 
-                                        <ul className="space-y-6">
+                                        <ul className="space-y-4">
                                             {FEATURES[activeIndex].points.map((point, i) => (
-                                                <li key={i} className="flex gap-5 text-slate-600 text-base lg:text-lg leading-relaxed">
-                                                    <div className="mt-2 h-1.5 w-1.5 rounded-full bg-primary shrink-0 opacity-50" />
+                                                <li key={i} className="flex gap-3 text-slate-600 text-sm lg:text-base leading-relaxed">
+                                                    <div className="mt-1.5 h-1.5 w-1.5 rounded-full bg-primary shrink-0 opacity-60" />
                                                     {point}
                                                 </li>
                                             ))}
