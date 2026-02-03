@@ -18,7 +18,7 @@ const FEATURES = [
             'Generación de respuestas legales basadas en normativa vigente.',
             'Trazabilidad total de cada objeción y su resolución.'
         ],
-        image: '/images/challenge-glosadas-new.jpg',
+        image: '/images/challenge-glosadas.jpg',
         icon: BillingAuditIcon,
         color: '#ef4444'
     },
@@ -32,7 +32,7 @@ const FEATURES = [
             'Estandarización de procesos asistenciales y administrativos.',
             'Acceso instantáneo a la información desde cualquier lugar.'
         ],
-        image: '/images/challenge-manuales-new.jpg',
+        image: '/images/challenge-manuales.jpg',
         icon: ProcessFlowIcon,
         color: '#f59e0b'
     },
@@ -46,7 +46,7 @@ const FEATURES = [
             'Seguimiento en tiempo real del progreso de las visitas.',
             'Reducción de costos operativos y tiempos de traslado.'
         ],
-        image: '/images/challenge-planillas-new.jpg',
+        image: '/images/challenge-planillas.jpg',
         icon: SchedulingIcon,
         color: '#3b82f6'
     },
@@ -60,7 +60,7 @@ const FEATURES = [
             'Alertas preventivas ante posibles vencimientos o fallas.',
             'Reportes automáticos para entes de control y vigilancia.'
         ],
-        image: '/images/challenge-cumplimiento-new.jpg',
+        image: '/images/challenge-cumplimiento.jpg',
         icon: ComplianceShieldIcon,
         color: '#8b5cf6'
     }
