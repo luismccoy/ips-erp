@@ -43,20 +43,20 @@ const PageLoader = () => (
 // ALSO: Clear demo state when landing on root/login paths to prevent
 // unwanted auto-restoration of previous demo sessions.
 if (typeof window !== 'undefined') {
-    const path = window.location.pathname;
-    
-    // Clear demo state for landing/login paths
-    if (shouldClearDemoState(path)) {
-        sessionStorage.removeItem(STORAGE_KEYS.DEMO_MODE);
-        sessionStorage.removeItem(STORAGE_KEYS.DEMO_ROLE);
-        sessionStorage.removeItem(STORAGE_KEYS.DEMO_TENANT);
-        console.log('🔄 Demo state cleared for landing/login path:', path);
-    }
-    // Enable demo mode for deep link paths
-    else if (shouldEnableDemoMode(path)) {
-        enableDemoMode();
-        console.log('🎭 Demo mode pre-enabled for deep link:', path);
-    }
+  const path = window.location.pathname;
+
+  // Clear demo state for landing/login paths
+  if (shouldClearDemoState(path)) {
+    sessionStorage.removeItem(STORAGE_KEYS.DEMO_MODE);
+    sessionStorage.removeItem(STORAGE_KEYS.DEMO_ROLE);
+    sessionStorage.removeItem(STORAGE_KEYS.DEMO_TENANT);
+    console.log('🔄 Demo state cleared for landing/login path:', path);
+  }
+  // Enable demo mode for deep link paths
+  else if (shouldEnableDemoMode(path)) {
+    enableDemoMode();
+    console.log('🎭 Demo mode pre-enabled for deep link:', path);
+  }
 }
 
 // Main App Component
@@ -79,11 +79,11 @@ export default function App() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const demoParam = params.get('demo');
-    
+
     if (demoParam && isDemoMode()) {
       // Clear the query param from URL (clean URL)
       window.history.replaceState({}, '', window.location.pathname);
-      
+
       // Auto-login to the requested demo portal
       if (demoParam === 'admin') {
         setDemoState('admin', TENANTS[0]);
@@ -101,7 +101,7 @@ export default function App() {
   // Handle direct /family route navigation (ANTIGRAVITY-006)
   useEffect(() => {
     const path = window.location.pathname;
-    
+
     // If user navigates directly to /family, auto-load Family Portal
     if (path === '/family' && !role && isDemoMode()) {
       setDemoState('family', TENANTS[0]);
@@ -113,14 +113,14 @@ export default function App() {
 
   useEffect(() => {
     console.log('[Navigation Debug] Main useEffect triggered | role:', role, '| initialViewSetForRole:', initialViewSetForRole.current);
-    
+
     // Deep link handling - REMOVED AUTOMATIC ROLE PROMOTION (Security Fix P0-2)
     // Previous code automatically promoted users to admin/nurse/family based on URL
     // This was a critical security vulnerability - users could access any portal by changing URL
     // Now handled by RouteGuard component which enforces RBAC
-    
+
     const path = window.location.pathname;
-    
+
     // For demo mode deep links WITHOUT existing role, prompt user to select demo portal
     // This maintains demo mode UX while preventing unauthorized access
     if (isDemoMode() && !role && (path === '/dashboard' || path === '/admin' || path === '/app' || path === '/nurse' || path === '/family')) {
@@ -129,19 +129,19 @@ export default function App() {
       setAuthStage('demo');
       return;
     }
-    
+
     // Track analytics when role is first set (prevents duplicate tracking on subsequent renders)
     if (role && initialViewSetForRole.current !== role) {
       // Only track session and identify on FIRST time this role is set
       console.log('[Navigation Debug] First-time session tracking for role:', role);
       initialViewSetForRole.current = role;
-      
+
       if (tenant) {
         identifyUser(role, { tenant: tenant.name, role });
         trackEvent('Session Started', { role });
       }
     }
-    
+
     // Reset the initialization tracking when logged out so next session tracks properly
     if (!role && initialViewSetForRole.current !== null) {
       console.log('[Navigation Debug] Resetting initialization tracking');
@@ -200,10 +200,11 @@ export default function App() {
     // Handler for Organization Access login - clears any demo state first
     const handleOrgLogin = () => {
       // Clear demo state so org login form can show
+      // NOTE: Don't call logout() here - it triggers a hard redirect!
+      // Just clear the demo-specific sessionStorage keys
       sessionStorage.removeItem(STORAGE_KEYS.DEMO_ROLE);
       sessionStorage.removeItem(STORAGE_KEYS.DEMO_TENANT);
       sessionStorage.removeItem(STORAGE_KEYS.DEMO_MODE);
-      logout(); // This clears role state
       setAuthStage('login');
     };
 
@@ -295,7 +296,7 @@ export default function App() {
   // Handler for unauthorized route access
   const handleUnauthorized = () => {
     console.warn('[SECURITY] Unauthorized access detected, redirecting to appropriate portal');
-    
+
     if (role) {
       // User has a role but wrong permissions - redirect to their portal
       const defaultRoute = getDefaultRouteForRole(role);
@@ -313,8 +314,8 @@ export default function App() {
     <ToastProvider>
       <Suspense fallback={<PageLoader />}>
         {role === 'nurse' && (
-          <RouteGuard 
-            userRole={role} 
+          <RouteGuard
+            userRole={role}
             currentPath={window.location.pathname}
             onUnauthorized={handleUnauthorized}
           >
@@ -322,8 +323,8 @@ export default function App() {
           </RouteGuard>
         )}
         {role === 'family' && (
-          <RouteGuard 
-            userRole={role} 
+          <RouteGuard
+            userRole={role}
             currentPath={window.location.pathname}
             onUnauthorized={handleUnauthorized}
           >
@@ -331,8 +332,8 @@ export default function App() {
           </RouteGuard>
         )}
         {role === 'admin' && (
-          <RouteGuard 
-            userRole={role} 
+          <RouteGuard
+            userRole={role}
             currentPath={window.location.pathname}
             onUnauthorized={handleUnauthorized}
           >
