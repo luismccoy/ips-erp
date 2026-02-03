@@ -5,6 +5,8 @@ frontend:
       commands:
         - npm ci --legacy-peer-deps
         - echo "VITE_USE_REAL_BACKEND=$VITE_USE_REAL_BACKEND"
+        # Write environment variable to .env so Vite can access it during build
+        - echo "VITE_USE_REAL_BACKEND=${VITE_USE_REAL_BACKEND:-true}" >> .env.production.local
     build:
       commands:
         - npm run build
