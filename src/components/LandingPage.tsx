@@ -66,11 +66,17 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
                         <div className="hidden md:flex space-x-8">
                             <a href="#programa-beta" className="text-sm font-semibold text-primary hover:text-primary/80 transition-colors uppercase tracking-widest">Programa Beta</a>
                             <a href="#modulos" className="text-sm font-medium hover:text-primary transition-colors">Módulos</a>
+                            <Button variant="ghost" size="sm" onClick={onViewDemo} className="text-sm font-medium hover:text-primary transition-colors" data-testid="family-portal-link">
+                                Portal Familiar
+                            </Button>
                             <a href="#beta" className="text-sm font-medium hover:text-primary transition-colors">Solicitar Acceso</a>
                         </div>
                         <div className="flex items-center gap-3">
-                            <Button variant="ghost" onClick={onLogin} className="font-bold text-foreground">
+                            <Button variant="ghost" onClick={onLogin} className="font-bold text-foreground" data-testid="login-button">
                                 Login
+                            </Button>
+                            <Button onClick={onViewDemo} variant="outline" className="font-bold text-foreground hidden md:inline-flex" data-testid="demo-button">
+                                Ver Demo
                             </Button>
                             <Button onClick={() => document.getElementById('beta')?.scrollIntoView({ behavior: 'smooth' })} className="rounded-full font-bold shadow-lg shadow-primary/20">
                                 Unirse Beta
@@ -85,6 +91,9 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
                         <div className="flex flex-col gap-4">
                             <a href="#programa-beta" onClick={() => setIsMenuOpen(false)} className="text-sm font-semibold text-primary uppercase tracking-widest px-4 py-2 hover:bg-slate-50 rounded-lg">Programa Beta</a>
                             <a href="#modulos" onClick={() => setIsMenuOpen(false)} className="text-sm font-medium text-foreground px-4 py-2 hover:bg-slate-50 rounded-lg">Módulos</a>
+                            <button onClick={() => { onViewDemo(); setIsMenuOpen(false); }} className="text-sm font-medium text-foreground px-4 py-2 hover:bg-slate-50 rounded-lg text-left" data-testid="family-portal-link-mobile">
+                                Portal Familiar
+                            </button>
                             <a href="#beta" onClick={() => setIsMenuOpen(false)} className="text-sm font-medium text-foreground px-4 py-2 hover:bg-slate-50 rounded-lg">Solicitar Acceso</a>
                             <div className="h-px bg-slate-100 my-2" />
                             <div className="flex flex-col gap-3 px-4">

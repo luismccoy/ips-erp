@@ -28,4 +28,5 @@ export interface NavItemProps {
     active: boolean;
     onClick: () => void;
     dataTour?: string;
+    'data-testid'?: string;
 }

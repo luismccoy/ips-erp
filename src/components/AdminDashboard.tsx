@@ -133,7 +133,7 @@ export default function AdminDashboard({ onLogout, tenant }: AdminDashboardProps
     };
 
     return (
-        <div className="flex h-screen bg-[#f8fafc]">
+        <div className="flex h-screen bg-[#f8fafc]" data-testid="admin-dashboard">
             {/* Mobile sidebar overlay */}
             {sidebarOpen && (
                 <div
@@ -161,19 +161,19 @@ export default function AdminDashboard({ onLogout, tenant }: AdminDashboardProps
                     </div>
                 </div>
                 <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-                    <NavItem icon={Activity} label="Panel Principal" active={view === 'dashboard'} onClick={() => { setView('dashboard'); setSidebarOpen(false); }} dataTour="nav-dashboard" />
-                    <NavItem icon={ClipboardList} label="Revisiones Pendientes" active={view === 'pending-reviews'} onClick={() => { setView('pending-reviews'); setSidebarOpen(false); }} dataTour="nav-pending" />
-                    <NavItem icon={ClipboardCheck} label="Auditoría Clínica" active={view === 'audit'} onClick={() => { setView('audit'); setSidebarOpen(false); }} dataTour="nav-audit" />
-                    <NavItem icon={Package} label="Inventario" active={view === 'inventory'} onClick={() => { setView('inventory'); setSidebarOpen(false); }} dataTour="nav-inventory" />
-                    <NavItem icon={Calendar} label="Programación de Turnos" active={view === 'roster'} onClick={() => { setView('roster'); setSidebarOpen(false); }} dataTour="nav-roster" />
-                    <NavItem icon={ShieldAlert} label="Cumplimiento" active={view === 'compliance'} onClick={() => { setView('compliance'); setSidebarOpen(false); }} dataTour="nav-compliance" />
-                    <NavItem icon={FileText} label="Facturación y RIPS" active={view === 'billing'} onClick={() => { setView('billing'); setSidebarOpen(false); }} dataTour="nav-billing" />
-                    <NavItem icon={BarChart} label="Reportes y Análisis" active={view === 'reporting'} onClick={() => { setView('reporting'); setSidebarOpen(false); }} dataTour="nav-reporting" />
+                    <NavItem icon={Activity} label="Panel Principal" active={view === 'dashboard'} onClick={() => { setView('dashboard'); setSidebarOpen(false); }} dataTour="nav-dashboard" data-testid="nav-dashboard" />
+                    <NavItem icon={ClipboardList} label="Revisiones Pendientes" active={view === 'pending-reviews'} onClick={() => { setView('pending-reviews'); setSidebarOpen(false); }} dataTour="nav-pending" data-testid="nav-pending-reviews" />
+                    <NavItem icon={ClipboardCheck} label="Auditoría Clínica" active={view === 'audit'} onClick={() => { setView('audit'); setSidebarOpen(false); }} dataTour="nav-audit" data-testid="nav-audit" />
+                    <NavItem icon={Package} label="Inventario" active={view === 'inventory'} onClick={() => { setView('inventory'); setSidebarOpen(false); }} dataTour="nav-inventory" data-testid="nav-inventory" />
+                    <NavItem icon={Calendar} label="Programación de Turnos" active={view === 'roster'} onClick={() => { setView('roster'); setSidebarOpen(false); }} dataTour="nav-roster" data-testid="nav-roster" />
+                    <NavItem icon={ShieldAlert} label="Cumplimiento" active={view === 'compliance'} onClick={() => { setView('compliance'); setSidebarOpen(false); }} dataTour="nav-compliance" data-testid="nav-compliance" />
+                    <NavItem icon={FileText} label="Facturación y RIPS" active={view === 'billing'} onClick={() => { setView('billing'); setSidebarOpen(false); }} dataTour="nav-billing" data-testid="nav-billing" />
+                    <NavItem icon={BarChart} label="Reportes y Análisis" active={view === 'reporting'} onClick={() => { setView('reporting'); setSidebarOpen(false); }} dataTour="nav-reporting" data-testid="nav-reporting" />
 
                     <div className="pt-4 mt-4 border-t border-slate-800">
                         <p className="px-4 text-xs font-bold text-slate-500 uppercase mb-2">Administración</p>
-                        <NavItem icon={Users} label="Pacientes" active={view === 'patients'} onClick={() => { setView('patients'); setSidebarOpen(false); }} dataTour="nav-patients" />
-                        <NavItem icon={Stethoscope} label="Personal / Enfermeras" active={view === 'staff'} onClick={() => { setView('staff'); setSidebarOpen(false); }} dataTour="nav-staff" />
+                        <NavItem icon={Users} label="Pacientes" active={view === 'patients'} onClick={() => { setView('patients'); setSidebarOpen(false); }} dataTour="nav-patients" data-testid="nav-patients" />
+                        <NavItem icon={Stethoscope} label="Personal / Enfermeras" active={view === 'staff'} onClick={() => { setView('staff'); setSidebarOpen(false); }} dataTour="nav-staff" data-testid="nav-staff" />
                     </div>
 
                 </nav>
@@ -187,8 +187,8 @@ export default function AdminDashboard({ onLogout, tenant }: AdminDashboardProps
                     </button>
                 </div>
             </aside>
-            <main className="flex-1 overflow-y-auto">
-                <header className="bg-white/80 backdrop-blur-md border-b border-slate-100 px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-20">
+            <main className="flex-1 overflow-y-auto" data-testid="admin-main-content">
+                <header className="bg-white/80 backdrop-blur-md border-b border-slate-100 px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-20" data-testid="admin-dashboard-header">
                     {/* Mobile hamburger menu */}
                     <button
                         onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -309,11 +309,12 @@ export default function AdminDashboard({ onLogout, tenant }: AdminDashboardProps
     );
 }
 
-function NavItem({ icon: Icon, label, active, onClick, dataTour }: NavItemProps) {
+function NavItem({ icon: Icon, label, active, onClick, dataTour, 'data-testid': dataTestId }: NavItemProps) {
     return (
         <motion.button
             onClick={onClick}
             data-tour={dataTour}
+            data-testid={dataTestId}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${active ? 'bg-[#2563eb] text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
                 }`}
             whileHover={{ x: active ? 0 : 4 }}
