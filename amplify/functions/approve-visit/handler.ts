@@ -4,6 +4,16 @@ import { DynamoDBDocumentClient, GetCommand, UpdateCommand, PutCommand } from '@
 
 const ddbClient = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddbClient);
+const safeGet = async (params: any) => {
+  try {
+    return await docClient.send(new GetCommand(params));
+  } catch (error: any) {
+    if (error?.name === 'ConditionalCheckFailedException') {
+      return { Item: undefined };
+    }
+    throw error;
+  }
+};
 
 // Table names from environment
 const VISIT_TABLE = process.env.VISIT_TABLE_NAME!;
@@ -28,10 +38,16 @@ export const handler: Handler = async (event) => {
 
   try {
     // 1. Verify user has admin role
-    const nurseResult = await docClient.send(new GetCommand({
+    const nurseResult = await safeGet({
       TableName: NURSE_TABLE,
-      Key: { id: userId }
-    }));
+      Key: { id: userId },
+      ProjectionExpression: 'id, tenantId, #role',
+      ConditionExpression: 'tenantId = :tenantId',
+      ExpressionAttributeNames: { '#role': 'role' },
+      ExpressionAttributeValues: {
+        ':tenantId': tenantId
+      }
+    });
     
     const nurse = nurseResult.Item;
     if (!nurse || nurse.role !== 'ADMIN') {
@@ -43,10 +59,16 @@ export const handler: Handler = async (event) => {
     }
 
     // 2. Query Visit by id=shiftId
-    const visitResult = await docClient.send(new GetCommand({
+    const visitResult = await safeGet({
       TableName: VISIT_TABLE,
-      Key: { id: shiftId }
-    }));
+      Key: { id: shiftId },
+      ProjectionExpression: 'id, tenantId, #status, nurseId, patientId',
+      ConditionExpression: 'tenantId = :tenantId',
+      ExpressionAttributeNames: { '#status': 'status' },
+      ExpressionAttributeValues: {
+        ':tenantId': tenantId
+      }
+    });
     
     const visit = visitResult.Item;
     if (!visit) {
@@ -122,10 +144,16 @@ export const handler: Handler = async (event) => {
     }));
 
     // 8. Get patient to find family members
-    const patientResult = await docClient.send(new GetCommand({
+    const patientResult = await safeGet({
       TableName: PATIENT_TABLE,
-      Key: { id: visit.patientId }
-    }));
+      Key: { id: visit.patientId },
+      ProjectionExpression: 'id, tenantId, #name, familyMembers',
+      ConditionExpression: 'tenantId = :tenantId',
+      ExpressionAttributeNames: { '#name': 'name' },
+      ExpressionAttributeValues: {
+        ':tenantId': tenantId
+      }
+    });
 
     const patient = patientResult.Item;
     if (patient && patient.familyMembers && patient.familyMembers.length > 0) {

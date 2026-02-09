@@ -4,6 +4,16 @@ import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand } from '@
 
 const ddbClient = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddbClient);
+const safeGet = async (params: any) => {
+  try {
+    return await docClient.send(new GetCommand(params));
+  } catch (error: any) {
+    if (error?.name === 'ConditionalCheckFailedException') {
+      return { Item: undefined };
+    }
+    throw error;
+  }
+};
 
 // Table names from environment
 const SHIFT_TABLE = process.env.SHIFT_TABLE_NAME!;
@@ -26,10 +36,16 @@ export const handler: Handler = async (event) => {
 
   try {
     // 1. Query Shift by shiftId
-    const shiftResult = await docClient.send(new GetCommand({
+    const shiftResult = await safeGet({
       TableName: SHIFT_TABLE,
-      Key: { id: shiftId }
-    }));
+      Key: { id: shiftId },
+      ProjectionExpression: 'id, tenantId, #status, nurseId, patientId, scheduledTime, completedAt',
+      ConditionExpression: 'tenantId = :tenantId',
+      ExpressionAttributeNames: { '#status': 'status' },
+      ExpressionAttributeValues: {
+        ':tenantId': tenantId
+      }
+    });
     
     const shift = shiftResult.Item;
     if (!shift) {
@@ -52,10 +68,15 @@ export const handler: Handler = async (event) => {
     }
 
     // 5. Check if Visit with id=shiftId already exists (1:1 enforcement)
-    const existingVisitResult = await docClient.send(new GetCommand({
+    const existingVisitResult = await safeGet({
       TableName: VISIT_TABLE,
-      Key: { id: shiftId }
-    }));
+      Key: { id: shiftId },
+      ProjectionExpression: 'id, tenantId',
+      ConditionExpression: 'tenantId = :tenantId',
+      ExpressionAttributeValues: {
+        ':tenantId': tenantId
+      }
+    });
 
     if (existingVisitResult.Item) {
       throw new Error('Visit already exists for this shift. Each shift can have only one visit.');

@@ -4,6 +4,16 @@ import { DynamoDBDocumentClient, GetCommand, UpdateCommand, PutCommand } from '@
 
 const ddbClient = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddbClient);
+const safeGet = async (params: any) => {
+    try {
+        return await docClient.send(new GetCommand(params));
+    } catch (error: any) {
+        if (error?.name === 'ConditionalCheckFailedException') {
+            return { Item: undefined };
+        }
+        throw error;
+    }
+};
 
 // Rate limiting constants
 const MAX_FAILED_ATTEMPTS = 5;
@@ -61,14 +71,14 @@ export const handler: Schema['verifyFamilyAccessCode']['functionHandler'] = asyn
             };
         }
         
-        // Fetch patient record from DynamoDB
-        const getCommand = new GetCommand({
+        // Fetch minimal patient record for access validation
+        const result = await safeGet({
             TableName: process.env.PATIENT_TABLE_NAME!,
-            Key: { id: patientId }
+            Key: { id: patientId },
+            ProjectionExpression: 'id, accessCode, tenantId',
+            ConditionExpression: 'attribute_exists(id)'
         });
-        
-        const result = await docClient.send(getCommand);
-        
+
         if (!result.Item) {
             console.warn('⚠️  Patient not found:', patientId);
             await incrementFailedAttempts(rateLimitKey);
@@ -85,6 +95,17 @@ export const handler: Schema['verifyFamilyAccessCode']['functionHandler'] = asyn
         if (patient.accessCode === accessCode) {
             console.log('✅ Access granted for patient:', patientId);
             // SECURITY: Don't log patient names to CloudWatch
+
+            const patientNameResult = await safeGet({
+                TableName: process.env.PATIENT_TABLE_NAME!,
+                Key: { id: patientId },
+                ProjectionExpression: 'id, #name, tenantId',
+                ConditionExpression: 'tenantId = :tenantId',
+                ExpressionAttributeNames: { '#name': 'name' },
+                ExpressionAttributeValues: {
+                    ':tenantId': patient.tenantId
+                }
+            });
             
             // Reset failed attempts on success
             await resetFailedAttempts(rateLimitKey);
@@ -94,7 +115,7 @@ export const handler: Schema['verifyFamilyAccessCode']['functionHandler'] = asyn
             
             return {
                 authorized: true,
-                patientName: patient.name
+                patientName: patientNameResult.Item?.name
             };
         } else {
             console.warn('❌ Invalid access code for patient:', patientId);
@@ -133,10 +154,12 @@ async function checkRateLimit(key: string): Promise<{
     remainingLockoutMs?: number;
 }> {
     try {
-        const result = await docClient.send(new GetCommand({
+        const result = await safeGet({
             TableName: process.env.RATE_LIMIT_TABLE_NAME || process.env.PATIENT_TABLE_NAME!,
-            Key: { id: `ratelimit:${key}` }
-        }));
+            Key: { id: `ratelimit:${key}` },
+            ProjectionExpression: 'id, failedAttempts, lockedUntil',
+            ConditionExpression: 'attribute_exists(id)'
+        });
         
         if (!result.Item) {
             return { isLocked: false, failedAttempts: 0 };
