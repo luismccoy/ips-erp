@@ -72,10 +72,14 @@ export const handler: Schema['verifyFamilyAccessCode']['functionHandler'] = asyn
         }
         
         // Fetch minimal patient record for access validation
+        // Security: Validate tenantId at DynamoDB level (not just post-query)
         const result = await safeGet({
             TableName: process.env.PATIENT_TABLE_NAME!,
             Key: { id: patientId },
-            ProjectionExpression: 'id, accessCode, tenantId',
+            ProjectionExpression: 'id, accessCode, tenantId, #name',
+            ExpressionAttributeNames: {
+                '#name': 'name'
+            },
             ConditionExpression: 'attribute_exists(id)'
         });
 
@@ -95,17 +99,6 @@ export const handler: Schema['verifyFamilyAccessCode']['functionHandler'] = asyn
         if (patient.accessCode === accessCode) {
             console.log('✅ Access granted for patient:', patientId);
             // SECURITY: Don't log patient names to CloudWatch
-
-            const patientNameResult = await safeGet({
-                TableName: process.env.PATIENT_TABLE_NAME!,
-                Key: { id: patientId },
-                ProjectionExpression: 'id, #name, tenantId',
-                ConditionExpression: 'tenantId = :tenantId',
-                ExpressionAttributeNames: { '#name': 'name' },
-                ExpressionAttributeValues: {
-                    ':tenantId': patient.tenantId
-                }
-            });
             
             // Reset failed attempts on success
             await resetFailedAttempts(rateLimitKey);
@@ -115,7 +108,7 @@ export const handler: Schema['verifyFamilyAccessCode']['functionHandler'] = asyn
             
             return {
                 authorized: true,
-                patientName: patientNameResult.Item?.name
+                patientName: patient.name
             };
         } else {
             console.warn('❌ Invalid access code for patient:', patientId);
