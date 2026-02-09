@@ -4,6 +4,16 @@ import { DynamoDBDocumentClient, GetCommand, ScanCommand } from '@aws-sdk/lib-dy
 
 const ddbClient = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddbClient);
+const safeGet = async (params: any) => {
+  try {
+    return await docClient.send(new GetCommand(params));
+  } catch (error: any) {
+    if (error?.name === 'ConditionalCheckFailedException') {
+      return { Item: undefined };
+    }
+    throw error;
+  }
+};
 
 // Table names from environment
 const VISIT_TABLE = process.env.VISIT_TABLE_NAME!;
@@ -27,10 +37,15 @@ export const handler: Handler = async (event) => {
 
   try {
     // 1. Fetch patient and verify family member access
-    const patientResult = await docClient.send(new GetCommand({
+    const patientResult = await safeGet({
       TableName: PATIENT_TABLE,
-      Key: { id: patientId }
-    }));
+      Key: { id: patientId },
+      ProjectionExpression: 'id, tenantId, familyMembers',
+      ConditionExpression: 'tenantId = :tenantId',
+      ExpressionAttributeValues: {
+        ':tenantId': tenantId
+      }
+    });
     
     const patient = patientResult.Item;
     if (!patient) {
@@ -69,17 +84,28 @@ export const handler: Handler = async (event) => {
     const summaries = await Promise.all(
       visits.map(async (visit) => {
         // Fetch nurse name
-        const nurseResult = await docClient.send(new GetCommand({
+        const nurseResult = await safeGet({
           TableName: NURSE_TABLE,
-          Key: { id: visit.nurseId }
-        }));
+          Key: { id: visit.nurseId },
+          ProjectionExpression: 'id, tenantId, #name',
+          ConditionExpression: 'tenantId = :tenantId',
+          ExpressionAttributeNames: { '#name': 'name' },
+          ExpressionAttributeValues: {
+            ':tenantId': tenantId
+          }
+        });
         const nurseName = nurseResult.Item?.name || 'Unknown Nurse';
 
         // Fetch shift for duration
-        const shiftResult = await docClient.send(new GetCommand({
+        const shiftResult = await safeGet({
           TableName: SHIFT_TABLE,
-          Key: { id: visit.shiftId }
-        }));
+          Key: { id: visit.shiftId },
+          ProjectionExpression: 'id, tenantId, scheduledTime, completedAt',
+          ConditionExpression: 'tenantId = :tenantId',
+          ExpressionAttributeValues: {
+            ':tenantId': tenantId
+          }
+        });
         const shift = shiftResult.Item;
         
         // Compute duration (if shift has start/end times)

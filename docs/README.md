@@ -1,185 +1,95 @@
-# IPS-ERP Documentation Index
-**Last Updated:** 2026-01-30
+# IPS-ERP Documentation
+
+**Production Status**: v1.0.0 Live | https://main.d2wwgecog8smmr.amplifyapp.com
 
 ---
 
-## 📂 Quick Navigation
+## 🎯 Start Here
 
-### 🎨 [01-design/](01-design/) - Design & UX
-**Landing Page & Visual Design:**
-- [`ENTERPRISE_DESIGN_PATTERNS.md`](ENTERPRISE_DESIGN_PATTERNS.md) - Opus deep analysis (35KB)
-- [`ENTERPRISE_DESIGN_PATTERNS_ANALYSIS.md`](ENTERPRISE_DESIGN_PATTERNS_ANALYSIS.md) - Photography & color strategy (12KB)
-- [`enterprise-mockups-professional.html`](enterprise-mockups-professional.html) - 2 design systems with module consistency
-- [`design-options.html`](design-options.html) - Initial design concepts
-- [`DESIGN_IMPLEMENTATION_GUIDE.md`](DESIGN_IMPLEMENTATION_GUIDE.md) - Code examples & components
-- [`gemini-homepage-template/`](gemini-homepage-template/) - **NEW:** Luis's Gemini layout (excellent structure!)
+### Essential Documents
+1. **[PROJECT_SCOPE.md](../PROJECT_SCOPE.md)** - Project scope and requirements
+2. **[SYSTEM_MAP.md](../SYSTEM_MAP.md)** - Complete architecture reference
+3. **[IPS_ERP_CONTEXT.md](../IPS_ERP_CONTEXT.md)** - Business context and Colombian regulations
 
-**UX Research & Testing:**
-- [`UI_UX_RESEARCH.md`](UI_UX_RESEARCH.md) - Comprehensive UX research (62KB)
-- [`UX_RESEARCH_HEALTHCARE_SAAS.md`](UX_RESEARCH_HEALTHCARE_SAAS.md) - Healthcare-specific patterns
-- [`DESIGN_TOKENS.md`](DESIGN_TOKENS.md) - Color, typography, spacing system
-
-**Visual Previews:**
-- [`enterprise-option1.png`](enterprise-option1.png) - Screenshot of Option 1
-- [`hero-preview.html`](hero-preview.html) - Hero section preview
-- [`nurse-mobile-preview.html`](nurse-mobile-preview.html) - Mobile UI preview
+### Current Production Status
+- **[SECURITY_AUDIT_REPORT.md](../SECURITY_AUDIT_REPORT.md)** - Latest security audit (78/100)
+- **[PERFORMANCE_REPORT.md](../PERFORMANCE_REPORT.md)** - Performance benchmarks (91.8/100)
+- **[RIPS_COMPLIANCE_REPORT.md](../RIPS_COMPLIANCE_REPORT.md)** - Colombian billing compliance (72/100)
 
 ---
 
-### 🗺️ [diagrams/](diagrams/) - Visual Documentation
-**Complete Suite (9/9 diagrams):**
-1. [`admin-journey.html`](diagrams/admin-journey.html) - Admin portal user flow (13KB)
-2. [`nurse-journey.html`](diagrams/nurse-journey.html) - Nurse mobile app flow (15KB)
-3. [`family-journey.html`](diagrams/family-journey.html) - Family portal flow (15KB)
-4. [`architecture-map.html`](diagrams/architecture-map.html) - System architecture (19KB)
-5. [`data-flow.html`](diagrams/data-flow.html) - Data & sync flows (39KB) 🔥
-6. [`ai-agents-map.html`](diagrams/ai-agents-map.html) - AI agents (448,348% ROI!) (29KB) 🤖
-7. [`navigation-flows.html`](diagrams/navigation-flows.html) - Navigation & routing (21KB)
-8. [`form-workflows.html`](diagrams/form-workflows.html) - Form validation & submission
-9. [`state-transitions.html`](diagrams/state-transitions.html) - State machines (22KB)
+## 📁 Documentation Structure
 
-**Total:** ~173KB of interactive Mermaid.js diagrams
+### 01-design/
+Design system, tokens, UX research, enterprise patterns
 
----
+**Key Files**:
+- `DESIGN_TOKENS.md` - Colors, typography, spacing
+- `ENTERPRISE_DESIGN_PATTERNS.md` - Reusable UI patterns
+- `UI_UX_RESEARCH.md` - User research findings
 
-### 🔧 [02-technical/](02-technical/) - Technical Documentation
-**Architecture & APIs:**
-- [`API_DOCUMENTATION.md`](API_DOCUMENTATION.md) - Complete API reference (198KB)
-- [`OFFLINE_SYNC_SPEC.md`](OFFLINE_SYNC_SPEC.md) - Offline-first architecture (44KB)
-- [`AUTHZ_MODEL.md`](AUTHZ_MODEL.md) - Authorization & permissions (14KB)
-- [`RIPS_AI_INTEGRATION.md`](RIPS_AI_INTEGRATION.md) - AI integration specs
+### 02-technical/
+API specs, authorization, integrations, clinical features
 
-**Specifications:**
-- [`CLINICAL_SCALES_SPEC.md`](CLINICAL_SCALES_SPEC.md) - Clinical forms (BARTHEL, NORTON, etc.)
-- [`EXTERNAL_INTEGRATIONS_SPEC.md`](EXTERNAL_INTEGRATIONS_SPEC.md) - Third-party integrations
-- [`TASK_MANAGER_SPEC.md`](TASK_MANAGER_SPEC.md) - Task management system
+**Key Files**:
+- `API_DOCUMENTATION.md` - GraphQL API reference
+- `AUTHZ_MODEL.md` - Multi-tenant authorization
+- `CLINICAL_SCALES_SPEC.md` - Clinical assessment tools
+- `RIPS_AI_INTEGRATION.md` - Bedrock AI integration
 
----
+### 03-testing/
+Test guides, security checklists, QA reports
 
-### 🧪 [03-testing/](03-testing/) - Testing & QA
-**Test Reports:**
-- [`QA_PARITY_REPORT.md`](QA_PARITY_REPORT.md) - Comprehensive QA report (28KB)
-- [`SECURITY_TEST_CHECKLIST.md`](SECURITY_TEST_CHECKLIST.md) - Security testing
-- [`TEST_ENGINEER_REPORT.md`](TEST_ENGINEER_REPORT.md) - Latest test results
+**Key Files**:
+- `QUICK_TEST_GUIDE.md` - Quick validation checklist
+- `SECURITY_TEST_CHECKLIST.md` - Security validation
+- `TEST_ENGINEER_REPORT.md` - QA findings
 
-**Stress Tests:**
-- [`CLINICAL_UX_STRESS_TEST.md`](CLINICAL_UX_STRESS_TEST.md) - Clinical workflow stress tests
-- [`AUDIT_NURSE_DEMO.md`](AUDIT_NURSE_DEMO.md) - Nurse portal audit
-- [`AUDIT_ADMIN_DEMO.md`](AUDIT_ADMIN_DEMO.md) - Admin portal audit
+### 04-research/
+Market analysis, competitor research, GTM strategy
 
-**User Guides:**
-- [`ADMIN_USER_GUIDE.md`](ADMIN_USER_GUIDE.md) - Admin portal guide
-- [`DEMO_WORKFLOW.md`](DEMO_WORKFLOW.md) - Demo walkthrough
-- [`QUICK_TEST_GUIDE.md`](QUICK_TEST_GUIDE.md) - Quick testing checklist
+**Key Files**:
+- `MARKET_RESEARCH_COLOMBIA.md` - Colombian healthcare market
+- `COMPETITOR_ANALYSIS.md` - Competitive landscape
+- `GTM_EXECUTIVE_SUMMARY.md` - Go-to-market strategy
+
+### 05-deployment/
+CI/CD, deployment logs, verification protocols
+
+**Key Files**:
+- `CICD_SETUP.md` - GitHub Actions pipeline
+- `DEPLOYMENT.md` - Deployment procedures
+- `POST_DEPLOY_VERIFICATION_R5.md` - Production verification
 
 ---
 
-### 📊 [04-research/](04-research/) - Market & Competitor Research
-**Market Analysis:**
-- [`MARKET_RESEARCH_COLOMBIA.md`](MARKET_RESEARCH_COLOMBIA.md) - Colombian healthcare market
-- [`COMPETITOR_ANALYSIS.md`](COMPETITOR_ANALYSIS.md) - Competitor breakdown
-- [`COMPETITOR_SCREENSHOTS_ANALYSIS.md`](COMPETITOR_SCREENSHOTS_ANALYSIS.md) - Visual analysis
-- [`GTM_EXECUTIVE_SUMMARY.md`](GTM_EXECUTIVE_SUMMARY.md) - Go-to-market strategy
+## 🚀 Quick Actions
 
-**Content & Marketing:**
-- [`CONTENT_STRATEGY.md`](CONTENT_STRATEGY.md) - Content marketing plan
-- [`LANDING_PAGE_IMPROVEMENTS.md`](LANDING_PAGE_IMPROVEMENTS.md) - Landing page optimization
+### For Developers
+- **API Reference**: `02-technical/API_DOCUMENTATION.md`
+- **Auth Model**: `02-technical/AUTHZ_MODEL.md`
+- **Test Locally**: `03-testing/QUICK_TEST_GUIDE.md`
 
----
+### For Product/Business
+- **Project Scope**: `../PROJECT_SCOPE.md`
+- **Roadmap**: `../PROJECT_ROADMAP.md`
+- **Market Research**: `04-research/`
 
-### 🚀 [05-deployment/](05-deployment/) - Deployment & DevOps
-**Deployment:**
-- [`DEPLOYMENT.md`](DEPLOYMENT.md) - Deployment guide
-- [`CICD_SETUP.md`](CICD_SETUP.md) - CI/CD pipeline
-- [`IAM_POLICY.md`](IAM_POLICY.md) - AWS IAM configuration
-
-**Priority Fixes (Recent):**
-- [`PRIORITY_FIXES_CYCLE1.md`](PRIORITY_FIXES_CYCLE1.md) - Cycle 1 fixes
-- [`PRIORITY_FIXES_CYCLE2.md`](PRIORITY_FIXES_CYCLE2.md) - Cycle 2 fixes
-- [`PRIORITY_FIXES_CYCLE3.md`](PRIORITY_FIXES_CYCLE3.md) - Cycle 3 fixes
+### For DevOps
+- **System Architecture**: `../SYSTEM_MAP.md`
+- **Deployment Guide**: `05-deployment/DEPLOYMENT.md`
+- **Security Audit**: `../SECURITY_AUDIT_REPORT.md`
 
 ---
 
-## 🌟 Most Important Files (Start Here)
+## 🔄 Recent Updates (2026-02-09)
 
-### For Design Review:
-1. **[`enterprise-mockups-professional.html`](enterprise-mockups-professional.html)** - View mockups in browser
-2. **[`ENTERPRISE_DESIGN_PATTERNS.md`](ENTERPRISE_DESIGN_PATTERNS.md)** - Read competitor analysis
-3. **[`gemini-homepage-template/`](gemini-homepage-template/)** - Your Gemini design (great structure!)
-
-### For System Understanding:
-1. **[`diagrams/architecture-map.html`](diagrams/architecture-map.html)** - System overview
-2. **[`diagrams/ai-agents-map.html`](diagrams/ai-agents-map.html)** - AI capabilities
-3. **[`API_DOCUMENTATION.md`](API_DOCUMENTATION.md)** - API reference
-
-### For Testing:
-1. **[`QUICK_TEST_GUIDE.md`](QUICK_TEST_GUIDE.md)** - Quick testing
-2. **[`DEMO_WORKFLOW.md`](DEMO_WORKFLOW.md)** - Demo walkthrough
-3. **[`QA_PARITY_REPORT.md`](QA_PARITY_REPORT.md)** - Latest QA status
+- ✅ Security audit completed (2 critical vulnerabilities identified)
+- ✅ Performance benchmarks added (91.8/100 score)
+- ✅ RIPS compliance audit (production blocker found)
+- ⏳ P0 fixes in progress (tenant isolation, EPS providers, file upload, PDF generation)
 
 ---
 
-## 📈 Project Stats
-
-**Documentation:**
-- Total files: 90+ documents
-- Total size: ~4.4MB
-- Diagrams: 9 interactive HTML files (~173KB)
-- Design research: ~159KB
-
-**System:**
-- Deploy: #155 (stable)
-- Tests: 15/17 passing (88%)
-- Bugs: 0 critical
-
-**AI:**
-- 3 AI agents (Roster, Glosa Defender, RIPS Validator)
-- ROI: 448,348%
-- Monthly recovery: $5.1M
-
----
-
-## 🔄 Recent Updates (Last 24h)
-
-### ✅ Completed:
-- All 9 documentation diagrams (100%)
-- Enterprise design package (Opus research)
-- Professional mockups (2 design systems)
-- Gemini template integration (**NEW!**)
-
-### 📋 Next Actions:
-- **T-20260130-005:** Review design package
-- Create combined mockup (Gemini layout + home healthcare photos)
-- Organize docs folder (in progress)
-
----
-
-## 📞 Quick Links
-
-**Live Site:** https://main.d2wwgecog8smmr.amplifyapp.com  
-**Repository:** ~/projects/ERP/  
-**Docs:** ~/projects/ERP/docs/  
-**Tests:** ~/projects/ERP/tests/
-
----
-
-## 🆘 Need Help?
-
-**Finding something?**
-- Design/UX → `01-design/`
-- Technical docs → `02-technical/`
-- Testing → `03-testing/`
-- Research → `04-research/`
-- Deployment → `05-deployment/`
-
-**Key searches:**
-- "enterprise" → Design patterns, mockups
-- "diagram" → Visual documentation
-- "test" → QA reports, test guides
-- "api" → API documentation
-- "security" → Security specs
-
----
-
-*Generated: 2026-01-30 14:20 UTC*  
-*Next update: After combined mockup delivery*
+**Last Updated**: 2026-02-09  
+**Backup**: ~/ERP-docs-backup-2026-02-09.tar.gz

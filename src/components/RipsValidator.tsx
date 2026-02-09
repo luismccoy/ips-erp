@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { client } from '../amplify-utils';
+import { client, getTenantId } from '../amplify-utils';
 import { useLoadingTimeout } from '../hooks/useLoadingTimeout';
+import { FileUpload } from './FileUpload';
 
 /**
  * RIPS Validator Component - Implementation Status
@@ -49,7 +50,7 @@ import { useLoadingTimeout } from '../hooks/useLoadingTimeout';
  * @see .kiro/specs/remaining-integrations/design.md - Integration architecture
  */
 export const RipsValidator: React.FC = () => {
-    const [file, setFile] = useState<File | null>(null);
+    const [uploadedFiles, setUploadedFiles] = useState<{ key: string; url: string; name: string }[]>([]);
     const [billingRecordId, setBillingRecordId] = useState<string>('');
     const { isLoading: isValidating, hasTimedOut, timeoutError, startLoading, stopLoading, retry } = useLoadingTimeout({
         timeoutMs: 30000, // 30 second timeout for validation
@@ -62,17 +63,9 @@ export const RipsValidator: React.FC = () => {
     } | null>(null);
     const [errorMessage, setErrorMessage] = useState<string>('');
 
-    const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            setFile(e.target.files[0]);
-            setValidationResult(null);
-            setErrorMessage('');
-        }
-    };
-
     const runValidation = async () => {
-        if (!file || !billingRecordId.trim()) {
-            setErrorMessage('Por favor ingrese un ID de registro de facturación válido.');
+        if (uploadedFiles.length === 0 || !billingRecordId.trim()) {
+            setErrorMessage('Por favor cargue al menos un archivo e ingrese un ID de registro válido.');
             return;
         }
         
@@ -168,13 +161,17 @@ export const RipsValidator: React.FC = () => {
                         <p className="input-hint">Ingrese el ID del registro de facturación a validar</p>
                     </div>
                     
-                    <div className="drop-zone" onClick={() => document.getElementById('rips-input')?.click()}>
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        <p>{file ? file.name : 'Seleccionar archivo .zip o .txt'}</p>
-                        <input id="rips-input" type="file" hidden onChange={handleUpload} />
-                    </div>
+                    <FileUpload
+                        basePath={`rips/${getTenantId()}`}
+                        accept=".zip,.txt,.csv,.json"
+                        multiple
+                        maxSizeMB={25}
+                        onUploadComplete={(files) => {
+                            setUploadedFiles(prev => [...prev, ...files]);
+                            setValidationResult(null);
+                            setErrorMessage('');
+                        }}
+                    />
 
                     <div className="rules-preview">
                         <h4>Reglas Activas (JSON/2275):</h4>
@@ -188,7 +185,7 @@ export const RipsValidator: React.FC = () => {
 
                     <button
                         className="btn-secondary btn-full"
-                        disabled={!file || !billingRecordId.trim() || isValidating}
+                        disabled={uploadedFiles.length === 0 || !billingRecordId.trim() || isValidating}
                         onClick={runValidation}
                     >
                         {isValidating ? 'Validando...' : 'Iniciar Validación Técnica'}
@@ -316,23 +313,6 @@ export const RipsValidator: React.FC = () => {
                     font-size: 0.75rem;
                     color: var(--neutral-500);
                 }
-
-                .drop-zone {
-                    height: 120px;
-                    border: 2px dashed var(--neutral-200);
-                    border-radius: var(--radius-lg);
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 0.5rem;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                    color: var(--neutral-400);
-                }
-                .drop-zone:hover { border-color: var(--primary-400); background: var(--primary-50); color: var(--primary-600); }
-                .drop-zone svg { width: 32px; height: 32px; }
-                .drop-zone p { margin: 0; font-size: 0.875rem; font-weight: 600; text-align: center; padding: 0 1rem; }
 
                 .rules-preview { background: var(--neutral-50); padding: 1rem; border-radius: var(--radius-md); }
                 .rules-preview h4 { margin: 0 0 0.75rem 0; font-size: 0.75rem; font-weight: 700; color: var(--neutral-500); text-transform: uppercase; }

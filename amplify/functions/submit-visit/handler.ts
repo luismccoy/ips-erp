@@ -4,6 +4,16 @@ import { DynamoDBDocumentClient, GetCommand, UpdateCommand, PutCommand, ScanComm
 
 const ddbClient = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddbClient);
+const safeGet = async (params: any) => {
+  try {
+    return await docClient.send(new GetCommand(params));
+  } catch (error: any) {
+    if (error?.name === 'ConditionalCheckFailedException') {
+      return { Item: undefined };
+    }
+    throw error;
+  }
+};
 
 // Table names from environment
 const VISIT_TABLE = process.env.VISIT_TABLE_NAME!;
@@ -27,10 +37,16 @@ export const handler: Handler = async (event) => {
 
   try {
     // 1. Query Visit by id=shiftId
-    const visitResult = await docClient.send(new GetCommand({
+    const visitResult = await safeGet({
       TableName: VISIT_TABLE,
-      Key: { id: shiftId }
-    }));
+      Key: { id: shiftId },
+      ProjectionExpression: 'id, tenantId, nurseId, #status, kardex',
+      ConditionExpression: 'tenantId = :tenantId',
+      ExpressionAttributeNames: { '#status': 'status' },
+      ExpressionAttributeValues: {
+        ':tenantId': tenantId
+      }
+    });
     
     const visit = visitResult.Item;
     if (!visit) {

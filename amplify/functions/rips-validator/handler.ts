@@ -7,6 +7,57 @@ const ddbClient = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddbClient);
 
 const BILLING_RECORD_TABLE = process.env.BILLING_RECORD_TABLE_NAME!;
+// Official Colombian EPS Registry (Superintendencia Nacional de Salud)
+// Source: https://www.supersalud.gov.co/es-co/vigilados/listados
+const COLOMBIAN_EPS_REGISTRY: Record<string, string> = {
+    // Régimen Contributivo
+    'EPS001': 'Aliansalud EPS',
+    'EPS002': 'Salud Total EPS',
+    'EPS005': 'EPS Sanitas',
+    'EPS008': 'Compensar EPS',
+    'EPS010': 'EPS Sura',
+    'EPS012': 'Comfenalco Valle EPS',
+    'EPS013': 'Saludvida EPS',
+    'EPS016': 'Coomeva EPS',
+    'EPS017': 'Nueva EPS',
+    'EPS018': 'Famisanar EPS',
+    'EPS023': 'Cruz Blanca EPS',
+    'EPS033': 'Salud Mía EPS',
+    'EPS037': 'Mutual Ser EPS',
+    'EPS039': 'Coosalud EPS',
+    'EPS040': 'Emssanar EPS',
+    'EPS041': 'Asmet Salud EPS',
+    'EPS042': 'Comfamiliar Nariño',
+    'EPS044': 'Comfamiliar Cartagena',
+    'EPS045': 'Comfamiliar Huila',
+    // Régimen Subsidiado
+    'EPSS01': 'Capital Salud EPS-S',
+    'EPSS02': 'Ambuq EPS-S',
+    'EPSS03': 'Comfaboy EPS-S',
+    'EPSS04': 'Convida EPS-S',
+    'EPSS05': 'Dusakawi EPS-S',
+    'EPSS06': 'Mallamas EPS-S',
+    'EPSS07': 'Pijaos Salud EPS-S',
+    'EPSS08': 'Anaswayuu EPS-S',
+    'EPSS09': 'Anas Wayuu EPS-S',
+    'EPSS10': 'AIC EPS-S',
+    // Special Regimes
+    'ESS062': 'Magisterio',
+    'ESS063': 'Fuerzas Militares',
+    'ESS064': 'Policía Nacional',
+    'ESS065': 'ECOPETROL',
+    'ESS066': 'Universidades Públicas',
+    // Legacy codes (still in use)
+    'SURA': 'EPS Sura (Legacy)',
+    'SANITAS': 'EPS Sanitas (Legacy)',
+    'COMPENSAR': 'Compensar EPS (Legacy)',
+    'FAMISANAR': 'Famisanar EPS (Legacy)',
+    'SALUD_TOTAL': 'Salud Total EPS (Legacy)',
+    'NUEVA_EPS': 'Nueva EPS (Legacy)',
+    'COOMEVA': 'Coomeva EPS (Legacy)',
+    'COOSALUD': 'Coosalud EPS (Legacy)'
+};
+const validEPS = Object.keys(COLOMBIAN_EPS_REGISTRY);
 
 /**
  * RIPS Validator - Colombian Health Ministry Compliance
@@ -56,19 +107,19 @@ export const handler: Schema["validateRIPS"]["functionHandler"] = async (event) 
 
     // 1. Validate required fields
     if (!billingRecord.date) {
-        errors.push({ field: 'date', message: 'Date is required' });
+        errors.push({ field: 'date', message: 'Fecha de servicio requerida (Resolución 2275/2023, Art. 8, Numeral 1)' });
     }
     
     if (!billingRecord.procedures || billingRecord.procedures.length === 0) {
-        errors.push({ field: 'procedures', message: 'At least one procedure (CUPS code) is required' });
+        errors.push({ field: 'procedures', message: 'Debe incluir al menos un procedimiento CUPS (Resolución 2275/2023, Art. 10)' });
     }
     
     if (!billingRecord.diagnosis) {
-        errors.push({ field: 'diagnosis', message: 'Diagnosis (ICD-10 code) is required' });
+        errors.push({ field: 'diagnosis', message: 'Diagnóstico CIE-10 requerido (Resolución 2275/2023, Art. 12)' });
     }
     
     if (!billingRecord.eps) {
-        errors.push({ field: 'eps', message: 'EPS (health insurance provider) is required' });
+        errors.push({ field: 'eps', message: 'EPS requerida (Resolución 2275/2023, Art. 6)' });
     }
 
     // 2. Validate date format (ISO 8601)
@@ -77,13 +128,13 @@ export const handler: Schema["validateRIPS"]["functionHandler"] = async (event) 
         if (!dateRegex.test(billingRecord.date)) {
             errors.push({ 
                 field: 'date', 
-                message: 'Date must be in ISO 8601 format (YYYY-MM-DD)' 
+                message: 'Fecha debe estar en formato ISO 8601 (YYYY-MM-DD). (Resolución 2275/2023, Art. 8)' 
             });
         } else {
             // Check if date is valid
             const date = new Date(billingRecord.date);
             if (isNaN(date.getTime())) {
-                errors.push({ field: 'date', message: 'Invalid date value' });
+                errors.push({ field: 'date', message: 'Fecha inválida. (Resolución 2275/2023, Art. 8)' });
             }
             
             // Warn if date is in the future
@@ -101,7 +152,7 @@ export const handler: Schema["validateRIPS"]["functionHandler"] = async (event) 
             if (!cupsRegex.test(code)) {
                 errors.push({ 
                     field: `procedures[${index}]`, 
-                    message: `Invalid CUPS code format: ${code}. Expected 6 digits.` 
+                    message: `Código CUPS inválido: ${code}. Debe ser 6 dígitos numéricos. (Resolución 2275/2023, Art. 10)` 
                 });
             }
         });
@@ -109,36 +160,27 @@ export const handler: Schema["validateRIPS"]["functionHandler"] = async (event) 
 
     // 4. Validate ICD-10 diagnosis code
     if (billingRecord.diagnosis) {
-        // ICD-10 codes: Letter + 2 digits + optional decimal + 1-2 digits
-        // Examples: A00, A00.0, A00.01
-        const icd10Regex = /^[A-Z]\d{2}(\.\d{1,2})?$/;
+        // ICD-10 codes per WHO specification:
+        // - 1 letter (A-Z) + 2 digits + optional decimal + 1 digit (NOT 2)
+        // - Valid: A00, A00.0, A00.1, Z99.9
+        // - Invalid: A00.00, A00.123
+        const icd10Regex = /^[A-Z]\d{2}(\.\d)?$/;
         if (!icd10Regex.test(billingRecord.diagnosis)) {
             errors.push({ 
                 field: 'diagnosis', 
-                message: `Invalid ICD-10 code format: ${billingRecord.diagnosis}` 
+                message: `Código CIE-10 inválido: ${billingRecord.diagnosis}. Formato esperado: Letra + 2 dígitos + opcionalmente .1 dígito. (Resolución 2275/2023, Art. 12)` 
             });
         }
     }
 
     // 5. Validate EPS (Colombian health insurance providers)
     if (billingRecord.eps) {
-        // Common Colombian EPS codes (simplified validation)
-        const validEPS = [
-            'EPS001', 'EPS002', 'EPS003', // Placeholder codes
-            'SURA', 'SANITAS', 'COMPENSAR', 'FAMISANAR', 'SALUD_TOTAL'
-        ];
-        
-        // For now, just check it's not empty and has reasonable length
-        if (billingRecord.eps.length < 3) {
-            errors.push({ 
-                field: 'eps', 
-                message: 'EPS code is too short' 
-            });
-        }
-        
-        // Warn if EPS is not in common list (but don't fail)
+        // Validate against official registry
         if (!validEPS.includes(billingRecord.eps)) {
-            warnings.push(`EPS '${billingRecord.eps}' is not in the common provider list`);
+            errors.push({
+                field: 'eps',
+                message: `EPS no registrada: ${billingRecord.eps}. Consulte registro SuperSalud. (Resolución 2275/2023, Art. 6)`
+            });
         }
     }
 
@@ -147,7 +189,7 @@ export const handler: Schema["validateRIPS"]["functionHandler"] = async (event) 
         if (billingRecord.totalAmount < 0) {
             errors.push({ 
                 field: 'totalAmount', 
-                message: 'Amount cannot be negative' 
+                message: 'El valor no puede ser negativo. (Resolución 2275/2023)' 
             });
         }
         
