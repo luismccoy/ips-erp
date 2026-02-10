@@ -1,6 +1,6 @@
 import type { Schema } from '../../data/resource';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, GetCommand, UpdateCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, UpdateCommand, PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 
 const ddbClient = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddbClient);
@@ -36,25 +36,21 @@ export const handler: Handler = async (event) => {
   }
 
   try {
-    // 1. Verify user has admin role
-    const nurseResult = await safeGet({
+    // 1. Verify user has admin role (lookup by cognitoSub via tenantId GSI)
+    const nurseResult = await docClient.send(new QueryCommand({
       TableName: NURSE_TABLE,
-      Key: { id: userId },
-      ProjectionExpression: 'id, tenantId, #role',
-      ConditionExpression: 'tenantId = :tenantId',
-      ExpressionAttributeNames: { '#role': 'role' },
+      IndexName: 'gsi-Tenant.nurses',
+      KeyConditionExpression: 'tenantId = :tenantId',
+      FilterExpression: 'cognitoSub = :sub',
       ExpressionAttributeValues: {
-        ':tenantId': tenantId
+        ':tenantId': tenantId,
+        ':sub': userId
       }
-    });
+    }));
     
-    const nurse = nurseResult.Item;
+    const nurse = nurseResult.Items?.[0];
     if (!nurse || nurse.role !== 'ADMIN') {
       throw new Error('Unauthorized: Only admins can reject visits');
-    }
-
-    if (nurse.tenantId !== tenantId) {
-      throw new Error('Unauthorized: Admin belongs to different tenant');
     }
 
     // 2. Query Visit by id=shiftId
