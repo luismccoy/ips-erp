@@ -5,9 +5,10 @@
  * Walks users through key features of the IPS ERP system.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Joyride, { STATUS, EVENTS } from 'react-joyride';
 import type { Step, CallBackProps } from 'react-joyride';
+import { STORAGE_KEYS } from '../constants/navigation';
 
 interface GuidedTourProps {
     /** Current view in the admin dashboard */
@@ -25,8 +26,11 @@ const tourStyles = {
         backgroundColor: '#ffffff',
         textColor: '#1e293b',
         arrowColor: '#ffffff',
-        overlayColor: 'rgba(15, 23, 42, 0.75)',
+        overlayColor: 'rgba(15, 23, 42, 0.4)', // Reduced opacity to 0.4 for less intrusive overlay
         zIndex: 10000,
+    },
+    overlay: {
+        backgroundColor: 'rgba(15, 23, 42, 0.4)', // Ensure consistent overlay color
     },
     buttonNext: {
         backgroundColor: '#2563eb',
@@ -40,7 +44,12 @@ const tourStyles = {
         fontWeight: 600,
     },
     buttonSkip: {
-        color: '#94a3b8',
+        color: '#64748b',
+        fontWeight: 600,
+        fontSize: '14px',
+        padding: '8px 16px',
+        backgroundColor: '#f1f5f9',
+        borderRadius: '8px',
     },
     tooltip: {
         borderRadius: '16px',
@@ -60,14 +69,64 @@ export function GuidedTour({ currentView, onViewChange, autoStart = false }: Gui
     const [run, setRun] = useState(false);
     const [stepIndex, setStepIndex] = useState(0);
     const [showWelcome, setShowWelcome] = useState(true);
+    
+    // Guard to prevent double-cleanup which could cause state issues
+    const isCleaningUp = useRef(false);
+
+    // Centralized cleanup function to ensure consistent state reset
+    // Wrapped in useCallback to prevent recreating on every render
+    const cleanupTour = useCallback(() => {
+        // Prevent double-cleanup
+        if (isCleaningUp.current) {
+            console.log('[GuidedTour] Skipping duplicate cleanup');
+            return;
+        }
+        isCleaningUp.current = true;
+        
+        setRun(false);
+        setStepIndex(0);
+        setShowWelcome(false);
+        sessionStorage.setItem(STORAGE_KEYS.TOUR_COMPLETED, 'true');
+        
+        // Only call onViewChange if we're not already on dashboard
+        // This prevents unnecessary state updates
+        onViewChange('dashboard');
+        
+        // Reset guard after a short delay to allow for legitimate re-cleanups
+        setTimeout(() => {
+            isCleaningUp.current = false;
+        }, 100);
+    }, [onViewChange]);
 
     // Check if user has seen the tour before
     useEffect(() => {
-        const hasSeenTour = sessionStorage.getItem('ips-demo-tour-completed');
+        const hasSeenTour = sessionStorage.getItem(STORAGE_KEYS.TOUR_COMPLETED);
         if (!hasSeenTour && autoStart) {
             setShowWelcome(true);
         }
     }, [autoStart]);
+
+    // Cleanup on unmount - ensure tour state is reset if component unmounts while running
+    useEffect(() => {
+        return () => {
+            // Reset tour state on unmount to prevent stuck overlays
+            setRun(false);
+            setStepIndex(0);
+            setShowWelcome(false);
+        };
+    }, []);
+
+    // ESC key handler - allow users to exit tour with ESC key
+    useEffect(() => {
+        const handleEscKey = (event: KeyboardEvent) => {
+            if (event.key === 'Escape' && (run || showWelcome)) {
+                cleanupTour();
+            }
+        };
+
+        window.addEventListener('keydown', handleEscKey);
+        return () => window.removeEventListener('keydown', handleEscKey);
+    }, [run, showWelcome, cleanupTour]);
 
     const steps: Step[] = [
         // Step 0: Dashboard Overview
@@ -241,12 +300,14 @@ export function GuidedTour({ currentView, onViewChange, autoStart = false }: Gui
             console.log('Target not found, current step:', index);
         }
 
-        // Handle tour completion
+        // Handle tour completion - ensure ALL exit paths clear state properly
         if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status as any)) {
-            setRun(false);
-            setStepIndex(0);
-            sessionStorage.setItem('ips-demo-tour-completed', 'true');
-            onViewChange('dashboard');
+            cleanupTour();
+        }
+
+        // Also handle close button click (X button)
+        if (action === 'close' || action === 'skip') {
+            cleanupTour();
         }
     };
 
@@ -258,8 +319,7 @@ export function GuidedTour({ currentView, onViewChange, autoStart = false }: Gui
     };
 
     const skipTour = () => {
-        setShowWelcome(false);
-        sessionStorage.setItem('ips-demo-tour-completed', 'true');
+        cleanupTour();
     };
 
     // Welcome Modal
@@ -318,9 +378,10 @@ export function GuidedTour({ currentView, onViewChange, autoStart = false }: Gui
             showProgress
             showSkipButton
             hideCloseButton={false}
-            disableOverlayClose
+            disableOverlayClose={false} // Allow clicking overlay to close (was true, changed to false)
             disableScrolling={false}
-            spotlightClicks
+            spotlightClicks={true}
+            spotlightPadding={0}
             callback={handleJoyrideCallback}
             styles={tourStyles}
             locale={{
@@ -328,7 +389,7 @@ export function GuidedTour({ currentView, onViewChange, autoStart = false }: Gui
                 close: 'Cerrar',
                 last: '¡Finalizar!',
                 next: 'Siguiente',
-                skip: 'Saltar Tour',
+                skip: '✕ Saltar Tour', // Added icon for better visibility
             }}
             floaterProps={{
                 disableAnimation: false,
@@ -342,7 +403,7 @@ export function RestartTourButton({ onClick }: { onClick: () => void }) {
     return (
         <button
             onClick={() => {
-                sessionStorage.removeItem('ips-demo-tour-completed');
+                sessionStorage.removeItem(STORAGE_KEYS.TOUR_COMPLETED);
                 onClick();
             }}
             className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors"

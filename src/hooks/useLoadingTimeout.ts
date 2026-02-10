@@ -1,96 +1,132 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface UseLoadingTimeoutOptions {
-    /** Timeout in milliseconds before showing error state (default: 15000) */
-    timeoutMs?: number;
-    /** Callback when timeout is reached */
-    onTimeout?: () => void;
+  timeoutMs?: number;
+  maxRetries?: number;
+  retryCount?: number;
+  onTimeout?: () => void;
+  timeoutMessage?: string;
 }
 
-interface UseLoadingTimeoutReturn {
-    /** Whether we're in loading state */
-    isLoading: boolean;
-    /** Whether timeout was reached */
-    hasTimedOut: boolean;
-    /** Error message if timed out */
-    timeoutError: string | null;
-    /** Start loading (resets timeout) */
-    startLoading: () => void;
-    /** Stop loading (success) */
-    stopLoading: () => void;
-    /** Reset to initial state */
-    reset: () => void;
-    /** Retry function - resets and starts loading again */
-    retry: () => void;
-}
+type UseLoadingTimeoutReturn = {
+  isLoading: boolean;
+  hasTimedOut: boolean;
+  timeoutError: string;
+  currentRetryCount: number;
+  canRetry: boolean;
+  startLoading: () => void;
+  stopLoading: () => void;
+  retry: () => boolean;
+  reset: () => void;
+};
 
-/**
- * Hook to manage loading states with automatic timeout.
- * Prevents infinite loading spinners by showing error state after timeout.
- * 
- * @example
- * const { isLoading, hasTimedOut, startLoading, stopLoading, retry } = useLoadingTimeout({
- *   timeoutMs: 10000,
- *   onTimeout: () => console.log('Loading timed out!')
- * });
- */
-export function useLoadingTimeout(options: UseLoadingTimeoutOptions = {}): UseLoadingTimeoutReturn {
-    const { timeoutMs = 15000, onTimeout } = options;
-    
-    const [isLoading, setIsLoading] = useState(false);
-    const [hasTimedOut, setHasTimedOut] = useState(false);
-    const [timeoutError, setTimeoutError] = useState<string | null>(null);
+const DEFAULT_TIMEOUT_MESSAGE = 'La operación tardó demasiado. Por favor, intente nuevamente.';
 
-    useEffect(() => {
-        let timer: ReturnType<typeof setTimeout> | null = null;
+export const useLoadingTimeout = (
+  isLoadingOrOptions?: boolean | UseLoadingTimeoutOptions,
+  options?: UseLoadingTimeoutOptions
+): UseLoadingTimeoutReturn => {
+  const hasExternalLoading = typeof isLoadingOrOptions === 'boolean';
+  const resolvedOptions = (hasExternalLoading ? options : isLoadingOrOptions) ?? {};
+  const {
+    timeoutMs = 30000,
+    maxRetries,
+    retryCount,
+    onTimeout,
+    timeoutMessage,
+  } = resolvedOptions;
 
-        if (isLoading && !hasTimedOut) {
-            timer = setTimeout(() => {
-                setHasTimedOut(true);
-                setIsLoading(false);
-                setTimeoutError(`La solicitud tardó demasiado (>${timeoutMs / 1000}s). Por favor, intente de nuevo.`);
-                onTimeout?.();
-            }, timeoutMs);
-        }
+  const effectiveMaxRetries =
+    typeof maxRetries === 'number' ? maxRetries : (typeof retryCount === 'number' ? retryCount : 1);
 
-        return () => {
-            if (timer) clearTimeout(timer);
-        };
-    }, [isLoading, hasTimedOut, timeoutMs, onTimeout]);
+  const [internalLoading, setInternalLoading] = useState(false);
+  const isLoading = hasExternalLoading ? (isLoadingOrOptions as boolean) : internalLoading;
+  const [hasTimedOut, setHasTimedOut] = useState(false);
+  const [currentRetryCount, setCurrentRetryCount] = useState(0);
+  const [timeoutError, setTimeoutError] = useState('');
 
-    const startLoading = useCallback(() => {
-        setIsLoading(true);
-        setHasTimedOut(false);
-        setTimeoutError(null);
-    }, []);
+  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
 
-    const stopLoading = useCallback(() => {
-        setIsLoading(false);
-    }, []);
+  const clearTimeoutTimer = useCallback(() => {
+    if (timeoutIdRef.current) {
+      clearTimeout(timeoutIdRef.current);
+      timeoutIdRef.current = null;
+    }
+  }, []);
 
-    const reset = useCallback(() => {
-        setIsLoading(false);
-        setHasTimedOut(false);
-        setTimeoutError(null);
-    }, []);
+  const startTimeoutTimer = useCallback(() => {
+    clearTimeoutTimer();
+    if (!timeoutMs || timeoutMs <= 0) return;
+    timeoutIdRef.current = setTimeout(() => {
+      setHasTimedOut(true);
+      setTimeoutError(timeoutMessage || DEFAULT_TIMEOUT_MESSAGE);
+      onTimeout?.();
+    }, timeoutMs);
+  }, [timeoutMs, clearTimeoutTimer, onTimeout, timeoutMessage]);
 
-    const retry = useCallback(() => {
-        reset();
-        // Small delay before starting again to ensure state is reset
-        setTimeout(() => {
-            startLoading();
-        }, 100);
-    }, [reset, startLoading]);
+  useEffect(() => {
+    if (isLoading) {
+      startTimeoutTimer();
+    } else {
+      clearTimeoutTimer();
+      setHasTimedOut(false);
+      setTimeoutError('');
+    }
 
-    return {
-        isLoading,
-        hasTimedOut,
-        timeoutError,
-        startLoading,
-        stopLoading,
-        reset,
-        retry,
+    return () => {
+      clearTimeoutTimer();
     };
-}
+  }, [isLoading, startTimeoutTimer, clearTimeoutTimer]);
+
+  const startLoading = useCallback(() => {
+    if (!hasExternalLoading) {
+      setInternalLoading(true);
+    }
+    setHasTimedOut(false);
+    setTimeoutError('');
+  }, [hasExternalLoading]);
+
+  const stopLoading = useCallback(() => {
+    if (!hasExternalLoading) {
+      setInternalLoading(false);
+    }
+    clearTimeoutTimer();
+  }, [hasExternalLoading, clearTimeoutTimer]);
+
+  const retry = useCallback(() => {
+    if (currentRetryCount < effectiveMaxRetries) {
+      setHasTimedOut(false);
+      setTimeoutError('');
+      setCurrentRetryCount(prev => prev + 1);
+      if (isLoading) {
+        startTimeoutTimer();
+      }
+      return true;
+    }
+    return false;
+  }, [currentRetryCount, effectiveMaxRetries, isLoading, startTimeoutTimer]);
+
+  const reset = useCallback(() => {
+    setHasTimedOut(false);
+    setTimeoutError('');
+    setCurrentRetryCount(0);
+    clearTimeoutTimer();
+    if (!hasExternalLoading) {
+      setInternalLoading(false);
+    }
+  }, [clearTimeoutTimer, hasExternalLoading]);
+
+  return {
+    isLoading,
+    hasTimedOut,
+    timeoutError,
+    currentRetryCount,
+    canRetry: currentRetryCount < effectiveMaxRetries,
+    startLoading,
+    stopLoading,
+    retry,
+    reset,
+  };
+};
 
 export default useLoadingTimeout;

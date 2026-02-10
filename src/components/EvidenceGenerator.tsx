@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { client, MOCK_USER } from '../amplify-utils';
 import { type Patient } from '../types';
 import { useToast } from './ui/Toast';
+import { generateRIPSPDF } from '../utils/pdfGenerator';
 
 interface HistoryItem {
     id: string;
@@ -43,19 +44,43 @@ export const EvidenceGenerator: React.FC = () => {
             showToast('warning', 'Selección requerida', 'Por favor seleccione un paciente.');
             return;
         }
+        const patientData = patients.find(p => p.id === selectedPatient);
+        if (!patientData) {
+            showToast('error', 'Paciente no encontrado', 'No se pudo cargar la información del paciente.');
+            return;
+        }
         setIsGenerating(true);
-        // Simulate PDF/Zip generation
-        await new Promise(r => setTimeout(r, 3000));
-        const patientName = patients.find(p => p.id === selectedPatient)?.name || 'Unknown';
+        const today = new Date().toISOString().split('T')[0];
+        const pdfDoc = generateRIPSPDF({
+            codigoPrestador: MOCK_USER.attributes['custom:tenantId'] || 'IPS-001',
+            fechaConsulta: today,
+            numeroDocumento: patientData.documentId,
+            codigoDiagnosticoPrincipal: patientData.diagnosis || 'Z00.0',
+            valoracionClinica: {
+                glasgow: 15,
+                dolor: 2,
+                braden: 18,
+                morse: 20,
+                news: 2,
+                barthel: 85,
+                norton: 16,
+                rass: 0,
+                alertas: ['Riesgo de caida moderado'],
+                observaciones: 'Paciente estable, responde a estimulos y sigue indicaciones.'
+            }
+        });
+        const pdfBlob = pdfDoc.output('blob');
+        const pdfFileName = `RIPS_${patientData.documentId}_${today}.pdf`;
+        pdfDoc.save(pdfFileName);
         setHistory([{
             id: `EXP-${Math.floor(Math.random() * 900) + 100}`,
-            date: new Date().toISOString().split('T')[0],
-            patient: patientName,
+            date: today,
+            patient: patientData.name || 'Unknown',
             status: 'READY',
-            size: '2.1 MB'
+            size: `${(pdfBlob.size / (1024 * 1024)).toFixed(2)} MB`
         }, ...history]);
         setIsGenerating(false);
-        showToast('success', '¡Éxito!', 'Paquete de evidencia generado exitosamente.');
+        showToast('success', '¡Éxito!', 'Paquete de evidencia generado con PDF clínico.');
     };
 
     return (

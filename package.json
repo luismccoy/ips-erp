@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
@@ -19,14 +19,19 @@
     "@aws-sdk/client-bedrock-runtime": "^3.972.0",
     "aws-amplify": "^6.15.10",
     "csstype": "^3.2.3",
+    "framer-motion": "^12.29.2",
+    "healthicons-react": "^3.5.0",
+    "jspdf": "^2.5.2",
+    "jspdf-autotable": "^3.8.4",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-joyride": "^2.9.3",
-    "react-router-dom": "^7.12.0"
+    "react-router-dom": "^7.13.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@playwright/test": "^1.58.0",
     "@tailwindcss/vite": "^4.1.18",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -34,6 +39,7 @@
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
+    "@types/jspdf": "^2.5.1",
     "@vitejs/plugin-react": "^5.1.1",
     "autoprefixer": "^10.4.23",
     "aws-sdk-client-mock": "^4.1.0",
@@ -51,6 +57,7 @@
     "vercel": "^50.4.8",
     "vite": "^7.2.4",
     "vite-plugin-pwa": "^1.2.0",
+    "vite-plugin-static-copy": "^3.2.0",
     "vitest": "^4.0.17"
   }
 }

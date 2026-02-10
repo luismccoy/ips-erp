@@ -1,0 +1,97 @@
+type Visit @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  patientId: ID!
+  nurseId: ID!
+  tenantId: ID!
+  status: String!
+  kardex: String
+  vitalsRecorded: String
+  medicationsAdministered: String
+  tasksCompleted: String
+  assessment: PatientAssessment @hasOne
+  rejectionReason: String
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type PatientAssessment @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  visitId: ID
+  patientId: ID!
+  nurseId: ID!
+  tenantId: ID!
+  glasgowScore: GlasgowScore
+  painScore: Int
+  bradenScore: BradenScore
+  morseScore: MorseScore
+  newsScore: NEWSScore
+  barthelScore: BarthelScore
+  nortonScore: NortonScore
+  rassScore: Int
+  notes: String
+  alerts: [String]
+  assessedAt: AWSDateTime!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type GlasgowScore {
+  eye: Int!
+  verbal: Int!
+  motor: Int!
+  total: Int!
+}
+
+type BradenScore {
+  sensoryPerception: Int!
+  moisture: Int!
+  activity: Int!
+  mobility: Int!
+  nutrition: Int!
+  frictionShear: Int!
+  total: Int!
+}
+
+type MorseScore {
+  historyOfFalling: Int!
+  secondaryDiagnosis: Int!
+  ambulatoryAid: Int!
+  ivHeparinLock: Int!
+  gait: Int!
+  mentalStatus: Int!
+  total: Int!
+}
+
+type NEWSScore {
+  respirationRate: Int!
+  oxygenSaturation: Int!
+  supplementalO2: Int!
+  temperature: Int!
+  systolicBP: Int!
+  heartRate: Int!
+  consciousness: Int!
+  total: Int!
+}
+
+type BarthelScore {
+  feeding: Int!
+  bathing: Int!
+  grooming: Int!
+  dressing: Int!
+  bowels: Int!
+  bladder: Int!
+  toiletUse: Int!
+  transfers: Int!
+  mobility: Int!
+  stairs: Int!
+  total: Int!
+}
+
+type NortonScore {
+  physicalCondition: Int!
+  mentalCondition: Int!
+  activity: Int!
+  mobility: Int!
+  incontinence: Int!
+  total: Int!
+}

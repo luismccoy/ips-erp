@@ -152,6 +152,26 @@ export function AssessmentEntryForm({
 
   const [validationError, setValidationError] = useState<string | null>(null);
 
+  /**
+   * SENTINEL FIX #2: Unsaved changes confirmation
+   * Prevents data loss by warning nurses before discarding clinical assessment data
+   */
+  const handleClose = useCallback(() => {
+    if (hasModifiedScales()) {
+      // Has unsaved changes - confirm before closing
+      const confirmed = window.confirm(
+        "¿Descartar cambios?\n\nTiene datos sin guardar en esta valoración clínica. ¿Está seguro de cerrar sin guardar?"
+      );
+      if (confirmed) {
+        onCancel(); // User confirmed discard - close the form
+      }
+      // If not confirmed, do nothing (stay open)
+    } else {
+      // No changes, close immediately
+      onCancel();
+    }
+  }, [hasModifiedScales, onCancel]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -214,7 +234,7 @@ export function AssessmentEntryForm({
           <h2 className="text-xl font-bold text-gray-900">Nueva Valoración</h2>
           <p className="text-sm text-gray-500">{patientName}</p>
         </div>
-        <button type="button" onClick={onCancel} className="p-2 text-gray-400 hover:text-gray-600">
+        <button type="button" onClick={handleClose} className="p-2 text-gray-400 hover:text-gray-600">
           <X size={24} />
         </button>
       </div>
@@ -584,7 +604,7 @@ export function AssessmentEntryForm({
       <div className="flex gap-3 pt-4 border-t">
         <button
           type="button"
-          onClick={onCancel}
+          onClick={handleClose}
           className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
         >
           Cancelar

@@ -8,7 +8,7 @@ interface ErrorStateProps {
 }
 
 export const ErrorState: React.FC<ErrorStateProps> = ({
-    title = 'Error loading data',
+    title = 'Error al cargar datos',
     message,
     onRetry
 }) => {
@@ -24,10 +24,10 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
             {onRetry && (
                 <button
                     onClick={onRetry}
-                    className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm active:scale-95"
+                    className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm active:scale-95 min-h-[44px]"
                 >
                     <RefreshCw size={18} />
-                    Try Again
+                    Reintentar
                 </button>
             )}
         </div>

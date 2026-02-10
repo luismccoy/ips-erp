@@ -57,6 +57,7 @@ export default function DemoSelection({ onSelectAdmin, onSelectNurse, onSelectFa
                     <button
                         onClick={handleSelectAdmin}
                         className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group text-left relative overflow-hidden"
+                        data-testid="demo-admin-button"
                     >
                         <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity transform group-hover:scale-110 duration-500">
                             <Building2 className="h-48 w-48 text-blue-600" />
@@ -84,6 +85,7 @@ export default function DemoSelection({ onSelectAdmin, onSelectNurse, onSelectFa
                     <button
                         onClick={handleSelectNurse}
                         className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group text-left relative overflow-hidden"
+                        data-testid="demo-nurse-button"
                     >
                         <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity transform group-hover:scale-110 duration-500">
                             <Stethoscope className="h-48 w-48 text-emerald-600" />
@@ -111,6 +113,7 @@ export default function DemoSelection({ onSelectAdmin, onSelectNurse, onSelectFa
                     <button
                         onClick={handleSelectFamily}
                         className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group text-left relative overflow-hidden"
+                        data-testid="demo-family-button"
                     >
                         <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity transform group-hover:scale-110 duration-500">
                             <Users className="h-48 w-48 text-indigo-600" />

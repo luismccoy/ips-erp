@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IPS-ERP Form Workflows</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .mermaid {
+            background-color: #252526;
+            padding: 20px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="color: #d4d4d4; text-align: center;">IPS-ERP Form Workflows</h1>
+    
+    <div class="mermaid">
+    ---
+    title: IPS-ERP Form Workflows
+    ---
+    flowchart TD
+        %% Global Error Handling
+        subgraph ErrorHandling ["Global Error Handling"]
+            ErrorValidation[Field-Level Validation]
+            NetworkQueue[Offline Queue Management]
+            ErrorNotification[User Error Notifications]
+        end
+
+        %% Kardex Form Workflow
+        subgraph KardexForm ["KARDEX (Visit Documentation)"]
+            KardexStart[Start Visit Documentation]
+            VitalSigns[Capture Vital Signs]
+            SubVitalSigns{Vital Signs Validation}
+            MedicationEntry[Medication Administration]
+            SubMedication{Medication Validation}
+            SuppliesUsed[Supplies Used Entry]
+            NursingNotes[Nursing Notes]
+            KardexSubmit[Submit Kardex Form]
+            
+            KardexStart --> VitalSigns
+            VitalSigns --> SubVitalSigns
+            SubVitalSigns -->|Valid| MedicationEntry
+            SubVitalSigns -->|Invalid| ErrorValidation
+            MedicationEntry --> SubMedication
+            SubMedication -->|Valid| SuppliesUsed
+            SubMedication -->|Invalid| ErrorValidation
+            SuppliesUsed --> NursingNotes
+            NursingNotes --> KardexSubmit
+            KardexSubmit --> NetworkQueue
+        end
+
+        %% Clinical Scales Workflow
+        subgraph ClinicalScales ["Clinical Scales"]
+            ScalesStart[Select Clinical Scale]
+            BarthelScale[BARTHEL - Activities of Daily Living]
+            NortonScale[NORTON - Pressure Ulcer Risk]
+            BradenScale[BRADEN - Skin Integrity]
+            ZaritScale[ZARIT - Caregiver Burden]
+            ScaleValidation{Scale Validation}
+            ScaleCalculation[Score Calculation]
+            ScaleInterpretation[Clinical Interpretation]
+            ScalesSubmit[Submit Clinical Scale]
+            
+            ScalesStart --> ScaleValidation
+            ScaleValidation -->|Valid| ScaleCalculation
+            ScaleValidation -->|Invalid| ErrorValidation
+            ScaleCalculation --> ScaleInterpretation
+            ScaleInterpretation --> ScalesSubmit
+            ScalesSubmit --> NetworkQueue
+        end
+
+        %% Admin Forms Workflow
+        subgraph AdminForms ["Admin Forms"]
+            AdminStart[Select Admin Form]
+            VisitApproval[Visit Approval]
+            RIPSGeneration[RIPS Generation]
+            GlosaSubmission[Glosa Defense Submission]
+            StaffScheduling[Staff Scheduling]
+            AdminValidation{Form Validation}
+            AdminSubmit[Submit Admin Form]
+            
+            AdminStart --> AdminValidation
+            AdminValidation -->|Valid| AdminSubmit
+            AdminValidation -->|Invalid| ErrorValidation
+            AdminSubmit --> NetworkQueue
+        end
+
+        %% Family Portal Forms
+        subgraph FamilyPortal ["Family Portal Forms"]
+            PortalStart[Select Portal Form]
+            MessageSubmission[Message Submission]
+            AppointmentRequest[Appointment Requests]
+            FeedbackForm[Feedback Form]
+            PortalValidation{Form Validation}
+            PortalSubmit[Submit Portal Form]
+            
+            PortalStart --> PortalValidation
+            PortalValidation -->|Valid| PortalSubmit
+            PortalValidation -->|Invalid| ErrorValidation
+            PortalSubmit --> NetworkQueue
+        end
+
+        %% Submission Flow
+        NetworkQueue --> ErrorNotification
+        NetworkQueue --> [Sync with Server]
+    end
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            theme: 'dark',
+            themeVariables: {
+                primaryColor: '#2d2d2d',
+                primaryTextColor: '#d4d4d4',
+                primaryBorderColor: '#4a4a4a',
+                lineColor: '#6a6a6a',
+                secondaryColor: '#3a3a3a',
+                tertiaryColor: '#2a2a2a'
+            }
+        });
+    </script>
+</body>
+</html>

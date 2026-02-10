@@ -45,6 +45,19 @@ export interface VitalsData {
 }
 
 /**
+ * Empty vitals data structure for initializing new forms.
+ * All fields are required and initialized to 0.
+ */
+export const EMPTY_VITALS: VitalsData = {
+  sys: 0,
+  dia: 0,
+  spo2: 0,
+  hr: 0,
+  temperature: undefined,
+  weight: undefined,
+};
+
+/**
  * Medication administration record.
  * Captures details of medications given during a visit.
  * 
@@ -107,6 +120,22 @@ export interface KardexData {
   /** Internal clinical notes (NOT visible to family) - Optional */
   internalNotes?: string;
 }
+
+/**
+ * Empty KARDEX data structure for initializing new forms.
+ * Only generalObservations is required, all other fields are optional.
+ */
+export const EMPTY_KARDEX: KardexData = {
+  generalObservations: '',
+  skinCondition: '',
+  mobilityStatus: '',
+  nutritionIntake: '',
+  painLevel: undefined,
+  mentalStatus: '',
+  environmentalSafety: '',
+  caregiverSupport: '',
+  internalNotes: '',
+};
 
 // ============================================================================
 // Visit Types

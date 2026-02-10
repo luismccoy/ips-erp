@@ -1,0 +1,72 @@
+{
+  "version": "1.0.0",
+  "updated_at": "2026-01-27T07:30:00Z",
+  "projects": [
+    {
+      "id": "ips-erp",
+      "name": "IPS-ERP",
+      "icon": "🏥",
+      "status": "active",
+      "description": "Multi-tenant home care management platform for Colombian healthcare.",
+      "link": "https://main.d2wwgecog8smmr.amplifyapp.com",
+      "linkLabel": "🚀 Live App",
+      "repo": "github.com/luismccoy/ips-erp",
+      "docsPath": "~/projects/ERP/docs/",
+      "docs": [
+        { "label": "📚 API Reference", "path": "API_DOCUMENTATION.md", "primary": true, "size": "184KB" },
+        { "label": "🎨 UX Report", "path": "UI_UX_TEST_REPORT.md", "size": "26KB" },
+        { "label": "📱 UX Research", "path": "UI_UX_RESEARCH.md", "size": "21KB" },
+        { "label": "🏥 Clinical Spec", "path": "CLINICAL_SCALES_SPEC.md", "size": "8KB" },
+        { "label": "🤖 AI Integration", "path": "RIPS_AI_INTEGRATION.md", "size": "8KB" },
+        { "label": "📋 Task Manager", "path": "TASK_MANAGER_SPEC.md", "size": "43KB" },
+        { "label": "📡 Offline Sync", "path": "OFFLINE_SYNC_SPEC.md", "size": "44KB" },
+        { "label": "🔗 Integrations", "path": "EXTERNAL_INTEGRATIONS_SPEC.md", "size": "25KB" },
+        { "label": "🎬 Demo Workflow", "path": "DEMO_WORKFLOW.md", "size": "15KB" },
+        { "label": "🚀 Deployment", "path": "DEPLOYMENT.md", "size": "5KB" }
+      ]
+    },
+    {
+      "id": "clawd-workspace",
+      "name": "Clawd Workspace",
+      "icon": "🤖",
+      "status": "active",
+      "description": "Personal AI assistant infrastructure. Task management, multi-agent orchestration.",
+      "link": "/dashboard.html",
+      "linkLabel": "📊 This Dashboard",
+      "isLocal": true,
+      "docsPath": "~/clawd/docs/",
+      "docs": [
+        { "label": "🎯 Brand Strategy", "path": "PERSONAL_BRAND_STRATEGY.md", "primary": true },
+        { "label": "📋 Dashboard Spec", "path": "DASHBOARD_FEATURE_SPEC.md" }
+      ]
+    },
+    {
+      "id": "personal-brand",
+      "name": "Personal Brand",
+      "icon": "🎯",
+      "status": "planning",
+      "description": "Building online presence on X/Twitter. Content strategy and automation.",
+      "link": "https://x.com/luismccoy",
+      "linkLabel": "🐦 Twitter/X",
+      "docsPath": "~/clawd/docs/",
+      "docs": [
+        { "label": "📖 Brand Strategy", "path": "PERSONAL_BRAND_STRATEGY.md", "primary": true }
+      ]
+    },
+    {
+      "id": "tam-assistant",
+      "name": "TAM Assistant",
+      "icon": "💼",
+      "status": "planning",
+      "description": "AI-powered workflow for TAM role. Email processing, goal tracking.",
+      "link": null,
+      "linkLabel": "🔒 Internal Tool",
+      "isInternal": true,
+      "docsPath": "~/clawd/docs/",
+      "docs": [
+        { "label": "🚀 Quick Start", "path": "TAM_QUICK_START.md", "primary": true },
+        { "label": "💼 Remote Guide", "path": "CORPORATE_REMOTE_ASSISTANT.md" }
+      ]
+    }
+  ]
+}

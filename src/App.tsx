@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { Activity } from 'lucide-react';
 import LandingPage from './components/LandingPage';
 import DemoSelection from './components/DemoSelection';
@@ -6,8 +6,10 @@ import { useAuth } from './hooks/useAuth';
 import { useAnalytics } from './hooks/useAnalytics';
 import { TENANTS } from './data/mock-data';
 import { ToastProvider } from './components/ui/Toast';
-import { isDemoMode } from './amplify-utils';
+import { isDemoMode, enableDemoMode } from './amplify-utils';
 import { FeedbackWidget } from './components/FeedbackWidget';
+import { RouteGuard } from './components/RouteGuard';
+import { STORAGE_KEYS, shouldClearDemoState, shouldEnableDemoMode, getDefaultRouteForRole } from './constants/navigation';
 
 // Lazy loaded components for performance
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
@@ -24,11 +26,43 @@ const PageLoader = () => (
   </div>
 );
 
+// ============================================
+// CRITICAL FIX: Pre-enable demo mode for deep links
+// ============================================
+// This runs BEFORE React renders any components, preventing race conditions
+// where child components (like SimpleNurseApp) try to fetch data before
+// the useEffect in App has set sessionStorage['ips-erp-demo-mode'].
+//
+// Without this, direct navigation to /nurse, /dashboard, or /family could
+// result in isDemoMode() returning false, causing the app to try using
+// the real AWS backend instead of mock data, leading to auth errors and
+// empty patient lists.
+//
+// This ensures sessionStorage is set SYNCHRONOUSLY before ANY component mounts.
+//
+// ALSO: Clear demo state when landing on root/login paths to prevent
+// unwanted auto-restoration of previous demo sessions.
+if (typeof window !== 'undefined') {
+  const path = window.location.pathname;
+
+  // Clear demo state for landing/login paths
+  if (shouldClearDemoState(path)) {
+    sessionStorage.removeItem(STORAGE_KEYS.DEMO_MODE);
+    sessionStorage.removeItem(STORAGE_KEYS.DEMO_ROLE);
+    sessionStorage.removeItem(STORAGE_KEYS.DEMO_TENANT);
+    console.log('🔄 Demo state cleared for landing/login path:', path);
+  }
+  // Enable demo mode for deep link paths
+  else if (shouldEnableDemoMode(path)) {
+    enableDemoMode();
+    console.log('🎭 Demo mode pre-enabled for deep link:', path);
+  }
+}
+
 // Main App Component
 export default function App() {
   const { role, tenant, loading, error, login, logout, setDemoState } = useAuth();
   const { trackEvent, identifyUser } = useAnalytics();
-  const [view, setView] = useState<string>('login');
   const [authStage, setAuthStage] = useState<'landing' | 'demo' | 'login'>('landing');
 
   // Login form state
@@ -36,15 +70,20 @@ export default function App() {
   const [password, setPassword] = useState('');
   const [isSigningIn, setIsSigningIn] = useState(false);
 
+  // Track if initial session has been set for current role (prevents duplicate analytics)
+  // Using ref instead of state since this doesn't affect rendering
+  const initialViewSetForRole = useRef<string | null>(null);
+  const [pendingDeepLinkRole, setPendingDeepLinkRole] = useState<string | null>(null);
+
   // Handle demo query param on page load (after demo mode redirect)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const demoParam = params.get('demo');
-    
+
     if (demoParam && isDemoMode()) {
       // Clear the query param from URL (clean URL)
       window.history.replaceState({}, '', window.location.pathname);
-      
+
       // Auto-login to the requested demo portal
       if (demoParam === 'admin') {
         setDemoState('admin', TENANTS[0]);
@@ -59,33 +98,56 @@ export default function App() {
     }
   }, [setDemoState, trackEvent]);
 
+  // Handle direct /family route navigation (ANTIGRAVITY-006)
   useEffect(() => {
-    // Basic routing for deep links
     const path = window.location.pathname;
-    
-    if (path === '/family') {
-        // Direct access to Family Portal
-        setAuthStage('login'); // Not strictly needed but keeps state clean
-        setView('family');
-        // We trick the role check effectively by setting it temporarily or just handling the view rendering
-        // In this architecture, we should update the role to trigger the rendering
-        setDemoState('family', TENANTS[0]); 
-        return;
+
+    // If user navigates directly to /family, auto-load Family Portal
+    if (path === '/family' && !role && isDemoMode()) {
+      setDemoState('family', TENANTS[0]);
+      trackEvent('Direct Family Route Access', { source: 'url' });
+      // Clean URL
+      window.history.replaceState({}, '', '/');
+    }
+  }, [role, setDemoState, trackEvent]);
+
+  useEffect(() => {
+    console.log('[Navigation Debug] Main useEffect triggered | role:', role, '| initialViewSetForRole:', initialViewSetForRole.current);
+
+    // Deep link handling - REMOVED AUTOMATIC ROLE PROMOTION (Security Fix P0-2)
+    // Previous code automatically promoted users to admin/nurse/family based on URL
+    // This was a critical security vulnerability - users could access any portal by changing URL
+    // Now handled by RouteGuard component which enforces RBAC
+
+    const path = window.location.pathname;
+
+    // For demo mode deep links WITHOUT existing role, prompt user to select demo portal
+    // This maintains demo mode UX while preventing unauthorized access
+    if (isDemoMode() && !role && (path === '/dashboard' || path === '/admin' || path === '/app' || path === '/nurse' || path === '/family')) {
+      console.log('[Navigation Debug] Deep link to protected route without role - showing demo selection');
+      // User will be prompted to select a demo role, then RouteGuard will verify access
+      setAuthStage('demo');
+      return;
     }
 
-    if (role === 'admin') setView('dashboard');
-    if (role === 'nurse') setView('nurse');
-    if (role === 'family') setView('family');
+    // Track analytics when role is first set (prevents duplicate tracking on subsequent renders)
+    if (role && initialViewSetForRole.current !== role) {
+      // Only track session and identify on FIRST time this role is set
+      console.log('[Navigation Debug] First-time session tracking for role:', role);
+      initialViewSetForRole.current = role;
 
-    if (!role) {
-      setView('login');
+      if (tenant) {
+        identifyUser(role, { tenant: tenant.name, role });
+        trackEvent('Session Started', { role });
+      }
     }
 
-    if (role && tenant) {
-      identifyUser(role, { tenant: tenant.name, role });
-      trackEvent('Session Started', { role });
+    // Reset the initialization tracking when logged out so next session tracks properly
+    if (!role && initialViewSetForRole.current !== null) {
+      console.log('[Navigation Debug] Resetting initialization tracking');
+      initialViewSetForRole.current = null;
     }
-  }, [role, tenant, identifyUser, trackEvent, setDemoState]);
+  }, [role, tenant, setDemoState, identifyUser, trackEvent, setAuthStage]);
 
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault();
@@ -138,10 +200,11 @@ export default function App() {
     // Handler for Organization Access login - clears any demo state first
     const handleOrgLogin = () => {
       // Clear demo state so org login form can show
-      sessionStorage.removeItem('ips-demo-role');
-      sessionStorage.removeItem('ips-demo-tenant');
-      sessionStorage.removeItem('ips-demo-mode');
-      logout(); // This clears role state
+      // NOTE: Don't call logout() here - it triggers a hard redirect!
+      // Just clear the demo-specific sessionStorage keys
+      sessionStorage.removeItem(STORAGE_KEYS.DEMO_ROLE);
+      sessionStorage.removeItem(STORAGE_KEYS.DEMO_TENANT);
+      sessionStorage.removeItem(STORAGE_KEYS.DEMO_MODE);
       setAuthStage('login');
     };
 
@@ -190,6 +253,7 @@ export default function App() {
                 className="w-full p-6 border border-slate-100 rounded-[24px] focus:outline-none focus:ring-4 focus:ring-blue-50 focus:border-[#2563eb] transition-all font-bold text-slate-700"
                 placeholder="nombre@ips.com"
                 autoComplete="email"
+                data-testid="email-input"
                 required
               />
             </div>
@@ -202,6 +266,7 @@ export default function App() {
                 className="w-full p-6 border border-slate-100 rounded-[24px] focus:outline-none focus:ring-4 focus:ring-blue-50 focus:border-[#2563eb] transition-all font-bold text-slate-700"
                 placeholder="••••••••"
                 autoComplete="current-password"
+                data-testid="password-input"
                 required
               />
             </div>
@@ -212,6 +277,7 @@ export default function App() {
               type="submit"
               disabled={isSigningIn}
               className="w-full py-6 bg-[#2563eb] text-white rounded-[24px] font-black uppercase tracking-[4px] shadow-xl hover:bg-blue-700 transition-all disabled:opacity-50"
+              data-testid="submit-button"
             >
               {isSigningIn ? 'Ingresando...' : 'Ingresar'}
             </button>
@@ -230,14 +296,53 @@ export default function App() {
     );
   }
 
+  // Handler for unauthorized route access
+  const handleUnauthorized = () => {
+    console.warn('[SECURITY] Unauthorized access detected, redirecting to appropriate portal');
+
+    if (role) {
+      // User has a role but wrong permissions - redirect to their portal
+      const defaultRoute = getDefaultRouteForRole(role);
+      window.location.href = defaultRoute;
+    } else {
+      // No role - redirect to login
+      handleLogout();
+    }
+  };
+
   // Use Suspense to handle loading state of lazy components
   // Wrap everything with ToastProvider for global notifications
+  // SECURITY FIX P0-2: Wrap all protected components with RouteGuard
   return (
     <ToastProvider>
       <Suspense fallback={<PageLoader />}>
-        {role === 'nurse' && <SimpleNurseApp onLogout={handleLogout} />}
-        {role === 'family' && <FamilyPortal onLogout={handleLogout} />}
-        {role === 'admin' && <AdminDashboard view={view} setView={setView} onLogout={handleLogout} tenant={tenant} />}
+        {role === 'nurse' && (
+          <RouteGuard
+            userRole={role}
+            currentPath={window.location.pathname}
+            onUnauthorized={handleUnauthorized}
+          >
+            <SimpleNurseApp onLogout={handleLogout} />
+          </RouteGuard>
+        )}
+        {role === 'family' && (
+          <RouteGuard
+            userRole={role}
+            currentPath={window.location.pathname}
+            onUnauthorized={handleUnauthorized}
+          >
+            <FamilyPortal onLogout={handleLogout} />
+          </RouteGuard>
+        )}
+        {role === 'admin' && (
+          <RouteGuard
+            userRole={role}
+            currentPath={window.location.pathname}
+            onUnauthorized={handleUnauthorized}
+          >
+            <AdminDashboard onLogout={handleLogout} tenant={tenant} />
+          </RouteGuard>
+        )}
       </Suspense>
       {/* Floating feedback button - always visible for beta testers */}
       <FeedbackWidget />

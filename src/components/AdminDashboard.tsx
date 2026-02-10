@@ -1,4 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
+import { motion } from 'framer-motion';
 import {
     Activity, ClipboardCheck, Package, Calendar, ShieldAlert,
     FileText, LogOut, DollarSign, ClipboardList, BarChart,
@@ -10,6 +11,7 @@ import { GuidedTour, RestartTourButton } from './GuidedTour';
 import type { AdminDashboardProps, NavItemProps } from '../types/components';
 import { graphqlToFrontendSafe } from '../utils/inventory-transforms';
 import { useLanguage } from '../contexts/LanguageContext';
+import { STORAGE_KEYS } from '../constants/navigation';
 
 import { NotificationBell } from './NotificationBell';
 import type { NotificationItem } from '../types/workflow';
@@ -24,8 +26,8 @@ const InventoryDashboard = lazy(() => import('./InventoryDashboard').then(m => (
 const RosterDashboard = lazy(() => import('./RosterDashboard').then(m => ({ default: m.RosterDashboard })));
 const ComplianceDashboard = lazy(() => import('./ComplianceDashboard').then(m => ({ default: m.ComplianceDashboard })));
 const ReportingDashboard = lazy(() => import('./ReportingDashboard').then(m => ({ default: m.ReportingDashboard })));
-const PatientManager = lazy(() => import('./PatientManager').then(m => ({ default: m.PatientManager })));
-const StaffManager = lazy(() => import('./StaffManager').then(m => ({ default: m.StaffManager })));
+const PatientsPage = lazy(() => import('../pages/admin/PatientsPage').then(m => ({ default: m.PatientsPage })));
+const StaffPage = lazy(() => import('../pages/admin/StaffPage').then(m => ({ default: m.StaffPage })));
 
 // Clinical Assessment Components
 import { ClinicalAlertsWidget } from './ClinicalAlertsWidget';
@@ -43,23 +45,42 @@ const PanelLoader = () => (
 
 
 
-export default function AdminDashboard({ view, setView, onLogout, tenant }: AdminDashboardProps) {
+export default function AdminDashboard({ onLogout, tenant }: AdminDashboardProps) {
+    // View state - controls which dashboard panel is displayed
+    const [view, setView] = useState<string>('dashboard');
+    
+    // Track which role's initial view has been set
+    const [initialViewSetForRole, setInitialViewSetForRole] = useState<string | null>(null);
+    
     // Mobile sidebar toggle
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    
+
     // Track visited panels for lazy mounting (only load when first visited, then keep mounted)
     const [visitedPanels, setVisitedPanels] = useState<Set<string>>(new Set(['dashboard']));
-    
+
     // Language toggle
     const { language, setLanguage } = useLanguage();
-    
+
     // Guided tour state (only show in demo mode)
     const [showTour, setShowTour] = useState(false);
-    
-    // Check for demo mode after mount (enableDemoMode runs after component mounts)
+
+    // Handle initial view setup and demo mode
     useEffect(() => {
+        // Initial view setup based on role
+        if (tenant?.role && initialViewSetForRole !== tenant.role) {
+            setInitialViewSetForRole(tenant.role);
+            if (tenant.role === 'admin') {
+                setView('dashboard');
+            }
+        }
+        
+        if (!tenant?.role && initialViewSetForRole !== null) {
+            setInitialViewSetForRole(null);
+        }
+
+        // Demo mode check
         const checkDemoMode = () => {
-            if (isDemoMode() && !sessionStorage.getItem('ips-demo-tour-completed')) {
+            if (isDemoMode() && !sessionStorage.getItem(STORAGE_KEYS.TOUR_COMPLETED)) {
                 setShowTour(true);
             }
         };
@@ -67,15 +88,15 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
         checkDemoMode();
         const timer = setTimeout(checkDemoMode, 100);
         return () => clearTimeout(timer);
-    }, []);
-    
+    }, [tenant?.role, initialViewSetForRole]);
+
     // Mark current view as visited
     useEffect(() => {
         if (!visitedPanels.has(view)) {
             setVisitedPanels(prev => new Set([...prev, view]));
         }
     }, [view, visitedPanels]);
-    
+
     /**
      * Handles visit approval from PendingReviewsPanel.
      * The PendingReviewsPanel handles the approval internally with its own modals.
@@ -112,15 +133,15 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
     };
 
     return (
-        <div className="flex h-screen bg-[#f8fafc]">
+        <div className="flex h-screen bg-[#f8fafc]" data-testid="admin-dashboard">
             {/* Mobile sidebar overlay */}
             {sidebarOpen && (
-                <div 
+                <div
                     className="fixed inset-0 bg-black/50 z-40 md:hidden"
                     onClick={() => setSidebarOpen(false)}
                 />
             )}
-            
+
             {/* Sidebar - hidden on mobile, slide in when open */}
             <aside className={`
                 fixed md:static inset-y-0 left-0 z-50
@@ -140,19 +161,19 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                     </div>
                 </div>
                 <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-                    <NavItem icon={Activity} label="Panel Principal" active={view === 'dashboard'} onClick={() => { setView('dashboard'); setSidebarOpen(false); }} dataTour="nav-dashboard" />
-                    <NavItem icon={ClipboardList} label="Revisiones Pendientes" active={view === 'pending-reviews'} onClick={() => { setView('pending-reviews'); setSidebarOpen(false); }} dataTour="nav-pending" />
-                    <NavItem icon={ClipboardCheck} label="Auditoría Clínica" active={view === 'audit'} onClick={() => { setView('audit'); setSidebarOpen(false); }} dataTour="nav-audit" />
-                    <NavItem icon={Package} label="Inventario" active={view === 'inventory'} onClick={() => { setView('inventory'); setSidebarOpen(false); }} dataTour="nav-inventory" />
-                    <NavItem icon={Calendar} label="Programación de Turnos" active={view === 'roster'} onClick={() => { setView('roster'); setSidebarOpen(false); }} dataTour="nav-roster" />
-                    <NavItem icon={ShieldAlert} label="Cumplimiento" active={view === 'compliance'} onClick={() => { setView('compliance'); setSidebarOpen(false); }} dataTour="nav-compliance" />
-                    <NavItem icon={FileText} label="Facturación y RIPS" active={view === 'billing'} onClick={() => { setView('billing'); setSidebarOpen(false); }} dataTour="nav-billing" />
-                    <NavItem icon={BarChart} label="Reportes y Análisis" active={view === 'reporting'} onClick={() => { setView('reporting'); setSidebarOpen(false); }} dataTour="nav-reporting" />
+                    <NavItem icon={Activity} label="Panel Principal" active={view === 'dashboard'} onClick={() => { setView('dashboard'); setSidebarOpen(false); }} dataTour="nav-dashboard" data-testid="nav-dashboard" />
+                    <NavItem icon={ClipboardList} label="Revisiones Pendientes" active={view === 'pending-reviews'} onClick={() => { setView('pending-reviews'); setSidebarOpen(false); }} dataTour="nav-pending" data-testid="nav-pending-reviews" />
+                    <NavItem icon={ClipboardCheck} label="Auditoría Clínica" active={view === 'audit'} onClick={() => { setView('audit'); setSidebarOpen(false); }} dataTour="nav-audit" data-testid="nav-audit" />
+                    <NavItem icon={Package} label="Inventario" active={view === 'inventory'} onClick={() => { setView('inventory'); setSidebarOpen(false); }} dataTour="nav-inventory" data-testid="nav-inventory" />
+                    <NavItem icon={Calendar} label="Programación de Turnos" active={view === 'roster'} onClick={() => { setView('roster'); setSidebarOpen(false); }} dataTour="nav-roster" data-testid="nav-roster" />
+                    <NavItem icon={ShieldAlert} label="Cumplimiento" active={view === 'compliance'} onClick={() => { setView('compliance'); setSidebarOpen(false); }} dataTour="nav-compliance" data-testid="nav-compliance" />
+                    <NavItem icon={FileText} label="Facturación y RIPS" active={view === 'billing'} onClick={() => { setView('billing'); setSidebarOpen(false); }} dataTour="nav-billing" data-testid="nav-billing" />
+                    <NavItem icon={BarChart} label="Reportes y Análisis" active={view === 'reporting'} onClick={() => { setView('reporting'); setSidebarOpen(false); }} dataTour="nav-reporting" data-testid="nav-reporting" />
 
                     <div className="pt-4 mt-4 border-t border-slate-800">
                         <p className="px-4 text-xs font-bold text-slate-500 uppercase mb-2">Administración</p>
-                        <NavItem icon={Users} label="Pacientes" active={view === 'patients'} onClick={() => { setView('patients'); setSidebarOpen(false); }} dataTour="nav-patients" />
-                        <NavItem icon={Stethoscope} label="Personal / Enfermeras" active={view === 'staff'} onClick={() => { setView('staff'); setSidebarOpen(false); }} dataTour="nav-staff" />
+                        <NavItem icon={Users} label="Pacientes" active={view === 'patients'} onClick={() => { setView('patients'); setSidebarOpen(false); }} dataTour="nav-patients" data-testid="nav-patients" />
+                        <NavItem icon={Stethoscope} label="Personal / Enfermeras" active={view === 'staff'} onClick={() => { setView('staff'); setSidebarOpen(false); }} dataTour="nav-staff" data-testid="nav-staff" />
                     </div>
 
                 </nav>
@@ -166,10 +187,10 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                     </button>
                 </div>
             </aside>
-            <main className="flex-1 overflow-y-auto">
-                <header className="bg-white/80 backdrop-blur-md border-b border-slate-100 px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-20">
+            <main className="flex-1 overflow-y-auto" data-testid="admin-main-content">
+                <header className="bg-white/80 backdrop-blur-md border-b border-slate-100 px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-20" data-testid="admin-dashboard-header">
                     {/* Mobile hamburger menu */}
-                    <button 
+                    <button
                         onClick={() => setSidebarOpen(!sidebarOpen)}
                         className="md:hidden p-2 -ml-2 mr-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg"
                     >
@@ -214,7 +235,7 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                 <div className="p-4 md:p-8">
                     {/* Dashboard is always mounted (default view) */}
                     <div className={view === 'dashboard' ? '' : 'hidden'}><DashboardView /></div>
-                    
+
                     {/* Lazy panels: only mount after first visit, then stay mounted */}
                     {visitedPanels.has('pending-reviews') && (
                         <Suspense fallback={<PanelLoader />}>
@@ -263,19 +284,19 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
                     )}
                     {visitedPanels.has('patients') && (
                         <Suspense fallback={<PanelLoader />}>
-                            <div className={view === 'patients' ? '' : 'hidden'}><PatientManager /></div>
+                            <div className={view === 'patients' ? '' : 'hidden'}><PatientsPage /></div>
                         </Suspense>
                     )}
                     {visitedPanels.has('staff') && (
                         <Suspense fallback={<PanelLoader />}>
-                            <div className={view === 'staff' ? '' : 'hidden'}><StaffManager /></div>
+                            <div className={view === 'staff' ? '' : 'hidden'}><StaffPage /></div>
                         </Suspense>
                     )}
 
 
                 </div>
             </main>
-            
+
             {/* Guided Tour (Demo Mode Only) */}
             {showTour && (
                 <GuidedTour
@@ -288,17 +309,21 @@ export default function AdminDashboard({ view, setView, onLogout, tenant }: Admi
     );
 }
 
-function NavItem({ icon: Icon, label, active, onClick, dataTour }: NavItemProps) {
+function NavItem({ icon: Icon, label, active, onClick, dataTour, 'data-testid': dataTestId }: NavItemProps) {
     return (
-        <button
+        <motion.button
             onClick={onClick}
             data-tour={dataTour}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${active ? 'bg-[#2563eb] text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+            data-testid={dataTestId}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${active ? 'bg-[#2563eb] text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
                 }`}
+            whileHover={{ x: active ? 0 : 4 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
         >
             <Icon size={18} />
             <span className="text-sm font-bold">{label}</span>
-        </button>
+        </motion.button>
     );
 }
 
@@ -420,17 +445,17 @@ function DashboardView() {
                     </div>
                 ))}
             </div>
-            
+
             {/* Clinical Alerts Widget */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ClinicalAlertsWidget 
+                <ClinicalAlertsWidget
                     onPatientClick={(patientId) => {
                         console.log('Navigate to patient:', patientId);
                         // TODO: Navigate to patient detail or assessments view
                     }}
                     maxItems={5}
                 />
-                
+
                 <div className="bg-white p-6 rounded-2xl border border-slate-100">
                     <h3 className="font-black text-slate-900 mb-4">Estado del Sistema</h3>
                     <div className="space-y-3">

@@ -188,7 +188,8 @@ const schema = a.schema({
         notifications: a.hasMany('Notification', 'tenantId'),
         assessments: a.hasMany('PatientAssessment', 'tenantId'), // Phase 4: Clinical assessments
     }).authorization(allow => [
-        allow.authenticated()
+        allow.groups(['SUPERADMIN']).to(['create', 'read', 'update', 'delete', 'list']),
+        // Regular users can only read their own tenant via relationship
     ]),
 
     // 2. PATIENT - Home care patients
@@ -274,8 +275,9 @@ const schema = a.schema({
         startLng: a.float(),
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
-        allow.groups(['ADMIN']).to(['create', 'read', 'update', 'delete']),
-        allow.groups(['NURSE']).to(['read'])
+        // KIRO-005 Fix: Added 'list' operation for listShifts query (previous fix only added subscribe/listen)
+        allow.groups(['ADMIN']).to(['create', 'read', 'list', 'update', 'delete', 'subscribe', 'listen']),
+        allow.groups(['NURSE']).to(['read', 'list', 'subscribe', 'listen'])
     ]).secondaryIndexes(index => [
         // Task 4.1: Query shifts by nurse and date for roster optimization
         index('nurseId').sortKeys(['scheduledTime']).name('byNurseAndDate')
@@ -295,8 +297,8 @@ const schema = a.schema({
         expiryDate: a.string(), // ISO date string
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
-        allow.groups(['ADMIN']).to(['create', 'read', 'update', 'delete']),
-        allow.groups(['NURSE']).to(['read'])
+        allow.groups(['ADMIN']).to(['create', 'read', 'list', 'update', 'delete']),
+        allow.groups(['NURSE']).to(['read', 'list'])
     ]),
 
     // 6. VITAL SIGNS - Patient health metrics
@@ -362,7 +364,7 @@ const schema = a.schema({
         causaExterna: a.string(),          // External cause code (01-15 per RIPS spec)
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
-        allow.groups(['ADMIN']).to(['create', 'read', 'update', 'delete'])
+        allow.groups(['ADMIN']).to(['create', 'read', 'list', 'update', 'delete'])
     ]),
     
     // 8. VISIT - Phase 3: Clinical documentation workflow
@@ -395,10 +397,8 @@ const schema = a.schema({
         approvedAt: a.datetime(),
         approvedBy: a.id(),
     }).authorization(allow => [
-        // Tenant isolation
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
-        // Only admin and assigned nurse can access (enforced in Lambda)
-        allow.authenticated()
+        allow.groups(['ADMIN', 'NURSE']).to(['create', 'read', 'update', 'list'])
     ]).secondaryIndexes(index => [
         // Task 4.1: Query visits by tenant and status for admin dashboard
         index('tenantId').sortKeys(['status']).name('byTenantAndStatus')
@@ -418,9 +418,8 @@ const schema = a.schema({
         details: a.json(),
         ipAddress: a.string(),
     }).authorization(allow => [
-        // Only admins can read audit logs
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
-        allow.authenticated()
+        allow.groups(['ADMIN', 'SUPERADMIN']).to(['read', 'list'])
     ]),
     
     // 10. NOTIFICATION - Phase 3: User notifications
@@ -437,8 +436,8 @@ const schema = a.schema({
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
         // Phase 16: Explicit group permissions for subscriptions
-        // KIRO-003 Fix: Added 'create' and explicit operations for list queries
-        allow.groups(['ADMIN', 'NURSE']).to(['create', 'read', 'update', 'delete'])
+        // KIRO-005 Fix: Added 'list' operation for listNotifications query (previous fix only added subscribe/listen)
+        allow.groups(['ADMIN', 'NURSE']).to(['create', 'read', 'list', 'update', 'delete', 'subscribe', 'listen'])
     ]).secondaryIndexes(index => [
         // Task 4.1: Query notifications by user (filter by read status in app)
         // Note: Boolean fields cannot be sort keys in DynamoDB GSIs
@@ -480,9 +479,9 @@ const schema = a.schema({
         visitId: a.id(),
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
-        allow.groups(['ADMIN']).to(['create', 'read', 'update', 'delete']),
-        allow.groups(['NURSE']).to(['create', 'read']),
-        allow.groups(['FAMILY']).to(['read'])
+        allow.groups(['ADMIN']).to(['create', 'read', 'list', 'update', 'delete']),
+        allow.groups(['NURSE']).to(['create', 'read', 'list']),
+        allow.groups(['FAMILY']).to(['read', 'list'])
     ]).secondaryIndexes(index => [
         // Query assessments by patient, sorted by date (most recent first)
         index('patientId').sortKeys(['assessedAt']).name('byPatient'),
