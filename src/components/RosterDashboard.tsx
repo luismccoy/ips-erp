@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Calendar, Sparkles, Clock, MapPin, Plus, User, Check, X, Users, RefreshCw } from 'lucide-react';
+import { Calendar, Sparkles, Clock, MapPin, Plus, User, Check, X, Users, RefreshCw, Navigation } from 'lucide-react';
 import { client, isUsingRealBackend, MOCK_USER } from '../amplify-utils';
 import { usePagination } from '../hooks/usePagination';
 import { useLoadingTimeout } from '../hooks/useLoadingTimeout';
@@ -22,6 +22,12 @@ export function RosterDashboard() {
     // Optimization Result States
     const [recentlyAssignedIds, setRecentlyAssignedIds] = useState<Set<string>>(new Set());
     const [optimizationResult, setOptimizationResult] = useState<any>(null);
+
+    // Route Optimization States
+    const [isRouteOptimizing, setIsRouteOptimizing] = useState(false);
+    const [routeResult, setRouteResult] = useState<any>(null);
+    const [isRouteResultOpen, setIsRouteResultOpen] = useState(false);
+    const [optimizedShiftOrder, setOptimizedShiftOrder] = useState<Map<string, number>>(new Map());
 
     // Form States
     const [newShiftPatientId, setNewShiftPatientId] = useState('');
@@ -213,6 +219,81 @@ export function RosterDashboard() {
         setNewShiftLocation('');
     };
 
+    const handleRouteOptimize = async () => {
+        // Get assigned shifts that have locations
+        const assignedShifts = shifts.filter(s => 
+            s.nurseId && s.nurseId !== 'UNASSIGNED' && s.nurseId !== 'unassigned' && s.location
+        );
+
+        if (assignedShifts.length < 2) {
+            alert('Se necesitan al menos 2 turnos asignados con ubicación para optimizar rutas.');
+            return;
+        }
+
+        setIsRouteOptimizing(true);
+        try {
+            const input = JSON.stringify({
+                shifts: assignedShifts.map(s => {
+                    const patient = patients.find(p => p.id === s.patientId);
+                    return {
+                        id: s.id,
+                        patientId: s.patientId || '',
+                        patientName: patient?.name || s.patientName || 'Paciente',
+                        address: s.location,
+                        scheduledTime: s.scheduledTime,
+                        nurseId: s.nurseId
+                    };
+                }),
+                optimizationMode: 'TIME'
+            });
+
+            const response = await (client.queries as any).optimizeRoute({ input });
+
+            if (response.data) {
+                const result = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
+
+                if (result.success) {
+                    // Build order map for display
+                    const orderMap = new Map<string, number>();
+                    (result.optimizedShifts || []).forEach((os: any) => {
+                        orderMap.set(os.id, os.order);
+                    });
+                    setOptimizedShiftOrder(orderMap);
+
+                    // Reorder shifts in the list based on optimization
+                    const reordered = [...shifts].sort((a, b) => {
+                        const orderA = orderMap.get(a.id) ?? 999;
+                        const orderB = orderMap.get(b.id) ?? 999;
+                        return orderA - orderB;
+                    });
+                    setItems(reordered);
+
+                    setRouteResult({
+                        totalTravelTimeMinutes: result.totalTravelTimeMinutes,
+                        totalDistanceKm: result.totalDistanceKm,
+                        routeSummary: result.routeSummary,
+                        optimizedShifts: result.optimizedShifts || [],
+                        shiftCount: assignedShifts.length
+                    });
+                    setIsRouteResultOpen(true);
+
+                    // Clear order badges after 8 seconds
+                    setTimeout(() => setOptimizedShiftOrder(new Map()), 8000);
+                } else {
+                    alert('No se pudo optimizar la ruta. Verifique que las direcciones sean válidas.');
+                }
+            }
+        } catch (error) {
+            console.error('Route optimization failed:', error);
+            const msg = error instanceof Error && error.message.includes('timeout')
+                ? 'La optimización tardó demasiado. Intente con menos turnos.'
+                : 'Error al optimizar rutas. Verifique su conexión e intente nuevamente.';
+            alert(msg);
+        } finally {
+            setIsRouteOptimizing(false);
+        }
+    };
+
     if (isLoading && shifts.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-12 bg-white rounded-2xl border border-slate-100 border-dashed animate-pulse">
@@ -240,13 +321,21 @@ export function RosterDashboard() {
                 </h3>
                 <div className="flex gap-3">
                     <button
+                        onClick={handleRouteOptimize}
+                        disabled={isRouteOptimizing}
+                        className="bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl font-bold text-xs hover:bg-emerald-100 transition-all flex items-center gap-2 border border-emerald-100"
+                    >
+                        {isRouteOptimizing ? <LoadingSpinner size="sm" /> : <Navigation size={14} />}
+                        {isRouteOptimizing ? 'Calculando...' : 'Optimizar Ruta'}
+                    </button>
+                    <button
                         onClick={handleOptimizeRoutes}
                         disabled={isOptimizing}
                         data-tour="ai-optimizer"
                         className="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-xl font-bold text-xs hover:bg-indigo-100 transition-all flex items-center gap-2 border border-indigo-100"
                     >
                         {isOptimizing ? <LoadingSpinner size="sm" /> : <Sparkles size={14} />}
-                        {isOptimizing ? 'Optimizando...' : 'Optimizar Rutas (IA)'}
+                        {isOptimizing ? 'Optimizando...' : 'Asignar Turnos (IA)'}
                     </button>
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
@@ -316,6 +405,11 @@ export function RosterDashboard() {
                                 </div>
                             </div>
                             <div className="text-right">
+                                {optimizedShiftOrder.has(shift.id) && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-black bg-emerald-50 text-emerald-600 border border-emerald-100 mb-1">
+                                        <Navigation size={10} /> #{optimizedShiftOrder.get(shift.id)}
+                                    </span>
+                                )}
                                 <span className={`px-2 py-1 rounded-md text-[10px] font-black border uppercase ${shift.status === 'COMPLETED' ? 'bg-green-50 text-green-600 border-green-100' :
                                     shift.status === 'IN_PROGRESS' ? 'bg-blue-50 text-blue-600 border-blue-100' :
                                         'bg-yellow-50 text-yellow-600 border-yellow-100'
@@ -431,6 +525,92 @@ export function RosterDashboard() {
                             >
                                 <Check size={18} />
                                 Entendido
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Route Optimization Result Modal */}
+            {isRouteResultOpen && routeResult && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 animate-in fade-in zoom-in duration-200">
+                        <div className="flex justify-between items-center mb-6">
+                            <div className="flex items-center gap-3">
+                                <div className="h-12 w-12 bg-emerald-100 rounded-full flex items-center justify-center">
+                                    <Navigation className="text-emerald-600" size={24} />
+                                </div>
+                                <div>
+                                    <h3 className="font-black text-xl text-slate-900">Ruta Optimizada</h3>
+                                    <p className="text-sm text-slate-500">{routeResult.shiftCount} turnos reordenados</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setIsRouteResultOpen(false)} className="text-slate-400 hover:text-slate-600">
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4 mb-6">
+                            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
+                                <div className="text-3xl font-black text-emerald-600 mb-1">
+                                    {Math.round(routeResult.totalTravelTimeMinutes || 0)}
+                                </div>
+                                <div className="text-xs font-bold text-emerald-700 uppercase">Minutos de Viaje</div>
+                            </div>
+                            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
+                                <div className="text-3xl font-black text-blue-600 mb-1">
+                                    {(routeResult.totalDistanceKm || 0).toFixed(1)}
+                                </div>
+                                <div className="text-xs font-bold text-blue-700 uppercase">Km Totales</div>
+                            </div>
+                        </div>
+
+                        {routeResult.routeSummary && (
+                            <p className="text-sm text-slate-600 bg-slate-50 rounded-xl p-3 mb-6">{routeResult.routeSummary}</p>
+                        )}
+
+                        {routeResult.optimizedShifts.length > 0 && (
+                            <div className="mb-6 max-h-48 overflow-y-auto border border-slate-200 rounded-xl">
+                                <table className="w-full">
+                                    <thead className="bg-slate-50 sticky top-0">
+                                        <tr>
+                                            <th className="text-left px-3 py-2 text-xs font-black text-slate-600">#</th>
+                                            <th className="text-left px-3 py-2 text-xs font-black text-slate-600">Turno</th>
+                                            <th className="text-right px-3 py-2 text-xs font-black text-slate-600">Viaje</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {routeResult.optimizedShifts.map((os: any) => {
+                                            const shift = shifts.find(s => s.id === os.id);
+                                            const patient = patients.find(p => p.id === shift?.patientId);
+                                            return (
+                                                <tr key={os.id} className="border-t border-slate-100">
+                                                    <td className="px-3 py-2">
+                                                        <span className="h-6 w-6 bg-emerald-500 text-white rounded-full text-xs font-black flex items-center justify-center">
+                                                            {os.order}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-3 py-2 text-sm font-bold text-slate-900">
+                                                        {patient?.name || 'Paciente'}
+                                                    </td>
+                                                    <td className="px-3 py-2 text-right text-xs text-slate-500">
+                                                        {os.travelTimeMinutes != null ? `${Math.round(os.travelTimeMinutes)} min` : '—'}
+                                                        {os.distanceKm != null ? ` · ${os.distanceKm.toFixed(1)} km` : ''}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+
+                        <div className="flex justify-end">
+                            <button
+                                onClick={() => setIsRouteResultOpen(false)}
+                                className="px-6 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors flex items-center gap-2"
+                            >
+                                <Check size={18} /> Entendido
                             </button>
                         </div>
                     </div>
