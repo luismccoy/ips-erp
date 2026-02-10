@@ -33,6 +33,8 @@
 
 | Date | Task | IDE | Commit |
 |------|------|-----|--------|
+| 2026-02-10 | Fix demo mode overriding Cognito auth on protected routes | Kiro | `5d762cc` |
+| 2026-02-10 | E2E testing: all 3 roles auth verified, RBAC confirmed | Kiro | — |
 | 2026-02-09 | Fix auth logout state/sessionStorage cleanup | Kiro | `b8327f7` |
 | 2026-01-28 | Subscription permissions fix | Kiro | `7cfd525` |
 | 2026-01-28 | Auditoría Clínica sidebar fix | Antigravity | `28220fa` |
