@@ -253,6 +253,7 @@ export default function App() {
                 className="w-full p-6 border border-slate-100 rounded-[24px] focus:outline-none focus:ring-4 focus:ring-blue-50 focus:border-[#2563eb] transition-all font-bold text-slate-700"
                 placeholder="nombre@ips.com"
                 autoComplete="email"
+                data-testid="email-input"
                 required
               />
             </div>
@@ -265,6 +266,7 @@ export default function App() {
                 className="w-full p-6 border border-slate-100 rounded-[24px] focus:outline-none focus:ring-4 focus:ring-blue-50 focus:border-[#2563eb] transition-all font-bold text-slate-700"
                 placeholder="••••••••"
                 autoComplete="current-password"
+                data-testid="password-input"
                 required
               />
             </div>
@@ -275,6 +277,7 @@ export default function App() {
               type="submit"
               disabled={isSigningIn}
               className="w-full py-6 bg-[#2563eb] text-white rounded-[24px] font-black uppercase tracking-[4px] shadow-xl hover:bg-blue-700 transition-all disabled:opacity-50"
+              data-testid="submit-button"
             >
               {isSigningIn ? 'Ingresando...' : 'Ingresar'}
             </button>

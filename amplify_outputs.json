@@ -396,6 +396,28 @@
               "isRequired": false,
               "attributes": []
             },
+            "primaryNurseId": {
+              "name": "primaryNurseId",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": false,
+              "attributes": []
+            },
+            "primaryNurse": {
+              "name": "primaryNurse",
+              "isArray": false,
+              "type": {
+                "model": "Nurse"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "association": {
+                "connectionType": "BELONGS_TO",
+                "targetNames": [
+                  "primaryNurseId"
+                ]
+              }
+            },
             "shifts": {
               "name": "shifts",
               "isArray": true,
@@ -649,6 +671,22 @@
                 ]
               }
             },
+            "primaryPatients": {
+              "name": "primaryPatients",
+              "isArray": true,
+              "type": {
+                "model": "Patient"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true,
+              "association": {
+                "connectionType": "HAS_MANY",
+                "associatedWith": [
+                  "primaryNurseId"
+                ]
+              }
+            },
             "createdAt": {
               "name": "createdAt",
               "isArray": false,
@@ -856,6 +894,17 @@
             {
               "type": "model",
               "properties": {}
+            },
+            {
+              "type": "key",
+              "properties": {
+                "name": "byNurseAndDate",
+                "queryField": "listShiftByNurseIdAndScheduledTime",
+                "fields": [
+                  "nurseId",
+                  "scheduledTime"
+                ]
+              }
             },
             {
               "type": "auth",
@@ -1387,6 +1436,62 @@
               "isRequired": false,
               "attributes": []
             },
+            "codigoPrestador": {
+              "name": "codigoPrestador",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "tipoDocumento": {
+              "name": "tipoDocumento",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "numeroAutorizacion": {
+              "name": "numeroAutorizacion",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "codigoServicio": {
+              "name": "codigoServicio",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "valorCopago": {
+              "name": "valorCopago",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": false,
+              "attributes": []
+            },
+            "valorCuotaModeradora": {
+              "name": "valorCuotaModeradora",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": false,
+              "attributes": []
+            },
+            "fechaConsulta": {
+              "name": "fechaConsulta",
+              "isArray": false,
+              "type": "AWSDate",
+              "isRequired": false,
+              "attributes": []
+            },
+            "causaExterna": {
+              "name": "causaExterna",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
             "createdAt": {
               "name": "createdAt",
               "isArray": false,
@@ -1644,6 +1749,17 @@
             {
               "type": "model",
               "properties": {}
+            },
+            {
+              "type": "key",
+              "properties": {
+                "name": "byTenantAndStatus",
+                "queryField": "listVisitByTenantIdAndStatus",
+                "fields": [
+                  "tenantId",
+                  "status"
+                ]
+              }
             },
             {
               "type": "auth",
@@ -1930,6 +2046,16 @@
               "properties": {}
             },
             {
+              "type": "key",
+              "properties": {
+                "name": "byUser",
+                "queryField": "listNotificationByUserId",
+                "fields": [
+                  "userId"
+                ]
+              }
+            },
+            {
               "type": "auth",
               "properties": {
                 "rules": [
@@ -1950,8 +2076,10 @@
                     "provider": "userPools",
                     "allow": "groups",
                     "operations": [
+                      "create",
                       "read",
-                      "update"
+                      "update",
+                      "delete"
                     ],
                     "groups": [
                       "ADMIN",
@@ -3088,6 +3216,20 @@
               "name": "patientId",
               "isArray": false,
               "type": "ID",
+              "isRequired": true
+            }
+          }
+        },
+        "optimizeRoute": {
+          "name": "optimizeRoute",
+          "isArray": false,
+          "type": "AWSJSON",
+          "isRequired": false,
+          "arguments": {
+            "input": {
+              "name": "input",
+              "isArray": false,
+              "type": "AWSJSON",
               "isRequired": true
             }
           }

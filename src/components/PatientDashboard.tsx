@@ -11,10 +11,31 @@ export const PatientDashboard: React.FC = () => {
     const [medications, setMedications] = useState<Medication[]>([]);
     const [tasks, setTasks] = useState<Task[]>([]);
     const [showAssessmentForm, setShowAssessmentForm] = useState(false);
-    // Note: setPatients is not used directly as patients are managed by usePagination hook
 
     const tenantId = MOCK_USER.attributes['custom:tenantId'];
-    const nurseId = MOCK_USER.attributes.sub; // Current user's nurse ID
+    const nurseId = MOCK_USER.attributes.sub;
+
+    // Real-time subscription for selected patient updates
+    useEffect(() => {
+        if (!selectedPatient) return;
+
+        const patientSub = (client.models.Patient as any).observeQuery({
+            filter: {
+                id: { eq: selectedPatient.id },
+                tenantId: { eq: tenantId }
+            }
+        }).subscribe({
+            next: (data: any) => {
+                if (data.items[0]) {
+                    setSelectedPatient(data.items[0]);
+                    setMedications(data.items[0].medications || []);
+                    setTasks(data.items[0].tasks || []);
+                }
+            }
+        });
+
+        return () => patientSub.unsubscribe();
+    }, [selectedPatient?.id, tenantId]);
 
     useEffect(() => {
         const fetchPatients = async () => {
@@ -50,15 +71,6 @@ export const PatientDashboard: React.FC = () => {
             return { data: response.data || [], nextToken: response.nextToken };
         });
     };
-
-    useEffect(() => {
-        if (!selectedPatient) return;
-
-        // Medications and tasks are nested in Patient model, not separate models
-        // Extract from selectedPatient.medications and selectedPatient.tasks
-        setMedications(selectedPatient.medications || []);
-        setTasks(selectedPatient.tasks || []);
-    }, [selectedPatient]);
 
     const handleToggleTask = async (task: Task) => {
         if (!selectedPatient) return;

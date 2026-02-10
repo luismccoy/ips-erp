@@ -651,10 +651,10 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
             
             {/* Header with NotificationBell and Network Status */}
             {/* NURSE APP HEADER: Isolated - no navigation to Family Portal or other portals */}
-            <header className={`bg-slate-800 p-4 flex justify-between items-center ${(isOffline || isSlow || pendingCount > 0 || isSyncing) ? 'mt-10' : ''}`}>
+            <header className={`bg-slate-800 p-4 flex justify-between items-center ${(isOffline || isSlow || pendingCount > 0 || isSyncing) ? 'mt-10' : ''}`} data-testid="nurse-dashboard-header">
                 <div className="flex items-center gap-2">
                     <Activity size={24} className="text-[#2563eb]" />
-                    <span className="font-black text-lg">IPS ERP - Enfermería</span>
+                    <span className="font-black text-lg" data-testid="nurse-dashboard-title">IPS ERP - Enfermería</span>
                     {/* Network status dot */}
                     {isOffline && (
                         <span className="text-xs text-red-400 flex items-center gap-1 ml-2">
@@ -679,6 +679,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                         className="text-sm text-slate-400 hover:text-white p-3 min-h-[44px] min-w-[44px] flex items-center justify-center"
                         aria-label="Cerrar sesión"
                         title="Cerrar sesión"
+                        data-testid="nurse-logout-button"
                     >
                         <LogOut size={22} />
                     </button>

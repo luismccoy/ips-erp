@@ -7593,3 +7593,272 @@ git push origin main
 
 **Phase 21 Status:** ✅ COMPLETE  
 **Last Updated:** 2026-01-27
+
+---
+
+## Phase 19: AWS Location Service - Route Optimization (February 9, 2026)
+
+**Status:** ✅ COMPLETE  
+**Deployment:** Backend deployed via `npx ampx sandbox --once`
+
+### 19.1 Overview
+
+Phase 19 adds AWS Location Service integration for nurse route optimization. The system geocodes patient addresses and calculates optimal visit routes using real-time travel time and distance calculations.
+
+**Features:**
+- Geocoding patient addresses to GPS coordinates
+- Optimal route calculation using nearest neighbor algorithm
+- Travel time and distance estimates between visits
+- Support for TIME or DISTANCE optimization modes
+- Fallback to Haversine distance when AWS Location Service unavailable
+
+### 19.2 AWS Resources Created
+
+**Place Index:**
+- Name: `IPS-ERP-PlaceIndex`
+- Data Source: Esri (best for Colombia/South America)
+- Pricing: Request-based usage
+- Purpose: Geocoding patient addresses
+
+**Route Calculator:**
+- Name: `IPS-ERP-RouteCalculator`
+- Data Source: Esri
+- Pricing: Request-based usage
+- Purpose: Calculate travel times and distances
+
+### 19.3 Lambda Function: route-optimizer
+
+**Handler:** `amplify/functions/route-optimizer/handler.ts`  
+**Timeout:** 60 seconds  
+**Memory:** 512 MB
+
+**GraphQL Query:**
+```graphql
+query OptimizeRoute($input: AWSJSON!) {
+  optimizeRoute(input: $input)
+}
+```
+
+**Input Schema:**
+```typescript
+type RouteOptimizerInput = {
+  shifts: Array<{
+    id: string;
+    patientId: string;
+    patientName: string;
+    address: string;
+    scheduledTime: string;
+    nurseId: string;
+  }>;
+  nurseLocation?: {
+    lat: number;
+    lng: number;
+  };
+  optimizationMode: 'TIME' | 'DISTANCE';
+};
+```
+
+**Output Schema:**
+```typescript
+type RouteOptimizerOutput = {
+  success: boolean;
+  optimizedShifts: Array<{
+    id: string;
+    patientId: string;
+    patientName: string;
+    address: string;
+    scheduledTime: string;
+    coordinates: { lat: number; lng: number } | null;
+    estimatedArrival: string | null;
+    travelTimeMinutes: number | null;
+    distanceKm: number | null;
+    order: number;
+  }>;
+  totalTravelTimeMinutes: number;
+  totalDistanceKm: number;
+  routeSummary: string;
+  error?: string;
+};
+```
+
+### 19.4 Usage Example
+
+**Request:**
+```json
+{
+  "input": {
+    "shifts": [
+      {
+        "id": "shift-1",
+        "patientId": "patient-1",
+        "patientName": "María González",
+        "address": "Calle 100 #15-20, Bogotá",
+        "scheduledTime": "2026-02-09T08:00:00Z",
+        "nurseId": "nurse-1"
+      },
+      {
+        "id": "shift-2",
+        "patientId": "patient-2",
+        "patientName": "Juan Pérez",
+        "address": "Carrera 7 #45-10, Bogotá",
+        "scheduledTime": "2026-02-09T10:00:00Z",
+        "nurseId": "nurse-1"
+      }
+    ],
+    "nurseLocation": {
+      "lat": 4.6097,
+      "lng": -74.0817
+    },
+    "optimizationMode": "TIME"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "optimizedShifts": [
+    {
+      "id": "shift-1",
+      "patientId": "patient-1",
+      "patientName": "María González",
+      "address": "Calle 100 #15-20, Bogotá",
+      "scheduledTime": "2026-02-09T08:00:00Z",
+      "coordinates": { "lat": 4.6850, "lng": -74.0550 },
+      "estimatedArrival": "2026-02-09T08:25:00Z",
+      "travelTimeMinutes": 25,
+      "distanceKm": 8.5,
+      "order": 1
+    },
+    {
+      "id": "shift-2",
+      "patientId": "patient-2",
+      "patientName": "Juan Pérez",
+      "address": "Carrera 7 #45-10, Bogotá",
+      "scheduledTime": "2026-02-09T10:00:00Z",
+      "coordinates": { "lat": 4.6350, "lng": -74.0650 },
+      "estimatedArrival": "2026-02-09T09:10:00Z",
+      "travelTimeMinutes": 15,
+      "distanceKm": 5.2,
+      "order": 2
+    }
+  ],
+  "totalTravelTimeMinutes": 40,
+  "totalDistanceKm": 13.7,
+  "routeSummary": "Ruta optimizada: 2 visitas, 40 min, 13.7 km"
+}
+```
+
+### 19.5 Algorithm Details
+
+**Nearest Neighbor Algorithm:**
+1. Start from nurse's current location (or first shift if not provided)
+2. Find the nearest unvisited patient (by Haversine distance)
+3. Add to optimized route
+4. Repeat until all patients visited
+
+**Travel Time Calculation:**
+1. Use AWS Location Service `CalculateRoute` API
+2. Travel mode: Car
+3. Distance unit: Kilometers
+4. Optimization: FastestRoute (TIME) or ShortestRoute (DISTANCE)
+5. Fallback: Haversine distance with 30 km/h average speed
+
+**Visit Duration:**
+- Default: 30 minutes per patient visit
+- Added to estimated arrival times
+
+### 19.6 IAM Permissions
+
+The route-optimizer Lambda has the following permissions:
+
+```typescript
+const locationPolicy = new PolicyStatement({
+  effect: Effect.ALLOW,
+  actions: [
+    'geo:SearchPlaceIndexForText',
+    'geo:CalculateRoute',
+  ],
+  resources: [
+    placeIndex.attrArn,
+    routeCalculator.attrArn,
+  ],
+});
+```
+
+### 19.7 Frontend Integration
+
+**"Optimizar Rutas" Button:**
+```typescript
+import { client } from '../amplify-utils';
+
+const optimizeRoutes = async (shifts: Shift[]) => {
+  const result = await client.queries.optimizeRoute({
+    input: JSON.stringify({
+      shifts: shifts.map(s => ({
+        id: s.id,
+        patientId: s.patientId,
+        patientName: s.patient?.name || 'Unknown',
+        address: s.patient?.address || '',
+        scheduledTime: s.scheduledTime,
+        nurseId: s.nurseId,
+      })),
+      nurseLocation: nurseCurrentLocation,
+      optimizationMode: 'TIME',
+    }),
+  });
+  
+  const optimized = JSON.parse(result.data);
+  if (optimized.success) {
+    // Reorder shifts based on optimized.optimizedShifts
+    // Display route summary: optimized.routeSummary
+  }
+};
+```
+
+### 19.8 Cost Considerations
+
+**AWS Location Service Pricing (us-east-1):**
+- Geocoding: $0.50 per 1,000 requests
+- Route calculation: $0.50 per 1,000 requests
+
+**Estimated Monthly Cost:**
+- 100 nurses × 10 shifts/day × 30 days = 30,000 shifts
+- Geocoding: 30,000 × $0.0005 = $15/month
+- Route calculation: 30,000 × $0.0005 = $15/month
+- **Total: ~$30/month**
+
+### 19.9 Error Handling
+
+**Geocoding Failures:**
+- If address cannot be geocoded, coordinates are set to null
+- Route optimization continues with available coordinates
+- Fallback to default 15-minute travel time
+
+**Route Calculation Failures:**
+- Falls back to Haversine distance calculation
+- Assumes 30 km/h average speed for time estimates
+- Logs warning to CloudWatch
+
+**Empty Input:**
+- Returns success: false with error message
+- Empty optimizedShifts array
+
+### 19.10 Testing
+
+**AppSync Console Test:**
+1. Navigate to AWS AppSync Console
+2. Select IPS-ERP API
+3. Go to Queries tab
+4. Run the optimizeRoute query with sample input
+
+**CloudWatch Logs:**
+- Log group: `/aws/lambda/amplify-ipserp-*-routeoptimizerlambda-*`
+- Check for geocoding and route calculation results
+
+---
+
+**Phase 19 Status:** ✅ COMPLETE  
+**Resources Created:** Place Index, Route Calculator, Lambda Function  
+**File Count:** 29 TypeScript files in amplify/ (3 new files for route-optimizer)

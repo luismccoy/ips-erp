@@ -59,6 +59,32 @@
     "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/roster-architect-lambda/ServiceRole/Resource"
    }
   },
+  "rosterarchitectlambdaServiceRoleDefaultPolicyA269A586": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "bedrock:InvokeModel",
+       "Effect": "Allow",
+       "Resource": "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-5-sonnet-20240620-v1:0"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "rosterarchitectlambdaServiceRoleDefaultPolicyA269A586",
+    "Roles": [
+     {
+      "Ref": "rosterarchitectlambdaServiceRole408AD53F"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/roster-architect-lambda/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
   "rosterarchitectlambdaF2FBCABC": {
    "Type": "AWS::Lambda::Function",
    "Properties": {
@@ -114,6 +140,7 @@
     "Timeout": 60
    },
    "DependsOn": [
+    "rosterarchitectlambdaServiceRoleDefaultPolicyA269A586",
     "rosterarchitectlambdaServiceRole408AD53F"
    ],
    "UpdateReplacePolicy": "Delete",
@@ -183,6 +210,32 @@
     "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/rips-validator-lambda/ServiceRole/Resource"
    }
   },
+  "ripsvalidatorlambdaServiceRoleDefaultPolicy2EBDE105": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "bedrock:InvokeModel",
+       "Effect": "Allow",
+       "Resource": "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-5-sonnet-20240620-v1:0"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ripsvalidatorlambdaServiceRoleDefaultPolicy2EBDE105",
+    "Roles": [
+     {
+      "Ref": "ripsvalidatorlambdaServiceRole5DCE9323"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/rips-validator-lambda/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
   "ripsvalidatorlambdaD72E96F7": {
    "Type": "AWS::Lambda::Function",
    "Properties": {
@@ -193,10 +246,11 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "eab2f8b1de97f78d642aea46defac2f60f87e0fd9a1b58a2d4ba0317a509c9ca.zip"
+     "S3Key": "a969489a24882736c40d5787b90380fb3e0673cf061a51cc9cc33b6d9ded5c28.zip"
     },
     "Environment": {
      "Variables": {
+      "MODEL_ID": "anthropic.claude-3-5-sonnet-20240620-v1:0",
       "AMPLIFY_SSM_ENV_CONFIG": "{}"
      }
     },
@@ -234,16 +288,17 @@
       "Value": "amplify"
      }
     ],
-    "Timeout": 30
+    "Timeout": 60
    },
    "DependsOn": [
+    "ripsvalidatorlambdaServiceRoleDefaultPolicy2EBDE105",
     "ripsvalidatorlambdaServiceRole5DCE9323"
    ],
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete",
    "Metadata": {
     "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/rips-validator-lambda/Resource",
-    "aws:asset:path": "asset.eab2f8b1de97f78d642aea46defac2f60f87e0fd9a1b58a2d4ba0317a509c9ca",
+    "aws:asset:path": "asset.a969489a24882736c40d5787b90380fb3e0673cf061a51cc9cc33b6d9ded5c28",
     "aws:asset:is-bundled": true,
     "aws:asset:property": "Code"
    }
@@ -306,6 +361,32 @@
     "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/glosa-defender-lambda/ServiceRole/Resource"
    }
   },
+  "glosadefenderlambdaServiceRoleDefaultPolicy1789DC6C": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "bedrock:InvokeModel",
+       "Effect": "Allow",
+       "Resource": "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-5-sonnet-20240620-v1:0"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "glosadefenderlambdaServiceRoleDefaultPolicy1789DC6C",
+    "Roles": [
+     {
+      "Ref": "glosadefenderlambdaServiceRoleCA0D20C7"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/glosa-defender-lambda/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
   "glosadefenderlambdaDB136293": {
    "Type": "AWS::Lambda::Function",
    "Properties": {
@@ -361,6 +442,7 @@
     "Timeout": 60
    },
    "DependsOn": [
+    "glosadefenderlambdaServiceRoleDefaultPolicy1789DC6C",
     "glosadefenderlambdaServiceRoleCA0D20C7"
    ],
    "UpdateReplacePolicy": "Delete",
@@ -444,10 +526,6 @@
     },
     "Environment": {
      "Variables": {
-      "VISIT_TABLE_NAME": "Visit-fxeusr7wzfchtkr7kamke3qnwq-NONE",
-      "NURSE_TABLE_NAME": "Nurse-fxeusr7wzfchtkr7kamke3qnwq-NONE",
-      "PATIENT_TABLE_NAME": "Patient-fxeusr7wzfchtkr7kamke3qnwq-NONE",
-      "SHIFT_TABLE_NAME": "Shift-fxeusr7wzfchtkr7kamke3qnwq-NONE",
       "AMPLIFY_SSM_ENV_CONFIG": "{}"
      }
     },
@@ -697,10 +775,6 @@
     },
     "Environment": {
      "Variables": {
-      "VISIT_TABLE_NAME": "Visit-fxeusr7wzfchtkr7kamke3qnwq-NONE",
-      "NURSE_TABLE_NAME": "Nurse-fxeusr7wzfchtkr7kamke3qnwq-NONE",
-      "AUDIT_TABLE_NAME": "AuditLog-fxeusr7wzfchtkr7kamke3qnwq-NONE",
-      "NOTIFICATION_TABLE_NAME": "Notification-fxeusr7wzfchtkr7kamke3qnwq-NONE",
       "AMPLIFY_SSM_ENV_CONFIG": "{}"
      }
     },
@@ -824,10 +898,6 @@
     },
     "Environment": {
      "Variables": {
-      "VISIT_TABLE_NAME": "Visit-fxeusr7wzfchtkr7kamke3qnwq-NONE",
-      "NURSE_TABLE_NAME": "Nurse-fxeusr7wzfchtkr7kamke3qnwq-NONE",
-      "AUDIT_TABLE_NAME": "AuditLog-fxeusr7wzfchtkr7kamke3qnwq-NONE",
-      "NOTIFICATION_TABLE_NAME": "Notification-fxeusr7wzfchtkr7kamke3qnwq-NONE",
       "AMPLIFY_SSM_ENV_CONFIG": "{}"
      }
     },
@@ -951,11 +1021,6 @@
     },
     "Environment": {
      "Variables": {
-      "VISIT_TABLE_NAME": "Visit-fxeusr7wzfchtkr7kamke3qnwq-NONE",
-      "NURSE_TABLE_NAME": "Nurse-fxeusr7wzfchtkr7kamke3qnwq-NONE",
-      "PATIENT_TABLE_NAME": "Patient-fxeusr7wzfchtkr7kamke3qnwq-NONE",
-      "AUDIT_TABLE_NAME": "AuditLog-fxeusr7wzfchtkr7kamke3qnwq-NONE",
-      "NOTIFICATION_TABLE_NAME": "Notification-fxeusr7wzfchtkr7kamke3qnwq-NONE",
       "AMPLIFY_SSM_ENV_CONFIG": "{}"
      }
     },
@@ -1075,7 +1140,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "eeb677782a40169935ea594e7c62ac4fcdef809a8e89aa3a91f80b3a1d818f26.zip"
+     "S3Key": "8d382f5a071dc94834a4418ea05f8b69de19e52eaa4ecaf0890046f46af7bc6b.zip"
     },
     "Environment": {
      "Variables": {
@@ -1126,7 +1191,293 @@
    "DeletionPolicy": "Delete",
    "Metadata": {
     "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/verify-family-access-lambda/Resource",
-    "aws:asset:path": "asset.eeb677782a40169935ea594e7c62ac4fcdef809a8e89aa3a91f80b3a1d818f26",
+    "aws:asset:path": "asset.8d382f5a071dc94834a4418ea05f8b69de19e52eaa4ecaf0890046f46af7bc6b",
+    "aws:asset:is-bundled": true,
+    "aws:asset:property": "Code"
+   }
+  },
+  "createnursevalidatedlambdaServiceRoleBABB2703": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "amplify:deployment-type",
+      "Value": "sandbox"
+     },
+     {
+      "Key": "amplify:friendly-name",
+      "Value": "create-nurse-validated"
+     },
+     {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
+      "Key": "created-by",
+      "Value": "amplify"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/create-nurse-validated-lambda/ServiceRole/Resource"
+   }
+  },
+  "createnursevalidatedlambdaD96205B7": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Architectures": [
+     "x86_64"
+    ],
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+     },
+     "S3Key": "8676f92751458eede531ce04ebd412929a5da3246d195214e1c6276d18e16189.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "NURSE_TABLE_NAME": "",
+      "AMPLIFY_SSM_ENV_CONFIG": "{}"
+     }
+    },
+    "EphemeralStorage": {
+     "Size": 512
+    },
+    "Handler": "index.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "createnursevalidatedlambdaServiceRoleBABB2703",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs20.x",
+    "Tags": [
+     {
+      "Key": "amplify:deployment-type",
+      "Value": "sandbox"
+     },
+     {
+      "Key": "amplify:friendly-name",
+      "Value": "create-nurse-validated"
+     },
+     {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
+      "Key": "created-by",
+      "Value": "amplify"
+     }
+    ],
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "createnursevalidatedlambdaServiceRoleBABB2703"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/create-nurse-validated-lambda/Resource",
+    "aws:asset:path": "asset.8676f92751458eede531ce04ebd412929a5da3246d195214e1c6276d18e16189",
+    "aws:asset:is-bundled": true,
+    "aws:asset:property": "Code"
+   }
+  },
+  "routeoptimizerlambdaServiceRole27F9D446": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "amplify:deployment-type",
+      "Value": "sandbox"
+     },
+     {
+      "Key": "amplify:friendly-name",
+      "Value": "route-optimizer"
+     },
+     {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
+      "Key": "created-by",
+      "Value": "amplify"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/route-optimizer-lambda/ServiceRole/Resource"
+   }
+  },
+  "routeoptimizerlambdaServiceRoleDefaultPolicy44D7DE1F": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "geo:SearchPlaceIndexForText",
+        "geo:CalculateRoute"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bIPSPlaceIndexA1D4F086Arn"
+        },
+        {
+         "Ref": "referencetoamplifyipserpluiscoysandboxbb7136bc7bIPSRouteCalculator5EE9BDE4Arn"
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "routeoptimizerlambdaServiceRoleDefaultPolicy44D7DE1F",
+    "Roles": [
+     {
+      "Ref": "routeoptimizerlambdaServiceRole27F9D446"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/route-optimizer-lambda/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "routeoptimizerlambda7CEA214F": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Architectures": [
+     "x86_64"
+    ],
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+     },
+     "S3Key": "1323849790b30cf1bbc1bad76cfd10d3820395bfbcbaa3b46aaa68350f404fbf.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "LOCATION_ROUTE_CALCULATOR": "IPS-ERP-RouteCalculator",
+      "LOCATION_PLACE_INDEX": "IPS-ERP-PlaceIndex",
+      "AMPLIFY_SSM_ENV_CONFIG": "{}"
+     }
+    },
+    "EphemeralStorage": {
+     "Size": 512
+    },
+    "Handler": "index.handler",
+    "MemorySize": 256,
+    "Role": {
+     "Fn::GetAtt": [
+      "routeoptimizerlambdaServiceRole27F9D446",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs20.x",
+    "Tags": [
+     {
+      "Key": "amplify:deployment-type",
+      "Value": "sandbox"
+     },
+     {
+      "Key": "amplify:friendly-name",
+      "Value": "route-optimizer"
+     },
+     {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
+      "Key": "created-by",
+      "Value": "amplify"
+     }
+    ],
+    "Timeout": 30
+   },
+   "DependsOn": [
+    "routeoptimizerlambdaServiceRoleDefaultPolicy44D7DE1F",
+    "routeoptimizerlambdaServiceRole27F9D446"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/route-optimizer-lambda/Resource",
+    "aws:asset:path": "asset.1323849790b30cf1bbc1bad76cfd10d3820395bfbcbaa3b46aaa68350f404fbf",
     "aws:asset:is-bundled": true,
     "aws:asset:property": "Code"
    }
@@ -1134,7 +1485,7 @@
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/zXNOw6DMBBF0bXQDxNilAUEpJQUsAA02AMyH1ti7FAg9h4BSnWqd59Clb/wmdAmqTZTOtsO94olsGkC6Qlok3afaekMtc4bHgWri090OljvwNKCe+1nhrJ3pwdI3pIIB8H3CUiORdQTh4KE4a5h2bt/44CaxcdVM1yDJtBg3XDA+YijPL4qQ5VhloxibbpGF+zCWN/+AFFM7czEAAAA"
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/zWOQQqDMBBFz+J+nFqlB6hCl1L0ADImo0RjAk6sFPHuRaWr9//iP36KafbAe0SrxEqPsTUtbiVLYF0HUiPQKs1maWo1Nc5rHgTLE6/FqWC8A0MTbpW3DEXnTr69Nep71CvtIFlDIhwEnwdAMswXNXLISRguPRad+0t3qFj8MiuGc1AH6o3rdzgu4CC3T5pgmmASDWJMPC8umImxuvgD+LiKS9UAAAA="
    },
    "Metadata": {
     "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/CDKMetadata/Default"
@@ -1408,6 +1759,14 @@
    ]
   }
  },
+ "Parameters": {
+  "referencetoamplifyipserpluiscoysandboxbb7136bc7bIPSPlaceIndexA1D4F086Arn": {
+   "Type": "String"
+  },
+  "referencetoamplifyipserpluiscoysandboxbb7136bc7bIPSRouteCalculator5EE9BDE4Arn": {
+   "Type": "String"
+  }
+ },
  "Outputs": {
   "amplifyipserpluiscoysandboxbb7136bc7bfunctionrosterarchitectlambdaF38DEDD6Ref": {
    "Value": {
@@ -1452,6 +1811,16 @@
   "amplifyipserpluiscoysandboxbb7136bc7bfunctionverifyfamilyaccesslambda3589BA81Ref": {
    "Value": {
     "Ref": "verifyfamilyaccesslambdaA0E8B3E0"
+   }
+  },
+  "amplifyipserpluiscoysandboxbb7136bc7bfunctioncreatenursevalidatedlambdaEB69E9A3Ref": {
+   "Value": {
+    "Ref": "createnursevalidatedlambdaD96205B7"
+   }
+  },
+  "amplifyipserpluiscoysandboxbb7136bc7bfunctionrouteoptimizerlambdaF7904129Ref": {
+   "Value": {
+    "Ref": "routeoptimizerlambda7CEA214F"
    }
   }
  }

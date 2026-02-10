@@ -24,7 +24,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-${AWS::Region}",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-${AWS::Region}",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/f689711e030aac71d035916c7f3db3e59ba553508b134ee35890adcb18802df2.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/808bce3a936c2da522bad8528a0bcd8c3cc9e37b2b2d17e357ca1e55c5b9f32b.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -109,6 +109,18 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "amplifyAuthIdentityPoolRoleAttachment045F17C8"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/auth/amplifyAuth/SuperAdminGroupRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "amplifyAuthSuperAdminGroupRole9B2270C7"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/auth/amplifyAuth/SuperAdminGroup": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "amplifyAuthSuperAdminGroupDA26B869"
           }
         ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/auth/amplifyAuth/AdminGroupRole/Resource": [
@@ -2451,6 +2463,46 @@
             "data": "Subscription.onDeleteShift"
           }
         ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/Shift/QuerylistShiftByNurseIdAndScheduledTimeauth0Function/QuerylistShiftByNurseIdAndScheduledTimeauth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QuerylistShiftByNurseIdAndScheduledTimeauth0FunctionQuerylistShiftByNurseIdAndScheduledTimeauth0FunctionAppSyncFunction45CF63A7"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QuerylistShiftByNurseIdAndScheduledTimeauth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/Shift/QuerylistShiftByNurseIdAndScheduledTimepostAuth0Function/QuerylistShiftByNurseIdAndScheduledTimepostAuth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QuerylistShiftByNurseIdAndScheduledTimepostAuth0FunctionQuerylistShiftByNurseIdAndScheduledTimepostAuth0FunctionAppSyncFunctionA5D9DD50"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QuerylistShiftByNurseIdAndScheduledTimepostAuth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/Shift/QueryListShiftByNurseIdAndScheduledTimeDataResolverFn/QueryListShiftByNurseIdAndScheduledTimeDataResolverFn.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QueryListShiftByNurseIdAndScheduledTimeDataResolverFnQueryListShiftByNurseIdAndScheduledTimeDataResolverFnAppSyncFunction114F7CE0"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QueryListShiftByNurseIdAndScheduledTimeDataResolverFn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/Shift/queryListShiftByNurseIdAndScheduledTimeResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QuerylistShiftByNurseIdAndScheduledTimeResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Query.listShiftByNurseIdAndScheduledTime"
+          }
+        ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/Shift/CDKMetadata/Default": [
           {
             "type": "aws:cdk:logicalId",
@@ -4551,6 +4603,46 @@
             "data": "Subscription.onDeleteVisit"
           }
         ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/Visit/QuerylistVisitByTenantIdAndStatusauth0Function/QuerylistVisitByTenantIdAndStatusauth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QuerylistVisitByTenantIdAndStatusauth0FunctionQuerylistVisitByTenantIdAndStatusauth0FunctionAppSyncFunction22F63DE0"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QuerylistVisitByTenantIdAndStatusauth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/Visit/QuerylistVisitByTenantIdAndStatuspostAuth0Function/QuerylistVisitByTenantIdAndStatuspostAuth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QuerylistVisitByTenantIdAndStatuspostAuth0FunctionQuerylistVisitByTenantIdAndStatuspostAuth0FunctionAppSyncFunctionF78E51D4"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QuerylistVisitByTenantIdAndStatuspostAuth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/Visit/QueryListVisitByTenantIdAndStatusDataResolverFn/QueryListVisitByTenantIdAndStatusDataResolverFn.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QueryListVisitByTenantIdAndStatusDataResolverFnQueryListVisitByTenantIdAndStatusDataResolverFnAppSyncFunction7424819E"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QueryListVisitByTenantIdAndStatusDataResolverFn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/Visit/queryListVisitByTenantIdAndStatusResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QuerylistVisitByTenantIdAndStatusResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Query.listVisitByTenantIdAndStatus"
+          }
+        ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/Visit/CDKMetadata/Default": [
           {
             "type": "aws:cdk:logicalId",
@@ -5601,6 +5693,46 @@
             "data": "Subscription.onDeleteNotification"
           }
         ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/Notification/QuerylistNotificationByUserIdauth0Function/QuerylistNotificationByUserIdauth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QuerylistNotificationByUserIdauth0FunctionQuerylistNotificationByUserIdauth0FunctionAppSyncFunctionE477AC53"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QuerylistNotificationByUserIdauth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/Notification/QuerylistNotificationByUserIdpostAuth0Function/QuerylistNotificationByUserIdpostAuth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QuerylistNotificationByUserIdpostAuth0FunctionQuerylistNotificationByUserIdpostAuth0FunctionAppSyncFunction2C1B4349"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QuerylistNotificationByUserIdpostAuth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/Notification/QueryListNotificationByUserIdDataResolverFn/QueryListNotificationByUserIdDataResolverFn.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QueryListNotificationByUserIdDataResolverFnQueryListNotificationByUserIdDataResolverFnAppSyncFunctionDD1A33D2"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QueryListNotificationByUserIdDataResolverFn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/Notification/queryListNotificationByUserIdResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QuerylistNotificationByUserIdResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Query.listNotificationByUserId"
+          }
+        ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/Notification/CDKMetadata/Default": [
           {
             "type": "aws:cdk:logicalId",
@@ -5665,6 +5797,646 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "amplifyDataNotificationNestedStackNotificationNestedStackResource648CCF39"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/DynamoDBModelTableReadIOPS": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DynamoDBModelTableReadIOPS"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/DynamoDBModelTableWriteIOPS": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DynamoDBModelTableWriteIOPS"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/DynamoDBBillingMode": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DynamoDBBillingMode"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/DynamoDBEnablePointInTimeRecovery": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DynamoDBEnablePointInTimeRecovery"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/DynamoDBEnableServerSideEncryption": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DynamoDBEnableServerSideEncryption"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/HasEnvironmentParameter": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "HasEnvironmentParameter"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/ShouldUsePayPerRequestBilling": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ShouldUsePayPerRequestBilling"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/ShouldUsePointInTimeRecovery": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ShouldUsePointInTimeRecovery"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/PatientAssessmentTable": [
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "PatientAssessment"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/PatientAssessmentTable/Default/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PatientAssessmentTable"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "PatientAssessment"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/CustomTablePatientAssessmentTable": [
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "PatientAssessment"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/GetAttPatientAssessmentTableStreamArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GetAttPatientAssessmentTableStreamArn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/GetAttPatientAssessmentTableName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GetAttPatientAssessmentTableName"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/PatientAssessmentIAMRole": [
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "PatientAssessmentIAMRole"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/PatientAssessmentIAMRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PatientAssessmentIAMRole5B16DC0B"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "PatientAssessmentIAMRole"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/PatientAssessmentDataSource": [
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "PatientAssessmentTable"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/PatientAssessmentDataSource/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PatientAssessmentDataSource"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "PatientAssessmentTable"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/QuerygetPatientAssessmentauth0Function/QuerygetPatientAssessmentauth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QuerygetPatientAssessmentauth0FunctionQuerygetPatientAssessmentauth0FunctionAppSyncFunction4AA62C09"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QuerygetPatientAssessmentauth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/QuerygetPatientAssessmentpostAuth0Function/QuerygetPatientAssessmentpostAuth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QuerygetPatientAssessmentpostAuth0FunctionQuerygetPatientAssessmentpostAuth0FunctionAppSyncFunctionA5940E2F"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QuerygetPatientAssessmentpostAuth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/QueryGetPatientAssessmentDataResolverFn/QueryGetPatientAssessmentDataResolverFn.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QueryGetPatientAssessmentDataResolverFnQueryGetPatientAssessmentDataResolverFnAppSyncFunctionBBD67BF5"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QueryGetPatientAssessmentDataResolverFn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/queryGetPatientAssessmentResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GetPatientAssessmentResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Query.getPatientAssessment"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/QuerylistPatientAssessmentsauth0Function/QuerylistPatientAssessmentsauth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QuerylistPatientAssessmentsauth0FunctionQuerylistPatientAssessmentsauth0FunctionAppSyncFunction118F5AC0"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QuerylistPatientAssessmentsauth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/QuerylistPatientAssessmentspostAuth0Function/QuerylistPatientAssessmentspostAuth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QuerylistPatientAssessmentspostAuth0FunctionQuerylistPatientAssessmentspostAuth0FunctionAppSyncFunction8889C2C7"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QuerylistPatientAssessmentspostAuth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/QueryListPatientAssessmentsDataResolverFn/QueryListPatientAssessmentsDataResolverFn.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QueryListPatientAssessmentsDataResolverFnQueryListPatientAssessmentsDataResolverFnAppSyncFunctionB9AC42DD"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QueryListPatientAssessmentsDataResolverFn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/queryListPatientAssessmentsResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ListPatientAssessmentResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Query.listPatientAssessments"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/MutationcreatePatientAssessmentinit0Function/MutationcreatePatientAssessmentinit0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MutationcreatePatientAssessmentinit0FunctionMutationcreatePatientAssessmentinit0FunctionAppSyncFunctionD2745F83"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "MutationcreatePatientAssessmentinit0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/MutationcreatePatientAssessmentauth0Function/MutationcreatePatientAssessmentauth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MutationcreatePatientAssessmentauth0FunctionMutationcreatePatientAssessmentauth0FunctionAppSyncFunction1048224B"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "MutationcreatePatientAssessmentauth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/MutationcreatePatientAssessmentpostAuth0Function/MutationcreatePatientAssessmentpostAuth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MutationcreatePatientAssessmentpostAuth0FunctionMutationcreatePatientAssessmentpostAuth0FunctionAppSyncFunction17A18509"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "MutationcreatePatientAssessmentpostAuth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/MutationCreatePatientAssessmentDataResolverFn/MutationCreatePatientAssessmentDataResolverFn.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MutationCreatePatientAssessmentDataResolverFnMutationCreatePatientAssessmentDataResolverFnAppSyncFunctionADAF281F"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "MutationCreatePatientAssessmentDataResolverFn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/mutationCreatePatientAssessmentResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CreatePatientAssessmentResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Mutation.createPatientAssessment"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/MutationupdatePatientAssessmentinit0Function/MutationupdatePatientAssessmentinit0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MutationupdatePatientAssessmentinit0FunctionMutationupdatePatientAssessmentinit0FunctionAppSyncFunction7DC96930"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "MutationupdatePatientAssessmentinit0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/MutationupdatePatientAssessmentauth0Function/MutationupdatePatientAssessmentauth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MutationupdatePatientAssessmentauth0FunctionMutationupdatePatientAssessmentauth0FunctionAppSyncFunction80514C3F"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "MutationupdatePatientAssessmentauth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/MutationupdatePatientAssessmentpostAuth0Function/MutationupdatePatientAssessmentpostAuth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MutationupdatePatientAssessmentpostAuth0FunctionMutationupdatePatientAssessmentpostAuth0FunctionAppSyncFunctionE312EA61"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "MutationupdatePatientAssessmentpostAuth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/MutationUpdatePatientAssessmentDataResolverFn/MutationUpdatePatientAssessmentDataResolverFn.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MutationUpdatePatientAssessmentDataResolverFnMutationUpdatePatientAssessmentDataResolverFnAppSyncFunction1ABE5311"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "MutationUpdatePatientAssessmentDataResolverFn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/mutationUpdatePatientAssessmentResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UpdatePatientAssessmentResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Mutation.updatePatientAssessment"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/MutationdeletePatientAssessmentauth0Function/MutationdeletePatientAssessmentauth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MutationdeletePatientAssessmentauth0FunctionMutationdeletePatientAssessmentauth0FunctionAppSyncFunction6836801F"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "MutationdeletePatientAssessmentauth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/MutationdeletePatientAssessmentpostAuth0Function/MutationdeletePatientAssessmentpostAuth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MutationdeletePatientAssessmentpostAuth0FunctionMutationdeletePatientAssessmentpostAuth0FunctionAppSyncFunction5524D4F7"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "MutationdeletePatientAssessmentpostAuth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/MutationDeletePatientAssessmentDataResolverFn/MutationDeletePatientAssessmentDataResolverFn.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MutationDeletePatientAssessmentDataResolverFnMutationDeletePatientAssessmentDataResolverFnAppSyncFunction2F7BB244"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "MutationDeletePatientAssessmentDataResolverFn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/mutationDeletePatientAssessmentResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DeletePatientAssessmentResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Mutation.deletePatientAssessment"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/SubscriptiononCreatePatientAssessmentauth0Function/SubscriptiononCreatePatientAssessmentauth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SubscriptiononCreatePatientAssessmentauth0FunctionSubscriptiononCreatePatientAssessmentauth0FunctionAppSyncFunction077AF081"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "SubscriptiononCreatePatientAssessmentauth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/SubscriptiononCreatePatientAssessmentpostAuth0Function/SubscriptiononCreatePatientAssessmentpostAuth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SubscriptiononCreatePatientAssessmentpostAuth0FunctionSubscriptiononCreatePatientAssessmentpostAuth0FunctionAppSyncFunctionB49DB985"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "SubscriptiononCreatePatientAssessmentpostAuth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/SubscriptionOnCreatePatientAssessmentDataResolverFn/SubscriptionOnCreatePatientAssessmentDataResolverFn.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SubscriptionOnCreatePatientAssessmentDataResolverFnSubscriptionOnCreatePatientAssessmentDataResolverFnAppSyncFunction1FAB6751"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "SubscriptionOnCreatePatientAssessmentDataResolverFn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/subscriptionOnCreatePatientAssessmentResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SubscriptiononCreatePatientAssessmentResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Subscription.onCreatePatientAssessment"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/SubscriptiononUpdatePatientAssessmentauth0Function/SubscriptiononUpdatePatientAssessmentauth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SubscriptiononUpdatePatientAssessmentauth0FunctionSubscriptiononUpdatePatientAssessmentauth0FunctionAppSyncFunction6F9D5FB5"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "SubscriptiononUpdatePatientAssessmentauth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/SubscriptiononUpdatePatientAssessmentpostAuth0Function/SubscriptiononUpdatePatientAssessmentpostAuth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SubscriptiononUpdatePatientAssessmentpostAuth0FunctionSubscriptiononUpdatePatientAssessmentpostAuth0FunctionAppSyncFunction322333A7"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "SubscriptiononUpdatePatientAssessmentpostAuth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/SubscriptionOnUpdatePatientAssessmentDataResolverFn/SubscriptionOnUpdatePatientAssessmentDataResolverFn.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SubscriptionOnUpdatePatientAssessmentDataResolverFnSubscriptionOnUpdatePatientAssessmentDataResolverFnAppSyncFunction7FB43FA2"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "SubscriptionOnUpdatePatientAssessmentDataResolverFn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/subscriptionOnUpdatePatientAssessmentResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SubscriptiononUpdatePatientAssessmentResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Subscription.onUpdatePatientAssessment"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/SubscriptiononDeletePatientAssessmentauth0Function/SubscriptiononDeletePatientAssessmentauth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SubscriptiononDeletePatientAssessmentauth0FunctionSubscriptiononDeletePatientAssessmentauth0FunctionAppSyncFunctionB4642C86"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "SubscriptiononDeletePatientAssessmentauth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/SubscriptiononDeletePatientAssessmentpostAuth0Function/SubscriptiononDeletePatientAssessmentpostAuth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SubscriptiononDeletePatientAssessmentpostAuth0FunctionSubscriptiononDeletePatientAssessmentpostAuth0FunctionAppSyncFunction43D1B19D"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "SubscriptiononDeletePatientAssessmentpostAuth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/SubscriptionOnDeletePatientAssessmentDataResolverFn/SubscriptionOnDeletePatientAssessmentDataResolverFn.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SubscriptionOnDeletePatientAssessmentDataResolverFnSubscriptionOnDeletePatientAssessmentDataResolverFnAppSyncFunction252AE4D5"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "SubscriptionOnDeletePatientAssessmentDataResolverFn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/subscriptionOnDeletePatientAssessmentResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SubscriptiononDeletePatientAssessmentResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Subscription.onDeletePatientAssessment"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/QuerylistPatientAssessmentByTenantIdauth0Function/QuerylistPatientAssessmentByTenantIdauth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QuerylistPatientAssessmentByTenantIdauth0FunctionQuerylistPatientAssessmentByTenantIdauth0FunctionAppSyncFunctionA9FFE298"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QuerylistPatientAssessmentByTenantIdauth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/QuerylistPatientAssessmentByTenantIdpostAuth0Function/QuerylistPatientAssessmentByTenantIdpostAuth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QuerylistPatientAssessmentByTenantIdpostAuth0FunctionQuerylistPatientAssessmentByTenantIdpostAuth0FunctionAppSyncFunctionA57CACDC"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QuerylistPatientAssessmentByTenantIdpostAuth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/QueryListPatientAssessmentByTenantIdDataResolverFn/QueryListPatientAssessmentByTenantIdDataResolverFn.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QueryListPatientAssessmentByTenantIdDataResolverFnQueryListPatientAssessmentByTenantIdDataResolverFnAppSyncFunctionD701368D"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QueryListPatientAssessmentByTenantIdDataResolverFn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/queryListPatientAssessmentByTenantIdResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QuerylistPatientAssessmentByTenantIdResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Query.listPatientAssessmentByTenantId"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/QuerylistPatientAssessmentByPatientIdAndAssessedAtauth0Function/QuerylistPatientAssessmentByPatientIdAndAssessedAtauth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QuerylistPatientAssessmentByPatientIdAndAssessedAtauth0FunctionQuerylistPatientAssessmentByPatientIdAndAssessedAtauth0FunctionAppSyncFunctionE1A650F6"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QuerylistPatientAssessmentByPatientIdAndAssessedAtauth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/QuerylistPatientAssessmentByPatientIdAndAssessedAtpostAuth0Function/QuerylistPatientAssessmentByPatientIdAndAssessedAtpostAuth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QuerylistPatientAssessmentByPatientIdAndAssessedAtpostAuth0FunctionQuerylistPatientAssessmentByPatientIdAndAssessedAtpostAuth0FunctionAppSyncFunction4F5E94FD"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QuerylistPatientAssessmentByPatientIdAndAssessedAtpostAuth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/QueryListPatientAssessmentByPatientIdAndAssessedAtDataResolverFn/QueryListPatientAssessmentByPatientIdAndAssessedAtDataResolverFn.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QueryListPatientAssessmentByPatientIdAndAssessedAtDataResolverFnQueryListPatientAssessmentByPatientIdAndAssessedAtDataResolverFnAppSyncFunction2F57FACD"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QueryListPatientAssessmentByPatientIdAndAssessedAtDataResolverFn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/queryListPatientAssessmentByPatientIdAndAssessedAtResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QuerylistPatientAssessmentByPatientIdAndAssessedAtResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Query.listPatientAssessmentByPatientIdAndAssessedAt"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/QuerylistPatientAssessmentByNurseIdauth0Function/QuerylistPatientAssessmentByNurseIdauth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QuerylistPatientAssessmentByNurseIdauth0FunctionQuerylistPatientAssessmentByNurseIdauth0FunctionAppSyncFunction0FF1AB1A"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QuerylistPatientAssessmentByNurseIdauth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/QuerylistPatientAssessmentByNurseIdpostAuth0Function/QuerylistPatientAssessmentByNurseIdpostAuth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QuerylistPatientAssessmentByNurseIdpostAuth0FunctionQuerylistPatientAssessmentByNurseIdpostAuth0FunctionAppSyncFunction89A7305A"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QuerylistPatientAssessmentByNurseIdpostAuth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/QueryListPatientAssessmentByNurseIdDataResolverFn/QueryListPatientAssessmentByNurseIdDataResolverFn.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QueryListPatientAssessmentByNurseIdDataResolverFnQueryListPatientAssessmentByNurseIdDataResolverFnAppSyncFunctionB18CE98D"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QueryListPatientAssessmentByNurseIdDataResolverFn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/queryListPatientAssessmentByNurseIdResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QuerylistPatientAssessmentByNurseIdResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Query.listPatientAssessmentByNurseId"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/CDKMetadata/Condition": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadataAvailable"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/reference-to-amplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataAmplifyTableManagerNestedStackAmplifyTableManagerNestedStackResource351D29B9Outputs.amplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataAmplifyTableManagerTableManagerCustomProviderframeworkonEventBB18C41FArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataAmplifyTableManagerNestedStackAmplifyTableManagerNestedStackResource351D29B9Outputsamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataAmplifyTableManagerTableManagerCustomProvi00906931"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/reference-to-amplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPI2EA0F806ApiId": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPI2EA0F806ApiId"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/reference-to-amplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPINONEDS93E553E0Name": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataGraphQLAPINONEDS93E553E0Name"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/reference-to-amplifyipserpluiscoysandboxbb7136bc7bauthNestedStackauthNestedStackResource3AD4712AOutputs.amplifyipserpluiscoysandboxbb7136bc7bauthamplifyAuthauthenticatedUserRoleF97D1B61Ref": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "referencetoamplifyipserpluiscoysandboxbb7136bc7bauthNestedStackauthNestedStackResource3AD4712AOutputsamplifyipserpluiscoysandboxbb7136bc7bauthamplifyAuthauthenticatedUserRoleF97D1B61Ref"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/reference-to-amplifyipserpluiscoysandboxbb7136bc7bauthNestedStackauthNestedStackResource3AD4712AOutputs.amplifyipserpluiscoysandboxbb7136bc7bauthamplifyAuthunauthenticatedUserRole58812DAARef": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "referencetoamplifyipserpluiscoysandboxbb7136bc7bauthNestedStackauthNestedStackResource3AD4712AOutputsamplifyipserpluiscoysandboxbb7136bc7bauthamplifyAuthunauthenticatedUserRole58812DAARef"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/reference-to-amplifyipserpluiscoysandboxbb7136bc7bauthNestedStackauthNestedStackResource3AD4712AOutputs.amplifyipserpluiscoysandboxbb7136bc7bauthamplifyAuthIdentityPoolBA7C7C57Ref": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "referencetoamplifyipserpluiscoysandboxbb7136bc7bauthNestedStackauthNestedStackResource3AD4712AOutputsamplifyipserpluiscoysandboxbb7136bc7bauthamplifyAuthIdentityPoolBA7C7C57Ref"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/amplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataPatientAssessmentPatientAssessmentDataSourceF1C1346DName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "amplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataPatientAssessmentPatientAssessmentDataSourceF1C1346DName"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment/amplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataPatientAssessmentPatientAssessmentTableA42CB571TableArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "amplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataPatientAssessmentPatientAssessmentTableA42CB571TableArn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/PatientAssessment.NestedStack/PatientAssessment.NestedStackResource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "amplifyDataPatientAssessmentNestedStackPatientAssessmentNestedStackResourceA2702812"
           }
         ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/HasEnvironmentParameter": [
@@ -5863,6 +6635,54 @@
           {
             "type": "graphqltransformer:resourceName",
             "data": "Mutation.approveVisit"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/CreateNurseValidatedLambdaDataSource": [
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "CreateNurseValidatedLambdaDataSource"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/CreateNurseValidatedLambdaDataSource/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CreateNurseValidatedLambdaDataSourceServiceRoleBD1CE1E3"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/CreateNurseValidatedLambdaDataSource/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CreateNurseValidatedLambdaDataSourceServiceRoleDefaultPolicy4AA33597"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/CreateNurseValidatedLambdaDataSource/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CreateNurseValidatedLambdaDataSource"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "CreateNurseValidatedLambdaDataSource"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/InvokeCreateNurseValidatedLambdaDataSource/InvokeCreateNurseValidatedLambdaDataSource.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "InvokeCreateNurseValidatedLambdaDataSourceInvokeCreateNurseValidatedLambdaDataSourceAppSyncFunctionFFEAE60E"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "InvokeCreateNurseValidatedLambdaDataSource"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/mutationCreateNurseWithValidationResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MutationcreateNurseWithValidationResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Mutation.createNurseWithValidation"
           }
         ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/RosterArchitectLambdaDataSource": [
@@ -6105,6 +6925,54 @@
             "data": "Query.listApprovedVisitSummariesForFamily"
           }
         ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/RouteOptimizerLambdaDataSource": [
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "RouteOptimizerLambdaDataSource"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/RouteOptimizerLambdaDataSource/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RouteOptimizerLambdaDataSourceServiceRole2F36E238"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/RouteOptimizerLambdaDataSource/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RouteOptimizerLambdaDataSourceServiceRoleDefaultPolicy7924EE24"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/RouteOptimizerLambdaDataSource/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RouteOptimizerLambdaDataSource"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "RouteOptimizerLambdaDataSource"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/InvokeRouteOptimizerLambdaDataSource/InvokeRouteOptimizerLambdaDataSource.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "InvokeRouteOptimizerLambdaDataSourceInvokeRouteOptimizerLambdaDataSourceAppSyncFunction24AC7763"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "InvokeRouteOptimizerLambdaDataSource"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/queryOptimizeRouteResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QueryoptimizeRouteResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Query.optimizeRoute"
+          }
+        ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/MutationCreateVisitDraftFromShiftAuthFN/MutationCreateVisitDraftFromShiftAuthFN.AppSyncFunction": [
           {
             "type": "aws:cdk:logicalId",
@@ -6143,6 +7011,16 @@
           {
             "type": "graphqltransformer:resourceName",
             "data": "MutationApproveVisitAuthFN"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/MutationCreateNurseWithValidationAuthFN/MutationCreateNurseWithValidationAuthFN.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MutationCreateNurseWithValidationAuthFNMutationCreateNurseWithValidationAuthFNAppSyncFunction2A0CD194"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "MutationCreateNurseWithValidationAuthFN"
           }
         ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/QueryGenerateRosterAuthFN/QueryGenerateRosterAuthFN.AppSyncFunction": [
@@ -6193,6 +7071,16 @@
           {
             "type": "graphqltransformer:resourceName",
             "data": "QueryListApprovedVisitSummariesForFamilyAuthFN"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/QueryOptimizeRouteAuthFN/QueryOptimizeRouteAuthFN.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QueryOptimizeRouteAuthFNQueryOptimizeRouteAuthFNAppSyncFunctionA3B2624C"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "QueryOptimizeRouteAuthFN"
           }
         ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/FunctionDirectiveStack/CDKMetadata/Default": [
@@ -6513,6 +7401,36 @@
             "data": "Tenant.notifications"
           }
         ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/Tenantassessmentsauth0Function/Tenantassessmentsauth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "Tenantassessmentsauth0FunctionTenantassessmentsauth0FunctionAppSyncFunction332496FA"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Tenantassessmentsauth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/TenantAssessmentsDataResolverFn/TenantAssessmentsDataResolverFn.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "TenantAssessmentsDataResolverFnTenantAssessmentsDataResolverFnAppSyncFunction999ED07E"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "TenantAssessmentsDataResolverFn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/tenantAssessmentsResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "TenantassessmentsResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Tenant.assessments"
+          }
+        ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/Patientshiftsauth0Function/Patientshiftsauth0Function.AppSyncFunction": [
           {
             "type": "aws:cdk:logicalId",
@@ -6603,6 +7521,36 @@
             "data": "Patient.visits"
           }
         ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/Patientassessmentsauth0Function/Patientassessmentsauth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "Patientassessmentsauth0FunctionPatientassessmentsauth0FunctionAppSyncFunction051AD53D"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Patientassessmentsauth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/PatientAssessmentsDataResolverFn/PatientAssessmentsDataResolverFn.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PatientAssessmentsDataResolverFnPatientAssessmentsDataResolverFnAppSyncFunction78A63DE4"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "PatientAssessmentsDataResolverFn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/patientAssessmentsResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PatientassessmentsResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Patient.assessments"
+          }
+        ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/Nurseshiftsauth0Function/Nurseshiftsauth0Function.AppSyncFunction": [
           {
             "type": "aws:cdk:logicalId",
@@ -6663,6 +7611,66 @@
             "data": "Nurse.visits"
           }
         ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/Nurseassessmentsauth0Function/Nurseassessmentsauth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "Nurseassessmentsauth0FunctionNurseassessmentsauth0FunctionAppSyncFunction0B867E73"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Nurseassessmentsauth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/NurseAssessmentsDataResolverFn/NurseAssessmentsDataResolverFn.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "NurseAssessmentsDataResolverFnNurseAssessmentsDataResolverFnAppSyncFunctionA4227167"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "NurseAssessmentsDataResolverFn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/nurseAssessmentsResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "NurseassessmentsResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Nurse.assessments"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/NurseprimaryPatientsauth0Function/NurseprimaryPatientsauth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "NurseprimaryPatientsauth0FunctionNurseprimaryPatientsauth0FunctionAppSyncFunctionD2FC98AA"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "NurseprimaryPatientsauth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/NursePrimaryPatientsDataResolverFn/NursePrimaryPatientsDataResolverFn.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "NursePrimaryPatientsDataResolverFnNursePrimaryPatientsDataResolverFnAppSyncFunction76671B10"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "NursePrimaryPatientsDataResolverFn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/nursePrimaryPatientsResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "NurseprimaryPatientsResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Nurse.primaryPatients"
+          }
+        ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/Patienttenantauth0Function/Patienttenantauth0Function.AppSyncFunction": [
           {
             "type": "aws:cdk:logicalId",
@@ -6691,6 +7699,36 @@
           {
             "type": "graphqltransformer:resourceName",
             "data": "Patient.tenant"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/PatientprimaryNurseauth0Function/PatientprimaryNurseauth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PatientprimaryNurseauth0FunctionPatientprimaryNurseauth0FunctionAppSyncFunctionFA928FC3"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "PatientprimaryNurseauth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/PatientPrimaryNurseDataResolverFn/PatientPrimaryNurseDataResolverFn.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PatientPrimaryNurseDataResolverFnPatientPrimaryNurseDataResolverFnAppSyncFunction694CAAF7"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "PatientPrimaryNurseDataResolverFn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/patientPrimaryNurseResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PatientprimaryNurseResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "Patient.primaryNurse"
           }
         ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/Nursetenantauth0Function/Nursetenantauth0Function.AppSyncFunction": [
@@ -7083,6 +8121,96 @@
             "data": "Notification.tenant"
           }
         ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/PatientAssessmenttenantauth0Function/PatientAssessmenttenantauth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PatientAssessmenttenantauth0FunctionPatientAssessmenttenantauth0FunctionAppSyncFunction80ED6ECE"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "PatientAssessmenttenantauth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/PatientAssessmentTenantDataResolverFn/PatientAssessmentTenantDataResolverFn.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PatientAssessmentTenantDataResolverFnPatientAssessmentTenantDataResolverFnAppSyncFunction146D2670"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "PatientAssessmentTenantDataResolverFn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/patientAssessmentTenantResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PatientAssessmenttenantResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "PatientAssessment.tenant"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/PatientAssessmentpatientauth0Function/PatientAssessmentpatientauth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PatientAssessmentpatientauth0FunctionPatientAssessmentpatientauth0FunctionAppSyncFunction66038652"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "PatientAssessmentpatientauth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/PatientAssessmentPatientDataResolverFn/PatientAssessmentPatientDataResolverFn.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PatientAssessmentPatientDataResolverFnPatientAssessmentPatientDataResolverFnAppSyncFunctionCDD4D477"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "PatientAssessmentPatientDataResolverFn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/patientAssessmentPatientResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PatientAssessmentpatientResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "PatientAssessment.patient"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/PatientAssessmentnurseauth0Function/PatientAssessmentnurseauth0Function.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PatientAssessmentnurseauth0FunctionPatientAssessmentnurseauth0FunctionAppSyncFunction6A6CACCB"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "PatientAssessmentnurseauth0Function"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/PatientAssessmentNurseDataResolverFn/PatientAssessmentNurseDataResolverFn.AppSyncFunction": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PatientAssessmentNurseDataResolverFnPatientAssessmentNurseDataResolverFnAppSyncFunction72D99B0E"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "PatientAssessmentNurseDataResolverFn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/patientAssessmentNurseResolver": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PatientAssessmentnurseResolver"
+          },
+          {
+            "type": "graphqltransformer:resourceName",
+            "data": "PatientAssessment.nurse"
+          }
+        ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/CDKMetadata/Default": [
           {
             "type": "aws:cdk:logicalId",
@@ -7231,6 +8359,18 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataNotificationNestedStackNotificationNestedStackResource4C24A189Outputsamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataNotificationNotificationTable30A69E39TableArn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/reference-to-amplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataPatientAssessmentNestedStackPatientAssessmentNestedStackResource93E9BD78Outputs.amplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataPatientAssessmentPatientAssessmentDataSourceF1C1346DName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataPatientAssessmentNestedStackPatientAssessmentNestedStackResource93E9BD78Outputsamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataPatientAssessmentPatientAssessmentDataSourceF1C1346DName"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/reference-to-amplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataPatientAssessmentNestedStackPatientAssessmentNestedStackResource93E9BD78Outputs.amplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataPatientAssessmentPatientAssessmentTableA42CB571TableArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "referencetoamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataPatientAssessmentNestedStackPatientAssessmentNestedStackResource93E9BD78Outputsamplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataPatientAssessmentPatientAssessmentTableA42CB571TableArn"
           }
         ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/data/amplifyData/ConnectionStack/reference-to-amplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataTenantNestedStackTenantNestedStackResourceC813AABBOutputs.amplifyipserpluiscoysandboxbb7136bc7bdataamplifyDataTenantTenantDataSource85A24588Name": [
@@ -7521,6 +8661,12 @@
             "data": "rosterarchitectlambdaServiceRole408AD53F"
           }
         ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/roster-architect-lambda/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "rosterarchitectlambdaServiceRoleDefaultPolicyA269A586"
+          }
+        ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/roster-architect-lambda/Resource": [
           {
             "type": "aws:cdk:logicalId",
@@ -7533,6 +8679,12 @@
             "data": "ripsvalidatorlambdaServiceRole5DCE9323"
           }
         ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/rips-validator-lambda/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ripsvalidatorlambdaServiceRoleDefaultPolicy2EBDE105"
+          }
+        ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/rips-validator-lambda/Resource": [
           {
             "type": "aws:cdk:logicalId",
@@ -7543,6 +8695,12 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "glosadefenderlambdaServiceRoleCA0D20C7"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/glosa-defender-lambda/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "glosadefenderlambdaServiceRoleDefaultPolicy1789DC6C"
           }
         ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/glosa-defender-lambda/Resource": [
@@ -7623,6 +8781,36 @@
             "data": "verifyfamilyaccesslambdaA0E8B3E0"
           }
         ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/create-nurse-validated-lambda/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "createnursevalidatedlambdaServiceRoleBABB2703"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/create-nurse-validated-lambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "createnursevalidatedlambdaD96205B7"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/route-optimizer-lambda/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "routeoptimizerlambdaServiceRole27F9D446"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/route-optimizer-lambda/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "routeoptimizerlambdaServiceRoleDefaultPolicy44D7DE1F"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/route-optimizer-lambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "routeoptimizerlambda7CEA214F"
+          }
+        ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/CDKMetadata/Default": [
           {
             "type": "aws:cdk:logicalId",
@@ -7633,6 +8821,18 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "CDKMetadataAvailable"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/reference-to-amplifyipserpluiscoysandboxbb7136bc7bIPSPlaceIndexA1D4F086Arn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "referencetoamplifyipserpluiscoysandboxbb7136bc7bIPSPlaceIndexA1D4F086Arn"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/reference-to-amplifyipserpluiscoysandboxbb7136bc7bIPSRouteCalculator5EE9BDE4Arn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "referencetoamplifyipserpluiscoysandboxbb7136bc7bIPSRouteCalculator5EE9BDE4Arn"
           }
         ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/amplifyipserpluiscoysandboxbb7136bc7bfunctionrosterarchitectlambdaF38DEDD6Ref": [
@@ -7689,6 +8889,18 @@
             "data": "amplifyipserpluiscoysandboxbb7136bc7bfunctionverifyfamilyaccesslambda3589BA81Ref"
           }
         ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/amplifyipserpluiscoysandboxbb7136bc7bfunctioncreatenursevalidatedlambdaEB69E9A3Ref": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "amplifyipserpluiscoysandboxbb7136bc7bfunctioncreatenursevalidatedlambdaEB69E9A3Ref"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function/amplifyipserpluiscoysandboxbb7136bc7bfunctionrouteoptimizerlambdaF7904129Ref": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "amplifyipserpluiscoysandboxbb7136bc7bfunctionrouteoptimizerlambdaF7904129Ref"
+          }
+        ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/function.NestedStack/function.NestedStackResource": [
           {
             "type": "aws:cdk:logicalId",
@@ -7699,6 +8911,18 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "definedFunctions"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/IPSPlaceIndex": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "IPSPlaceIndex"
+          }
+        ],
+        "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/IPSRouteCalculator": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "IPSRouteCalculator"
           }
         ],
         "/amplify-ipserp-luiscoy-sandbox-bb7136bc7b/CDKMetadata/Default": [

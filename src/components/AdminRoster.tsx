@@ -121,7 +121,7 @@ export const AdminRoster: React.FC = () => {
                         </div>
 
                         <div className={styles.rosterDescription}>
-                            <p>Optimiza automáticamente las asignaciones de turnos basadas en habilidades, proximidad y carga de trabajo.</p>
+                            <p>Optimiza automáticamente los turnos basados en habilidades, proximidad y carga de trabajo.</p>
                         </div>
 
                         <div className={styles.statsRow}>

@@ -1,0 +1,8 @@
+{
+  "name": "route-optimizer",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@aws-sdk/client-location": "^3.x"
+  }
+}

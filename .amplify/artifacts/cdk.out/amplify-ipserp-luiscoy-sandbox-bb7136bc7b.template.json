@@ -144,7 +144,7 @@
    }
   },
   "groups": {
-   "Value": "[{\"Admin\":{\"precedence\":0}},{\"Nurse\":{\"precedence\":1}},{\"Family\":{\"precedence\":2}}]"
+   "Value": "[{\"SuperAdmin\":{\"precedence\":0}},{\"Admin\":{\"precedence\":1}},{\"Nurse\":{\"precedence\":2}},{\"Family\":{\"precedence\":3}}]"
   },
   "awsAppsyncApiId": {
    "Value": {
@@ -278,6 +278,20 @@
         "Outputs.amplifyipserpluiscoysandboxbb7136bc7bfunctionverifyfamilyaccesslambda3589BA81Ref"
        ]
       },
+      "\",\"",
+      {
+       "Fn::GetAtt": [
+        "function1351588B",
+        "Outputs.amplifyipserpluiscoysandboxbb7136bc7bfunctioncreatenursevalidatedlambdaEB69E9A3Ref"
+       ]
+      },
+      "\",\"",
+      {
+       "Fn::GetAtt": [
+        "function1351588B",
+        "Outputs.amplifyipserpluiscoysandboxbb7136bc7bfunctionrouteoptimizerlambdaF7904129Ref"
+       ]
+      },
       "\"]"
      ]
     ]
@@ -322,7 +336,7 @@
        {
         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
        },
-       "/4cd6498c0e50417f26b255ae94eeb10d82046c6a12f0f8711de3a58fdd76cea9.json"
+       "/c21784d0c747bf50dfd785118bba969a18702ed1afc127445d9659c7857d1489.json"
       ]
      ]
     }
@@ -398,7 +412,7 @@
        {
         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
        },
-       "/c7a3ed85ff509d53f350838a6cfcbfd2cff770db32a3b6fbb18fe80eb265d1b9.json"
+       "/48bcb45e64350ddc4366010506e908ba2307766671f5f9e3c6efbc6fffa40d89.json"
       ]
      ]
     }
@@ -414,6 +428,20 @@
   "function1351588B": {
    "Type": "AWS::CloudFormation::Stack",
    "Properties": {
+    "Parameters": {
+     "referencetoamplifyipserpluiscoysandboxbb7136bc7bIPSPlaceIndexA1D4F086Arn": {
+      "Fn::GetAtt": [
+       "IPSPlaceIndex",
+       "Arn"
+      ]
+     },
+     "referencetoamplifyipserpluiscoysandboxbb7136bc7bIPSRouteCalculator5EE9BDE4Arn": {
+      "Fn::GetAtt": [
+       "IPSRouteCalculator",
+       "Arn"
+      ]
+     }
+    },
     "Tags": [
      {
       "Key": "amplify:deployment-type",
@@ -448,7 +476,7 @@
        {
         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
        },
-       "/d40b7c68732b4f83c92f3eef1a3171a1d52803118bc0c1373ffaad3f71fc1b72.json"
+       "/0133bd56c1c2c537c1f440ee8b4b5d8b51886149be09146883d075bfb6712329.json"
       ]
      ]
     }
@@ -461,10 +489,74 @@
     "aws:asset:property": "TemplateURL"
    }
   },
+  "IPSPlaceIndex": {
+   "Type": "AWS::Location::PlaceIndex",
+   "Properties": {
+    "DataSource": "Esri",
+    "Description": "Geocoding for IPS ERP patient addresses in Colombia",
+    "IndexName": "IPS-ERP-PlaceIndex",
+    "PricingPlan": "RequestBasedUsage",
+    "Tags": [
+     {
+      "Key": "amplify:deployment-type",
+      "Value": "sandbox"
+     },
+     {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
+      "Key": "created-by",
+      "Value": "amplify"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/IPSPlaceIndex"
+   }
+  },
+  "IPSRouteCalculator": {
+   "Type": "AWS::Location::RouteCalculator",
+   "Properties": {
+    "CalculatorName": "IPS-ERP-RouteCalculator",
+    "DataSource": "Esri",
+    "Description": "Route calculation for IPS ERP nurse visit optimization",
+    "PricingPlan": "RequestBasedUsage",
+    "Tags": [
+     {
+      "Key": "amplify:deployment-type",
+      "Value": "sandbox"
+     },
+     {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
+      "Key": "created-by",
+      "Value": "amplify"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/IPSRouteCalculator"
+   }
+  },
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/zPSMzI21TNUTCwv1k1OydbNyUzSqw4uSUzO1nFOy/MvLSkoLQGxwEK1Onn5Kal6WcX6ZUYGekYGegaKWcWZmbpFpXklmbmpekEQGgCIy2+wVAAAAA=="
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/yWKQQ6CMBAA38KdrrXGF/TkSQMPMGtbkkLdNXRXTAh/N4TTTCbjwF2ucG5wqSbEyZT8grUXDFPrB7qrfFR2OxIu9Vk4oGQmWP1Aj4Ih3Sim3z51rJI8lqAFhedta4ljgrGevs6Cs2CbseZsZiXJ7wTdwT9WAtIjhAAAAA=="
    },
    "Metadata": {
     "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/CDKMetadata/Default"

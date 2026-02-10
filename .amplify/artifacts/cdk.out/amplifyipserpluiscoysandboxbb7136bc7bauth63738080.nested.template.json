@@ -332,6 +332,81 @@
     "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/auth/amplifyAuth/IdentityPoolRoleAttachment"
    }
   },
+  "amplifyAuthSuperAdminGroupRole9B2270C7": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRoleWithWebIdentity",
+       "Condition": {
+        "StringEquals": {
+         "cognito-identity.amazonaws.com:aud": {
+          "Ref": "amplifyAuthIdentityPool3FDE84CC"
+         }
+        },
+        "ForAnyValue:StringLike": {
+         "cognito-identity.amazonaws.com:amr": "authenticated"
+        }
+       },
+       "Effect": "Allow",
+       "Principal": {
+        "Federated": "cognito-identity.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Tags": [
+     {
+      "Key": "amplify:deployment-type",
+      "Value": "sandbox"
+     },
+     {
+      "Key": "amplify:friendly-name",
+      "Value": "amplifyAuth"
+     },
+     {
+      "Key": "application",
+      "Value": "EPS"
+     },
+     {
+      "Key": "auto-delete",
+      "Value": "no"
+     },
+     {
+      "Key": "created-by",
+      "Value": "amplify"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/auth/amplifyAuth/SuperAdminGroupRole/Resource"
+   }
+  },
+  "amplifyAuthSuperAdminGroupDA26B869": {
+   "Type": "AWS::Cognito::UserPoolGroup",
+   "Properties": {
+    "GroupName": "SuperAdmin",
+    "Precedence": 0,
+    "RoleArn": {
+     "Fn::GetAtt": [
+      "amplifyAuthSuperAdminGroupRole9B2270C7",
+      "Arn"
+     ]
+    },
+    "UserPoolId": {
+     "Ref": "amplifyAuthUserPool4BA7F805"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-ipserp-luiscoy-sandbox-bb7136bc7b/auth/amplifyAuth/SuperAdminGroup"
+   }
+  },
   "amplifyAuthAdminGroupRole766878DC": {
    "Type": "AWS::IAM::Role",
    "Properties": {
@@ -390,7 +465,7 @@
    "Type": "AWS::Cognito::UserPoolGroup",
    "Properties": {
     "GroupName": "Admin",
-    "Precedence": 0,
+    "Precedence": 1,
     "RoleArn": {
      "Fn::GetAtt": [
       "amplifyAuthAdminGroupRole766878DC",
@@ -465,7 +540,7 @@
    "Type": "AWS::Cognito::UserPoolGroup",
    "Properties": {
     "GroupName": "Nurse",
-    "Precedence": 1,
+    "Precedence": 2,
     "RoleArn": {
      "Fn::GetAtt": [
       "amplifyAuthNurseGroupRole90D615BE",
@@ -540,7 +615,7 @@
    "Type": "AWS::Cognito::UserPoolGroup",
    "Properties": {
     "GroupName": "Family",
-    "Precedence": 2,
+    "Precedence": 3,
     "RoleArn": {
      "Fn::GetAtt": [
       "amplifyAuthFamilyGroupRoleA2E7CDE3",

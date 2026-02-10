@@ -127,17 +127,17 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
 
     if (!isAuthenticated) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-slate-900 to-slate-900 flex items-center justify-center p-4">
+            <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-slate-900 to-slate-900 flex items-center justify-center p-4" data-testid="family-login-page">
                 <div className="bg-white w-full max-w-md rounded-3xl p-8 shadow-2xl animate-in fade-in zoom-in duration-300">
                     <div className="text-center mb-8">
                         <div className="h-16 w-16 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 mx-auto mb-4 shadow-inner">
                             <Lock size={32} />
                         </div>
-                        <h1 className="text-2xl font-black text-slate-900">Portal Familiar</h1>
+                        <h1 className="text-2xl font-black text-slate-900" data-testid="family-login-title">Portal Familiar</h1>
                         <p className="text-slate-500 mt-2">Ingrese su código de acceso para ver la evolución del paciente.</p>
                     </div>
 
-                    <form onSubmit={handleLogin} className="space-y-6">
+                    <form onSubmit={handleLogin} className="space-y-6" data-testid="family-login-form">
                         <div>
                             <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Código de Acceso</label>
                             <input
@@ -150,11 +150,12 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
                                 className="w-full text-center text-2xl tracking-[0.5em] font-black py-4 rounded-xl border-2 border-slate-200 focus:border-indigo-600 focus:ring-0 transition-colors bg-slate-50 text-slate-900 placeholder-slate-300"
                                 placeholder="••••"
                                 autoFocus
+                                data-testid="family-access-code-input"
                             />
                         </div>
 
                         {authError && (
-                            <div className="p-3 bg-red-50 text-red-600 text-sm font-medium rounded-xl flex items-center gap-2 justify-center">
+                            <div className="p-3 bg-red-50 text-red-600 text-sm font-medium rounded-xl flex items-center gap-2 justify-center" data-testid="family-auth-error">
                                 <ShieldAlert size={16} /> {authError}
                             </div>
                         )}
@@ -163,6 +164,7 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
                             type="submit"
                             disabled={isCheckingAuth || accessCode.length < 4}
                             className="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 shadow-lg shadow-indigo-500/30"
+                            data-testid="family-submit-button"
                         >
                             {isCheckingAuth ? <LoadingSpinner size="sm" /> : (
                                 <>
@@ -189,18 +191,18 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
     }
 
     return (
-        <div className="min-h-screen bg-[#f0f9ff]">
-            <header className="bg-white border-b border-slate-200 px-4 py-3 sticky top-0 z-10 flex justify-between items-center shadow-sm">
+        <div className="min-h-screen bg-[#f0f9ff]" data-testid="family-portal">
+            <header className="bg-white border-b border-slate-200 px-4 py-3 sticky top-0 z-10 flex justify-between items-center shadow-sm" data-testid="family-portal-header">
                 <div className="flex items-center gap-3">
                     <div className="h-10 w-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-md">
                         <Activity size={20} />
                     </div>
                     <div>
-                        <h1 className="font-black text-slate-900 tracking-tight leading-none">IPS Familia</h1>
+                        <h1 className="font-black text-slate-900 tracking-tight leading-none" data-testid="family-portal-title">IPS Familia</h1>
                         <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Portal Seguro</p>
                     </div>
                 </div>
-                <button onClick={() => setIsAuthenticated(false)} className="bg-slate-100 hover:bg-slate-200 text-slate-600 p-2 rounded-lg transition-colors" title="Salir">
+                <button onClick={() => setIsAuthenticated(false)} className="bg-slate-100 hover:bg-slate-200 text-slate-600 p-2 rounded-lg transition-colors" title="Salir" data-testid="family-logout-button">
                     <LogOut size={18} />
                 </button>
             </header>
