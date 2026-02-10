@@ -205,13 +205,27 @@ export function useAuth() {
     }
 
     async function logout() {
-        // Use centralized logout function for complete session teardown
-        // This will clear ALL state and force a hard redirect to '/'
+        // KIRO-FIX: Reset React state FIRST so tests and UI see immediate changes
+        // without depending on the hard redirect in centralizedLogout()
+        setUser(null);
+        setRole(null);
+        setTenant(null);
+        setError(null);
+        setLoading(false);
+
+        // KIRO-FIX: Explicitly clear auth-related sessionStorage keys
+        // This ensures cleanup even if centralizedLogout() throws
+        try {
+            sessionStorage.removeItem(STORAGE_KEYS.DEMO_ROLE);
+            sessionStorage.removeItem(STORAGE_KEYS.DEMO_TENANT);
+            sessionStorage.removeItem(STORAGE_KEYS.DEMO_MODE);
+            sessionStorage.removeItem(STORAGE_KEYS.TOUR_COMPLETED);
+        } catch {
+            // sessionStorage may not be available in some test environments
+        }
+
+        // Full session teardown + hard redirect to '/'
         await centralizedLogout();
-        
-        // Note: State reset (setUser/setRole/setTenant) not needed here
-        // because centralizedLogout() does window.location.href = '/'
-        // which completely reloads the app and resets all React state
     }
 
     // Manual overrides for demo/mocking purposes

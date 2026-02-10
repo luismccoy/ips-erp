@@ -1,6 +1,6 @@
 import type { Schema } from '../../data/resource';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 
 const ddbClient = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddbClient);
@@ -19,6 +19,7 @@ const safeGet = async (params: any) => {
 const SHIFT_TABLE = process.env.SHIFT_TABLE_NAME!;
 const VISIT_TABLE = process.env.VISIT_TABLE_NAME!;
 const AUDIT_TABLE = process.env.AUDIT_TABLE_NAME!;
+const NURSE_TABLE = process.env.NURSE_TABLE_NAME!;
 
 type Handler = Schema['createVisitDraftFromShift']['functionHandler'];
 
@@ -35,6 +36,23 @@ export const handler: Handler = async (event) => {
   }
 
   try {
+    // 0. Look up caller's Nurse record by cognitoSub
+    const callerNurseResult = await docClient.send(new QueryCommand({
+      TableName: NURSE_TABLE,
+      IndexName: 'gsi-Tenant.nurses',
+      KeyConditionExpression: 'tenantId = :tenantId',
+      FilterExpression: 'cognitoSub = :sub',
+      ExpressionAttributeValues: {
+        ':tenantId': tenantId,
+        ':sub': userId
+      }
+    }));
+    const callerNurse = callerNurseResult.Items?.[0];
+    if (!callerNurse) {
+      throw new Error('Unauthorized: No nurse record found for this user');
+    }
+    const nurseRecordId = callerNurse.id;
+
     // 1. Query Shift by shiftId
     const shiftResult = await safeGet({
       TableName: SHIFT_TABLE,
@@ -57,8 +75,8 @@ export const handler: Handler = async (event) => {
       throw new Error(`Cannot create visit from shift with status: ${shift.status}. Shift must be COMPLETED.`);
     }
 
-    // 3. Verify shift.nurseId === userId (assigned nurse only)
-    if (shift.nurseId !== userId) {
+    // 3. Verify shift.nurseId === caller's nurse record ID (assigned nurse only)
+    if (shift.nurseId !== nurseRecordId) {
       throw new Error('Unauthorized: Only the assigned nurse can create a visit for this shift');
     }
 

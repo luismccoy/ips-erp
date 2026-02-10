@@ -1,6 +1,6 @@
 import type { Schema } from '../../data/resource';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, GetCommand, UpdateCommand, PutCommand, ScanCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, UpdateCommand, PutCommand, ScanCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 
 const ddbClient = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddbClient);
@@ -36,6 +36,23 @@ export const handler: Handler = async (event) => {
   }
 
   try {
+    // 0. Look up caller's Nurse record by cognitoSub
+    const callerNurseResult = await docClient.send(new QueryCommand({
+      TableName: NURSE_TABLE,
+      IndexName: 'gsi-Tenant.nurses',
+      KeyConditionExpression: 'tenantId = :tenantId',
+      FilterExpression: 'cognitoSub = :sub',
+      ExpressionAttributeValues: {
+        ':tenantId': tenantId,
+        ':sub': userId
+      }
+    }));
+    const callerNurse = callerNurseResult.Items?.[0];
+    if (!callerNurse) {
+      throw new Error('Unauthorized: No nurse record found for this user');
+    }
+    const nurseRecordId = callerNurse.id;
+
     // 1. Query Visit by id=shiftId
     const visitResult = await safeGet({
       TableName: VISIT_TABLE,
@@ -53,8 +70,8 @@ export const handler: Handler = async (event) => {
       throw new Error('Visit not found');
     }
 
-    // 2. Verify visit.nurseId === userId (assigned nurse only)
-    if (visit.nurseId !== userId) {
+    // 2. Verify visit.nurseId === caller's nurse record ID (assigned nurse only)
+    if (visit.nurseId !== nurseRecordId) {
       throw new Error('Unauthorized: Only the assigned nurse can submit this visit');
     }
 

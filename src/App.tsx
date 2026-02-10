@@ -45,6 +45,11 @@ const PageLoader = () => (
 if (typeof window !== 'undefined') {
   const path = window.location.pathname;
 
+  // Check if user has an active Cognito session (tokens in localStorage)
+  const hasCognitoSession = Object.keys(localStorage).some(
+    key => key.includes('CognitoIdentityServiceProvider') && key.endsWith('.accessToken')
+  );
+
   // Clear demo state for landing/login paths
   if (shouldClearDemoState(path)) {
     sessionStorage.removeItem(STORAGE_KEYS.DEMO_MODE);
@@ -52,10 +57,15 @@ if (typeof window !== 'undefined') {
     sessionStorage.removeItem(STORAGE_KEYS.DEMO_TENANT);
     console.log('🔄 Demo state cleared for landing/login path:', path);
   }
-  // Enable demo mode for deep link paths
-  else if (shouldEnableDemoMode(path)) {
+  // Enable demo mode for deep link paths ONLY if no real Cognito session exists
+  else if (shouldEnableDemoMode(path) && !hasCognitoSession) {
     enableDemoMode();
     console.log('🎭 Demo mode pre-enabled for deep link:', path);
+  }
+  // If Cognito session exists, ensure demo mode is OFF so real auth is used
+  else if (hasCognitoSession && isDemoMode()) {
+    sessionStorage.removeItem(STORAGE_KEYS.DEMO_MODE);
+    console.log('🔐 Demo mode disabled - active Cognito session detected');
   }
 }
 

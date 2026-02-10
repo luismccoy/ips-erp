@@ -93,7 +93,11 @@ function PatientsPageContent() {
                         id: selectedPatient.id,
                         ...data
                     });
-                    // Optimistic update of local state
+                    if (!result?.data) {
+                        console.error('Patient update returned null:', result?.errors);
+                        showToast('error', 'Error al actualizar: el servidor no devolvió datos. Revise permisos o esquema.');
+                        return;
+                    }
                     setPatients(prev => prev.map(p => p.id === selectedPatient.id ? result.data : p));
                     showToast('success', 'Paciente actualizado correctamente');
                 } else {
@@ -102,6 +106,11 @@ function PatientsPageContent() {
                         tenantId: 'tenant-bogota-01', // TODO: Get from context/auth
                         ...data
                     });
+                    if (!result?.data) {
+                        console.error('Patient create returned null:', result?.errors);
+                        showToast('error', 'Error al crear paciente: el servidor no devolvió datos. Revise permisos o esquema.');
+                        return;
+                    }
                     setPatients(prev => [...prev, result.data]);
                     showToast('success', 'Paciente creado correctamente');
                 }
@@ -131,6 +140,7 @@ function PatientsPageContent() {
 
     const normalizedSearch = searchTerm.trim().toLowerCase();
     const filteredPatients = patients.filter((patient) => {
+        if (!patient) return false; // Guard against null entries (BUG-003)
         const name = (patient.name ?? '').toLowerCase();
         const documentId = patient.documentId ? String(patient.documentId) : '';
         return name.includes(normalizedSearch) || documentId.includes(searchTerm);
