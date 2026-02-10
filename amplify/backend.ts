@@ -1,6 +1,7 @@
 import { defineBackend } from '@aws-amplify/backend';
 import { Tags } from 'aws-cdk-lib';
 import { PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam';
+import * as location from 'aws-cdk-lib/aws-location';
 import { auth } from './auth/resource';
 import { data } from './data/resource';
 import { rosterArchitect } from './functions/roster-architect/resource';
@@ -13,6 +14,7 @@ import { rejectVisit } from './functions/reject-visit/resource';
 import { approveVisit } from './functions/approve-visit/resource';
 import { verifyFamilyAccess } from './functions/verify-family-access/resource';
 import { createNurseValidated } from './functions/create-nurse-validated/resource';
+import { routeOptimizer } from './functions/route-optimizer/resource';
 
 /**
  * @see https://docs.amplify.aws/react/build-a-backend/
@@ -30,6 +32,7 @@ const backend = defineBackend({
     approveVisit,
     verifyFamilyAccess,
     createNurseValidated,
+    routeOptimizer,
 });
 
 // Grant Bedrock permissions to AI-powered Lambda functions
@@ -47,6 +50,41 @@ const bedrockPolicy = new PolicyStatement({
 backend.ripsValidator.resources.lambda.addToRolePolicy(bedrockPolicy);
 backend.glosaDefender.resources.lambda.addToRolePolicy(bedrockPolicy);
 backend.rosterArchitect.resources.lambda.addToRolePolicy(bedrockPolicy);
+
+// ============================================
+// AWS LOCATION SERVICE - Route Optimization
+// ============================================
+
+// Create Place Index for geocoding patient addresses
+const placeIndex = new location.CfnPlaceIndex(backend.stack, 'IPSPlaceIndex', {
+    indexName: 'IPS-ERP-PlaceIndex',
+    dataSource: 'Esri', // Best for Colombia/South America
+    pricingPlan: 'RequestBasedUsage',
+    description: 'Geocoding for IPS ERP patient addresses in Colombia',
+});
+
+// Create Route Calculator for travel time/distance calculations
+const routeCalculator = new location.CfnRouteCalculator(backend.stack, 'IPSRouteCalculator', {
+    calculatorName: 'IPS-ERP-RouteCalculator',
+    dataSource: 'Esri', // Best for Colombia/South America
+    pricingPlan: 'RequestBasedUsage',
+    description: 'Route calculation for IPS ERP nurse visit optimization',
+});
+
+// Grant Location Service permissions to route-optimizer Lambda
+const locationPolicy = new PolicyStatement({
+    effect: Effect.ALLOW,
+    actions: [
+        'geo:SearchPlaceIndexForText',
+        'geo:CalculateRoute',
+    ],
+    resources: [
+        placeIndex.attrArn,
+        routeCalculator.attrArn,
+    ],
+});
+
+backend.routeOptimizer.resources.lambda.addToRolePolicy(locationPolicy);
 
 // Apply AWS resource tags to prevent Spring cleaning deletion
 // These tags are inherited by all resources in the stack (DynamoDB, Lambda, Cognito, AppSync, etc.)

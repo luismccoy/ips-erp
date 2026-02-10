@@ -375,6 +375,10 @@
      {
       "attributeName": "tenantId",
       "attributeType": "S"
+     },
+     {
+      "attributeName": "primaryNurseId",
+      "attributeType": "S"
      }
     ],
     "keySchema": [
@@ -389,6 +393,34 @@
       "keySchema": [
        {
         "attributeName": "tenantId",
+        "keyType": "HASH"
+       }
+      ],
+      "projection": {
+       "projectionType": "ALL"
+      },
+      "provisionedThroughput": {
+       "Fn::If": [
+        "ShouldUsePayPerRequestBilling",
+        {
+         "Ref": "AWS::NoValue"
+        },
+        {
+         "ReadCapacityUnits": {
+          "Ref": "DynamoDBModelTableReadIOPS"
+         },
+         "WriteCapacityUnits": {
+          "Ref": "DynamoDBModelTableWriteIOPS"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "indexName": "gsi-Nurse.primaryPatients",
+      "keySchema": [
+       {
+        "attributeName": "primaryNurseId",
         "keyType": "HASH"
        }
       ],
@@ -1037,7 +1069,7 @@
     "FunctionVersion": "2018-05-29",
     "Name": "MutationcreatePatientauth0Function",
     "RequestMappingTemplateS3Location": {
-     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/8290793dc008bb7e0cfa039749bdf2eb92b392294a9fd2ad09496aca30ecfef0.vtl"
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/c58db2256afafcf3782c11bb7d50e66c985653577dc410bf1689ac0ef0c63ed7.vtl"
     },
     "ResponseMappingTemplate": "$util.toJson({})"
    },
@@ -1251,7 +1283,7 @@
      "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/1f5fed297da9c32ae3af922bf3a38ccf23b956078887d16891ec06c20c64722c.vtl"
     },
     "ResponseMappingTemplateS3Location": {
-     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/44785c8d6a5291196d7ff01fc1df42e9f3df88d6f1d63cb6fe651d801a0b2f4b.vtl"
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/133b9680190a7809e8708ddcc81340e06f607a5eeadd5b04de8e2e2f5da8fa79.vtl"
     }
    },
    "DependsOn": [

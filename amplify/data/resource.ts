@@ -586,6 +586,20 @@ const schema = a.schema({
         .handler(a.handler.function('approve-visit')),
     
     // ============================================
+    // PHASE 19: AWS LOCATION SERVICE - ROUTE OPTIMIZATION
+    // ============================================
+    
+    // Optimize nurse visit routes using AWS Location Service
+    // Geocodes addresses, calculates optimal order, returns travel estimates
+    optimizeRoute: a.query()
+        .arguments({
+            input: a.json().required() // RouteOptimizerInput: { shifts, nurseLocation?, optimizationMode? }
+        })
+        .returns(a.json())
+        .authorization(allow => [allow.authenticated()])
+        .handler(a.handler.function('route-optimizer')),
+    
+    // ============================================
     // PHASE 19: SECURITY ENHANCEMENTS
     // ============================================
     

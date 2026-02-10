@@ -1,0 +1,124 @@
+{
+  "meta": {
+    "lastTouchedVersion": "2026.1.24-3",
+    "lastTouchedAt": "2026-01-27T03:00:00.000Z"
+  },
+  "wizard": {
+    "lastRunAt": "2026-01-26T05:47:00.533Z",
+    "lastRunVersion": "2026.1.24-3",
+    "lastRunCommand": "configure",
+    "lastRunMode": "local"
+  },
+  "auth": {
+    "profiles": {
+      "anthropic:claude": {
+        "provider": "anthropic",
+        "mode": "token"
+      }
+    }
+  },
+  "models": {
+    "bedrockDiscovery": {
+      "enabled": true,
+      "region": "us-east-1"
+    }
+  },
+  "agents": {
+    "defaults": {
+      "workspace": "/home/ubuntu/clawd",
+      "model": {
+        "primary": "amazon-bedrock/us.anthropic.claude-sonnet-4-20250514-v1:0",
+        "fallbacks": [
+          "amazon-bedrock/us.anthropic.claude-opus-4-20250514-v1:0",
+          "amazon-bedrock/us.anthropic.claude-3-5-sonnet-20241022-v2:0",
+          "amazon-bedrock/us.anthropic.claude-3-5-haiku-20241022-v1:0",
+          "anthropic/claude-opus-4-5",
+          "anthropic/claude-sonnet-4-5"
+        ]
+      },
+      "compaction": {
+        "mode": "safeguard"
+      },
+      "maxConcurrent": 4,
+      "subagents": {
+        "maxConcurrent": 8
+      }
+    }
+  },
+  "tools": {
+    "web": {
+      "search": {
+        "enabled": true,
+        "apiKey": "BSAnnUMX67drqU9dHaFPfLQAfAZxP3-"
+      },
+      "fetch": {
+        "enabled": true
+      }
+    }
+  },
+  "messages": {
+    "ackReactionScope": "group-mentions"
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto"
+  },
+  "hooks": {
+    "internal": {
+      "enabled": true,
+      "entries": {
+        "session-memory": {
+          "enabled": true
+        },
+        "command-logger": {
+          "enabled": true
+        }
+      }
+    }
+  },
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "dmPolicy": "pairing",
+      "botToken": "8247058653:AAGmKlBK7Qu8g-UyaX-RxzLRe89-nS1PkdI",
+      "allowFrom": [
+        "8569105078"
+      ],
+      "groupPolicy": "allowlist",
+      "streamMode": "partial"
+    }
+  },
+  "gateway": {
+    "port": 18789,
+    "mode": "local",
+    "bind": "loopback",
+    "auth": {
+      "mode": "token",
+      "token": "fb2740683711f4c019db0ef784303a6a501b8b372c2dd4f4"
+    },
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    }
+  },
+  "skills": {
+    "install": {
+      "nodeManager": "npm"
+    },
+    "entries": {
+      "nano-banana-pro": {
+        "apiKey": "AIzaSyBTRL8CDyojXvZEx9oMEXhU67RAOlq6nZo"
+      },
+      "openai-image-gen": {
+        "apiKey": "sk-xxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    }
+  },
+  "plugins": {
+    "entries": {
+      "telegram": {
+        "enabled": true
+      }
+    }
+  }
+}
