@@ -1,7 +1,7 @@
 # IPS-ERP Active Tasks
 
 **Project:** IPS-ERP Healthcare SaaS  
-**Updated:** 2026-02-09 23:30 UTC
+**Updated:** 2026-02-09 23:50 UTC
 
 ---
 
@@ -21,26 +21,7 @@
 
 ### Backend (Kiro)
 
-## 🔧 [Kiro] Fix Auth Logout Cleanup
-- **Assignee:** Kiro
-- **Type:** Backend
-- **Status:** Assigned
-- **Signed:** 2026-02-10 00:20 UTC
-- **Details:** Fix `useAuth` hook to properly clear role/tenant/user state after logout. Current issue: logout tests failing because state persists after `signOut()` call. Ensure all auth state resets to initial values.
-
-## 🔧 [Kiro] Fix SessionStorage Cleanup on Logout
-- **Assignee:** Kiro
-- **Type:** Backend
-- **Status:** Assigned
-- **Signed:** 2026-02-10 00:20 UTC
-- **Details:** Ensure `signOut` function removes auth keys from SessionStorage. Current issue: keys persist after logout causing test failures. Verify cleanup in both `useAuth` and Amplify signOut flow.
-
-## 🔧 [Kiro] Fix Logout Test Timeouts
-- **Assignee:** Kiro
-- **Type:** Backend
-- **Status:** Assigned
-- **Signed:** 2026-02-10 00:20 UTC
-- **Details:** Adjust test timeouts for role-based redirects after logout. Tests are timing out waiting for async redirects. Either increase timeout thresholds or add explicit waits for redirect completion.
+*No active backend tasks*
 
 ### Frontend (Antigravity)
 
@@ -52,6 +33,7 @@
 
 | Date | Task | IDE | Commit |
 |------|------|-----|--------|
+| 2026-02-09 | Fix auth logout state/sessionStorage cleanup | Kiro | `b8327f7` |
 | 2026-01-28 | Subscription permissions fix | Kiro | `7cfd525` |
 | 2026-01-28 | Auditoría Clínica sidebar fix | Antigravity | `28220fa` |
 | 2026-01-27 | Clinical Scales frontend | Antigravity | - |
