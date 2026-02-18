@@ -217,7 +217,9 @@ export interface VisitSummary {
 export type NotificationType =
   | 'VISIT_APPROVED'
   | 'VISIT_REJECTED'
-  | 'VISIT_PENDING_REVIEW';
+  | 'VISIT_PENDING_REVIEW'
+  | 'DETERIORATION_WARNING'
+  | 'DETERIORATION_CRITICAL';
 
 /**
  * Notification item for workflow events.

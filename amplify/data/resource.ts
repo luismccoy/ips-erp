@@ -164,7 +164,8 @@ const schema = a.schema({
     ]),
     NotificationType: a.enum([
         'VISIT_APPROVED', 'VISIT_REJECTED', 'VISIT_PENDING_REVIEW',
-        'VISIT_AVAILABLE_FOR_FAMILY', 'SHIFT_ASSIGNED', 'SHIFT_CANCELLED'
+        'VISIT_AVAILABLE_FOR_FAMILY', 'SHIFT_ASSIGNED', 'SHIFT_CANCELLED',
+        'DETERIORATION_WARNING', 'DETERIORATION_CRITICAL'
     ]),
 
     // ============================================
@@ -599,6 +600,16 @@ const schema = a.schema({
         .authorization(allow => [allow.authenticated()])
         .handler(a.handler.function('route-optimizer')),
     
+    // AI-powered patient deterioration risk analysis
+    analyzeDeteriorationRisk: a.query()
+        .arguments({
+            patientId: a.id().required(),
+            tenantId: a.id().required()
+        })
+        .returns(a.json())
+        .authorization(allow => [allow.authenticated()])
+        .handler(a.handler.function('deterioration-detector')),
+
     // ============================================
     // PHASE 19: SECURITY ENHANCEMENTS
     // ============================================
