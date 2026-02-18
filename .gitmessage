@@ -1,0 +1,12 @@
+# type(scope): description
+#
+# Types: feat, fix, refactor, docs, chore, test, perf, ci, style, release
+# Scope: optional, e.g. auth, nurse, billing, infra
+#
+# Example: feat(auth): add JWT token refresh
+#
+# Rules:
+# - Use imperative mood ("add" not "added")
+# - Don't end the subject with a period
+# - Keep subject under 72 characters
+# - Separate subject from body with a blank line
