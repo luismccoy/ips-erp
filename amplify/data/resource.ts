@@ -189,7 +189,7 @@ const schema = a.schema({
         notifications: a.hasMany('Notification', 'tenantId'),
         assessments: a.hasMany('PatientAssessment', 'tenantId'), // Phase 4: Clinical assessments
     }).authorization(allow => [
-        allow.groups(['SuperAdmin']).to(['create', 'read', 'update', 'delete', 'list']),
+        allow.groups(['SuperAdmin']).to(['create', 'read', 'update', 'delete']),
         // Regular users can only read their own tenant via relationship
     ]),
 
@@ -276,9 +276,8 @@ const schema = a.schema({
         startLng: a.float(),
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
-        // KIRO-005 Fix: Added 'list' operation for listShifts query (previous fix only added subscribe/listen)
-        allow.groups(['Admin']).to(['create', 'read', 'list', 'update', 'delete', 'subscribe', 'listen']),
-        allow.groups(['Nurse']).to(['read', 'list', 'subscribe', 'listen'])
+        allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+        allow.groups(['Nurse']).to(['read'])
     ]).secondaryIndexes(index => [
         // Task 4.1: Query shifts by nurse and date for roster optimization
         index('nurseId').sortKeys(['scheduledTime']).name('byNurseAndDate')
@@ -298,8 +297,8 @@ const schema = a.schema({
         expiryDate: a.string(), // ISO date string
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
-        allow.groups(['Admin']).to(['create', 'read', 'list', 'update', 'delete']),
-        allow.groups(['Nurse']).to(['read', 'list'])
+        allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+        allow.groups(['Nurse']).to(['read'])
     ]),
 
     // 6. VITAL SIGNS - Patient health metrics
@@ -365,7 +364,7 @@ const schema = a.schema({
         causaExterna: a.string(),          // External cause code (01-15 per RIPS spec)
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
-        allow.groups(['Admin']).to(['create', 'read', 'list', 'update', 'delete'])
+        allow.groups(['Admin']).to(['create', 'read', 'update', 'delete'])
     ]),
     
     // 8. VISIT - Phase 3: Clinical documentation workflow
@@ -399,7 +398,7 @@ const schema = a.schema({
         approvedBy: a.id(),
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
-        allow.groups(['Admin', 'Nurse']).to(['create', 'read', 'update', 'list'])
+        allow.groups(['Admin', 'Nurse']).to(['create', 'read', 'update'])
     ]).secondaryIndexes(index => [
         // Task 4.1: Query visits by tenant and status for admin dashboard
         index('tenantId').sortKeys(['status']).name('byTenantAndStatus')
@@ -420,7 +419,7 @@ const schema = a.schema({
         ipAddress: a.string(),
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
-        allow.groups(['Admin', 'SuperAdmin']).to(['read', 'list'])
+        allow.groups(['Admin', 'SuperAdmin']).to(['read'])
     ]),
     
     // 10. NOTIFICATION - Phase 3: User notifications
@@ -436,9 +435,7 @@ const schema = a.schema({
         read: a.boolean().required().default(false),
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
-        // Phase 16: Explicit group permissions for subscriptions
-        // KIRO-005 Fix: Added 'list' operation for listNotifications query (previous fix only added subscribe/listen)
-        allow.groups(['Admin', 'Nurse', 'Family']).to(['create', 'read', 'list', 'update', 'delete', 'subscribe', 'listen'])
+        allow.groups(['Admin', 'Nurse', 'Family']).to(['create', 'read', 'update', 'delete'])
     ]).secondaryIndexes(index => [
         // Task 4.1: Query notifications by user (filter by read status in app)
         // Note: Boolean fields cannot be sort keys in DynamoDB GSIs
@@ -480,9 +477,9 @@ const schema = a.schema({
         visitId: a.id(),
     }).authorization(allow => [
         allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
-        allow.groups(['Admin']).to(['create', 'read', 'list', 'update', 'delete']),
-        allow.groups(['Nurse']).to(['create', 'read', 'list']),
-        allow.groups(['Family']).to(['read', 'list'])
+        allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+        allow.groups(['Nurse']).to(['create', 'read']),
+        allow.groups(['Family']).to(['read'])
     ]).secondaryIndexes(index => [
         // Query assessments by patient, sorted by date (most recent first)
         index('patientId').sortKeys(['assessedAt']).name('byPatient'),
