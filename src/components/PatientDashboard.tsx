@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { client, MOCK_USER } from '../amplify-utils';
 import { usePagination } from '../hooks/usePagination';
 import { type Patient, type Medication, type Task } from '../types';
-import { AssessmentForm, AssessmentHistory } from './clinical';
+import { AssessmentForm, AssessmentHistory, DeteriorationRiskPanel } from './clinical';
+import type { DeteriorationAnalysis } from './clinical';
 import { Person, Medicines, Stethoscope } from 'healthicons-react/outline';
 
 export const PatientDashboard: React.FC = () => {
@@ -11,6 +12,8 @@ export const PatientDashboard: React.FC = () => {
     const [medications, setMedications] = useState<Medication[]>([]);
     const [tasks, setTasks] = useState<Task[]>([]);
     const [showAssessmentForm, setShowAssessmentForm] = useState(false);
+    const [deteriorationAnalysis, setDeteriorationAnalysis] = useState<DeteriorationAnalysis | null>(null);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
 
     const tenantId = MOCK_USER.attributes['custom:tenantId'];
     const nurseId = MOCK_USER.attributes.sub;
@@ -84,6 +87,32 @@ export const PatientDashboard: React.FC = () => {
             id: selectedPatient.id,
             tasks: updatedTasks
         });
+    };
+
+    const handleAnalyzeDeteriorationRisk = async () => {
+        if (!selectedPatient) return;
+        setIsAnalyzing(true);
+        setDeteriorationAnalysis(null);
+        try {
+            const result = await (client.queries as any).analyzeDeteriorationRisk({
+                patientId: selectedPatient.id,
+                tenantId,
+            });
+            setDeteriorationAnalysis(result?.data ?? result);
+        } catch (error) {
+            console.error('Deterioration analysis failed:', error);
+            setDeteriorationAnalysis({
+                hasRisk: false,
+                overallRiskLevel: 'NONE',
+                confidence: 0,
+                risks: [],
+                correlations: [],
+                summary: 'Error al realizar el analisis.',
+                error: error instanceof Error ? error.message : 'Error desconocido',
+            });
+        } finally {
+            setIsAnalyzing(false);
+        }
     };
 
     if (!selectedPatient) {
@@ -204,13 +233,31 @@ export const PatientDashboard: React.FC = () => {
                     <section className="assessment-section glass">
                         <div className="section-header">
                             <h3>Evaluaciones Clínicas</h3>
-                            <button
-                                onClick={() => setShowAssessmentForm(!showAssessmentForm)}
-                                className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
-                            >
-                                {showAssessmentForm ? 'Ver Historial' : 'Nueva Evaluación'}
-                            </button>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={handleAnalyzeDeteriorationRisk}
+                                    disabled={isAnalyzing}
+                                    className="px-3 py-1.5 text-sm font-medium text-white bg-amber-600 rounded-md hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {isAnalyzing ? 'Analizando...' : 'Analizar Riesgo de Deterioro'}
+                                </button>
+                                <button
+                                    onClick={() => setShowAssessmentForm(!showAssessmentForm)}
+                                    className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                                >
+                                    {showAssessmentForm ? 'Ver Historial' : 'Nueva Evaluación'}
+                                </button>
+                            </div>
                         </div>
+
+                        {deteriorationAnalysis && (
+                            <div className="mb-4">
+                                <DeteriorationRiskPanel
+                                    analysis={deteriorationAnalysis}
+                                    onDismiss={() => setDeteriorationAnalysis(null)}
+                                />
+                            </div>
+                        )}
 
                         {showAssessmentForm ? (
                             <AssessmentForm

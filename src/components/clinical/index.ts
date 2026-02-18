@@ -7,3 +7,5 @@
 export { AssessmentForm } from './AssessmentForm';
 export { AssessmentHistory } from './AssessmentHistory';
 export { RiskIndicatorBadge } from './RiskIndicatorBadge';
+export { DeteriorationRiskPanel } from './DeteriorationRiskPanel';
+export type { DeteriorationAnalysis } from './DeteriorationRiskPanel';

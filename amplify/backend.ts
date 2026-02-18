@@ -15,6 +15,7 @@ import { approveVisit } from './functions/approve-visit/resource';
 import { verifyFamilyAccess } from './functions/verify-family-access/resource';
 import { createNurseValidated } from './functions/create-nurse-validated/resource';
 import { routeOptimizer } from './functions/route-optimizer/resource';
+import { deteriorationDetector } from './functions/deterioration-detector/resource';
 
 /**
  * @see https://docs.amplify.aws/react/build-a-backend/
@@ -33,6 +34,7 @@ const backend = defineBackend({
     verifyFamilyAccess,
     createNurseValidated,
     routeOptimizer,
+    deteriorationDetector,
 });
 
 // Grant Bedrock permissions to AI-powered Lambda functions
@@ -50,6 +52,7 @@ const bedrockPolicy = new PolicyStatement({
 backend.ripsValidator.resources.lambda.addToRolePolicy(bedrockPolicy);
 backend.glosaDefender.resources.lambda.addToRolePolicy(bedrockPolicy);
 backend.rosterArchitect.resources.lambda.addToRolePolicy(bedrockPolicy);
+backend.deteriorationDetector.resources.lambda.addToRolePolicy(bedrockPolicy);
 
 // ============================================
 // AWS LOCATION SERVICE - Route Optimization
@@ -203,6 +206,31 @@ const billingTablePolicy = new PolicyStatement({
 });
 backend.glosaDefender.resources.lambda.addToRolePolicy(billingTablePolicy);
 backend.ripsValidator.resources.lambda.addToRolePolicy(billingTablePolicy);
+
+// deterioration-detector: needs Patient, PatientAssessment, VitalSigns, Notification, Nurse
+backend.deteriorationDetector.resources.lambda.addEnvironment('PATIENT_TABLE_NAME', tables['Patient'].tableName);
+backend.deteriorationDetector.resources.lambda.addEnvironment('PATIENT_ASSESSMENT_TABLE_NAME', tables['PatientAssessment'].tableName);
+backend.deteriorationDetector.resources.lambda.addEnvironment('VITAL_SIGNS_TABLE_NAME', tables['VitalSigns'].tableName);
+backend.deteriorationDetector.resources.lambda.addEnvironment('NOTIFICATION_TABLE_NAME', tables['Notification'].tableName);
+backend.deteriorationDetector.resources.lambda.addEnvironment('NURSE_TABLE_NAME', tables['Nurse'].tableName);
+
+const deteriorationDetectorPolicy = new PolicyStatement({
+    effect: Effect.ALLOW,
+    actions: ['dynamodb:GetItem', 'dynamodb:Query', 'dynamodb:PutItem'],
+    resources: [
+        tables['Patient'].tableArn,
+        `${tables['Patient'].tableArn}/index/*`,
+        tables['PatientAssessment'].tableArn,
+        `${tables['PatientAssessment'].tableArn}/index/*`,
+        tables['VitalSigns'].tableArn,
+        `${tables['VitalSigns'].tableArn}/index/*`,
+        tables['Notification'].tableArn,
+        `${tables['Notification'].tableArn}/index/*`,
+        tables['Nurse'].tableArn,
+        `${tables['Nurse'].tableArn}/index/*`,
+    ],
+});
+backend.deteriorationDetector.resources.lambda.addToRolePolicy(deteriorationDetectorPolicy);
 
 // Apply AWS resource tags to prevent Spring cleaning deletion
 // These tags are inherited by all resources in the stack (DynamoDB, Lambda, Cognito, AppSync, etc.)
