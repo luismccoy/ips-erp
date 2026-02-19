@@ -53,9 +53,6 @@ import { MetricCard } from './ui/MetricCard';
 import { HealthRings } from './nurse/HealthRings';
 import { QuickVitalsSheet } from './nurse/QuickVitalsSheet';
 import { SwipeableShiftCard } from './nurse/SwipeableShiftCard';
-
-// Lazy-load RouteMap to avoid Leaflet loading at startup
-const RouteMap = lazy(() => import('./nurse/RouteMap'));
 import { NotificationBell } from './NotificationBell';
 import { VisitDocumentationForm } from './VisitDocumentationForm';
 import { AssessmentEntryForm } from './AssessmentEntryForm';
@@ -66,6 +63,9 @@ import { NetworkStatusIndicator, LastSyncTime } from './NetworkStatusIndicator';
 import type { SimpleNurseAppProps } from '../types/components';
 import type { Shift, Patient } from '../types';
 import type { Visit, VisitStatus, NotificationItem } from '../types/workflow';
+
+// Lazy-load RouteMap to avoid Leaflet loading at startup (must be after all imports)
+const RouteMap = lazy(() => import('./nurse/RouteMap'));
 
 // ============================================================================
 // Animation Variants
