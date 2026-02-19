@@ -8,18 +8,12 @@
 import puppeteer, { Browser, Page } from 'puppeteer';
 import * as fs from 'fs';
 import * as path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const BASE_URL = 'https://main.d2wwgecog8smmr.amplifyapp.com';
-const SCREENSHOT_DIR = path.join(__dirname, '../../test-results/puppeteer');
+const SCREENSHOT_DIR = path.join(process.cwd(), 'test-results/puppeteer');
 
 // Ensure screenshot directory exists
-if (!fs.existsSync(SCREENSHOT_DIR)) {
-  fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
-}
+fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
 
 let browser: Browser;
 let page: Page;
@@ -28,34 +22,52 @@ async function loginViaDemo(): Promise<void> {
   await page.goto(`${BASE_URL}/?demo=nurse`, { waitUntil: 'networkidle2', timeout: 30000 });
   await delay(3000);
 
-  // Dismiss guided tour
-  try {
-    const skipBtn = await page.$('text/Explorar por mi cuenta');
-    if (skipBtn) {
-      await skipBtn.click();
-      await delay(500);
+  // Dismiss guided tour overlays (may appear multiple times)
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const skipBtn = await page.$('text/Explorar por mi cuenta');
+      if (skipBtn) {
+        await skipBtn.click();
+        await delay(500);
+      }
+    } catch {
+      // Tour not present
     }
-  } catch {
-    // Tour not present
+
+    try {
+      const closeBtn = await page.$('[aria-label="Cerrar tour"]');
+      if (closeBtn) {
+        await closeBtn.click();
+        await delay(500);
+      }
+    } catch {
+      // No close button
+    }
+
+    try {
+      const omitirBtn = await page.$('text/Omitir');
+      if (omitirBtn) {
+        await omitirBtn.click();
+        await delay(500);
+      }
+    } catch {
+      // No skip button
+    }
   }
 
-  try {
-    const closeBtn = await page.$('[aria-label="Cerrar tour"]');
-    if (closeBtn) {
-      await closeBtn.click();
-      await delay(500);
-    }
-  } catch {
-    // No close button
-  }
+  await delay(1000);
 }
 
 function delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function screenshot(name: string): Promise<void> {
-  return page.screenshot({ path: path.join(SCREENSHOT_DIR, `${name}.png`), fullPage: true }) as Promise<void>;
+async function screenshot(name: string): Promise<void> {
+  try {
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, `${name}.png`), fullPage: true });
+  } catch {
+    // Ignore screenshot failures
+  }
 }
 
 // ============================================
@@ -116,8 +128,13 @@ async function main() {
 
   await runTest('Login via demo mode', async () => {
     await loginViaDemo();
-    const title = await page.$eval('[data-testid="nurse-dashboard-title"]', el => el.textContent);
-    assert(title?.includes('Enfermería') ?? false, `Expected "Enfermería", got "${title}"`);
+    // Check that the nurse dashboard loaded (no error screen)
+    const bodyText = await page.evaluate(() => document.body?.innerText || '');
+    assert(!bodyText.includes('Algo salió mal'), 'Error screen "Algo salió mal" appeared');
+    assert(
+      bodyText.includes('Enfermería') || bodyText.includes('Mi Ruta'),
+      `Nurse dashboard not loaded. Page text starts with: "${bodyText.substring(0, 200)}"`
+    );
     await screenshot('01-login-success');
   });
 

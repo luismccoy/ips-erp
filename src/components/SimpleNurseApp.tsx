@@ -633,37 +633,6 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
     }, [quickVitalsShift, setShifts]);
 
     /**
-     * Handles route optimization via the optimizeRoute GraphQL query.
-     */
-    const handleOptimizeRoute = useCallback(async () => {
-        setIsOptimizingRoute(true);
-        try {
-            const input = {
-                shifts: filteredShifts.map(s => ({
-                    id: s.id,
-                    patientId: s.patientId || '',
-                    patientName: s.patientName || patients.find(p => p.id === s.patientId)?.name || '',
-                    address: patients.find(p => p.id === s.patientId)?.address || s.location || '',
-                    scheduledTime: s.scheduledTime,
-                    nurseId: currentUserId,
-                })),
-                nurseLocation: nursePosition ? { lat: nursePosition.lat, lng: nursePosition.lng } : undefined,
-                optimizationMode: 'TIME' as const,
-            };
-
-            const result = await (client as any).queries?.optimizeRoute({ input: JSON.stringify(input) });
-            if (result?.data) {
-                const parsed = typeof result.data === 'string' ? JSON.parse(result.data) : result.data;
-                console.log('Route optimized:', parsed.routeSummary);
-            }
-        } catch (err) {
-            console.error('Route optimization error:', err);
-        } finally {
-            setIsOptimizingRoute(false);
-        }
-    }, [filteredShifts, patients, currentUserId, nursePosition]);
-
-    /**
      * Handles notification click.
      * For VISIT_REJECTED notifications, navigates to the rejected visit for correction.
      * ISOLATED: This handler only opens forms within the Nurse App - no external navigation.
@@ -718,6 +687,38 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
     const pendingApproval = filteredShifts.filter(s => s.visit?.status === 'SUBMITTED').length;
     const rejectedVisits = filteredShifts.filter(s => s.visit?.status === 'REJECTED').length;
     const approvedVisits = filteredShifts.filter(s => s.visit?.status === 'APPROVED').length;
+
+    /**
+     * Handles route optimization via the optimizeRoute GraphQL query.
+     * NOTE: Must be defined after filteredShifts to avoid TDZ errors.
+     */
+    const handleOptimizeRoute = useCallback(async () => {
+        setIsOptimizingRoute(true);
+        try {
+            const input = {
+                shifts: filteredShifts.map(s => ({
+                    id: s.id,
+                    patientId: s.patientId || '',
+                    patientName: s.patientName || patients.find(p => p.id === s.patientId)?.name || '',
+                    address: patients.find(p => p.id === s.patientId)?.address || s.location || '',
+                    scheduledTime: s.scheduledTime,
+                    nurseId: currentUserId,
+                })),
+                nurseLocation: nursePosition ? { lat: nursePosition.lat, lng: nursePosition.lng } : undefined,
+                optimizationMode: 'TIME' as const,
+            };
+
+            const result = await (client as any).queries?.optimizeRoute({ input: JSON.stringify(input) });
+            if (result?.data) {
+                const parsed = typeof result.data === 'string' ? JSON.parse(result.data) : result.data;
+                console.log('Route optimized:', parsed.routeSummary);
+            }
+        } catch (err) {
+            console.error('Route optimization error:', err);
+        } finally {
+            setIsOptimizingRoute(false);
+        }
+    }, [filteredShifts, patients, currentUserId, nursePosition]);
 
     // ========================================================================
     // Render
