@@ -35,7 +35,7 @@
  * Offline: Phase 4 UI Integration
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { Activity, LogOut, FileText, Edit3, Clock, CheckCircle, XCircle, AlertCircle, FileCheck, HeartPulse, CloudOff, ChevronRight, ArrowLeft, Calendar, BarChart3, MapPin } from 'lucide-react';
 import { client, isUsingRealBackend } from '../amplify-utils';
@@ -53,7 +53,9 @@ import { MetricCard } from './ui/MetricCard';
 import { HealthRings } from './nurse/HealthRings';
 import { QuickVitalsSheet } from './nurse/QuickVitalsSheet';
 import { SwipeableShiftCard } from './nurse/SwipeableShiftCard';
-import { RouteMap } from './nurse/RouteMap';
+
+// Lazy-load RouteMap to avoid Leaflet loading at startup
+const RouteMap = lazy(() => import('./nurse/RouteMap'));
 import { NotificationBell } from './NotificationBell';
 import { VisitDocumentationForm } from './VisitDocumentationForm';
 import { AssessmentEntryForm } from './AssessmentEntryForm';
@@ -1171,12 +1173,21 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                 aria-labelledby="tab-map"
                                 tabIndex={-1}
                             >
-                                <RouteMap
-                                    shifts={filteredShifts}
-                                    nursePosition={nursePosition ? { lat: nursePosition.lat, lng: nursePosition.lng } : null}
-                                    onOptimize={handleOptimizeRoute}
-                                    isOptimizing={isOptimizingRoute}
-                                />
+                                <Suspense fallback={
+                                    <div className="flex items-center justify-center h-[50vh] bg-white rounded-xl border border-slate-200">
+                                        <div className="text-center">
+                                            <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                                            <p className="text-sm text-slate-500">Cargando mapa...</p>
+                                        </div>
+                                    </div>
+                                }>
+                                    <RouteMap
+                                        shifts={filteredShifts}
+                                        nursePosition={nursePosition ? { lat: nursePosition.lat, lng: nursePosition.lng } : null}
+                                        onOptimize={handleOptimizeRoute}
+                                        isOptimizing={isOptimizingRoute}
+                                    />
+                                </Suspense>
                             </motion.div>
                         )}
 
