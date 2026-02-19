@@ -5,8 +5,8 @@ import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
  * Multi-tenant architecture with strict data isolation
  * 
  * Authorization Strategy:
- * - All models (except Tenant) filter by custom:tenantId JWT claim
- * - Users can only access data from their own IPS organization
+ * - Group-based auth (Admin, Nurse, Family) controls CRUD permissions
+ * - Multi-tenant isolation enforced at application layer (tenantId filtering)
  * - Relationships enable single-query loading (shift.nurse.name)
  */
 
@@ -223,7 +223,6 @@ const schema = a.schema({
         visits: a.hasMany('Visit', 'patientId'),
         assessments: a.hasMany('PatientAssessment', 'patientId'), // Phase 4: Clinical assessments
     }).authorization(allow => [
-        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
         allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
         allow.groups(['Nurse']).to(['read']),
         allow.groups(['Family']).to(['read'])
@@ -251,7 +250,6 @@ const schema = a.schema({
         assessments: a.hasMany('PatientAssessment', 'nurseId'), // Phase 4: Clinical assessments
         primaryPatients: a.hasMany('Patient', 'primaryNurseId'), // Task 4.3: Patients assigned to this nurse
     }).authorization(allow => [
-        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
         allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
         allow.groups(['Nurse']).to(['read'])
     ]),
@@ -280,7 +278,6 @@ const schema = a.schema({
         startLat: a.float(),
         startLng: a.float(),
     }).authorization(allow => [
-        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
         allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
         allow.groups(['Nurse']).to(['read'])
     ]).secondaryIndexes(index => [
@@ -301,7 +298,6 @@ const schema = a.schema({
         status: a.ref('InventoryStatus'),
         expiryDate: a.string(), // ISO date string
     }).authorization(allow => [
-        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
         allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
         allow.groups(['Nurse']).to(['read'])
     ]),
@@ -324,7 +320,6 @@ const schema = a.schema({
         weight: a.float(),
         note: a.string(),
     }).authorization(allow => [
-        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
         allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
         allow.groups(['Nurse']).to(['create', 'read'])
     ]),
@@ -370,7 +365,6 @@ const schema = a.schema({
         fechaConsulta: a.date(),           // Consultation date (AWSDate)
         causaExterna: a.string(),          // External cause code (01-15 per RIPS spec)
     }).authorization(allow => [
-        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
         allow.groups(['Admin']).to(['create', 'read', 'update', 'delete'])
     ]),
     
@@ -404,7 +398,6 @@ const schema = a.schema({
         approvedAt: a.datetime(),
         approvedBy: a.id(),
     }).authorization(allow => [
-        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
         allow.groups(['Admin', 'Nurse']).to(['create', 'read', 'update'])
     ]).secondaryIndexes(index => [
         // Task 4.1: Query visits by tenant and status for admin dashboard
@@ -425,7 +418,6 @@ const schema = a.schema({
         details: a.json(),
         ipAddress: a.string(),
     }).authorization(allow => [
-        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
         allow.groups(['Admin', 'SuperAdmin']).to(['read'])
     ]),
     
@@ -441,7 +433,6 @@ const schema = a.schema({
         entityId: a.id().required(),
         read: a.boolean().required().default(false),
     }).authorization(allow => [
-        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
         allow.groups(['Admin', 'Nurse', 'Family']).to(['create', 'read', 'update', 'delete'])
     ]).secondaryIndexes(index => [
         // Task 4.1: Query notifications by user (filter by read status in app)
@@ -483,7 +474,6 @@ const schema = a.schema({
         // Link to visit (optional - assessments can be standalone)
         visitId: a.id(),
     }).authorization(allow => [
-        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
         allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
         allow.groups(['Nurse']).to(['create', 'read']),
         allow.groups(['Family']).to(['read'])
