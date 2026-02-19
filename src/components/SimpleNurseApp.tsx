@@ -35,14 +35,20 @@
  * Offline: Phase 4 UI Integration
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { Activity, LogOut, FileText, Edit3, Clock, CheckCircle, XCircle, AlertCircle, FileCheck, HeartPulse, CloudOff, ChevronRight, ArrowLeft } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
+import { Activity, LogOut, FileText, Edit3, Clock, CheckCircle, XCircle, AlertCircle, FileCheck, HeartPulse, CloudOff, ChevronRight, ArrowLeft, Calendar, BarChart3 } from 'lucide-react';
 import { client, isUsingRealBackend } from '../amplify-utils';
 import { createVisitDraft } from '../api/workflow-api';
 import { usePagination } from '../hooks/usePagination';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
 import { useSyncStatus } from '../hooks/useSyncStatus';
 import { NavigationStateManager } from '../utils/navigationState';
+import { Avatar } from './ui/Avatar';
+import { Badge } from './ui/Badge';
+import { Button } from './ui/Button';
+import { Card } from './ui/Card';
+import { MetricCard } from './ui/MetricCard';
 import { NotificationBell } from './NotificationBell';
 import { VisitDocumentationForm } from './VisitDocumentationForm';
 import { AssessmentEntryForm } from './AssessmentEntryForm';
@@ -53,6 +59,26 @@ import { NetworkStatusIndicator, LastSyncTime } from './NetworkStatusIndicator';
 import type { SimpleNurseAppProps } from '../types/components';
 import type { Shift, Patient } from '../types';
 import type { Visit, VisitStatus, NotificationItem } from '../types/workflow';
+
+// ============================================================================
+// Animation Variants
+// ============================================================================
+
+const staggerContainer = {
+    hidden: {},
+    show: { transition: { staggerChildren: 0.08 } },
+};
+
+const fadeSlideUp = {
+    hidden: { opacity: 0, y: 16 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] } },
+};
+
+const tabContentVariants = {
+    enter: (dir: number) => ({ x: dir > 0 ? 60 : -60, opacity: 0 }),
+    center: { x: 0, opacity: 1, transition: { duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] } },
+    exit: (dir: number) => ({ x: dir < 0 ? 60 : -60, opacity: 0, transition: { duration: 0.2 } }),
+};
 
 // ============================================================================
 // Types
@@ -132,47 +158,28 @@ interface VisitStatusBadgeProps {
     rejectionReason?: string | null;
 }
 
-const VisitStatusBadge: React.FC<VisitStatusBadgeProps> = ({ status, rejectionReason }) => {
-    const config: Record<VisitStatus, { label: string; bgColor: string; textColor: string; icon: React.ReactNode }> = {
-        DRAFT: {
-            label: 'Borrador',
-            bgColor: 'bg-slate-100',
-            textColor: 'text-slate-600',
-            icon: <Edit3 size={16} />,
-        },
-        SUBMITTED: {
-            label: 'Pendiente',
-            bgColor: 'bg-amber-50',
-            textColor: 'text-amber-700',
-            icon: <Clock size={16} />,
-        },
-        REJECTED: {
-            label: 'Rechazada',
-            bgColor: 'bg-red-50',
-            textColor: 'text-red-700',
-            icon: <XCircle size={16} />,
-        },
-        APPROVED: {
-            label: 'Aprobada',
-            bgColor: 'bg-green-50',
-            textColor: 'text-green-700',
-            icon: <CheckCircle size={16} />,
-        },
-    };
+const visitStatusConfig: Record<VisitStatus, { label: string; variant: 'neutral' | 'warning' | 'error' | 'success' }> = {
+    DRAFT: { label: 'Borrador', variant: 'neutral' },
+    SUBMITTED: { label: 'Pendiente', variant: 'warning' },
+    REJECTED: { label: 'Rechazada', variant: 'error' },
+    APPROVED: { label: 'Aprobada', variant: 'success' },
+};
 
-    const { label, bgColor, textColor, icon } = config[status];
+const VisitStatusBadge: React.FC<VisitStatusBadgeProps> = ({ status, rejectionReason }) => {
+    const { label, variant } = visitStatusConfig[status];
 
     return (
-        <div className="mt-4">
-            <span className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-base font-medium ${bgColor} ${textColor}`}>
-                {icon}
-                {label}
-            </span>
+        <div className="mt-3">
+            <Badge variant={variant} dot>{label}</Badge>
             {status === 'REJECTED' && rejectionReason && (
-                <p className="text-base text-red-600 mt-3 flex items-start gap-2 p-3 bg-red-50 rounded-lg">
-                    <AlertCircle size={18} className="mt-0.5 flex-shrink-0" />
+                <motion.p
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className="text-sm text-red-600 mt-2 flex items-start gap-2 p-3 bg-red-50 rounded-lg border border-red-100"
+                >
+                    <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
                     <span>{rejectionReason}</span>
-                </p>
+                </motion.p>
             )}
         </div>
     );
@@ -197,60 +204,60 @@ const DocumentationButton: React.FC<DocumentationButtonProps> = ({
     isLoading,
     onGeneratePacket
 }) => {
-    // Only show button for COMPLETED shifts
-    if (shift.status !== 'COMPLETED') {
-        return null;
-    }
+    if (shift.status !== 'COMPLETED') return null;
 
     const visit = shift.visit;
 
-    // If visit APPROVED, show "Generate Packet" (New Feature from UX Audit)
     if (visit && visit.status === 'APPROVED') {
         return (
-            <button
+            <Button
+                variant="success"
+                size="lg"
+                icon={<FileCheck size={18} />}
                 onClick={() => onGeneratePacket(shift.id)}
-                className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-base font-medium rounded-lg transition-colors min-h-[48px]"
+                className="mt-4 w-full min-h-[48px]"
             >
-                <FileCheck size={18} />
                 Generar Paquete de Facturación
-            </button>
+            </Button>
         );
     }
 
-    // If visit exists and is SUBMITTED, show "Pending Review" (disabled)
     if (visit && visit.status === 'SUBMITTED') {
         return (
-            <div className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-yellow-500/10 text-yellow-500 text-base font-medium rounded-lg border border-yellow-500/20 min-h-[48px]">
+            <div className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-amber-50 text-amber-600 text-base font-medium rounded-lg border border-amber-200 min-h-[48px]">
                 <Clock size={18} />
                 Esperando Revisión
             </div>
         );
     }
 
-    // If visit exists and is DRAFT or REJECTED, show "Continue Documentation"
     if (visit && (visit.status === 'DRAFT' || visit.status === 'REJECTED')) {
         return (
-            <button
-                onClick={() => onContinueDocumentation(shift.id)}
+            <Button
+                variant={visit.status === 'REJECTED' ? 'cta' : 'primary'}
+                size="lg"
+                icon={<Edit3 size={18} />}
                 disabled={isLoading}
-                className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white text-base font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
+                onClick={() => onContinueDocumentation(shift.id)}
+                className="mt-4 w-full min-h-[48px]"
             >
-                <Edit3 size={18} />
                 {visit.status === 'REJECTED' ? 'Corregir Documentación' : 'Continuar Documentación'}
-            </button>
+            </Button>
         );
     }
 
-    // No visit exists, show "Start Documentation"
     return (
-        <button
-            onClick={() => onStartDocumentation(shift.id)}
+        <Button
+            variant="primary"
+            size="lg"
+            icon={<FileText size={18} />}
+            isLoading={isLoading}
             disabled={isLoading}
-            className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-[#2563eb] hover:bg-blue-700 text-white text-base font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
+            onClick={() => onStartDocumentation(shift.id)}
+            className="mt-4 w-full min-h-[48px]"
         >
-            <FileText size={18} />
             {isLoading ? 'Creando...' : 'Iniciar Documentación'}
-        </button>
+        </Button>
     );
 };
 
@@ -263,6 +270,9 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
     // State
     // ========================================================================
     const [activeTab, setActiveTab] = useState('route');
+    const [tabDirection, setTabDirection] = useState(0);
+    const routePanelRef = useRef<HTMLDivElement>(null);
+    const statsPanelRef = useRef<HTMLDivElement>(null);
     const { items: shifts, loadMore, hasMore, isLoading, setItems: setShifts } = usePagination<ShiftWithVisit>();
     const [patients, setPatients] = useState<Patient[]>([]);
     const [loadingPatients, setLoadingPatients] = useState(true);
@@ -649,56 +659,104 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
             {/* Offline Banner - Shows when offline, slow, or syncing */}
             <OfflineBanner />
 
+            {/* Skip Link */}
+            <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:bg-blue-600 focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm">
+                Saltar al contenido
+            </a>
+
             {/* Header */}
-            <header className={`bg-white border-b border-slate-200 px-4 py-3 flex justify-between items-center sticky top-0 z-30 ${(isOffline || isSlow || pendingCount > 0 || isSyncing) ? 'mt-10' : ''}`} data-testid="nurse-dashboard-header">
-                <div className="flex items-center gap-2.5">
-                    <div className="h-9 w-9 bg-blue-600 rounded-lg flex items-center justify-center">
-                        <Activity size={18} className="text-white" />
+            <header className={`bg-white sticky top-0 z-30 ${(isOffline || isSlow || pendingCount > 0 || isSyncing) ? 'mt-10' : ''}`} role="banner" data-testid="nurse-dashboard-header">
+                <div className="px-4 md:px-6 py-3 md:py-4 flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-sm">
+                            <Activity size={20} className="text-white" />
+                        </div>
+                        <div>
+                            <h1 className="font-bold text-lg md:text-xl text-slate-900" data-testid="nurse-dashboard-title">Enfermería</h1>
+                            <p className="text-xs text-slate-400 hidden md:block">
+                                {new Date().toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' })}
+                            </p>
+                        </div>
+                        {isOffline && (
+                            <Badge variant="error" dot>Offline</Badge>
+                        )}
                     </div>
-                    <span className="font-bold text-lg text-slate-900" data-testid="nurse-dashboard-title">Enfermería</span>
-                    {isOffline && (
-                        <span className="text-xs text-red-500 flex items-center gap-1 ml-1 bg-red-50 px-2 py-0.5 rounded-full">
-                            <CloudOff size={10} />
-                            Offline
+                    <div className="flex items-center gap-2">
+                        <NetworkStatusIndicator showPendingBadge={true} size="md" />
+                        <NotificationBell
+                            userId={currentUserId}
+                            onNotificationClick={handleNotificationClick}
+                        />
+                        <button
+                            onClick={onLogout}
+                            className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg transition-colors"
+                            aria-label="Cerrar sesión"
+                            title="Cerrar sesión"
+                            data-testid="nurse-logout-button"
+                        >
+                            <LogOut size={20} />
+                        </button>
+                    </div>
+                </div>
+                {/* Day Progress Bar */}
+                {!loadingPatients && totalShifts > 0 && (
+                    <div className="px-4 md:px-6 pb-3 flex items-center gap-3">
+                        <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <motion.div
+                                className="h-full bg-gradient-to-r from-blue-500 to-teal-400 rounded-full"
+                                initial={{ width: 0 }}
+                                animate={{ width: `${completionRate}%` }}
+                                transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
+                            />
+                        </div>
+                        <span className="text-xs font-semibold text-slate-500 whitespace-nowrap" aria-live="polite">
+                            {completedShifts}/{totalShifts}
                         </span>
-                    )}
-                </div>
-                <div className="flex items-center gap-2">
-                    <NetworkStatusIndicator showPendingBadge={true} size="md" />
-                    <NotificationBell
-                        userId={currentUserId}
-                        onNotificationClick={handleNotificationClick}
-                    />
-                    <button
-                        onClick={onLogout}
-                        className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg transition-colors"
-                        aria-label="Cerrar sesión"
-                        title="Cerrar sesión"
-                        data-testid="nurse-logout-button"
-                    >
-                        <LogOut size={20} />
-                    </button>
-                </div>
+                    </div>
+                )}
+                {/* Gradient accent line */}
+                <div className="h-0.5 bg-gradient-to-r from-blue-600 via-blue-500 to-teal-400" />
             </header>
 
-            <div className="p-4 max-w-3xl mx-auto">
+            <main id="main-content" className="p-4 md:p-6 max-w-3xl md:max-w-5xl mx-auto" role="main">
                 {/* Tab Navigation */}
-                <div className="flex gap-1 mb-5 bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
-                    <button
-                        type="button"
-                        onClick={(event) => { event.preventDefault(); event.stopPropagation(); setActiveTab('route'); }}
-                        className={`flex-1 py-3 min-h-[48px] rounded-md font-semibold text-sm transition-all ${activeTab === 'route' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50 active:bg-slate-100'}`}
-                    >
-                        Mi Ruta
-                    </button>
-                    <button
-                        type="button"
-                        onClick={(event) => { event.preventDefault(); event.stopPropagation(); setActiveTab('stats'); }}
-                        className={`flex-1 py-3 min-h-[48px] rounded-md font-semibold text-sm transition-all ${activeTab === 'stats' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50 active:bg-slate-100'}`}
-                    >
-                        Estadísticas
-                    </button>
+                <LayoutGroup>
+                <div className="flex gap-1 mb-5 bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm" role="tablist" aria-label="Secciones de enfermería">
+                    {([
+                        { id: 'route', label: 'Mi Ruta', icon: <Calendar size={16} /> },
+                        { id: 'stats', label: 'Estadísticas', icon: <BarChart3 size={16} /> },
+                    ] as const).map((tab) => (
+                        <button
+                            key={tab.id}
+                            type="button"
+                            role="tab"
+                            id={`tab-${tab.id}`}
+                            aria-selected={activeTab === tab.id}
+                            aria-controls={`panel-${tab.id}`}
+                            onClick={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                setTabDirection(tab.id === 'stats' ? 1 : -1);
+                                setActiveTab(tab.id);
+                            }}
+                            className={`relative flex-1 flex items-center justify-center gap-2 py-3 min-h-[48px] rounded-lg font-semibold text-sm md:text-base transition-colors z-10 ${
+                                activeTab === tab.id ? 'text-white' : 'text-slate-500 hover:bg-slate-50 active:bg-slate-100'
+                            }`}
+                        >
+                            {activeTab === tab.id && (
+                                <motion.div
+                                    layoutId="nurse-tab-indicator"
+                                    className="absolute inset-0 bg-blue-600 rounded-lg shadow-sm"
+                                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                                    style={{ zIndex: -1 }}
+                                />
+                            )}
+                            {tab.icon}
+                            {tab.label}
+                        </button>
+                    ))}
                 </div>
+                </LayoutGroup>
 
                 {/* Error Message */}
                 {error && (
@@ -717,18 +775,52 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                 )}
 
                 {(isLoading && shifts.length === 0) || loadingPatients ? (
-                    <div className="text-center text-slate-400 py-8">
-                        <div className="animate-spin w-8 h-8 border-4 border-slate-200 border-t-blue-600 rounded-full mx-auto mb-3"></div>
-                        <span className="text-sm">Cargando...</span>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {[0, 1, 2].map(i => (
+                            <div key={i} className="bg-white p-5 rounded-xl border border-slate-200 animate-pulse">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="h-12 w-12 rounded-full bg-slate-200 flex-shrink-0" />
+                                    <div className="flex-1 space-y-2">
+                                        <div className="h-4 bg-slate-200 rounded w-3/4" />
+                                        <div className="h-3 bg-slate-100 rounded w-1/2" />
+                                    </div>
+                                    <div className="h-6 w-16 bg-slate-100 rounded-lg" />
+                                </div>
+                                <div className="h-3 bg-slate-100 rounded w-full mb-2" />
+                                <div className="h-3 bg-slate-100 rounded w-2/3 mb-4" />
+                                <div className="h-11 bg-slate-100 rounded-lg w-full" />
+                            </div>
+                        ))}
                     </div>
                 ) : (
                     <>
+                    <AnimatePresence mode="wait" custom={tabDirection}>
                         {/* Route Tab - Shift Cards with Visit Status */}
                         {activeTab === 'route' && (
-                            <div className="space-y-6">
+                            <motion.div
+                                key="route"
+                                custom={tabDirection}
+                                variants={tabContentVariants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                className="space-y-5"
+                                id="panel-route"
+                                role="tabpanel"
+                                aria-labelledby="tab-route"
+                                ref={routePanelRef}
+                                tabIndex={-1}
+                            >
                                 {/* Today Filter Toggle */}
-                                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between gap-4">
-                                    <span className="text-sm font-semibold text-slate-700">Mostrar solo visitas de hoy</span>
+                                <Card disableAnimation className="flex items-center justify-between gap-4 !p-4">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm font-semibold text-slate-700">Solo hoy</span>
+                                        {showOnlyToday && (
+                                            <span className="text-xs font-medium text-blue-600" aria-live="polite">
+                                                ({filteredShifts.length} {filteredShifts.length === 1 ? 'visita' : 'visitas'})
+                                            </span>
+                                        )}
+                                    </div>
                                     <button
                                         onClick={() => setShowOnlyToday(!showOnlyToday)}
                                         className={`relative inline-flex items-center h-10 rounded-full w-20 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
@@ -738,271 +830,338 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                         aria-checked={showOnlyToday}
                                         aria-label="Filtrar solo hoy"
                                     >
-                                        <span
-                                            className={`${
-                                                showOnlyToday ? 'translate-x-[42px]' : 'translate-x-1'
-                                            } inline-block w-8 h-8 transform bg-white rounded-full transition-transform shadow-md`}
+                                        <motion.span
+                                            className="inline-block w-8 h-8 bg-white rounded-full shadow-md"
+                                            animate={{ x: showOnlyToday ? 42 : 4 }}
+                                            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                                         />
                                     </button>
-                                </div>
-
-                                {/* SOLO HOY Badge */}
-                                {showOnlyToday && (
-                                    <div className="bg-blue-50 border border-blue-200 p-3 rounded-xl flex items-center justify-center gap-2">
-                                        <Clock size={16} className="text-blue-600" />
-                                        <span className="text-sm font-bold text-blue-700">SOLO HOY</span>
-                                        <span className="text-sm text-blue-500">({filteredShifts.length} {filteredShifts.length === 1 ? 'visita' : 'visitas'})</span>
-                                    </div>
-                                )}
+                                </Card>
 
                                 {filteredShifts.length === 0 ? (
-                                    <div className="bg-white p-8 rounded-xl border border-slate-200 text-center">
-                                        <p className="text-sm text-slate-500 mb-2">
-                                            {showOnlyToday ? 'No hay visitas programadas para hoy' : 'No hay turnos asignados'}
-                                        </p>
-                                        <p className="text-xs text-slate-400">
+                                    <Card className="text-center py-12 px-6">
+                                        <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center">
+                                            <Calendar size={28} className="text-slate-400" />
+                                        </div>
+                                        <h3 className="font-semibold text-slate-700 mb-1">
+                                            {showOnlyToday ? 'Sin visitas hoy' : 'Sin turnos asignados'}
+                                        </h3>
+                                        <p className="text-sm text-slate-400">
                                             {showOnlyToday ? 'Desactive el filtro para ver todas las visitas' : 'Revise más tarde para ver su ruta'}
                                         </p>
-                                    </div>
+                                    </Card>
                                 ) : (
-                                    filteredShifts.map(shift => {
-                                        const patient = patients.find(p => p.id === shift.patientId);
-                                        const isCreatingThisDraft = creatingDraft === shift.id;
-                                        // Determine sync status for the shift/visit
-                                        // _syncStatus is tracked on ShiftWithVisit level
-                                        const visitSyncStatus: SyncStatusType = shift._syncStatus || 'synced';
+                                    <motion.div
+                                        variants={staggerContainer}
+                                        initial="hidden"
+                                        animate="show"
+                                        className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                                    >
+                                        {filteredShifts.map(shift => {
+                                            const patient = patients.find(p => p.id === shift.patientId);
+                                            const patientName = patient?.name || shift.patientName || 'Paciente Desconocido';
+                                            const isCreatingThisDraft = creatingDraft === shift.id;
+                                            const visitSyncStatus: SyncStatusType = shift._syncStatus || 'synced';
+                                            const isActionable = (shift.status === 'PENDING' || shift.status === 'IN_PROGRESS');
+                                            const isInProgress = shift.status === 'IN_PROGRESS';
 
-                                        // Determine if this card should be interactive (pending/in-progress, regardless of visit status)
-                                        const isActionable = (shift.status === 'PENDING' || shift.status === 'IN_PROGRESS');
-                                        
-                                        return (
-                                            <div
-                                                key={shift.id}
-                                                className={`bg-white p-5 rounded-xl border border-slate-200 shadow-sm transition-all relative overflow-hidden ${
-                                                    isActionable ? 'hover:shadow-md hover:border-blue-200 cursor-pointer active:bg-slate-50' : ''
-                                                }`}
-                                                style={{
-                                                    borderLeft: `4px solid ${
-                                                        shift.status === 'COMPLETED' ? '#22c55e' :
-                                                        shift.status === 'IN_PROGRESS' ? '#3b82f6' :
-                                                        shift.status === 'CANCELLED' ? '#ef4444' : '#f59e0b'
-                                                    }`
-                                                }}
-                                                onClick={isActionable ? () => {
-                                                    // Route to appropriate handler based on visit status
-                                                    if (!shift.visit) {
-                                                        handleStartDocumentation(shift.id);
-                                                    } else if (shift.visit.status === 'DRAFT' || shift.visit.status === 'REJECTED' || shift.visit.status === 'APPROVED') {
-                                                        handleContinueDocumentation(shift.id);
-                                                    }
-                                                    // SUBMITTED visits don't do anything on card click
-                                                } : undefined}
-                                                role={isActionable ? 'button' : undefined}
-                                                tabIndex={isActionable ? 0 : undefined}
-                                            >
-                                                {/* Shift Header */}
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <div className="flex items-center gap-2">
-                                                        <h3 className="font-bold text-slate-900">
-                                                            {patient?.name || shift.patientName || 'Paciente Desconocido'}
-                                                        </h3>
-                                                        {/* Sync status icon for the visit */}
-                                                        {shift.visit && visitSyncStatus !== 'synced' && (
-                                                            <SyncCloudIcon syncStatus={visitSyncStatus} size={14} />
-                                                        )}
-                                                        {/* Chevron indicator for actionable cards */}
-                                                        {isActionable && (
-                                                            <ChevronRight size={18} className="text-blue-400 ml-auto" />
-                                                        )}
-                                                    </div>
-                                                    <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${shift.status === 'COMPLETED'
-                                                        ? 'bg-green-50 text-green-700'
-                                                        : shift.status === 'IN_PROGRESS'
-                                                            ? 'bg-blue-50 text-blue-700'
-                                                            : shift.status === 'CANCELLED'
-                                                                ? 'bg-red-50 text-red-700'
-                                                                : 'bg-amber-50 text-amber-700'
-                                                        }`}>
-                                                        {shift.status === 'COMPLETED' ? 'Completado' :
-                                                            shift.status === 'IN_PROGRESS' ? 'En Progreso' :
-                                                                shift.status === 'CANCELLED' ? 'Cancelado' : 'Pendiente'}
-                                                    </span>
-                                                </div>
+                                            const shiftStatusBadge: Record<string, { variant: 'success' | 'default' | 'error' | 'warning'; label: string }> = {
+                                                COMPLETED: { variant: 'success', label: 'Completado' },
+                                                IN_PROGRESS: { variant: 'default', label: 'En Progreso' },
+                                                CANCELLED: { variant: 'error', label: 'Cancelado' },
+                                                PENDING: { variant: 'warning', label: 'Pendiente' },
+                                            };
+                                            const badgeConfig = shiftStatusBadge[shift.status] || shiftStatusBadge.PENDING;
 
-                                                {/* Patient Address */}
-                                                <p className="text-sm text-slate-500 mb-1.5">
-                                                    {patient?.address || shift.location || 'Dirección no disponible'}
-                                                </p>
+                                            const borderColor = shift.status === 'COMPLETED' ? 'border-l-green-500' :
+                                                shift.status === 'IN_PROGRESS' ? 'border-l-blue-500' :
+                                                shift.status === 'CANCELLED' ? 'border-l-red-500' : 'border-l-amber-500';
 
-                                                {/* Scheduled Time */}
-                                                <p className="text-xs text-slate-400">
-                                                    {new Date(shift.scheduledTime).toLocaleString('es-CO', {
-                                                        weekday: 'short',
-                                                        day: 'numeric',
-                                                        month: 'short',
-                                                        hour: '2-digit',
-                                                        minute: '2-digit',
-                                                    })}
-                                                </p>
-
-                                                {/* Visit Status Badge - Requirements 3.4, 3.6 */}
-                                                {shift.visit && (
-                                                    <VisitStatusBadge
-                                                        status={shift.visit.status}
-                                                        rejectionReason={shift.visit.rejectionReason}
-                                                    />
-                                                )}
-
-                                                {/* Offline sync status message */}
-                                                {visitSyncStatus === 'pending' && (
-                                                    <div className="mt-3 text-xs text-amber-700 flex items-center gap-2 bg-amber-50 px-3 py-2.5 rounded-lg border border-amber-200">
-                                                        <CloudOff size={14} />
-                                                        <span>Se sincronizará cuando haya conexión</span>
-                                                    </div>
-                                                )}
-                                                {visitSyncStatus === 'error' && (
-                                                    <div className="mt-3 text-xs text-red-700 flex items-center gap-2 bg-red-50 px-3 py-2.5 rounded-lg border border-red-200 min-h-[44px] cursor-pointer active:bg-red-100">
-                                                        <AlertCircle size={14} />
-                                                        <span>Error al sincronizar - toque para reintentar</span>
-                                                    </div>
-                                                )}
-
-                                                {/* SENTINEL FIX #1: Action buttons for Pending/In-Progress Shifts */}
-                                                {(shift.status === 'PENDING' || shift.status === 'IN_PROGRESS') && (
-                                                    <>
-                                                        {/* No visit yet - show Iniciar Visita */}
-                                                        {!shift.visit && (
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleStartDocumentation(shift.id);
-                                                                }}
-                                                                disabled={isCreatingThisDraft}
-                                                                className="mt-4 w-full flex items-center justify-center gap-2 px-6 py-4 min-h-[48px] bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-base font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-                                                            >
-                                                                <FileText size={20} />
-                                                                {isCreatingThisDraft ? 'Iniciando...' : 'Iniciar Visita'}
-                                                            </button>
-                                                        )}
-                                                        {/* Visit approved - show Ver Visita */}
-                                                        {shift.visit?.status === 'APPROVED' && (
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleContinueDocumentation(shift.id);
-                                                                }}
-                                                                className="mt-4 w-full flex items-center justify-center gap-2 px-6 py-4 min-h-[48px] bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-base font-bold rounded-lg transition-colors shadow-lg"
-                                                            >
-                                                                <CheckCircle size={20} />
-                                                                Ver Visita Aprobada
-                                                            </button>
-                                                        )}
-                                                        {/* Visit submitted - show waiting status */}
-                                                        {shift.visit?.status === 'SUBMITTED' && (
-                                                            <div className="mt-4 w-full flex items-center justify-center gap-2 px-6 py-4 min-h-[48px] bg-yellow-500/10 text-yellow-500 text-base font-bold rounded-lg border border-yellow-500/20">
-                                                                <Clock size={20} />
-                                                                Esperando Revisión
+                                            return (
+                                                <motion.div
+                                                    key={shift.id}
+                                                    variants={fadeSlideUp}
+                                                    className={`bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden border-l-4 ${borderColor} ${
+                                                        isActionable ? 'hover:shadow-md hover:border-blue-200 cursor-pointer active:bg-slate-50' : ''
+                                                    }`}
+                                                    animate={isInProgress ? {
+                                                        boxShadow: [
+                                                            '0 1px 3px 0 rgba(0,0,0,0.1)',
+                                                            '0 1px 3px 0 rgba(59,130,246,0.2), 0 0 0 3px rgba(59,130,246,0.08)',
+                                                            '0 1px 3px 0 rgba(0,0,0,0.1)',
+                                                        ],
+                                                    } : undefined}
+                                                    transition={isInProgress ? { duration: 2.5, repeat: Infinity, ease: 'easeInOut' } : undefined}
+                                                    onClick={isActionable ? () => {
+                                                        if (!shift.visit) {
+                                                            handleStartDocumentation(shift.id);
+                                                        } else if (shift.visit.status === 'DRAFT' || shift.visit.status === 'REJECTED' || shift.visit.status === 'APPROVED') {
+                                                            handleContinueDocumentation(shift.id);
+                                                        }
+                                                    } : undefined}
+                                                    role={isActionable ? 'button' : undefined}
+                                                    tabIndex={isActionable ? 0 : undefined}
+                                                    onKeyDown={isActionable ? (e: React.KeyboardEvent) => {
+                                                        if (e.key === 'Enter' || e.key === ' ') {
+                                                            e.preventDefault();
+                                                            if (!shift.visit) handleStartDocumentation(shift.id);
+                                                            else if (shift.visit.status === 'DRAFT' || shift.visit.status === 'REJECTED' || shift.visit.status === 'APPROVED') {
+                                                                handleContinueDocumentation(shift.id);
+                                                            }
+                                                        }
+                                                    } : undefined}
+                                                >
+                                                    {/* Shift Header with Avatar */}
+                                                    <div className="flex items-start gap-3 mb-3">
+                                                        <Avatar
+                                                            name={patientName}
+                                                            size="lg"
+                                                            status={shift.status === 'IN_PROGRESS' ? 'busy' : shift.status === 'COMPLETED' ? 'online' : undefined}
+                                                        />
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center justify-between gap-2">
+                                                                <h3 className="font-bold text-base text-slate-900 truncate">
+                                                                    {patientName}
+                                                                </h3>
+                                                                <Badge variant={badgeConfig.variant} dot>
+                                                                    {badgeConfig.label}
+                                                                </Badge>
                                                             </div>
-                                                        )}
-                                                        {/* Visit draft or rejected - show continue/correct */}
-                                                        {(shift.visit?.status === 'DRAFT' || shift.visit?.status === 'REJECTED') && (
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleContinueDocumentation(shift.id);
-                                                                }}
-                                                                disabled={isCreatingThisDraft}
-                                                                className="mt-4 w-full flex items-center justify-center gap-2 px-6 py-4 min-h-[48px] bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-base font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-                                                            >
-                                                                <Edit3 size={20} />
-                                                                {shift.visit?.status === 'REJECTED' ? 'Corregir Documentación' : 'Continuar Documentación'}
-                                                            </button>
-                                                        )}
-                                                    </>
-                                                )}
+                                                            <p className="text-sm text-slate-500 truncate mt-0.5">
+                                                                {patient?.address || shift.location || 'Dirección no disponible'}
+                                                            </p>
+                                                            <div className="flex items-center gap-2 mt-1">
+                                                                <p className="text-xs text-slate-400 font-medium">
+                                                                    {new Date(shift.scheduledTime).toLocaleString('es-CO', {
+                                                                        weekday: 'short',
+                                                                        day: 'numeric',
+                                                                        month: 'short',
+                                                                        hour: '2-digit',
+                                                                        minute: '2-digit',
+                                                                    })}
+                                                                </p>
+                                                                {shift.visit && visitSyncStatus !== 'synced' && (
+                                                                    <SyncCloudIcon syncStatus={visitSyncStatus} size={14} />
+                                                                )}
+                                                                {isActionable && (
+                                                                    <ChevronRight size={16} className="text-blue-400 ml-auto flex-shrink-0" />
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
 
-                                                {/* Documentation Button - Requirements 1.1, 1.5 */}
-                                                <DocumentationButton
-                                                    shift={shift}
-                                                    onStartDocumentation={handleStartDocumentation}
-                                                    onContinueDocumentation={handleContinueDocumentation}
-                                                    onGeneratePacket={handleGeneratePacket}
-                                                    isLoading={isCreatingThisDraft}
-                                                />
+                                                    {/* Visit Status Badge */}
+                                                    {shift.visit && (
+                                                        <VisitStatusBadge
+                                                            status={shift.visit.status}
+                                                            rejectionReason={shift.visit.rejectionReason}
+                                                        />
+                                                    )}
 
-                                                {/* Clinical Assessment Button */}
-                                                {shift.status === 'COMPLETED' && (
-                                                    <button
-                                                        onClick={() => {
-                                                            setAssessmentPatient({
-                                                                id: shift.patientId || '',
-                                                                name: patient?.name || shift.patientName || 'Paciente'
-                                                            });
-                                                            setShowAssessmentForm(true);
-                                                        }}
-                                                        className={`mt-4 w-full flex items-center justify-center gap-2 px-4 py-3.5 text-base font-medium rounded-lg transition-colors min-h-[48px] ${
-                                                            isOffline 
-                                                                ? 'bg-pink-600/10 border border-pink-500/20 text-pink-400/70' 
-                                                                : 'bg-pink-600/20 border border-pink-500/30 text-pink-400 hover:bg-pink-600/30'
-                                                        }`}
-                                                    >
-                                                        <HeartPulse size={18} />
-                                                        Registrar Valoración Clínica
-                                                        {isOffline && <span className="text-xs ml-1">(offline)</span>}
-                                                    </button>
-                                                )}
-                                            </div>
-                                        );
-                                    })
+                                                    {/* Offline sync status */}
+                                                    {visitSyncStatus === 'pending' && (
+                                                        <div className="mt-3 text-xs text-amber-700 flex items-center gap-2 bg-amber-50 px-3 py-2.5 rounded-lg border border-amber-200">
+                                                            <CloudOff size={14} />
+                                                            <span>Se sincronizará cuando haya conexión</span>
+                                                        </div>
+                                                    )}
+                                                    {visitSyncStatus === 'error' && (
+                                                        <div className="mt-3 text-xs text-red-700 flex items-center gap-2 bg-red-50 px-3 py-2.5 rounded-lg border border-red-200 min-h-[44px] cursor-pointer active:bg-red-100">
+                                                            <AlertCircle size={14} />
+                                                            <span>Error al sincronizar - toque para reintentar</span>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Action buttons for Pending/In-Progress Shifts */}
+                                                    {(shift.status === 'PENDING' || shift.status === 'IN_PROGRESS') && (
+                                                        <div className="mt-4" onClick={(e) => e.stopPropagation()}>
+                                                            {!shift.visit && (
+                                                                <Button
+                                                                    variant="primary"
+                                                                    size="lg"
+                                                                    icon={<FileText size={18} />}
+                                                                    isLoading={isCreatingThisDraft}
+                                                                    disabled={isCreatingThisDraft}
+                                                                    onClick={() => handleStartDocumentation(shift.id)}
+                                                                    className="w-full min-h-[48px]"
+                                                                >
+                                                                    {isCreatingThisDraft ? 'Iniciando...' : 'Iniciar Visita'}
+                                                                </Button>
+                                                            )}
+                                                            {shift.visit?.status === 'APPROVED' && (
+                                                                <Button
+                                                                    variant="success"
+                                                                    size="lg"
+                                                                    icon={<CheckCircle size={18} />}
+                                                                    onClick={() => handleContinueDocumentation(shift.id)}
+                                                                    className="w-full min-h-[48px]"
+                                                                >
+                                                                    Ver Visita Aprobada
+                                                                </Button>
+                                                            )}
+                                                            {shift.visit?.status === 'SUBMITTED' && (
+                                                                <div className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-amber-50 text-amber-600 text-base font-medium rounded-lg border border-amber-200 min-h-[48px]">
+                                                                    <Clock size={18} />
+                                                                    Esperando Revisión
+                                                                </div>
+                                                            )}
+                                                            {(shift.visit?.status === 'DRAFT' || shift.visit?.status === 'REJECTED') && (
+                                                                <Button
+                                                                    variant={shift.visit?.status === 'REJECTED' ? 'cta' : 'primary'}
+                                                                    size="lg"
+                                                                    icon={<Edit3 size={18} />}
+                                                                    disabled={isCreatingThisDraft}
+                                                                    onClick={() => handleContinueDocumentation(shift.id)}
+                                                                    className="w-full min-h-[48px]"
+                                                                >
+                                                                    {shift.visit?.status === 'REJECTED' ? 'Corregir Documentación' : 'Continuar Documentación'}
+                                                                </Button>
+                                                            )}
+                                                        </div>
+                                                    )}
+
+                                                    {/* Documentation Button for COMPLETED shifts */}
+                                                    <DocumentationButton
+                                                        shift={shift}
+                                                        onStartDocumentation={handleStartDocumentation}
+                                                        onContinueDocumentation={handleContinueDocumentation}
+                                                        onGeneratePacket={handleGeneratePacket}
+                                                        isLoading={isCreatingThisDraft}
+                                                    />
+
+                                                    {/* Clinical Assessment Button */}
+                                                    {shift.status === 'COMPLETED' && (
+                                                        <Button
+                                                            variant="outline"
+                                                            size="lg"
+                                                            icon={<HeartPulse size={18} />}
+                                                            disabled={isOffline}
+                                                            onClick={() => {
+                                                                setAssessmentPatient({
+                                                                    id: shift.patientId || '',
+                                                                    name: patientName
+                                                                });
+                                                                setShowAssessmentForm(true);
+                                                            }}
+                                                            className="mt-3 w-full min-h-[48px]"
+                                                        >
+                                                            Registrar Valoración Clínica
+                                                            {isOffline && <span className="text-xs ml-1 opacity-60">(offline)</span>}
+                                                        </Button>
+                                                    )}
+                                                </motion.div>
+                                            );
+                                        })}
+                                    </motion.div>
                                 )}
                                 {hasMore && (
-                                    <button
-                                        onClick={handleLoadMore}
+                                    <Button
+                                        variant="secondary"
+                                        size="lg"
+                                        isLoading={isLoading}
                                         disabled={isLoading}
-                                        className="w-full py-3 px-6 text-sm font-semibold text-slate-500 bg-white border border-slate-200 hover:bg-slate-50 active:bg-slate-100 rounded-xl transition-all disabled:opacity-50 mt-4 min-h-[48px] shadow-sm"
+                                        onClick={handleLoadMore}
+                                        className="w-full min-h-[48px] mt-4"
                                     >
                                         {isLoading ? 'Cargando más...' : 'Cargar Más Turnos'}
-                                    </button>
+                                    </Button>
                                 )}
-                            </div>
+                            </motion.div>
                         )}
 
                         {/* Stats Tab */}
                         {activeTab === 'stats' && (
-                            <div className="space-y-4">
-                                {/* KPI Row */}
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm text-center">
-                                        <div className="text-3xl font-bold text-slate-900 mb-1">{totalShifts}</div>
-                                        <div className="text-xs text-slate-500 font-medium uppercase">Total Turnos</div>
-                                    </div>
-                                    <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm text-center">
-                                        <div className="text-3xl font-bold text-blue-600 mb-1">{completionRate}%</div>
-                                        <div className="text-xs text-slate-500 font-medium uppercase">Completado</div>
-                                    </div>
+                            <motion.div
+                                key="stats"
+                                custom={tabDirection}
+                                variants={tabContentVariants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                className="space-y-5"
+                                id="panel-stats"
+                                role="tabpanel"
+                                aria-labelledby="tab-stats"
+                                ref={statsPanelRef}
+                                tabIndex={-1}
+                            >
+                                {/* KPI Row with MetricCards */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                    <MetricCard
+                                        icon={<Calendar size={18} />}
+                                        value={totalShifts}
+                                        label="Total Turnos"
+                                        color="blue"
+                                        delay={0}
+                                    />
+                                    <MetricCard
+                                        icon={<CheckCircle size={18} />}
+                                        value={`${completionRate}%`}
+                                        label="Completado"
+                                        color="green"
+                                        trendDirection={completionRate >= 50 ? 'up' : 'neutral'}
+                                        delay={0.08}
+                                    />
+                                    <MetricCard
+                                        icon={<Clock size={18} />}
+                                        value={pendingApproval}
+                                        label="Pendientes"
+                                        color="amber"
+                                        delay={0.16}
+                                    />
+                                    <MetricCard
+                                        icon={<XCircle size={18} />}
+                                        value={rejectedVisits}
+                                        label="Rechazadas"
+                                        color="red"
+                                        trendDirection={rejectedVisits > 0 ? 'down' : 'neutral'}
+                                        delay={0.24}
+                                    />
                                 </div>
 
-                                {/* Visit Status Summary */}
-                                <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                                    <h4 className="text-sm font-bold text-slate-900 mb-4">Estado de Visitas</h4>
-                                    <div className="grid grid-cols-3 gap-3">
-                                        <div className="text-center p-3 bg-amber-50 rounded-lg border border-amber-100">
-                                            <div className="text-xl font-bold text-amber-700">{pendingApproval}</div>
-                                            <div className="text-[11px] text-slate-500 font-medium">Pendientes</div>
+                                {/* Completion Progress Ring */}
+                                <Card>
+                                    <div className="flex items-center gap-6">
+                                        <div className="relative w-24 h-24 flex-shrink-0">
+                                            <svg className="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
+                                                <circle
+                                                    cx="50" cy="50" r="42"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="8"
+                                                    className="text-slate-100"
+                                                />
+                                                <motion.circle
+                                                    cx="50" cy="50" r="42"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="8"
+                                                    strokeLinecap="round"
+                                                    className="text-blue-600"
+                                                    initial={{ strokeDashoffset: 264 }}
+                                                    animate={{ strokeDashoffset: 264 - (264 * completionRate) / 100 }}
+                                                    transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94], delay: 0.3 }}
+                                                    strokeDasharray="264"
+                                                />
+                                            </svg>
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <span className="text-xl font-bold text-slate-900">{completionRate}%</span>
+                                            </div>
                                         </div>
-                                        <div className="text-center p-3 bg-red-50 rounded-lg border border-red-100">
-                                            <div className="text-xl font-bold text-red-700">{rejectedVisits}</div>
-                                            <div className="text-[11px] text-slate-500 font-medium">Rechazadas</div>
-                                        </div>
-                                        <div className="text-center p-3 bg-green-50 rounded-lg border border-green-100">
-                                            <div className="text-xl font-bold text-green-700">{approvedVisits}</div>
-                                            <div className="text-[11px] text-slate-500 font-medium">Aprobadas</div>
+                                        <div>
+                                            <h4 className="text-sm font-bold text-slate-900 mb-1">Progreso del Día</h4>
+                                            <p className="text-sm text-slate-500">
+                                                {completedShifts} de {totalShifts} visitas completadas
+                                            </p>
+                                            <p className="text-xs text-slate-400 mt-1">
+                                                {approvedVisits} aprobadas • {pendingApproval} pendientes
+                                            </p>
                                         </div>
                                     </div>
-                                </div>
+                                </Card>
 
                                 {/* Sync Status */}
-                                <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                                <Card>
                                     <h4 className="text-sm font-bold text-slate-900 mb-4">Sincronización</h4>
                                     <div className="grid grid-cols-2 gap-3">
                                         <div className="text-center p-3 bg-slate-50 rounded-lg border border-slate-100">
@@ -1012,7 +1171,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                             <div className="text-[11px] text-slate-400 font-medium">Estado</div>
                                         </div>
                                         <div className="text-center p-3 bg-slate-50 rounded-lg border border-slate-100">
-                                            <div className={`text-lg font-bold ${pendingCount > 0 ? 'text-amber-600' : 'text-green-600'}`}>
+                                            <div className={`text-lg font-bold ${pendingCount > 0 ? 'text-amber-600' : 'text-green-600'}`} aria-live="polite">
                                                 {pendingCount}
                                             </div>
                                             <div className="text-[11px] text-slate-400 font-medium">Pendientes</div>
@@ -1023,19 +1182,20 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                             <LastSyncTime className="text-slate-400 text-xs" />
                                         </div>
                                     )}
-                                </div>
+                                </Card>
 
                                 {/* Backend Status */}
-                                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
-                                    <span className="text-xs text-slate-500">
+                                <div className="text-center py-2">
+                                    <span className="text-xs text-slate-400">
                                         {isUsingRealBackend() ? 'Conectado a AWS Backend' : 'Modo Demo — Datos de Prueba'}
                                     </span>
                                 </div>
-                            </div>
+                            </motion.div>
                         )}
+                    </AnimatePresence>
                     </>
                 )}
-            </div>
+            </main>
 
             {/* Sync Progress Indicator - Floating at bottom right */}
             <SyncProgressIndicator position="bottom-right" />
