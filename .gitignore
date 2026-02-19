@@ -33,6 +33,14 @@ dist-ssr
 amplify_outputs.json
 amplify_outputs.*.json
 
+# Amplify generated artifacts (regenerated on sandbox/deploy)
+.amplify/artifacts/
+.amplify/generated/
+
+# Files outside project root (should never be tracked)
+~/.ssh/
+~/kiro-workspace/
+
 # Backup files (contain sensitive data)
 backups/
 *.backup.json
