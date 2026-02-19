@@ -269,12 +269,17 @@
               "properties": {
                 "rules": [
                   {
-                    "allow": "private",
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
                     "operations": [
                       "create",
+                      "read",
                       "update",
-                      "delete",
-                      "read"
+                      "delete"
+                    ],
+                    "groups": [
+                      "SuperAdmin"
                     ]
                   }
                 ]
@@ -521,6 +526,42 @@
                       "delete",
                       "read"
                     ]
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update",
+                      "delete"
+                    ],
+                    "groups": [
+                      "Admin"
+                    ]
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "read"
+                    ],
+                    "groups": [
+                      "Nurse"
+                    ]
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "read"
+                    ],
+                    "groups": [
+                      "Family"
+                    ]
                   }
                 ]
               }
@@ -725,6 +766,31 @@
                       "update",
                       "delete",
                       "read"
+                    ]
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update",
+                      "delete"
+                    ],
+                    "groups": [
+                      "Admin"
+                    ]
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "read"
+                    ],
+                    "groups": [
+                      "Nurse"
                     ]
                   }
                 ]
@@ -933,7 +999,7 @@
                       "delete"
                     ],
                     "groups": [
-                      "ADMIN"
+                      "Admin"
                     ]
                   },
                   {
@@ -944,7 +1010,7 @@
                       "read"
                     ],
                     "groups": [
-                      "NURSE"
+                      "Nurse"
                     ]
                   }
                 ]
@@ -1091,7 +1157,7 @@
                       "delete"
                     ],
                     "groups": [
-                      "ADMIN"
+                      "Admin"
                     ]
                   },
                   {
@@ -1102,7 +1168,7 @@
                       "read"
                     ],
                     "groups": [
-                      "NURSE"
+                      "Nurse"
                     ]
                   }
                 ]
@@ -1263,6 +1329,32 @@
                       "update",
                       "delete",
                       "read"
+                    ]
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update",
+                      "delete"
+                    ],
+                    "groups": [
+                      "Admin"
+                    ]
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "create",
+                      "read"
+                    ],
+                    "groups": [
+                      "Nurse"
                     ]
                   }
                 ]
@@ -1543,7 +1635,7 @@
                       "delete"
                     ],
                     "groups": [
-                      "ADMIN"
+                      "Admin"
                     ]
                   }
                 ]
@@ -1778,12 +1870,17 @@
                     ]
                   },
                   {
-                    "allow": "private",
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
                     "operations": [
                       "create",
-                      "update",
-                      "delete",
-                      "read"
+                      "read",
+                      "update"
+                    ],
+                    "groups": [
+                      "Admin",
+                      "Nurse"
                     ]
                   }
                 ]
@@ -1927,12 +2024,15 @@
                     ]
                   },
                   {
-                    "allow": "private",
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
                     "operations": [
-                      "create",
-                      "update",
-                      "delete",
                       "read"
+                    ],
+                    "groups": [
+                      "Admin",
+                      "SuperAdmin"
                     ]
                   }
                 ]
@@ -2082,8 +2182,9 @@
                       "delete"
                     ],
                     "groups": [
-                      "ADMIN",
-                      "NURSE"
+                      "Admin",
+                      "Nurse",
+                      "Family"
                     ]
                   }
                 ]
@@ -2353,7 +2454,7 @@
                       "delete"
                     ],
                     "groups": [
-                      "ADMIN"
+                      "Admin"
                     ]
                   },
                   {
@@ -2365,7 +2466,7 @@
                       "read"
                     ],
                     "groups": [
-                      "NURSE"
+                      "Nurse"
                     ]
                   },
                   {
@@ -2376,7 +2477,7 @@
                       "read"
                     ],
                     "groups": [
-                      "FAMILY"
+                      "Family"
                     ]
                   }
                 ]
@@ -2448,7 +2549,9 @@
             "VISIT_PENDING_REVIEW",
             "VISIT_AVAILABLE_FOR_FAMILY",
             "SHIFT_ASSIGNED",
-            "SHIFT_CANCELLED"
+            "SHIFT_CANCELLED",
+            "DETERIORATION_WARNING",
+            "DETERIORATION_CRITICAL"
           ]
         },
         "NurseRole": {
@@ -3230,6 +3333,26 @@
               "name": "input",
               "isArray": false,
               "type": "AWSJSON",
+              "isRequired": true
+            }
+          }
+        },
+        "analyzeDeteriorationRisk": {
+          "name": "analyzeDeteriorationRisk",
+          "isArray": false,
+          "type": "AWSJSON",
+          "isRequired": false,
+          "arguments": {
+            "patientId": {
+              "name": "patientId",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true
+            },
+            "tenantId": {
+              "name": "tenantId",
+              "isArray": false,
+              "type": "ID",
               "isRequired": true
             }
           }
