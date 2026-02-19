@@ -159,6 +159,58 @@ npx amplify deploy    # Deploy to AWS
 - Functions in `amplify/functions/`
 - Deploy with `npx amplify deploy`
 
+## Post-Deploy Hooks (MANDATORY)
+
+Every Amplify deploy silently breaks two things. AI agents MUST run the post-deploy fix after any successful Amplify build — no exceptions.
+
+### What Breaks on Every Deploy
+
+1. **Cognito auth flows** — Amplify removes `ALLOW_ADMIN_USER_PASSWORD_AUTH` from the Cognito client, breaking all programmatic login (tests, scripts, API health checks).
+2. **AppSync resolver auth functions** — Amplify regenerates all `auth0` VTL resolver functions with empty request templates, effectively removing group-based access control. Admin, Nurse, and Family roles lose their RBAC enforcement.
+
+### Required Post-Deploy Procedure
+
+From the Ubuntu EC2 instance (`ssh ubuntu-dev`):
+
+```bash
+cd /home/ubuntu/projects/ERP
+
+# Step 1: Run the post-deploy fix (Cognito + resolvers + health check)
+bash .local-tests/post-deploy.sh
+
+# Step 2: Run the full E2E suite to verify everything works
+node .local-tests/e2e-full-workflow.cjs
+```
+
+Expected E2E result: **20 PASS, 0 FAIL, 0 WARN** (Admin: 10, Nurse: 6, Family: 4).
+
+If any tests fail after running the post-deploy fix, investigate before proceeding. Do not ship broken auth.
+
+### What the Post-Deploy Script Does
+
+1. Re-enables `ALLOW_ADMIN_USER_PASSWORD_AUTH` on Cognito client `2evujd9dbsveotssutkp4u6436`
+2. Runs `fix-all-resolvers.py` — scans ~400 AppSync functions, patches empty auth0 templates with correct `staticGroupRoles` VTL
+3. Runs `api-health-check.py` — authenticates as admin and queries all 8 data models
+
+### Test Credentials
+
+| Role   | Email           | Password   | Cognito Group |
+|--------|-----------------|------------|---------------|
+| Admin  | admin@ips.com   | Admin123!  | Admin         |
+| Nurse  | nurse@ips.com   | Nurse123!  | Nurse         |
+| Family | family@ips.com  | Family123! | Family        |
+
+### Infrastructure IDs
+
+| Resource       | ID |
+|----------------|----|
+| Amplify App    | `d2wwgecog8smmr` |
+| AppSync API    | `fxeusr7wzfchtkr7kamke3qnwq` |
+| Cognito Pool   | `us-east-1_q9ZtCLtQr` |
+| Cognito Client | `2evujd9dbsveotssutkp4u6436` |
+
+See `.local-tests/TESTING.md` for full details, troubleshooting, and standalone script usage.
+
 ## Common Pitfalls
 
 - **Tenant isolation**: Always filter by `tenantId`. Cross-tenant data leaks are critical security bugs.
