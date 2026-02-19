@@ -223,7 +223,10 @@ const schema = a.schema({
         visits: a.hasMany('Visit', 'patientId'),
         assessments: a.hasMany('PatientAssessment', 'patientId'), // Phase 4: Clinical assessments
     }).authorization(allow => [
-        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')
+        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
+        allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+        allow.groups(['Nurse']).to(['read']),
+        allow.groups(['Family']).to(['read'])
     ]),
 
     // 3. NURSE - Home care nurses
@@ -248,7 +251,9 @@ const schema = a.schema({
         assessments: a.hasMany('PatientAssessment', 'nurseId'), // Phase 4: Clinical assessments
         primaryPatients: a.hasMany('Patient', 'primaryNurseId'), // Task 4.3: Patients assigned to this nurse
     }).authorization(allow => [
-        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')
+        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
+        allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+        allow.groups(['Nurse']).to(['read'])
     ]),
 
     // 4. SHIFT - Nurse assignments to patients
@@ -319,7 +324,9 @@ const schema = a.schema({
         weight: a.float(),
         note: a.string(),
     }).authorization(allow => [
-        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')
+        allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId'),
+        allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+        allow.groups(['Nurse']).to(['create', 'read'])
     ]),
 
     // 7. BILLING RECORD - RIPS billing data (Phase 10: Updated for Billing module)
