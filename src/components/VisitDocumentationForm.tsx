@@ -392,7 +392,15 @@ export const VisitDocumentationForm: React.FC<VisitDocumentationFormProps> = ({
         <div className="relative px-6 py-4 border-b border-slate-200">
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => {
+              if (hasUnsavedChanges()) {
+                if (window.confirm('¿Estás seguro de salir? Los cambios sin guardar se perderán.')) {
+                  onClose();
+                }
+              } else {
+                onClose();
+              }
+            }}
             className="absolute left-4 top-4 p-2 hover:bg-slate-200 rounded-lg transition-colors"
             aria-label="Volver"
           >
@@ -597,6 +605,13 @@ function VoiceDictationBar({
         <p className="mt-2 text-xs text-red-500 flex items-center gap-1">
           <MicOff size={12} />
           {error}
+        </p>
+      )}
+
+      {/* Helper text for first-time users */}
+      {!isListening && !error && (
+        <p className="mt-1.5 text-[11px] text-slate-400 leading-relaxed">
+          Toca el botón y habla. La app escribirá lo que dices en las observaciones. Puedes editar el texto después.
         </p>
       )}
     </div>

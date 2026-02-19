@@ -931,7 +931,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                         animate="show"
                                         className="grid grid-cols-1 md:grid-cols-2 gap-4"
                                     >
-                                        {filteredShifts.map(shift => {
+                                        {filteredShifts.map((shift, shiftIdx) => {
                                             const patient = patients.find(p => p.id === shift.patientId);
                                             const patientName = patient?.name || shift.patientName || 'Paciente Desconocido';
                                             const isCreatingThisDraft = creatingDraft === shift.id;
@@ -955,6 +955,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                             return (
                                               <motion.div key={shift.id} variants={fadeSlideUp}>
                                                 <SwipeableShiftCard
+                                                    showHint={shiftIdx === 0}
                                                     onNavigate={() => {
                                                         const addr = patient?.address || shift.location || '';
                                                         if (addr) window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr)}`, '_blank');
@@ -999,7 +1000,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                         <div className="flex-1 min-w-0">
                                                             <div className="flex items-center justify-between gap-2">
                                                                 <h3 className="font-bold text-base text-slate-900 truncate">
-                                                                    {patientName}
+                                                                    <span className="text-blue-500 font-bold mr-1">{shiftIdx + 1}.</span>{patientName}
                                                                 </h3>
                                                                 <div className="flex items-center gap-2">
                                                                     {hasVitals && (
@@ -1015,11 +1016,11 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                                     </Badge>
                                                                 </div>
                                                             </div>
-                                                            <p className="text-sm text-slate-500 truncate mt-0.5">
+                                                            <p className="text-sm font-medium text-slate-600 mt-0.5">
                                                                 {patient?.address || shift.location || 'Dirección no disponible'}
                                                             </p>
                                                             <div className="flex items-center gap-2 mt-1">
-                                                                <p className="text-xs text-slate-400 font-medium">
+                                                                <p className="text-xs text-slate-500 font-semibold">
                                                                     {new Date(shift.scheduledTime).toLocaleString('es-CO', {
                                                                         weekday: 'short',
                                                                         day: 'numeric',
@@ -1184,6 +1185,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                 }>
                                     <RouteMap
                                         shifts={filteredShifts}
+                                        patients={patients}
                                         nursePosition={nursePosition ? { lat: nursePosition.lat, lng: nursePosition.lng } : null}
                                         onOptimize={handleOptimizeRoute}
                                         isOptimizing={isOptimizingRoute}
