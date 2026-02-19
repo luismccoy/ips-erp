@@ -319,46 +319,47 @@ graph TD
         <div class="bg-indigo-50 rounded-lg p-4">
           <h3 class="text-sm font-bold text-indigo-900 mb-3">Admin Portal</h3>
           <div class="space-y-2 text-xs text-indigo-700 font-mono">
-            <div>/admin</div>
-            <div>/admin/visits</div>
-            <div>/admin/visits/:id</div>
-            <div>/admin/rips</div>
-            <div>/admin/glosa/:id</div>
-            <div>/admin/staff</div>
+            <div>#dashboard</div>
+            <div>#visits</div>
+            <div>#visit/:id</div>
+            <div>#rips</div>
+            <div>#glosa/:id</div>
+            <div>#staff</div>
           </div>
         </div>
         
         <div class="bg-purple-50 rounded-lg p-4">
           <h3 class="text-sm font-bold text-purple-900 mb-3">Nurse Portal</h3>
           <div class="space-y-2 text-xs text-purple-700 font-mono">
-            <div>/nurse</div>
-            <div>/nurse/visits</div>
-            <div>/nurse/visit/:id</div>
-            <div>/nurse/visit/:id/kardex</div>
-            <div>/nurse/visit/:id/scales</div>
-            <div>/nurse/offline-queue</div>
+            <div>#nurse</div>
+            <div>#nurse/visits</div>
+            <div>#nurse/visit/:id</div>
+            <div>#nurse/visit/:id/kardex</div>
+            <div>#nurse/visit/:id/scales</div>
+            <div>#nurse/offline-queue</div>
           </div>
         </div>
         
         <div class="bg-pink-50 rounded-lg p-4">
           <h3 class="text-sm font-bold text-pink-900 mb-3">Family Portal</h3>
           <div class="space-y-2 text-xs text-pink-700 font-mono">
-            <div>/family/:code</div>
-            <div>/family/:code/patient</div>
-            <div>/family/:code/history</div>
-            <div>/family/:code/visits/:id</div>
-            <div>/family/:code/messages</div>
+            <div>#family/:code</div>
+            <div>#family/:code/patient</div>
+            <div>#family/:code/history</div>
+            <div>#family/:code/visits/:id</div>
+            <div>#family/:code/messages</div>
           </div>
         </div>
       </div>
 
       <div class="mt-6 bg-blue-50 rounded-lg p-4">
-        <h3 class="text-sm font-bold text-blue-900 mb-2">🔗 Deep Link Examples</h3>
+        <h3 class="text-sm font-bold text-blue-900 mb-2">🔗 Hash-Based Routing</h3>
+        <p class="text-xs text-blue-600 mb-2">The app uses hash-based routing (<code>#view</code>) rather than path-based (<code>/path</code>) routing. This ensures compatibility with Amplify Hosting and offline-first navigation.</p>
         <div class="space-y-2 text-xs text-blue-700">
-          <div><strong>Direct to Visit:</strong> <code>https://app.ips-erp.com/nurse/visit/V-20260130-001</code></div>
-          <div><strong>Resume KARDEX:</strong> <code>https://app.ips-erp.com/nurse/visit/V-20260130-001/kardex</code></div>
-          <div><strong>Family View:</strong> <code>https://app.ips-erp.com/family/FAM-1234/patient</code></div>
-          <div><strong>Admin Approval:</strong> <code>https://app.ips-erp.com/admin/visits/V-20260130-001</code></div>
+          <div><strong>Direct to Visit:</strong> <code>https://main.d2wwgecog8smmr.amplifyapp.com/#visit/V-20260130-001</code></div>
+          <div><strong>Resume KARDEX:</strong> <code>https://main.d2wwgecog8smmr.amplifyapp.com/#nurse/visit/V-20260130-001/kardex</code></div>
+          <div><strong>Family View:</strong> <code>https://main.d2wwgecog8smmr.amplifyapp.com/#family/FAM-1234/patient</code></div>
+          <div><strong>Admin Approval:</strong> <code>https://main.d2wwgecog8smmr.amplifyapp.com/#visit/V-20260130-001</code></div>
         </div>
       </div>
     </div>
@@ -478,45 +479,50 @@ stateDiagram-v2
     <div class="diagram-container rounded-2xl p-8 mb-8 shadow-2xl">
       <h2 class="text-2xl font-bold text-slate-900 mb-4">Navigation Testing Coverage</h2>
       
-      <div class="grid md:grid-cols-3 gap-4 mb-6">
+      <div class="grid md:grid-cols-1 gap-4 mb-6">
         <div class="bg-green-50 rounded-lg p-4 text-center">
-          <div class="text-3xl font-bold text-green-900">9/9</div>
-          <div class="text-sm text-green-700">Smoke Tests</div>
+          <div class="text-3xl font-bold text-green-900">20/20</div>
+          <div class="text-sm text-green-700">Total Tests</div>
           <div class="text-xs text-green-600 mt-1">100% Pass Rate</div>
-        </div>
-        <div class="bg-blue-50 rounded-lg p-4 text-center">
-          <div class="text-3xl font-bold text-blue-900">6/8</div>
-          <div class="text-sm text-blue-700">Edge Cases</div>
-          <div class="text-xs text-blue-600 mt-1">75% Pass Rate</div>
-        </div>
-        <div class="bg-purple-50 rounded-lg p-4 text-center">
-          <div class="text-3xl font-bold text-purple-900">15/17</div>
-          <div class="text-sm text-purple-700">Total Tests</div>
-          <div class="text-xs text-purple-600 mt-1">88% Pass Rate</div>
         </div>
       </div>
 
       <div class="bg-slate-50 rounded-lg p-4">
-        <h3 class="text-sm font-bold text-slate-900 mb-3">Test Scenarios (Playwright)</h3>
-        <div class="grid md:grid-cols-2 gap-4">
+        <h3 class="text-sm font-bold text-slate-900 mb-3">Test Scenarios (Playwright E2E)</h3>
+        <div class="grid md:grid-cols-3 gap-4">
           <div>
-            <h4 class="text-xs font-bold text-slate-700 mb-2">✅ Passing Tests</h4>
+            <h4 class="text-xs font-bold text-slate-700 mb-2">✅ Admin Tests (10)</h4>
             <ul class="text-xs text-slate-600 space-y-1">
-              <li>• Basic portal navigation</li>
-              <li>• Back button functionality</li>
-              <li>• Multi-visit navigation</li>
-              <li>• Rapid click handling</li>
-              <li>• State persistence</li>
-              <li>• Browser history integration</li>
+              <li>• Login & dashboard access</li>
+              <li>• Billing AI persistence</li>
+              <li>• Inventory write access</li>
+              <li>• Lambda integrations</li>
+              <li>• Shift creation</li>
+              <li>• Visit rejection workflow</li>
+              <li>• Workflow components</li>
+              <li>• RIPS validation</li>
+              <li>• Glosa defense</li>
+              <li>• Roster optimization</li>
             </ul>
           </div>
           <div>
-            <h4 class="text-xs font-bold text-slate-700 mb-2">🔄 In Progress</h4>
+            <h4 class="text-xs font-bold text-slate-700 mb-2">✅ Nurse Tests (6)</h4>
             <ul class="text-xs text-slate-600 space-y-1">
-              <li>• Deep link restoration</li>
-              <li>• Offline recovery flows</li>
-              <li>• Permission boundary tests</li>
-              <li>• Concurrent user scenarios</li>
+              <li>• Login & portal access</li>
+              <li>• Visit documentation</li>
+              <li>• Clinical scales</li>
+              <li>• Offline queue</li>
+              <li>• KARDEX form</li>
+              <li>• Visit submission</li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-slate-700 mb-2">✅ Family Tests (4)</h4>
+            <ul class="text-xs text-slate-600 space-y-1">
+              <li>• Login & portal access</li>
+              <li>• Patient overview</li>
+              <li>• Visit history</li>
+              <li>• Care updates</li>
             </ul>
           </div>
         </div>
@@ -528,7 +534,7 @@ stateDiagram-v2
       <div class="flex items-center justify-between">
         <div>
           <div class="text-sm text-slate-600">Documentation Generated</div>
-          <div class="text-xs text-slate-500">2026-01-30 • IPS-ERP Navigation Architecture</div>
+          <div class="text-xs text-slate-500">2026-02-19 • IPS-ERP Navigation Architecture</div>
         </div>
         <div class="flex gap-4 text-xs text-slate-500">
           <a href="admin-journey.html" class="hover:text-indigo-600">Admin Journey</a>

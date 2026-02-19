@@ -39,7 +39,7 @@
           <div class="grid md:grid-cols-5 gap-4">
             <div class="bg-indigo-50 rounded-lg p-4">
               <div class="text-2xl font-bold text-indigo-900">Visit</div>
-              <div class="text-sm text-indigo-700">8 States</div>
+              <div class="text-sm text-indigo-700">4 States</div>
             </div>
             <div class="bg-purple-50 rounded-lg p-4">
               <div class="text-2xl font-bold text-purple-900">RIPS</div>
@@ -71,35 +71,17 @@
       
       <div class="mermaid">
 stateDiagram-v2
-    [*] --> ASSIGNED: Admin assigns nurse
+    [*] --> DRAFT: Nurse creates visit
     
-    ASSIGNED --> IN_PROGRESS: Nurse starts visit
-    ASSIGNED --> CANCELLED: Admin/Patient cancels
+    DRAFT --> DRAFT: saveProgress()
+    DRAFT --> SUBMITTED: Nurse submits
     
-    IN_PROGRESS --> DOCUMENTING: Start documentation
+    SUBMITTED --> APPROVED: Admin approves
+    SUBMITTED --> REJECTED: Admin rejects
     
-    DOCUMENTING --> DRAFT: Save in progress
-    DRAFT --> DOCUMENTING: Resume editing
+    REJECTED --> SUBMITTED: Nurse resubmits
     
-    DOCUMENTING --> AWAITING_APPROVAL: Submit for approval
-    
-    AWAITING_APPROVAL --> APPROVED: Admin approves
-    AWAITING_APPROVAL --> REVISION_REQUIRED: Admin requests changes
-    
-    REVISION_REQUIRED --> DOCUMENTING: Nurse re-edits
-    
-    APPROVED --> RIPS_PENDING: Queue for RIPS
-    RIPS_PENDING --> RIPS_GENERATED: AI validates & generates
-    RIPS_GENERATED --> BILLED: Submit to EPS
-    
-    BILLED --> REJECTED: EPS rejects (glosa)
-    REJECTED --> GLOSA_DEFENSE: AI generates defense
-    GLOSA_DEFENSE --> BILLED: Resubmitted successfully
-    
-    BILLED --> PAID: EPS pays
-    PAID --> [*]: Completed
-    
-    CANCELLED --> [*]: Visit cancelled
+    APPROVED --> [*]: Complete
     
     note right of DRAFT
         Auto-saved locally
@@ -107,16 +89,14 @@ stateDiagram-v2
         Persists across sessions
     end note
     
-    note right of AWAITING_APPROVAL
+    note right of SUBMITTED
         Notification to admin
         72h SLA timer starts
-        Can bulk-approve similar
     end note
     
     note right of REJECTED
-        Glosa Defender AI
-        92% success rate
-        Auto-generates PDF
+        Nurse can edit and resubmit
+        Rejection reason provided
     end note
       </div>
 
@@ -124,11 +104,9 @@ stateDiagram-v2
         <div class="bg-green-50 rounded-lg p-4">
           <h3 class="text-sm font-bold text-green-900 mb-2">✅ Happy Path</h3>
           <div class="text-xs text-green-700 space-y-1">
-            <div>1. ASSIGNED → IN_PROGRESS (5min avg)</div>
-            <div>2. DOCUMENTING → AWAITING_APPROVAL (45min avg)</div>
-            <div>3. APPROVED → RIPS_GENERATED (2min AI)</div>
-            <div>4. BILLED → PAID (7-15 days)</div>
-            <div><strong>Total: ~8-16 days</strong></div>
+            <div>1. DRAFT → SUBMITTED (nurse documents)</div>
+            <div>2. SUBMITTED → APPROVED (admin reviews)</div>
+            <div><strong>Total: ~1-2 days</strong></div>
           </div>
         </div>
         
@@ -257,7 +235,7 @@ stateDiagram-v2
     
     note right of ANALYZING
         Glosa Defender AI
-        Claude Opus 4.5
+        Claude 3.5 Sonnet
         92% success rate
         Avg 15min generation
     end note
@@ -430,10 +408,8 @@ stateDiagram-v2
         <div class="bg-indigo-50 rounded-lg p-4">
           <h3 class="text-sm font-bold text-indigo-900 mb-3">Admin Permissions</h3>
           <ul class="text-xs text-indigo-700 space-y-1">
-            <li>• ASSIGNED ← Create visit</li>
-            <li>• AWAITING_APPROVAL → APPROVED</li>
-            <li>• AWAITING_APPROVAL → REVISION_REQUIRED</li>
-            <li>• Any state → CANCELLED</li>
+            <li>• SUBMITTED → APPROVED</li>
+            <li>• SUBMITTED → REJECTED</li>
             <li>• MANUAL_REVIEW → PENDING (RIPS)</li>
             <li>• DEFENSE_GENERATED → APPROVED_FOR_SUBMISSION</li>
           </ul>
@@ -442,11 +418,9 @@ stateDiagram-v2
         <div class="bg-purple-50 rounded-lg p-4">
           <h3 class="text-sm font-bold text-purple-900 mb-3">Nurse Permissions</h3>
           <ul class="text-xs text-purple-700 space-y-1">
-            <li>• ASSIGNED → IN_PROGRESS</li>
-            <li>• IN_PROGRESS → DOCUMENTING</li>
-            <li>• DOCUMENTING ↔ DRAFT</li>
-            <li>• DOCUMENTING → AWAITING_APPROVAL</li>
-            <li>• REVISION_REQUIRED → DOCUMENTING</li>
+            <li>• Create DRAFT visit</li>
+            <li>• DRAFT → SUBMITTED</li>
+            <li>• REJECTED → SUBMITTED (resubmit)</li>
             <li>• AVAILABLE ↔ ON_VISIT ↔ BREAK</li>
           </ul>
         </div>
@@ -454,7 +428,6 @@ stateDiagram-v2
         <div class="bg-pink-50 rounded-lg p-4">
           <h3 class="text-sm font-bold text-pink-900 mb-3">System/AI Permissions</h3>
           <ul class="text-xs text-pink-700 space-y-1">
-            <li>• RIPS_PENDING → RIPS_GENERATED</li>
             <li>• PENDING → VALIDATING (RIPS)</li>
             <li>• VALIDATING → GENERATED</li>
             <li>• REJECTED → ANALYZING (Glosa)</li>
@@ -476,19 +449,17 @@ stateDiagram-v2
         <div class="bg-red-50 rounded-lg p-4">
           <h3 class="text-sm font-bold text-red-900 mb-2">❌ Cannot Skip States</h3>
           <ul class="text-xs text-red-700 space-y-1">
-            <li>• ASSIGNED → APPROVED (must document)</li>
-            <li>• IN_PROGRESS → BILLED (must approve first)</li>
-            <li>• DRAFT → RIPS_GENERATED (must submit for approval)</li>
-            <li>• REJECTED → PAID (must defend glosa)</li>
+            <li>• DRAFT → APPROVED (must submit first)</li>
+            <li>• REJECTED → APPROVED (must resubmit)</li>
+            <li>• DRAFT → REJECTED (must submit first)</li>
           </ul>
         </div>
         
         <div class="bg-orange-50 rounded-lg p-4">
           <h3 class="text-sm font-bold text-orange-900 mb-2">⚠️ Cannot Reverse</h3>
           <ul class="text-xs text-orange-700 space-y-1">
-            <li>• PAID → any prior state (audit trail)</li>
-            <li>• CANCELLED → ASSIGNED (create new)</li>
-            <li>• BILLED → DRAFT (can only defend)</li>
+            <li>• APPROVED → any prior state (final)</li>
+            <li>• SUBMITTED → DRAFT (can only be approved/rejected)</li>
             <li>• DISCHARGED → ACTIVE_CARE (re-admit process)</li>
           </ul>
         </div>
@@ -539,7 +510,7 @@ stateDiagram-v2
       <div class="grid md:grid-cols-4 gap-4 mb-6">
         <div class="bg-green-50 rounded-lg p-4 text-center">
           <div class="text-2xl font-bold text-green-900">Visit</div>
-          <div class="text-sm text-green-700">8/8 states</div>
+          <div class="text-sm text-green-700">4/4 states</div>
           <div class="text-xs text-green-600">100% covered</div>
         </div>
         <div class="bg-blue-50 rounded-lg p-4 text-center">
@@ -562,8 +533,8 @@ stateDiagram-v2
       <div class="bg-slate-50 rounded-lg p-4">
         <h3 class="text-sm font-bold text-slate-900 mb-2">Playwright Test Coverage</h3>
         <ul class="text-xs text-slate-600 space-y-1">
-          <li>✓ Happy path: ASSIGNED → PAID (full cycle test)</li>
-          <li>✓ Rejection flow: BILLED → REJECTED → DEFENSE → PAID</li>
+          <li>✓ Happy path: DRAFT → SUBMITTED → APPROVED (full cycle test)</li>
+          <li>✓ Rejection flow: SUBMITTED → REJECTED → SUBMITTED → APPROVED</li>
           <li>✓ Draft persistence: DRAFT → logout → resume</li>
           <li>✓ Invalid transitions: Guards prevent illegal moves</li>
           <li>✓ Offline sync: LOCAL_ONLY → SYNCING → SYNCED</li>
@@ -577,7 +548,7 @@ stateDiagram-v2
       <div class="flex items-center justify-between">
         <div>
           <div class="text-sm text-slate-600">Documentation Generated</div>
-          <div class="text-xs text-slate-500">2026-01-30 • IPS-ERP State Transitions</div>
+          <div class="text-xs text-slate-500">2026-02-19 • IPS-ERP State Transitions</div>
         </div>
         <div class="flex gap-4 text-xs text-slate-500">
           <a href="navigation-flows.html" class="hover:text-indigo-600">Navigation</a>

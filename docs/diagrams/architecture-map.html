@@ -120,24 +120,27 @@ graph TB
     
     subgraph "API Layer"
         AppSync[AWS AppSync<br/>GraphQL API]
-        APIGateway[API Gateway<br/>REST endpoints]
     end
     
     subgraph "Business Logic"
-        Lambda[AWS Lambda Functions]
+        Lambda[AWS Lambda Functions<br/>12 functions]
         WorkflowEngine[Visit Workflow Engine]
         RosterEngine[Roster Architect AI]
         GlosaDefender[Glosa Defender AI]
+        DeteriorationDetector[Deterioration Detector AI]
+        RouteOptimizer[Route Optimizer]
     end
     
     subgraph "AI Services"
-        Bedrock[Amazon Bedrock<br/>Claude 3.7 Sonnet]
-        BedrockOps[Claude Opus 4.5<br/>Complex reasoning]
+        Bedrock[Amazon Bedrock<br/>Claude 3.5 Sonnet]
+    end
+    
+    subgraph "Location Services"
+        LocationService[Amazon Location Service<br/>Esri Provider]
     end
     
     subgraph "Data Layer"
-        DynamoDB[(DynamoDB<br/>Patient, Shift, Visit data)]
-        S3[(S3 Buckets<br/>Documents, Images)]
+        DynamoDB[(DynamoDB<br/>11 models)]
     end
     
     subgraph "Auth & Security"
@@ -151,21 +154,22 @@ graph TB
     
     CloudFront --> Amplify
     Amplify --> AppSync
-    Amplify --> APIGateway
     
     AppSync --> Lambda
-    APIGateway --> Lambda
     
     Lambda --> WorkflowEngine
     Lambda --> RosterEngine
     Lambda --> GlosaDefender
+    Lambda --> DeteriorationDetector
+    Lambda --> RouteOptimizer
     
     WorkflowEngine --> DynamoDB
     RosterEngine --> Bedrock
-    GlosaDefender --> BedrockOps
+    GlosaDefender --> Bedrock
+    DeteriorationDetector --> Bedrock
+    RouteOptimizer --> LocationService
     
     Lambda --> DynamoDB
-    Lambda --> S3
     
     AppSync --> Cognito
     Lambda --> IAM
@@ -175,6 +179,7 @@ graph TB
     style FamilyApp fill:#f472b6,stroke:#be185d
     style Bedrock fill:#f59e0b,stroke:#d97706
     style DynamoDB fill:#8b5cf6,stroke:#6d28d9
+    style LocationService fill:#06b6d4,stroke:#0891b2
       </pre>
     </div>
 
@@ -184,10 +189,10 @@ graph TB
       <div class="tech-card">
         <h4>Core Framework</h4>
         <ul>
-          <li><code>React 18.3</code> - UI library</li>
+          <li><code>React 19</code> - UI library</li>
           <li><code>TypeScript 5.x</code> - Type safety</li>
-          <li><code>Vite 5.x</code> - Build tool</li>
-          <li><code>TailwindCSS 3.x</code> - Styling</li>
+          <li><code>Vite</code> - Build tool</li>
+          <li><code>TailwindCSS v4</code> - Styling</li>
         </ul>
       </div>
       
@@ -281,6 +286,12 @@ graph LR
         <li><code>Visit</code> - Documentation, vitals, KARDEX</li>
         <li><code>PatientAssessment</code> - Clinical scales (Glasgow, Braden, etc.)</li>
         <li><code>Nurse</code> - Profile, certifications</li>
+        <li><code>Tenant</code> - Agency configuration</li>
+        <li><code>InventoryItem</code> - Medical supplies</li>
+        <li><code>BillingRecord</code> - RIPS billing</li>
+        <li><code>VitalSigns</code> - Patient vitals</li>
+        <li><code>AuditLog</code> - System audit trail</li>
+        <li><code>Notification</code> - User notifications</li>
       </ul>
       <p><strong>Features:</strong> Real-time subscriptions, pagination, filtering</p>
     </div>
@@ -293,7 +304,14 @@ graph LR
         <li><code>submitVisit</code> - Validate and submit for approval</li>
         <li><code>approveVisit</code> - Admin approval workflow</li>
         <li><code>rejectVisit</code> - Return for corrections</li>
-        <li><code>generateRIPS</code> - Create billing records</li>
+        <li><code>listApprovedVisitSummaries</code> - Query approved visits</li>
+        <li><code>ripsValidator</code> - AI-powered RIPS validation</li>
+        <li><code>glosaDefender</code> - AI-powered billing defense</li>
+        <li><code>rosterArchitect</code> - AI-powered shift optimization</li>
+        <li><code>deteriorationDetector</code> - AI-powered patient risk analysis</li>
+        <li><code>createNurseValidated</code> - Validated nurse creation</li>
+        <li><code>verifyFamilyAccess</code> - Family portal access verification</li>
+        <li><code>routeOptimizer</code> - Route optimization with Amazon Location Service</li>
       </ul>
       <p><strong>Runtime:</strong> Node.js 20.x, TypeScript</p>
     </div>
@@ -340,7 +358,7 @@ sequenceDiagram
     <div class="tech-stack">
       <div class="tech-card">
         <h4>Roster Architect AI</h4>
-        <p><strong>Model:</strong> Claude 3.7 Sonnet</p>
+        <p><strong>Model:</strong> Claude 3.5 Sonnet</p>
         <p><strong>Input:</strong></p>
         <ul>
           <li>Unassigned shifts</li>
@@ -354,7 +372,7 @@ sequenceDiagram
       
       <div class="tech-card">
         <h4>Glosa Defender AI</h4>
-        <p><strong>Model:</strong> Claude Opus 4.5</p>
+        <p><strong>Model:</strong> Claude 3.5 Sonnet</p>
         <p><strong>Input:</strong></p>
         <ul>
           <li>EPS rejection reason</li>
@@ -368,7 +386,7 @@ sequenceDiagram
       
       <div class="tech-card">
         <h4>RIPS Validator AI</h4>
-        <p><strong>Model:</strong> Claude 3.7 Sonnet</p>
+        <p><strong>Model:</strong> Claude 3.5 Sonnet</p>
         <p><strong>Input:</strong></p>
         <ul>
           <li>Visit documentation</li>
@@ -388,7 +406,7 @@ flowchart TD
     Lambda --> Fetch[Fetch clinical data<br/>from DynamoDB]
     Fetch --> Context[Build context:<br/>- Patient history<br/>- Visit notes<br/>- Vitals<br/>- EPS rejection reason]
     
-    Context --> Bedrock[Invoke Bedrock<br/>Claude Opus 4.5]
+    Context --> Bedrock[Invoke Bedrock<br/>Claude 3.5 Sonnet]
     
     Bedrock --> Prompt[Structured prompt:<br/>Legal framework +<br/>Medical evidence]
     
@@ -397,8 +415,7 @@ flowchart TD
     Generate --> Validate[Validate output:<br/>- Citations present<br/>- Medical terms correct<br/>- Format compliant]
     
     Validate --> PDF[Generate PDF]
-    PDF --> S3[Store in S3]
-    S3 --> Return[Return URL to admin]
+    PDF --> Return[Return URL to admin]
     
     Return --> Admin
     
@@ -412,7 +429,7 @@ flowchart TD
     <div class="layer">
       <div class="layer-title">Authentication (Cognito)</div>
       <ul>
-        <li><strong>User Pools:</strong> Separate pools for Nurse, Admin, Family</li>
+        <li><strong>User Pool:</strong> Single pool (<code>us-east-1_q9ZtCLtQr</code>) with 3 groups: Admin, Nurse, Family</li>
         <li><strong>MFA:</strong> Optional SMS/TOTP for admin accounts</li>
         <li><strong>Social Login:</strong> Google OAuth for family portal (future)</li>
         <li><strong>Session Management:</strong> JWT tokens with 1-hour expiry</li>
@@ -437,7 +454,7 @@ flowchart TD
     <div class="layer">
       <div class="layer-title">Data Protection</div>
       <ul>
-        <li><strong>Encryption at Rest:</strong> DynamoDB + S3 with AWS KMS</li>
+        <li><strong>Encryption at Rest:</strong> DynamoDB with AWS KMS</li>
         <li><strong>Encryption in Transit:</strong> TLS 1.3 only</li>
         <li><strong>HIPAA Compliance:</strong> BAA with AWS, audit logging</li>
         <li><strong>Data Residency:</strong> us-east-1 (configurable per tenant)</li>
@@ -484,7 +501,7 @@ graph TB
     MainBranch --> ProdEnv
     
     ProdEnv --> Monitoring
-    Monitoring --> Alerts[PagerDuty Alerts]
+    Monitoring --> Alerts[CloudWatch Alarms]
       </pre>
     </div>
 
@@ -495,7 +512,7 @@ graph TB
           <li><strong>Metrics:</strong> CloudWatch custom metrics</li>
           <li><strong>Logs:</strong> Centralized Lambda logs</li>
           <li><strong>Tracing:</strong> X-Ray for request tracing</li>
-          <li><strong>Alerts:</strong> SNS → PagerDuty</li>
+          <li><strong>Alerts:</strong> CloudWatch Alarms + SNS</li>
         </ul>
       </div>
       
@@ -616,13 +633,17 @@ sequenceDiagram
       <ul>
         <li><strong>Serverless:</strong> Zero server management, auto-scaling</li>
         <li><strong>Offline-First:</strong> Nurse app works without connectivity</li>
-        <li><strong>AI-Powered:</strong> 3 specialized AI agents (Roster, Glosa, RIPS)</li>
+        <li><strong>AI-Powered:</strong> 4 specialized AI agents (Roster, Glosa, RIPS, Deterioration)</li>
         <li><strong>Multi-Tenant:</strong> Single codebase serves multiple IPS organizations</li>
         <li><strong>Cost-Efficient:</strong> Pay-per-use, ~$0.50/user/month at scale</li>
         <li><strong>HIPAA-Compliant:</strong> Encrypted, audited, secure</li>
         <li><strong>Real-Time:</strong> GraphQL subscriptions for live updates</li>
       </ul>
     </div>
+
+    <p style="text-align: center; color: #64748b; margin-top: 50px;">
+      IPS-ERP System Architecture Documentation • Last Updated: 2026-02-19
+    </p>
 
   </div>
 

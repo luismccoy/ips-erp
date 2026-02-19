@@ -59,10 +59,14 @@
         %% Clinical Scales Workflow
         subgraph ClinicalScales ["Clinical Scales"]
             ScalesStart[Select Clinical Scale]
+            GlasgowScale[GLASGOW - Consciousness Level]
+            PainEVAScale[PAIN/EVA - Pain Assessment]
+            BradenScale[BRADEN - Skin Integrity]
+            MorseScale[MORSE - Fall Risk]
+            NEWSScale[NEWS - Early Warning Score]
             BarthelScale[BARTHEL - Activities of Daily Living]
             NortonScale[NORTON - Pressure Ulcer Risk]
-            BradenScale[BRADEN - Skin Integrity]
-            ZaritScale[ZARIT - Caregiver Burden]
+            RASSScale[RASS - Sedation/Agitation]
             ScaleValidation{Scale Validation}
             ScaleCalculation[Score Calculation]
             ScaleInterpretation[Clinical Interpretation]
@@ -112,6 +116,10 @@
         NetworkQueue --> [Sync with Server]
     end
     </div>
+
+    <p style="text-align: center; color: #d4d4d4; margin-top: 30px; padding-bottom: 20px;">
+      IPS-ERP Form Workflows Documentation • Last Updated: 2026-02-19
+    </p>
 
     <script>
         mermaid.initialize({ 

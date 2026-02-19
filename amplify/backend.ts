@@ -236,9 +236,12 @@ backend.deteriorationDetector.resources.lambda.addToRolePolicy(deteriorationDete
 // These tags are inherited by all resources in the stack (DynamoDB, Lambda, Cognito, AppSync, etc.)
 try {
     Tags.of(backend.stack).add('auto-delete', 'no');        // Prevents nightly Spring cleaning deletion
-    Tags.of(backend.stack).add('application', 'EPS');       // Identifies resource ownership for tracking and cost allocation
+    Tags.of(backend.stack).add('application', 'IPS-ERP');   // Identifies resource ownership for tracking and cost allocation
+    Tags.of(backend.stack).add('Project', 'IPS-ERP');       // Project identifier for resource grouping
+    Tags.of(backend.stack).add('Environment', 'production'); // Environment classification
+    Tags.of(backend.stack).add('Owner', 'luiscoy');         // Resource owner for accountability
 } catch (error) {
     console.error('⚠️  Failed to apply tags to backend stack:', error);
     console.log('📝 Manual remediation required - add tags via AWS Console or CLI');
-    console.log('   aws resourcegroupstaggingapi tag-resources --resource-arn-list <arn> --tags auto-delete=no,application=EPS');
+    console.log('   aws resourcegroupstaggingapi tag-resources --resource-arn-list <arn> --tags auto-delete=no,application=IPS-ERP,Project=IPS-ERP,Environment=production,Owner=luiscoy');
 }

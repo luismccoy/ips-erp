@@ -271,7 +271,6 @@ flowchart TB
     
     subgraph DATA["🗄️ Data Layer"]
         DynamoDB[(DynamoDB<br/>Primary Store)]
-        S3[(S3 Buckets<br/>Documents)]
     end
     
     NurseApp <-->|Offline writes| IndexedDB
@@ -287,7 +286,6 @@ flowchart TB
     AppSync <--> Subscriptions
     
     Lambda --> DynamoDB
-    Lambda --> S3
     Lambda <--> Bedrock
     
     Subscriptions -.->|Push updates| NurseApp
@@ -535,10 +533,10 @@ sequenceDiagram
         WF->>API: Update status: APPROVED
         API-->>Admin: Approved ✓
         API->>N: 🔔 Visit approved
-    else Rejected (needs corrections)
+    else Rejected
         Admin->>API: rejectVisit(visitId, reason)
         API->>WF: Process rejection
-        WF->>API: Update status: CORRECTIONS_NEEDED
+        WF->>API: Update status: REJECTED
         API-->>Admin: Rejected ✓
         API->>N: 🔔 Corrections needed
         N->>App: Make corrections
@@ -569,14 +567,11 @@ stateDiagram-v2
     DRAFT --> SUBMITTED: submitVisit()
     
     SUBMITTED --> APPROVED: approveVisit()
-    SUBMITTED --> CORRECTIONS_NEEDED: rejectVisit()
+    SUBMITTED --> REJECTED: rejectVisit()
     
-    CORRECTIONS_NEEDED --> SUBMITTED: reSubmitVisit()
+    REJECTED --> SUBMITTED: reSubmitVisit()
     
-    APPROVED --> RIPS_GENERATED: generateRIPS()
-    RIPS_GENERATED --> BILLED: markBilled()
-    
-    BILLED --> [*]
+    APPROVED --> [*]
     
     note right of DRAFT
         Nurse can edit
@@ -799,11 +794,12 @@ type VisitStatusEvent {
 
     <div class="info-box success">
       <h3>🧠 Amazon Bedrock Integration</h3>
-      <p>Three specialized AI agents powered by Claude models:</p>
+      <p>Four specialized AI agents powered by Claude 3.5 Sonnet:</p>
       <ul>
-        <li><strong>Roster Architect:</strong> Claude 3.7 Sonnet - Shift optimization</li>
-        <li><strong>Glosa Defender:</strong> Claude Opus 4.5 - Legal justification generation</li>
-        <li><strong>RIPS Validator:</strong> Claude 3.7 Sonnet - Billing compliance validation</li>
+        <li><strong>Roster Architect:</strong> Claude 3.5 Sonnet - Shift optimization</li>
+        <li><strong>Glosa Defender:</strong> Claude 3.5 Sonnet - Legal justification generation</li>
+        <li><strong>RIPS Validator:</strong> Claude 3.5 Sonnet - Billing compliance validation</li>
+        <li><strong>Deterioration Detector:</strong> Claude 3.5 Sonnet - Patient deterioration alerts</li>
       </ul>
     </div>
 
@@ -811,7 +807,7 @@ type VisitStatusEvent {
     <div class="ai-agent">
       <h4>🗓️ Roster Architect - Shift Optimization</h4>
       <p><strong>Purpose:</strong> Optimally assign nurses to shifts considering skills, location, and availability</p>
-      <p><strong>Model:</strong> Claude 3.7 Sonnet | <strong>Cost:</strong> ~$0.003/optimization</p>
+      <p><strong>Model:</strong> Claude 3.5 Sonnet | <strong>Cost:</strong> ~$0.003/optimization</p>
     </div>
 
     <div class="diagram">
@@ -827,7 +823,7 @@ flowchart LR
     subgraph Process["🧠 AI Processing"]
         Lambda["Lambda Function<br/>roster-optimizer"]
         Context["Build Context<br/>JSON payload"]
-        Bedrock["Amazon Bedrock<br/>Claude 3.7 Sonnet"]
+        Bedrock["Amazon Bedrock<br/>Claude 3.5 Sonnet"]
         Parse["Parse Response<br/>Extract assignments"]
     end
     
@@ -862,7 +858,7 @@ sequenceDiagram
     participant API as GraphQL API
     participant Lambda as Roster Lambda
     participant DB as DynamoDB
-    participant AI as Bedrock Claude
+    participant AI as Bedrock Claude 3.5 Sonnet
     
     Admin->>API: optimizeRoster(date: "2026-01-30")
     API->>Lambda: Invoke roster-optimizer
@@ -896,7 +892,7 @@ sequenceDiagram
     <div class="ai-agent">
       <h4>🛡️ Glosa Defender - EPS Rejection Appeals</h4>
       <p><strong>Purpose:</strong> Generate legally sound justification documents for rejected claims</p>
-      <p><strong>Model:</strong> Claude Opus 4.5 | <strong>Cost:</strong> ~$0.15/defense</p>
+      <p><strong>Model:</strong> Claude 3.5 Sonnet | <strong>Cost:</strong> ~$0.05/defense</p>
     </div>
 
     <div class="diagram">
@@ -916,30 +912,33 @@ flowchart TB
     
     subgraph AI["🧠 AI Defense Generation"]
         Lambda["Lambda Function<br/>glosa-defender"]
-        Opus["Claude Opus 4.5<br/>Deep reasoning"]
+        Sonnet["Claude 3.5 Sonnet<br/>Legal reasoning"]
         Generate["Generate Justification<br/>- Medical necessity<br/>- Legal citations<br/>- Clinical evidence"]
     end
     
-    subgraph Output["📄 Output"]
-        PDF["PDF Document<br/>Formal justification"]
-        S3["Store in S3<br/>glosa-defenses/"]
-        Notify["Notify Admin<br/>Defense ready"]
+    subgraph "5. Output Generation"
+        Justification["📄 Legal Justification<br/>Document"]
+        Citations["📚 Regulation<br/>Citations"]
+        Evidence["🔗 Evidence<br/>References"]
+        PDF["📑 Combined PDF<br/>for EPS submission"]
+        
+        Bedrock --> Justification
+        Bedrock --> Citations
+        Bedrock --> Evidence
+        
+        Justification --> PDF
+        Citations --> PDF
+        Evidence --> PDF
     end
     
-    Rejection --> Lambda
+    subgraph "6. Submission"
+        Review[👨‍💼 Admin Review]
+        Submit[📤 Submit to EPS]
+        Track[📊 Track Response]
+        
+        PDF --> Review
     
-    Lambda --> Patient
-    Lambda --> Visits
-    Lambda --> RIPS
-    Lambda --> Legal
-    
-    Patient & Visits & RIPS & Legal --> Opus
-    Opus --> Generate
-    Generate --> PDF
-    PDF --> S3
-    S3 --> Notify
-    
-    style Opus fill:#c4b5fd,stroke:#8b5cf6,color:#0f172a
+    style Sonnet fill:#c4b5fd,stroke:#8b5cf6,color:#0f172a
     style PDF fill:#10b981,stroke:#059669,color:#0f172a
       </pre>
     </div>
@@ -952,8 +951,7 @@ sequenceDiagram
     participant API as GraphQL API
     participant Lambda as Glosa Lambda
     participant DB as DynamoDB
-    participant AI as Claude Opus 4.5
-    participant S3 as S3 Storage
+    participant AI as Claude 3.5 Sonnet
     
     Admin->>API: defendGlosa(rejectionId: "rej-456")
     API->>Lambda: Invoke glosa-defender
@@ -971,13 +969,11 @@ sequenceDiagram
     Note right of Lambda: 50KB+ clinical context<br/>+ legal framework<br/>+ EPS guidelines
     
     Lambda->>AI: Generate defense document
-    Note right of AI: Deep reasoning mode<br/>Extended thinking enabled<br/>Legal + Medical analysis
+    Note right of AI: Legal + Medical analysis<br/>with regulation citations
     
     AI-->>Lambda: Structured justification<br/>with citations
     
     Lambda->>Lambda: Generate PDF
-    Lambda->>S3: Upload PDF
-    S3-->>Lambda: URL: s3://bucket/defenses/def-789.pdf
     
     Lambda->>DB: Create DefenseRecord
     Lambda-->>API: Defense ready
@@ -989,7 +985,7 @@ sequenceDiagram
     <div class="ai-agent">
       <h4>✅ RIPS Validator - Pre-Submission Validation</h4>
       <p><strong>Purpose:</strong> Validate RIPS XML before EPS submission to prevent rejections</p>
-      <p><strong>Model:</strong> Claude 3.7 Sonnet | <strong>Cost:</strong> ~$0.002/validation</p>
+      <p><strong>Model:</strong> Claude 3.5 Sonnet | <strong>Cost:</strong> ~$0.002/validation</p>
     </div>
 
     <div class="diagram">
@@ -1011,7 +1007,7 @@ flowchart LR
     
     subgraph Validate["🧠 AI Validation"]
         Lambda["Lambda Function<br/>rips-validator"]
-        Sonnet["Claude 3.7 Sonnet<br/>Pattern matching"]
+        Sonnet["Claude 3.5 Sonnet<br/>Pattern matching"]
         Check["Validation Checks<br/>- Required fields<br/>- Code validity<br/>- Logical consistency"]
     end
     
@@ -1044,28 +1040,36 @@ flowchart LR
 flowchart TB
     subgraph RosterAI["🗓️ Roster Architect"]
         R_In["Input:<br/>Shifts + Nurses"]
-        R_Model["Claude 3.7 Sonnet<br/>$3/M tokens"]
+        R_Model["Claude 3.5 Sonnet<br/>$3/M tokens"]
         R_Out["Output:<br/>Assignments JSON"]
         R_In --> R_Model --> R_Out
     end
     
     subgraph GlosaAI["🛡️ Glosa Defender"]
         G_In["Input:<br/>Rejection + History"]
-        G_Model["Claude Opus 4.5<br/>$15/M tokens"]
+        G_Model["Claude 3.5 Sonnet<br/>$3/M tokens"]
         G_Out["Output:<br/>Legal PDF"]
         G_In --> G_Model --> G_Out
     end
     
     subgraph RIPSAI["✅ RIPS Validator"]
         V_In["Input:<br/>RIPS XML Draft"]
-        V_Model["Claude 3.7 Sonnet<br/>$3/M tokens"]
+        V_Model["Claude 3.5 Sonnet<br/>$3/M tokens"]
         V_Out["Output:<br/>Valid/Errors"]
         V_In --> V_Model --> V_Out
+    end
+    
+    subgraph DetAI["🚨 Deterioration Detector"]
+        D_In["Input:<br/>Vitals + History"]
+        D_Model["Claude 3.5 Sonnet<br/>$3/M tokens"]
+        D_Out["Output:<br/>Risk Alerts"]
+        D_In --> D_Model --> D_Out
     end
     
     style R_Model fill:#60a5fa,stroke:#1e40af,color:#0f172a
     style G_Model fill:#c4b5fd,stroke:#8b5cf6,color:#0f172a
     style V_Model fill:#60a5fa,stroke:#1e40af,color:#0f172a
+    style D_Model fill:#f59e0b,stroke:#d97706,color:#0f172a
       </pre>
     </div>
 
@@ -1229,7 +1233,7 @@ sequenceDiagram
         <li><strong>Offline-First:</strong> IndexedDB + Service Worker ensures zero data loss</li>
         <li><strong>Visit Workflow:</strong> Draft → Submit → Review → Approve → RIPS</li>
         <li><strong>Real-Time:</strong> GraphQL subscriptions for instant status updates</li>
-        <li><strong>AI Integration:</strong> 3 specialized agents (Roster, Glosa, RIPS)</li>
+        <li><strong>AI Integration:</strong> 4 specialized agents (Roster, Glosa, RIPS, Deterioration Detector)</li>
         <li><strong>Conflict Resolution:</strong> Auto-merge when possible, admin review when critical</li>
       </ul>
     </div>

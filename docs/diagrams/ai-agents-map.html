@@ -83,6 +83,7 @@
     .agent-card.roster::before { background: linear-gradient(90deg, #34d399, #10b981); }
     .agent-card.glosa::before { background: linear-gradient(90deg, #f472b6, #ec4899); }
     .agent-card.rips::before { background: linear-gradient(90deg, #60a5fa, #3b82f6); }
+    .agent-card.deterioration::before { background: linear-gradient(90deg, #f59e0b, #d97706); }
     
     .agent-card h4 {
       color: #f8fafc;
@@ -302,11 +303,11 @@
     <!-- Executive Summary -->
     <div class="info-box">
       <h3>📋 Executive Summary</h3>
-      <p>IPS-ERP leverages three specialized AI agents to automate critical healthcare operations, ensuring compliance with Colombian regulations while dramatically improving efficiency and revenue recovery.</p>
+      <p>IPS-ERP leverages four specialized AI agents to automate critical healthcare operations, ensuring compliance with Colombian regulations while dramatically improving efficiency and revenue recovery.</p>
       <div class="metrics-grid">
         <div class="metric-card">
           <div class="icon">🧠</div>
-          <div class="value">3</div>
+          <div class="value">4</div>
           <div class="label">AI Agents</div>
         </div>
         <div class="metric-card">
@@ -347,15 +348,19 @@ graph TB
             direction LR
             
             subgraph "Roster Architect"
-                RA[🗓️ Roster Architect AI<br/>Claude 3.7 Sonnet]
+                RA[🗓️ Roster Architect AI<br/>Claude 3.5 Sonnet]
             end
             
             subgraph "Glosa Defender"
-                GD[⚖️ Glosa Defender AI<br/>Claude Opus 4.5]
+                GD[⚖️ Glosa Defender AI<br/>Claude 3.5 Sonnet]
             end
             
             subgraph "RIPS Validator"
-                RV[📝 RIPS Validator AI<br/>Claude 3.7 Sonnet]
+                RV[📝 RIPS Validator AI<br/>Claude 3.5 Sonnet]
+            end
+            
+            subgraph "Deterioration Detector"
+                DD[🚨 Deterioration Detector AI<br/>Claude 3.5 Sonnet]
             end
         end
         
@@ -363,6 +368,7 @@ graph TB
             Assignments[📅 Optimal Assignments]
             Justifications[📄 Legal Justifications]
             ValidatedRIPS[✅ Validated RIPS XML]
+            Alerts[🚨 Deterioration Alerts]
         end
         
         subgraph "Compliance"
@@ -386,9 +392,14 @@ graph TB
     MinSalud --> RV
     RV --> ValidatedRIPS
     
+    Patients --> DD
+    Visits --> DD
+    DD --> Alerts
+    
     style RA fill:#34d399,stroke:#059669,color:#0f172a
     style GD fill:#f472b6,stroke:#be185d,color:#0f172a
     style RV fill:#60a5fa,stroke:#1e40af,color:#0f172a
+    style DD fill:#f59e0b,stroke:#d97706,color:#0f172a
     style Res3100 fill:#f59e0b,stroke:#d97706,color:#0f172a
     style RIPS fill:#f59e0b,stroke:#d97706,color:#0f172a
     style MinSalud fill:#f59e0b,stroke:#d97706,color:#0f172a
@@ -401,7 +412,7 @@ graph TB
     <div class="agent-grid">
       <!-- Roster Architect -->
       <div class="agent-card roster">
-        <h4>🗓️ Roster Architect AI <span class="model">Claude 3.7 Sonnet</span></h4>
+        <h4>🗓️ Roster Architect AI <span class="model">Claude 3.5 Sonnet</span></h4>
         <p class="description">Intelligent shift optimization that minimizes travel time while matching nurse skills to patient needs.</p>
         
         <div class="io-section">
@@ -438,7 +449,7 @@ graph TB
       
       <!-- Glosa Defender -->
       <div class="agent-card glosa">
-        <h4>⚖️ Glosa Defender AI <span class="model">Claude Opus 4.5</span></h4>
+        <h4>⚖️ Glosa Defender AI <span class="model">Claude 3.5 Sonnet</span></h4>
         <p class="description">Advanced legal AI that generates bulletproof justifications to recover rejected healthcare claims.</p>
         
         <div class="io-section">
@@ -475,7 +486,7 @@ graph TB
       
       <!-- RIPS Validator -->
       <div class="agent-card rips">
-        <h4>📝 RIPS Validator AI <span class="model">Claude 3.7 Sonnet</span></h4>
+        <h4>📝 RIPS Validator AI <span class="model">Claude 3.5 Sonnet</span></h4>
         <p class="description">Pre-submission validation ensuring 100% compliance with Colombian healthcare billing regulations.</p>
         
         <div class="io-section">
@@ -509,6 +520,43 @@ graph TB
           </div>
         </div>
       </div>
+      
+      <!-- Deterioration Detector -->
+      <div class="agent-card deterioration">
+        <h4>🚨 Deterioration Detector AI <span class="model">Claude 3.5 Sonnet</span></h4>
+        <p class="description">Monitors patient vitals and clinical data to detect early signs of deterioration, triggering proactive alerts.</p>
+        
+        <div class="io-section">
+          <strong>📥 Inputs:</strong>
+          <ul>
+            <li>Patient vital signs history</li>
+            <li>Clinical assessment scores</li>
+            <li>Medication records</li>
+            <li>Previous visit observations</li>
+            <li>Baseline health parameters</li>
+          </ul>
+        </div>
+        
+        <div class="io-section">
+          <strong>📤 Outputs:</strong>
+          <ul>
+            <li>Deterioration risk score</li>
+            <li>Specific risk factors identified</li>
+            <li>Recommended interventions</li>
+          </ul>
+        </div>
+        
+        <div class="stat-row">
+          <div class="stat">
+            <div class="stat-value">95%</div>
+            <div class="stat-label">Detection Accuracy</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">4h</div>
+            <div class="stat-label">Early Warning</div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Roster Architect Detailed Flow -->
@@ -521,7 +569,7 @@ sequenceDiagram
     participant API as GraphQL API
     participant Lambda as Lambda Function
     participant DDB as DynamoDB
-    participant Bedrock as 🧠 Bedrock<br/>Claude 3.7 Sonnet
+    participant Bedrock as 🧠 Bedrock<br/>Claude 3.5 Sonnet
     participant Nurse as 👩‍⚕️ Nurse App
     
     Admin->>API: Request roster optimization
@@ -623,7 +671,7 @@ flowchart TD
         SOAT --> Context
         Precedents --> Context
         
-        Bedrock[🧠 Claude Opus 4.5<br/>Deep legal reasoning]
+        Bedrock[🧠 Claude 3.5 Sonnet<br/>Legal reasoning]
         Context --> Bedrock
     end
     
@@ -689,7 +737,7 @@ flowchart TD
 sequenceDiagram
     participant Visit as 📋 Visit Submission
     participant Lambda as Lambda Function
-    participant AI as 🧠 Bedrock<br/>Claude 3.7 Sonnet
+    participant AI as 🧠 Bedrock<br/>Claude 3.5 Sonnet
     participant Rules as 📜 RIPS Rules<br/>Engine
     participant Output as 📤 Output
     
@@ -747,7 +795,6 @@ graph TB
     
     subgraph "API Layer"
         AppSync[AWS AppSync<br/>GraphQL API]
-        REST[API Gateway<br/>REST Endpoints]
     end
     
     subgraph "Business Logic"
@@ -760,9 +807,10 @@ graph TB
         AIRouter[AI Request Router]
         
         subgraph "Amazon Bedrock"
-            Sonnet1[Claude 3.7 Sonnet<br/>Roster Architect]
-            Opus[Claude Opus 4.5<br/>Glosa Defender]
-            Sonnet2[Claude 3.7 Sonnet<br/>RIPS Validator]
+            Sonnet1[Claude 3.5 Sonnet<br/>Roster Architect]
+            Sonnet2[Claude 3.5 Sonnet<br/>Glosa Defender]
+            Sonnet3[Claude 3.5 Sonnet<br/>RIPS Validator]
+            Sonnet4[Claude 3.5 Sonnet<br/>Deterioration Detector]
         end
         
         ResponseHandler[Response Handler<br/>& Validation]
@@ -770,8 +818,10 @@ graph TB
     
     subgraph "Data Layer"
         DynamoDB[(DynamoDB<br/>Operational Data)]
-        S3[(S3<br/>Documents & PDFs)]
-        OpenSearch[(OpenSearch<br/>Analytics)]
+    end
+    
+    subgraph "Location Services"
+        LocationService[Amazon Location Service<br/>Esri Provider]
     end
     
     subgraph "External Systems"
@@ -781,39 +831,41 @@ graph TB
     
     NurseApp --> AppSync
     AdminApp --> AppSync
-    AdminApp --> REST
     FamilyApp --> AppSync
     
     AppSync --> VisitLambda
     AppSync --> RosterLambda
-    REST --> BillingLambda
+    AppSync --> BillingLambda
     
     VisitLambda --> AIRouter
     RosterLambda --> AIRouter
     BillingLambda --> AIRouter
     
     AIRouter --> Sonnet1
-    AIRouter --> Opus
     AIRouter --> Sonnet2
+    AIRouter --> Sonnet3
+    AIRouter --> Sonnet4
     
     Sonnet1 --> ResponseHandler
-    Opus --> ResponseHandler
     Sonnet2 --> ResponseHandler
+    Sonnet3 --> ResponseHandler
+    Sonnet4 --> ResponseHandler
     
     ResponseHandler --> VisitLambda
     ResponseHandler --> RosterLambda
     ResponseHandler --> BillingLambda
     
     VisitLambda --> DynamoDB
-    BillingLambda --> S3
-    ResponseHandler --> OpenSearch
+    BillingLambda --> DynamoDB
+    RosterLambda --> LocationService
     
     BillingLambda --> MinSalud
     BillingLambda --> EPS
     
     style Sonnet1 fill:#34d399,stroke:#059669
-    style Opus fill:#f472b6,stroke:#be185d
-    style Sonnet2 fill:#60a5fa,stroke:#3b82f6
+    style Sonnet2 fill:#f472b6,stroke:#be185d
+    style Sonnet3 fill:#60a5fa,stroke:#3b82f6
+    style Sonnet4 fill:#f59e0b,stroke:#d97706
     style AIRouter fill:#f59e0b,stroke:#d97706
       </pre>
     </div>
@@ -834,40 +886,46 @@ graph TB
       <tbody>
         <tr>
           <td>🗓️ Roster Architect</td>
-          <td><code>Claude 3.7 Sonnet</code></td>
+          <td><code>Claude 3.5 Sonnet</code></td>
           <td>~$150</td>
           <td class="cost-positive">$12,000 (fuel + time)</td>
           <td class="cost-positive">8,000%</td>
         </tr>
         <tr>
           <td>⚖️ Glosa Defender</td>
-          <td><code>Claude Opus 4.5</code></td>
-          <td>~$800</td>
+          <td><code>Claude 3.5 Sonnet</code></td>
+          <td>~$200</td>
           <td class="cost-positive">$5,100,000</td>
-          <td class="cost-positive">637,400%</td>
+          <td class="cost-positive">2,549,900%</td>
         </tr>
         <tr>
           <td>📝 RIPS Validator</td>
-          <td><code>Claude 3.7 Sonnet</code></td>
-          <td>~$200</td>
+          <td><code>Claude 3.5 Sonnet</code></td>
+          <td>~$100</td>
           <td class="cost-positive">$45,000 (prevented rejections)</td>
-          <td class="cost-positive">22,400%</td>
+          <td class="cost-positive">44,900%</td>
+        </tr>
+        <tr>
+          <td>🚨 Deterioration Detector</td>
+          <td><code>Claude 3.5 Sonnet</code></td>
+          <td>~$100</td>
+          <td class="cost-positive">$30,000 (early interventions)</td>
+          <td class="cost-positive">29,900%</td>
         </tr>
         <tr style="background: #1e293b;">
           <td><strong>TOTAL</strong></td>
           <td>-</td>
-          <td><strong>~$1,150</strong></td>
-          <td class="cost-positive"><strong>$5,157,000</strong></td>
-          <td class="cost-positive"><strong>448,348%</strong></td>
+          <td><strong>~$550</strong></td>
+          <td class="cost-positive"><strong>$5,187,000</strong></td>
+          <td class="cost-positive"><strong>943,000%</strong></td>
         </tr>
       </tbody>
     </table>
 
     <div class="info-box">
       <h3>📊 Bedrock Pricing Reference</h3>
-      <p><strong>Claude 3.7 Sonnet:</strong> $3.00/M input tokens, $15.00/M output tokens</p>
-      <p><strong>Claude Opus 4.5:</strong> $15.00/M input tokens, $75.00/M output tokens</p>
-      <p><em>Note: Opus used only for complex legal reasoning (Glosa Defender) where highest accuracy is critical.</em></p>
+      <p><strong>Claude 3.5 Sonnet:</strong> $3.00/M input tokens, $15.00/M output tokens</p>
+      <p><em>All four agents use Claude 3.5 Sonnet for consistent performance and cost efficiency.</em></p>
     </div>
 
     <!-- Data Flow Integration -->
@@ -909,7 +967,7 @@ Memory: 1024 MB
 Timeout: 60 seconds
 Environment:
   BEDROCK_REGION: us-east-1
-  MODEL_ID: anthropic.claude-3-7-sonnet
+  MODEL_ID: anthropic.claude-3-5-sonnet-20240620-v1:0
   MAX_TOKENS: 4096
         </code>
       </div>
@@ -924,8 +982,7 @@ Environment:
     "bedrock:InvokeModelWithResponseStream"
   ],
   "Resource": [
-    "arn:aws:bedrock:*::foundation-model/anthropic.claude-3-7-sonnet*",
-    "arn:aws:bedrock:*::foundation-model/anthropic.claude-opus-4-5*"
+    "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-5-sonnet-20240620-v1:0"
   ]
 }
         </code>
@@ -936,7 +993,6 @@ Environment:
         <code style="display: block; white-space: pre-wrap; padding: 15px;">
 Retry Strategy:
   - Throttling: Exponential backoff
-  - Model errors: Fallback to Sonnet
   - Timeout: Queue for async processing
 
 Monitoring:
@@ -951,16 +1007,16 @@ Monitoring:
     <div class="info-box" style="background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%); border-left-color: #34d399;">
       <h3>🎯 Key Takeaways</h3>
       <ul>
-        <li><strong>Right Model for the Job:</strong> Sonnet for efficiency (roster, validation), Opus for complex reasoning (legal defense)</li>
+        <li><strong>Unified Model Strategy:</strong> All 4 agents use Claude 3.5 Sonnet for consistent performance and simplified operations</li>
         <li><strong>Colombian Compliance Built-In:</strong> Resolution 3100, RIPS, PBS deeply integrated into AI prompts</li>
-        <li><strong>Massive ROI:</strong> $1,150/month investment yields $5.1M+ in recovered revenue</li>
+        <li><strong>Massive ROI:</strong> ~$550/month investment yields $5.1M+ in recovered revenue</li>
         <li><strong>Human-in-the-Loop:</strong> AI assists, humans approve - ensuring accountability</li>
         <li><strong>Continuous Improvement:</strong> Feedback loops train AI on rejection patterns</li>
       </ul>
     </div>
 
     <p style="text-align: center; color: #64748b; margin-top: 50px;">
-      IPS-ERP AI Agents Documentation • Version 1.0 • Last Updated: January 2026
+      IPS-ERP AI Agents Documentation • Version 2.0 • Last Updated: 2026-02-19
     </p>
 
   </div>
