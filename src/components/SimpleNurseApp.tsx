@@ -37,18 +37,23 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { Activity, LogOut, FileText, Edit3, Clock, CheckCircle, XCircle, AlertCircle, FileCheck, HeartPulse, CloudOff, ChevronRight, ArrowLeft, Calendar, BarChart3 } from 'lucide-react';
+import { Activity, LogOut, FileText, Edit3, Clock, CheckCircle, XCircle, AlertCircle, FileCheck, HeartPulse, CloudOff, ChevronRight, ArrowLeft, Calendar, BarChart3, MapPin } from 'lucide-react';
 import { client, isUsingRealBackend } from '../amplify-utils';
 import { createVisitDraft } from '../api/workflow-api';
 import { usePagination } from '../hooks/usePagination';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
 import { useSyncStatus } from '../hooks/useSyncStatus';
+import { useGeolocation } from '../hooks/useGeolocation';
 import { NavigationStateManager } from '../utils/navigationState';
 import { Avatar } from './ui/Avatar';
 import { Badge } from './ui/Badge';
 import { Button } from './ui/Button';
 import { Card } from './ui/Card';
 import { MetricCard } from './ui/MetricCard';
+import { HealthRings } from './nurse/HealthRings';
+import { QuickVitalsSheet } from './nurse/QuickVitalsSheet';
+import { SwipeableShiftCard } from './nurse/SwipeableShiftCard';
+import { RouteMap } from './nurse/RouteMap';
 import { NotificationBell } from './NotificationBell';
 import { VisitDocumentationForm } from './VisitDocumentationForm';
 import { AssessmentEntryForm } from './AssessmentEntryForm';
@@ -290,6 +295,12 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
     const [showAssessmentForm, setShowAssessmentForm] = useState(false);
     const [assessmentPatient, setAssessmentPatient] = useState<{ id: string; name: string } | null>(null);
 
+    // Quick Vitals Sheet state
+    const [quickVitalsShift, setQuickVitalsShift] = useState<ShiftWithVisit | null>(null);
+
+    // Route optimization state
+    const [isOptimizingRoute, setIsOptimizingRoute] = useState(false);
+
     // Current user ID (in real app, this would come from auth context)
     const currentUserId = 'nurse-1';
 
@@ -349,6 +360,11 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
     // ========================================================================
     const { isOffline, isSlow, isOnline } = useNetworkStatus();
     const { pendingCount, isSyncing, lastSyncTimeFormatted } = useSyncStatus();
+
+    // ========================================================================
+    // Geolocation (for Route Map)
+    // ========================================================================
+    const { position: nursePosition, startTracking, stopTracking, isTracking } = useGeolocation();
 
     // ========================================================================
     // Data Fetching
@@ -596,10 +612,60 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
     }, [fetchData]);
 
     /**
+     * Handles Quick Vitals save from the bottom sheet.
+     */
+    const handleQuickVitalsSave = useCallback((vitals: import('../types/workflow').VitalsData) => {
+        if (!quickVitalsShift) return;
+        console.log('Quick vitals saved for shift:', quickVitalsShift.id, vitals);
+        // Update shift's visit vitals locally (optimistic)
+        setShifts(prev => prev.map(s => {
+            if (s.id === quickVitalsShift.id && s.visit) {
+                return {
+                    ...s,
+                    visit: { ...s.visit, vitalsRecorded: vitals },
+                };
+            }
+            return s;
+        }));
+        setQuickVitalsShift(null);
+    }, [quickVitalsShift, setShifts]);
+
+    /**
+     * Handles route optimization via the optimizeRoute GraphQL query.
+     */
+    const handleOptimizeRoute = useCallback(async () => {
+        setIsOptimizingRoute(true);
+        try {
+            const input = {
+                shifts: filteredShifts.map(s => ({
+                    id: s.id,
+                    patientId: s.patientId || '',
+                    patientName: s.patientName || patients.find(p => p.id === s.patientId)?.name || '',
+                    address: patients.find(p => p.id === s.patientId)?.address || s.location || '',
+                    scheduledTime: s.scheduledTime,
+                    nurseId: currentUserId,
+                })),
+                nurseLocation: nursePosition ? { lat: nursePosition.lat, lng: nursePosition.lng } : undefined,
+                optimizationMode: 'TIME' as const,
+            };
+
+            const result = await (client as any).queries?.optimizeRoute({ input: JSON.stringify(input) });
+            if (result?.data) {
+                const parsed = typeof result.data === 'string' ? JSON.parse(result.data) : result.data;
+                console.log('Route optimized:', parsed.routeSummary);
+            }
+        } catch (err) {
+            console.error('Route optimization error:', err);
+        } finally {
+            setIsOptimizingRoute(false);
+        }
+    }, [filteredShifts, patients, currentUserId, nursePosition]);
+
+    /**
      * Handles notification click.
      * For VISIT_REJECTED notifications, navigates to the rejected visit for correction.
      * ISOLATED: This handler only opens forms within the Nurse App - no external navigation.
-     * 
+     *
      * Validates: Requirement 4.4
      */
     const handleNotificationClick = useCallback((notification: NotificationItem) => {
@@ -724,8 +790,9 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                 <div className="flex gap-1 mb-5 bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm" role="tablist" aria-label="Secciones de enfermería">
                     {([
                         { id: 'route', label: 'Mi Ruta', icon: <Calendar size={16} /> },
+                        { id: 'map', label: 'Mapa', icon: <MapPin size={16} /> },
                         { id: 'stats', label: 'Estadísticas', icon: <BarChart3 size={16} /> },
-                    ] as const).map((tab) => (
+                    ] as const).map((tab, idx) => (
                         <button
                             key={tab.id}
                             type="button"
@@ -736,8 +803,12 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                             onClick={(event) => {
                                 event.preventDefault();
                                 event.stopPropagation();
-                                setTabDirection(tab.id === 'stats' ? 1 : -1);
+                                const currentIdx = ['route', 'map', 'stats'].indexOf(activeTab);
+                                setTabDirection(idx > currentIdx ? 1 : -1);
                                 setActiveTab(tab.id);
+                                // Start/stop GPS tracking when entering/leaving map tab
+                                if (tab.id === 'map' && !isTracking) startTracking();
+                                if (tab.id !== 'map' && isTracking) stopTracking();
                             }}
                             className={`relative flex-1 flex items-center justify-center gap-2 py-3 min-h-[48px] rounded-lg font-semibold text-sm md:text-base transition-colors z-10 ${
                                 activeTab === tab.id ? 'text-white' : 'text-slate-500 hover:bg-slate-50 active:bg-slate-100'
@@ -864,6 +935,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                             const visitSyncStatus: SyncStatusType = shift._syncStatus || 'synced';
                                             const isActionable = (shift.status === 'PENDING' || shift.status === 'IN_PROGRESS');
                                             const isInProgress = shift.status === 'IN_PROGRESS';
+                                            const hasVitals = shift.visit?.vitalsRecorded && (shift.visit.vitalsRecorded as any).spo2 > 0;
 
                                             const shiftStatusBadge: Record<string, { variant: 'success' | 'default' | 'error' | 'warning'; label: string }> = {
                                                 COMPLETED: { variant: 'success', label: 'Completado' },
@@ -878,20 +950,23 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                 shift.status === 'CANCELLED' ? 'border-l-red-500' : 'border-l-amber-500';
 
                                             return (
-                                                <motion.div
-                                                    key={shift.id}
-                                                    variants={fadeSlideUp}
+                                              <motion.div key={shift.id} variants={fadeSlideUp}>
+                                                <SwipeableShiftCard
+                                                    onNavigate={() => {
+                                                        const addr = patient?.address || shift.location || '';
+                                                        if (addr) window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr)}`, '_blank');
+                                                    }}
+                                                    onQuickVitals={() => setQuickVitalsShift(shift)}
+                                                    onCall={() => {
+                                                        // Use patient phone or a placeholder
+                                                        window.open('tel:+573001234567', '_self');
+                                                    }}
+                                                    disabled={showDocumentationForm}
+                                                >
+                                                <div
                                                     className={`bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden border-l-4 ${borderColor} ${
                                                         isActionable ? 'hover:shadow-md hover:border-blue-200 cursor-pointer active:bg-slate-50' : ''
-                                                    }`}
-                                                    animate={isInProgress ? {
-                                                        boxShadow: [
-                                                            '0 1px 3px 0 rgba(0,0,0,0.1)',
-                                                            '0 1px 3px 0 rgba(59,130,246,0.2), 0 0 0 3px rgba(59,130,246,0.08)',
-                                                            '0 1px 3px 0 rgba(0,0,0,0.1)',
-                                                        ],
-                                                    } : undefined}
-                                                    transition={isInProgress ? { duration: 2.5, repeat: Infinity, ease: 'easeInOut' } : undefined}
+                                                    } ${isInProgress ? 'ring-2 ring-blue-200 ring-opacity-50' : ''}`}
                                                     onClick={isActionable ? () => {
                                                         if (!shift.visit) {
                                                             handleStartDocumentation(shift.id);
@@ -911,7 +986,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                         }
                                                     } : undefined}
                                                 >
-                                                    {/* Shift Header with Avatar */}
+                                                    {/* Shift Header with Avatar + HealthRings */}
                                                     <div className="flex items-start gap-3 mb-3">
                                                         <Avatar
                                                             name={patientName}
@@ -923,9 +998,19 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                                 <h3 className="font-bold text-base text-slate-900 truncate">
                                                                     {patientName}
                                                                 </h3>
-                                                                <Badge variant={badgeConfig.variant} dot>
-                                                                    {badgeConfig.label}
-                                                                </Badge>
+                                                                <div className="flex items-center gap-2">
+                                                                    {hasVitals && (
+                                                                        <HealthRings
+                                                                            spo2={(shift.visit!.vitalsRecorded as any).spo2}
+                                                                            heartRate={(shift.visit!.vitalsRecorded as any).hr}
+                                                                            systolic={(shift.visit!.vitalsRecorded as any).sys}
+                                                                            size={36}
+                                                                        />
+                                                                    )}
+                                                                    <Badge variant={badgeConfig.variant} dot>
+                                                                        {badgeConfig.label}
+                                                                    </Badge>
+                                                                </div>
                                                             </div>
                                                             <p className="text-sm text-slate-500 truncate mt-0.5">
                                                                 {patient?.address || shift.location || 'Dirección no disponible'}
@@ -1049,7 +1134,9 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                             {isOffline && <span className="text-xs ml-1 opacity-60">(offline)</span>}
                                                         </Button>
                                                     )}
-                                                </motion.div>
+                                                </div>
+                                                </SwipeableShiftCard>
+                                              </motion.div>
                                             );
                                         })}
                                     </motion.div>
@@ -1066,6 +1153,30 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                         {isLoading ? 'Cargando más...' : 'Cargar Más Turnos'}
                                     </Button>
                                 )}
+                            </motion.div>
+                        )}
+
+                        {/* Map Tab */}
+                        {activeTab === 'map' && (
+                            <motion.div
+                                key="map"
+                                custom={tabDirection}
+                                variants={tabContentVariants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                className="space-y-4"
+                                id="panel-map"
+                                role="tabpanel"
+                                aria-labelledby="tab-map"
+                                tabIndex={-1}
+                            >
+                                <RouteMap
+                                    shifts={filteredShifts}
+                                    nursePosition={nursePosition ? { lat: nursePosition.lat, lng: nursePosition.lng } : null}
+                                    onOptimize={handleOptimizeRoute}
+                                    isOptimizing={isOptimizingRoute}
+                                />
                             </motion.div>
                         )}
 
@@ -1196,6 +1307,19 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                     </>
                 )}
             </main>
+
+            {/* Quick Vitals Bottom Sheet */}
+            <QuickVitalsSheet
+                isOpen={quickVitalsShift !== null}
+                onClose={() => setQuickVitalsShift(null)}
+                onSave={handleQuickVitalsSave}
+                initialValues={quickVitalsShift?.visit?.vitalsRecorded as any}
+                patientName={
+                    quickVitalsShift
+                        ? patients.find(p => p.id === quickVitalsShift.patientId)?.name || quickVitalsShift.patientName || 'Paciente'
+                        : ''
+                }
+            />
 
             {/* Sync Progress Indicator - Floating at bottom right */}
             <SyncProgressIndicator position="bottom-right" />

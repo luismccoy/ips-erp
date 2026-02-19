@@ -1,7 +1,9 @@
 // Update the imports at the top
 import React, { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Mic, MicOff, Square } from 'lucide-react';
 import { generateClient } from 'aws-amplify/data';
+import { useVoiceRecognition } from '../hooks/useVoiceRecognition';
 import { isUsingRealBackend, client, getUserId, getTenantId } from '../amplify-utils';
 import { KardexForm } from './KardexForm';
 import { AssessmentForm } from './clinical/AssessmentForm';
@@ -439,18 +441,32 @@ export const VisitDocumentationForm: React.FC<VisitDocumentationFormProps> = ({
 
           {/* Tab Content */}
           {activeSection === 'kardex' ? (
-            <KardexForm
-              kardex={kardex}
-              vitals={vitals}
-              medications={medications}
-              tasks={tasks}
-              onKardexChange={setKardex}
-              onVitalsChange={setVitals}
-              onMedicationsChange={setMedications}
-              onTasksChange={setTasks}
-              disabled={isReadOnly}
-              vitalsErrors={vitalsErrors}
-            />
+            <>
+              {/* Voice Dictation Bar */}
+              <VoiceDictationBar
+                disabled={isReadOnly}
+                onTranscript={(text) => {
+                  setKardex(prev => ({
+                    ...prev,
+                    generalObservations: prev.generalObservations
+                      ? prev.generalObservations + ' ' + text
+                      : text,
+                  }));
+                }}
+              />
+              <KardexForm
+                kardex={kardex}
+                vitals={vitals}
+                medications={medications}
+                tasks={tasks}
+                onKardexChange={setKardex}
+                onVitalsChange={setVitals}
+                onMedicationsChange={setMedications}
+                onTasksChange={setTasks}
+                disabled={isReadOnly}
+                vitalsErrors={vitalsErrors}
+              />
+            </>
           ) : (
             <AssessmentForm
               patientId={patientId}
@@ -470,4 +486,119 @@ export const VisitDocumentationForm: React.FC<VisitDocumentationFormProps> = ({
   );
 };
 
-// ... [Keep existing utility functions and exports] ...
+// ============================================================================
+// Voice Dictation Bar
+// ============================================================================
+
+function VoiceDictationBar({
+  disabled,
+  onTranscript,
+}: {
+  disabled: boolean;
+  onTranscript: (text: string) => void;
+}) {
+  const {
+    isListening,
+    transcript,
+    interimTranscript,
+    error,
+    isSupported,
+    startListening,
+    stopListening,
+    resetTranscript,
+  } = useVoiceRecognition('es-CO');
+
+  const prevTranscriptRef = React.useRef('');
+
+  // When transcript updates with new finalized text, push it to the form
+  useEffect(() => {
+    if (transcript && transcript !== prevTranscriptRef.current) {
+      const newText = transcript.slice(prevTranscriptRef.current.length).trim();
+      if (newText) {
+        onTranscript(newText);
+      }
+      prevTranscriptRef.current = transcript;
+    }
+  }, [transcript, onTranscript]);
+
+  // Reset ref when transcript is cleared
+  useEffect(() => {
+    if (!transcript) {
+      prevTranscriptRef.current = '';
+    }
+  }, [transcript]);
+
+  if (!isSupported) return null;
+
+  const handleToggle = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      resetTranscript();
+      startListening();
+    }
+  };
+
+  return (
+    <div className="mb-4">
+      <div className="flex items-center gap-3">
+        <motion.button
+          type="button"
+          onClick={handleToggle}
+          disabled={disabled}
+          whileTap={{ scale: 0.92 }}
+          className={`
+            relative flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm
+            transition-colors min-h-[44px] touch-manipulation
+            ${isListening
+              ? 'bg-red-50 text-red-700 border-2 border-red-300'
+              : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
+            }
+            ${disabled ? 'opacity-40 cursor-not-allowed' : ''}
+          `}
+          aria-label={isListening ? 'Detener dictado' : 'Iniciar dictado de voz'}
+        >
+          {isListening ? (
+            <>
+              {/* Pulsing animation rings */}
+              <motion.span
+                className="absolute inset-0 rounded-xl border-2 border-red-400"
+                animate={{ scale: [1, 1.08, 1], opacity: [0.6, 0, 0.6] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              />
+              <Square size={16} className="text-red-600 fill-red-600" />
+              <span>Dictando...</span>
+            </>
+          ) : (
+            <>
+              <Mic size={16} />
+              <span>Dictar Observaciones</span>
+            </>
+          )}
+        </motion.button>
+
+        {/* Interim preview */}
+        <AnimatePresence>
+          {isListening && interimTranscript && (
+            <motion.span
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0 }}
+              className="text-sm italic text-slate-400 truncate max-w-[200px]"
+            >
+              {interimTranscript}
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Error message */}
+      {error && (
+        <p className="mt-2 text-xs text-red-500 flex items-center gap-1">
+          <MicOff size={12} />
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
