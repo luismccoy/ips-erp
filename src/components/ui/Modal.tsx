@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 
 interface ModalProps {
@@ -40,8 +41,6 @@ export const Modal: React.FC<ModalProps> = ({
         }
     };
 
-    if (!isOpen) return null;
-
     const maxWidthClasses = {
         sm: 'max-w-sm',
         md: 'max-w-md',
@@ -51,35 +50,46 @@ export const Modal: React.FC<ModalProps> = ({
     };
 
     return (
-        <div
-            ref={overlayRef}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200"
-            onClick={handleOverlayClick}
-        >
-            <div
-                className={`
-                    w-full ${maxWidthClasses[maxWidth]} bg-white rounded-2xl shadow-2xl 
-                    transform transition-all animate-in zoom-in-95 duration-200
-                    flex flex-col max-h-[90vh]
-                `}
-                role="dialog"
-                aria-modal="true"
-            >
-                <div className="flex items-center justify-between p-6 border-b border-slate-100">
-                    <h2 className="text-xl font-black text-slate-900">{title}</h2>
-                    <button
-                        onClick={onClose}
-                        className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-                        aria-label="Cerrar"
+        <AnimatePresence>
+            {isOpen && (
+                <motion.div
+                    ref={overlayRef}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm"
+                    onClick={handleOverlayClick}
+                >
+                    <motion.div
+                        initial={{ opacity: 0, y: 30, scale: 0.97 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 20, scale: 0.97 }}
+                        transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                        className={`
+                            w-full ${maxWidthClasses[maxWidth]} bg-white rounded-2xl shadow-2xl
+                            flex flex-col max-h-[90vh]
+                        `}
+                        role="dialog"
+                        aria-modal="true"
                     >
-                        <X size={24} />
-                    </button>
-                </div>
+                        <div className="flex items-center justify-between p-6 border-b border-slate-100">
+                            <h2 className="text-xl font-bold text-slate-900">{title}</h2>
+                            <button
+                                onClick={onClose}
+                                className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                                aria-label="Cerrar"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
 
-                <div className="p-6 overflow-y-auto">
-                    {children}
-                </div>
-            </div>
-        </div>
+                        <div className="p-6 overflow-y-auto">
+                            {children}
+                        </div>
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
     );
 };

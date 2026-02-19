@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
     noPadding?: boolean;
     disableAnimation?: boolean;
+    hoverable?: boolean;
 }
 
 export const Card: React.FC<CardProps> = ({
@@ -11,17 +12,17 @@ export const Card: React.FC<CardProps> = ({
     className = '',
     noPadding = false,
     disableAnimation = false,
+    hoverable = false,
     ...props
 }) => {
     return (
         <motion.div
-            className={`bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden ${noPadding ? '' : 'p-6'} ${className}`}
+            className={`bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden ${noPadding ? '' : 'p-6'} ${hoverable ? 'hover:shadow-md transition-shadow duration-200' : ''} ${className}`}
             initial={disableAnimation ? false : { opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            whileHover={disableAnimation ? {} : { scale: 1.01 }}
             transition={{
-                duration: 0.2,
-                ease: "easeOut"
+                duration: 0.25,
+                ease: [0.25, 0.46, 0.45, 0.94]
             }}
             {...props}
         >

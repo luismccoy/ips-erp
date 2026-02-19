@@ -1,13 +1,17 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import {
-    Plus, Search, Edit, Trash2, Mail, MoreVertical,
-    Shield, Briefcase, CheckCircle, XCircle
-} from 'lucide-react';
+import { Plus, Edit, Trash2, Mail } from 'lucide-react';
 import { client, isUsingRealBackend } from '../../amplify-utils';
 import type { Nurse } from '../../types';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { useToast } from '../../components/ui/Toast';
 import { StaffForm } from './components/StaffForm';
+import { PageHeader } from '../../components/ui/PageHeader';
+import { SearchInput } from '../../components/ui/SearchInput';
+import { DataTable, type Column } from '../../components/ui/DataTable';
+import { Avatar } from '../../components/ui/Avatar';
+import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
+import { Modal } from '../../components/ui/Modal';
 
 export function StaffPage() {
     const { showToast } = useToast();
@@ -18,35 +22,26 @@ export function StaffPage() {
     const [roleFilter, setRoleFilter] = useState<'ALL' | 'ADMIN' | 'NURSE' | 'COORDINATOR'>('ALL');
     const isMountedRef = useRef(true);
 
-    // Modal states
     const [showFormModal, setShowFormModal] = useState(false);
-
     const [selectedNurse, setSelectedNurse] = useState<Nurse | null>(null);
     const [formLoading, setFormLoading] = useState(false);
 
     const fetchNurses = useCallback(async () => {
         setLoadError(null);
         setLoading(true);
-
         let timeoutId: ReturnType<typeof setTimeout> | null = null;
         try {
             const timeoutPromise = new Promise<never>((_, reject) => {
                 timeoutId = setTimeout(() => reject(new Error('timeout')), 8000);
             });
-
             const response = await Promise.race([
                 (client.models.Nurse as any).list(),
                 timeoutPromise
             ]);
             const data = Array.isArray(response?.data)
                 ? response.data
-                : Array.isArray(response?.data?.items)
-                    ? response.data.items
-                    : [];
-
-            if (isMountedRef.current) {
-                setNurses(data || []);
-            }
+                : Array.isArray(response?.data?.items) ? response.data.items : [];
+            if (isMountedRef.current) setNurses(data || []);
         } catch (err) {
             console.error('Error fetching staff:', err);
             if (isMountedRef.current) {
@@ -60,45 +55,27 @@ export function StaffPage() {
             showToast('error', 'Error al cargar la lista de personal');
         } finally {
             if (timeoutId) clearTimeout(timeoutId);
-            if (isMountedRef.current) {
-                setLoading(false);
-            }
+            if (isMountedRef.current) setLoading(false);
         }
     }, [showToast]);
 
     useEffect(() => {
         isMountedRef.current = true;
         fetchNurses();
-        return () => {
-            isMountedRef.current = false;
-        };
+        return () => { isMountedRef.current = false; };
     }, [fetchNurses]);
 
-    const handleCreateClick = () => {
-        setSelectedNurse(null);
-        setShowFormModal(true);
-    };
+    const handleCreateClick = () => { setSelectedNurse(null); setShowFormModal(true); };
+    const handleEditClick = (nurse: Nurse) => { setSelectedNurse(nurse); setShowFormModal(true); };
 
-    const handleEditClick = (nurse: Nurse) => {
-        setSelectedNurse(nurse);
-        setShowFormModal(true);
-    };
-
-    // Note: Deleting staff doesn't delete the Cognito user automatically
-    // The spec doesn't explicitly ask for delete, but standard CRUD usually implies it.
-    // I will include soft delete logic if possible, or mapping to delete mutation.
     const handleDeleteClick = async (nurse: Nurse) => {
-        if (!confirm(`¿Está seguro de eliminar a ${nurse.name}? Nota: Esto no elimina su acceso al sistema.`)) return;
-
+        if (!confirm(`¿Está seguro de eliminar a ${nurse.name}?`)) return;
         try {
             if (isUsingRealBackend()) {
                 await (client.models.Nurse as any).delete({ id: nurse.id });
-                setNurses(prev => prev.filter(n => n.id !== nurse.id));
-                showToast('success', 'Personal eliminado correctamente');
-            } else {
-                showToast('info', 'Mock Mode: Delete simulated');
-                setNurses(prev => prev.filter(n => n.id !== nurse.id));
             }
+            setNurses(prev => prev.filter(n => n.id !== nurse.id));
+            showToast('success', 'Personal eliminado correctamente');
         } catch (err) {
             console.error('Error deleting staff:', err);
             showToast('error', 'Error al eliminar el personal');
@@ -110,18 +87,13 @@ export function StaffPage() {
         try {
             if (isUsingRealBackend()) {
                 if (selectedNurse) {
-                    // Update
-                    const result = await (client.models.Nurse as any).update({
-                        id: selectedNurse.id,
-                        ...data
-                    });
+                    const result = await (client.models.Nurse as any).update({ id: selectedNurse.id, ...data });
                     setNurses(prev => prev.map(n => n.id === selectedNurse.id ? result.data : n));
                     showToast('success', 'Personal actualizado correctamente');
                 } else {
-                    // Create
                     const result = await (client.models.Nurse as any).create({
                         tenantId: 'tenant-bogota-01',
-                        cognitoSub: crypto.randomUUID(), // Placeholder as we can't get real sub without Cognito trigger flow return
+                        cognitoSub: crypto.randomUUID(),
                         isActive: true,
                         ...data
                     });
@@ -133,12 +105,7 @@ export function StaffPage() {
                 if (selectedNurse) {
                     setNurses(prev => prev.map(n => n.id === selectedNurse.id ? { ...n, ...data } : n));
                 } else {
-                    const newMock: Nurse = {
-                        id: `temp-${Date.now()}`,
-                        tenantId: 'mock-tenant',
-                        isActive: true,
-                        ...data
-                    };
+                    const newMock: Nurse = { id: `temp-${Date.now()}`, tenantId: 'mock-tenant', isActive: true, ...data };
                     setNurses(prev => [...prev, newMock]);
                 }
             }
@@ -158,43 +125,124 @@ export function StaffPage() {
         return matchesSearch && matchesRole;
     });
 
+    const columns: Column<Nurse>[] = [
+        {
+            key: 'name',
+            header: 'Nombre',
+            sortable: true,
+            render: (nurse) => {
+                const displayName = nurse.name?.trim() || 'Sin nombre';
+                const displayEmail = nurse.email?.trim() || 'No email';
+                return (
+                    <div className="flex items-center gap-3">
+                        <Avatar name={displayName} size="sm" />
+                        <div>
+                            <div className="font-medium text-slate-900">{displayName}</div>
+                            <div className="flex items-center gap-1 text-xs text-slate-500">
+                                <Mail size={10} /> {displayEmail}
+                            </div>
+                        </div>
+                    </div>
+                );
+            },
+        },
+        {
+            key: 'role',
+            header: 'Rol',
+            sortable: true,
+            render: (nurse) => {
+                const role = nurse.role || 'NURSE';
+                const variant = role === 'ADMIN' ? 'default' : role === 'COORDINATOR' ? 'warning' : 'info';
+                return <Badge variant={variant}>{role}</Badge>;
+            },
+        },
+        {
+            key: 'skills',
+            header: 'Skills',
+            render: (nurse) => (
+                <div className="flex flex-wrap gap-1 max-w-[200px]">
+                    {nurse.skills && nurse.skills.length > 0 ? (
+                        <>
+                            {nurse.skills.slice(0, 3).map((skill, i) => (
+                                <span key={i} className="px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-medium border border-slate-200">
+                                    {skill}
+                                </span>
+                            ))}
+                            {nurse.skills.length > 3 && (
+                                <span className="text-[10px] text-slate-400">+{nurse.skills.length - 3}</span>
+                            )}
+                        </>
+                    ) : (
+                        <span className="text-slate-400 text-xs">—</span>
+                    )}
+                </div>
+            ),
+        },
+        {
+            key: 'isActive',
+            header: 'Estado',
+            render: (nurse) => (
+                (nurse as any).isActive
+                    ? <Badge variant="success" dot>Activo</Badge>
+                    : <Badge variant="neutral" dot>Inactivo</Badge>
+            ),
+        },
+        {
+            key: 'actions',
+            header: 'Acciones',
+            width: '100px',
+            render: (nurse) => (
+                <div className="flex items-center justify-end gap-1">
+                    <button
+                        onClick={(e) => { e.stopPropagation(); handleEditClick(nurse); }}
+                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Editar"
+                    >
+                        <Edit size={16} />
+                    </button>
+                    <button
+                        onClick={(e) => { e.stopPropagation(); handleDeleteClick(nurse); }}
+                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Eliminar"
+                    >
+                        <Trash2 size={16} />
+                    </button>
+                </div>
+            ),
+        },
+    ];
+
     if (loading) return <div className="p-12"><LoadingSpinner size="lg" /></div>;
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-500">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 bg-slate-900 text-white rounded-2xl shadow-lg shadow-slate-200/50">
-                <div>
-                    <h1 className="text-2xl font-black mb-1">Personal y Enfermeras</h1>
-                    <p className="text-slate-400 text-sm">Gestiona el equipo médico y administrativo.</p>
-                </div>
-                <button
-                    onClick={handleCreateClick}
-                    className="mt-4 sm:mt-0 flex items-center gap-2 px-5 py-2.5 bg-[#2563eb] hover:bg-blue-600 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-blue-500/20"
-                >
-                    <Plus size={20} /> Crear Personal
-                </button>
-            </div>
+        <div className="space-y-5">
+            <PageHeader
+                title="Personal y Enfermeras"
+                subtitle="Gestiona el equipo médico y administrativo"
+                actions={
+                    <Button onClick={handleCreateClick} icon={<Plus size={18} />}>
+                        Crear Personal
+                    </Button>
+                }
+            />
 
-            <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1 bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
-                    <Search className="text-slate-400" size={20} />
-                    <input
-                        type="text"
-                        placeholder="Buscar por nombre o correo..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="flex-1 bg-transparent outline-none text-slate-700 placeholder:text-slate-400"
-                    />
-                </div>
-                <div className="flex bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
+            {/* Search + Filters */}
+            <div className="flex flex-col md:flex-row gap-3">
+                <SearchInput
+                    placeholder="Buscar por nombre o correo..."
+                    onSearch={setSearchTerm}
+                    className="flex-1"
+                />
+                <div className="flex bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
                     {(['ALL', 'NURSE', 'COORDINATOR', 'ADMIN'] as const).map(role => (
                         <button
                             key={role}
                             onClick={() => setRoleFilter(role)}
-                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${roleFilter === role
-                                    ? 'bg-slate-900 text-white shadow-md'
-                                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
-                                }`}
+                            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                                roleFilter === role
+                                    ? 'bg-blue-600 text-white shadow-sm'
+                                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                            }`}
                         >
                             {role === 'ALL' ? 'Todos' : role}
                         </button>
@@ -202,150 +250,39 @@ export function StaffPage() {
                 </div>
             </div>
 
+            {/* Error state */}
             {loadError && (
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-800">
+                <div className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-800">
                     <div>
-                        <div className="font-bold">No se pudo cargar el personal</div>
+                        <div className="font-semibold">No se pudo cargar el personal</div>
                         <div className="text-sm">{loadError}</div>
                     </div>
-                    <button
-                        onClick={fetchNurses}
-                        className="px-4 py-2 rounded-lg bg-amber-600 text-white font-bold hover:bg-amber-700 transition-colors"
-                    >
-                        Reintentar
-                    </button>
+                    <Button variant="secondary" size="sm" onClick={fetchNurses}>Reintentar</Button>
                 </div>
             )}
 
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="min-w-full w-full">
-                        <thead className="bg-slate-50 border-b border-slate-200">
-                            <tr>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Nombre</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Rol</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Skills</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Estado</th>
-                                <th className="px-6 py-4 text-right text-xs font-bold text-slate-500 uppercase">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {filteredNurses.length === 0 ? (
-                                <tr>
-                                    <td colSpan={5} className="px-6 py-12 text-center text-slate-400">
-                                        {loadError
-                                            ? 'No hay datos disponibles. Reintenta más tarde.'
-                                            : 'No se encontró personal con los filtros actuales.'}
-                                    </td>
-                                </tr>
-                            ) : (
-                                filteredNurses.map((nurse) => {
-                                    const displayName = nurse.name?.trim() || 'Sin nombre';
-                                    const displayEmail = nurse.email?.trim() || 'No email';
-                                    const displayRole = nurse.role || 'NURSE';
-                                    return (
-                                        <tr key={nurse.id} className="hover:bg-slate-50 transition-colors group">
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="h-10 w-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center font-bold">
-                                                    {displayName.charAt(0)}
-                                                </div>
-                                                <div>
-                                                    <div className="font-bold text-slate-900">{displayName}</div>
-                                                    <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                                                        <Mail size={10} />
-                                                        {displayEmail}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase ${displayRole === 'ADMIN' ? 'bg-purple-100 text-purple-700' :
-                                                    displayRole === 'COORDINATOR' ? 'bg-orange-100 text-orange-700' :
-                                                        'bg-blue-100 text-blue-700'
-                                                }`}>
-                                                {displayRole}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex flex-wrap gap-1 max-w-[200px]">
-                                                {nurse.skills && nurse.skills.length > 0 ? (
-                                                    nurse.skills.slice(0, 3).map((skill, i) => (
-                                                        <span key={i} className="px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-medium border border-slate-200">
-                                                            {skill}
-                                                        </span>
-                                                    ))
-                                                ) : (
-                                                    <span className="text-slate-400 text-xs italic">-</span>
-                                                )}
-                                                {nurse.skills && nurse.skills.length > 3 && (
-                                                    <span className="text-[10px] text-slate-400">+{nurse.skills.length - 3}</span>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            {(nurse as any).isActive ? (
-                                                <span className="flex items-center gap-1.5 px-2 py-1 w-fit bg-emerald-50 text-emerald-700 rounded-full text-xs font-bold">
-                                                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></div> Active
-                                                </span>
-                                            ) : (
-                                                <span className="px-2 py-1 w-fit bg-slate-100 text-slate-500 rounded-full text-xs font-bold">
-                                                    Inactive
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button
-                                                    onClick={() => handleEditClick(nurse)}
-                                                    className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                                    title="Editar"
-                                                >
-                                                    <Edit size={18} />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDeleteClick(nurse)}
-                                                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                                    title="Eliminar"
-                                                >
-                                                    <Trash2 size={18} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    );
-                                })
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            {/* Data Table */}
+            <DataTable
+                columns={columns}
+                data={filteredNurses}
+                pagination={{ pageSize: 10 }}
+                emptyMessage="No se encontró personal con los filtros actuales."
+            />
 
             {/* Create/Edit Modal */}
-            {showFormModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-                        <div className="flex justify-between items-center p-6 border-b border-slate-100 bg-slate-50/50">
-                            <h3 className="text-xl font-bold text-slate-900">
-                                {selectedNurse ? 'Editar Personal' : 'Nuevo Integrante'}
-                            </h3>
-                            <button
-                                onClick={() => setShowFormModal(false)}
-                                className="text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-100 rounded-lg transition-colors"
-                            >
-                                <XCircle size={24} />
-                            </button>
-                        </div>
-
-                        <StaffForm
-                            initialData={selectedNurse}
-                            onSubmit={handleFormSubmit}
-                            onCancel={() => setShowFormModal(false)}
-                            isLoading={formLoading}
-                        />
-                    </div>
-                </div>
-            )}
+            <Modal
+                isOpen={showFormModal}
+                onClose={() => setShowFormModal(false)}
+                title={selectedNurse ? 'Editar Personal' : 'Nuevo Integrante'}
+                maxWidth="2xl"
+            >
+                <StaffForm
+                    initialData={selectedNurse}
+                    onSubmit={handleFormSubmit}
+                    onCancel={() => setShowFormModal(false)}
+                    isLoading={formLoading}
+                />
+            </Modal>
         </div>
     );
 }

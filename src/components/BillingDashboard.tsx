@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { DollarSign, FileText, Sparkles, ClipboardCheck, AlertTriangle, Clock, Download, X, Check, Save } from 'lucide-react';
+import { DollarSign, FileText, Sparkles, ClipboardCheck, AlertTriangle, Clock, Download, X, Save } from 'lucide-react';
 import { client, isUsingRealBackend, MOCK_USER } from '../amplify-utils';
 import { usePagination } from '../hooks/usePagination';
 import { useLoadingTimeout } from '../hooks/useLoadingTimeout';
@@ -7,6 +7,11 @@ import { useToast } from './ui/Toast';
 import { ErrorState } from './ui/ErrorState';
 import { ErrorBoundary } from './ErrorBoundary';
 import { RipsExportPanel } from './RipsExportPanel';
+import { MetricCard } from './ui/MetricCard';
+import { Card } from './ui/Card';
+import { Button } from './ui/Button';
+import { Badge } from './ui/Badge';
+import { Modal } from './ui/Modal';
 import type { BillingRecord as BillingRecordType, BillingStatus } from '../types';
 import { LoadingSpinner } from './ui/LoadingSpinner';
 
@@ -17,7 +22,6 @@ export function BillingDashboard() {
 
     // AI Loading States
     const [isValidating, setIsValidating] = useState(false);
-    const [isGeneratingRebuttal, setIsGeneratingRebuttal] = useState(false);
     const [isGeneratingDefense, setIsGeneratingDefense] = useState(false);
 
     // AI Result Modals
@@ -36,7 +40,6 @@ export function BillingDashboard() {
 
     const fetchBills = async () => {
         startLoading();
-        // Always use the client - it returns demo data in demo mode
         await loadMore(async (token) => {
             try {
                 const response = await (client.models.BillingRecord as any).list({
@@ -72,15 +75,8 @@ export function BillingDashboard() {
     const handleValidateRIPS = async () => {
         setIsValidating(true);
         try {
-            // Use the first billing record for validation demo
             const billingRecordId = bills.length > 0 ? bills[0].id : 'demo-bill';
-            
-            // Call the validateRIPS AI query
-            const response = await (client.queries as any).validateRIPS({
-                billingRecordId
-            });
-            
-            console.log('Resultado de Validación RIPS:', response);
+            const response = await (client.queries as any).validateRIPS({ billingRecordId });
 
             if (response.data) {
                 const result = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
@@ -92,7 +88,6 @@ export function BillingDashboard() {
                     resolution: result.resolution || 'Resolución 2275 de 2023'
                 });
             } else {
-                // Fallback for demo
                 setRipsResult({
                     valid: true,
                     files: ['AC0001.txt', 'AF0001.txt', 'US0001.txt'],
@@ -102,7 +97,6 @@ export function BillingDashboard() {
             }
         } catch (error) {
             console.error('RIPS Validation failed:', error);
-            // Demo fallback - show a realistic validation result
             setRipsResult({
                 valid: true,
                 files: ['AC0001.txt', 'AF0001.txt', 'US0001.txt', 'CT0001.txt'],
@@ -114,37 +108,12 @@ export function BillingDashboard() {
         }
     };
 
-    const handleGenerateRebuttal = async () => {
-        setIsGeneratingRebuttal(true);
-        try {
-            // Call the Glosa Defender Lambda
-            const response = await (client.queries as any).glosaDefender({
-                glosaId: 'test-glosa'
-            });
-
-            // Show result modal instead of alert
-            const mockDefense = typeof response === 'string' ? response :
-                `# Technical Defense for Glosa FE-882\n\n**Patient:** Juan Perez\n**Procedure:** Home Care Nursing (S0201)\n\nBased on the clinical history review, the glosa regarding "Lack of medical necessity" is unfounded. The patient's vitals on 01/15 show acute hypertension (150/95 mmHg) requiring immediate pharmacological intervention administered by the nurse.\n\n**Reference:** Resolution 3047, Article 12.`;
-
-            setRebuttalResult(mockDefense);
-
-        } catch (error) {
-            console.error('Rebuttal generation failed:', error);
-            alert('Error al generar respuesta');
-        } finally {
-            setIsGeneratingRebuttal(false);
-        }
-    };
-
     const handleGenerateDefense = async (billingRecordId: string) => {
-        // Prevent race condition - ignore if already generating
         if (isGeneratingDefense) return;
-        
         setIsGeneratingDefense(true);
         setErrorMessage('');
 
         try {
-            // Find the billing record and patient for context
             const billingRecord = bills.find(b => b.id === billingRecordId);
             if (!billingRecord) {
                 setErrorMessage('No se encontró el registro de facturación.');
@@ -152,13 +121,11 @@ export function BillingDashboard() {
                 return;
             }
 
-            // Fetch patient data for clinical context
             let patientHistory: any = { name: 'Paciente Demo', age: 75, diagnosis: 'Condición Crónica' };
             try {
                 const patientRes = await (client.models.Patient as any).get({ id: billingRecord.patientId });
                 if (patientRes.data) {
                     patientHistory = patientRes.data;
-                    // Also fetch vitals for this patient
                     const vitalsRes = await (client.models.VitalSigns as any).list({
                         filter: { patientId: { eq: billingRecord.patientId } },
                         limit: 5
@@ -169,7 +136,6 @@ export function BillingDashboard() {
                 console.log('Using demo patient data');
             }
 
-            // Call the generateGlosaDefense AI query
             const response = await (client.queries as any).generateGlosaDefense({
                 billingRecord: JSON.stringify({
                     ...billingRecord,
@@ -180,17 +146,10 @@ export function BillingDashboard() {
                 clinicalNotes: JSON.stringify({ notes: 'Clinical documentation on file' })
             });
 
-            console.log('Glosa Defense Response:', response);
-
-            // Parse the response
             if (response.data) {
                 const parsed = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
                 if (parsed.success && parsed.defenseLetter) {
-                    setDefenseLetterModal({
-                        isOpen: true,
-                        content: parsed.defenseLetter,
-                        billingRecordId
-                    });
+                    setDefenseLetterModal({ isOpen: true, content: parsed.defenseLetter, billingRecordId });
                 } else {
                     setDefenseLetterModal({
                         isOpen: true,
@@ -200,10 +159,8 @@ export function BillingDashboard() {
                 }
             } else if (response.errors && response.errors.length > 0) {
                 const error = response.errors[0];
-                console.error('GraphQL Error:', error);
                 setErrorMessage(error.message || 'Error al generar respuesta AI.');
             } else {
-                console.error('Unexpected response format:', response);
                 setErrorMessage('Error al generar respuesta AI. Por favor intente nuevamente.');
             }
         } catch (error) {
@@ -221,76 +178,65 @@ export function BillingDashboard() {
     };
 
     const handleSaveRebuttal = async () => {
-        // Placeholder for saving to BillingRecord
         console.log('Saving rebuttal:', rebuttalResult);
         showToast('info', 'Guardado', 'Respuesta guardada en el registro de facturación (Backend pendiente)');
         setRebuttalResult(null);
     };
 
-    const getStatusStyle = (status: BillingStatus) => {
-        switch (status) {
-            case 'PAID': return 'bg-emerald-50 text-emerald-600 border-emerald-100';
-            case 'PENDING': return 'bg-yellow-50 text-yellow-600 border-yellow-100';
-            case 'CANCELED': return 'bg-red-50 text-red-600 border-red-100';
-            case 'GLOSED': return 'bg-purple-50 text-purple-600 border-purple-100';
-            default: return 'bg-slate-50 text-slate-600 border-slate-100';
-        }
+    const getStatusBadge = (status: BillingStatus) => {
+        const map: Record<string, { variant: 'success' | 'warning' | 'error' | 'default'; label: string }> = {
+            PAID: { variant: 'success', label: 'PAID' },
+            PENDING: { variant: 'warning', label: 'PENDING' },
+            CANCELED: { variant: 'error', label: 'CANCELED' },
+            GLOSED: { variant: 'default', label: 'GLOSED' },
+        };
+        return map[status] || { variant: 'default' as const, label: status };
     };
 
     return (
         <div className="space-y-6 relative">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
-                            <DollarSign size={20} />
-                        </div>
-                        <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">+12%</span>
-                    </div>
-                    <div className="text-2xl font-black text-slate-900">$42.5M</div>
-                    <div className="text-xs text-slate-400 uppercase font-bold">Total Facturado (HFC)</div>
-                </div>
-
-                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-2 bg-purple-50 rounded-lg text-purple-600">
-                            <AlertTriangle size={20} />
-                        </div>
-                        <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded-full">8.2%</span>
-                    </div>
-                    <div className="text-2xl font-black text-slate-900">$3.4M</div>
-                    <div className="text-xs text-slate-400 uppercase font-bold">Glosas Pendientes</div>
-                </div>
-
-                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600">
-                            <ClipboardCheck size={20} />
-                        </div>
-                        <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">Pure</span>
-                    </div>
-                    <div className="text-2xl font-black text-slate-900">100%</div>
-                    <div className="text-xs text-slate-400 uppercase font-bold">RIPS 2275 Compliance</div>
-                </div>
+            {/* KPI Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <MetricCard
+                    icon={<DollarSign size={18} />}
+                    value="$42.5M"
+                    label="Total Facturado (HFC)"
+                    trendDirection="up"
+                    color="blue"
+                    delay={0}
+                />
+                <MetricCard
+                    icon={<AlertTriangle size={18} />}
+                    value="$3.4M"
+                    label="Glosas Pendientes"
+                    trendDirection="down"
+                    color="red"
+                    delay={0.05}
+                />
+                <MetricCard
+                    icon={<ClipboardCheck size={18} />}
+                    value="100%"
+                    label="RIPS 2275 Compliance"
+                    trendDirection="up"
+                    color="green"
+                    delay={0.1}
+                />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                {/* Recent Billing */}
+                <Card>
                     <div className="flex justify-between items-center mb-6">
-                        <h3 className="font-black text-slate-900 flex items-center gap-2">
+                        <h3 className="font-bold text-slate-900 flex items-center gap-2">
                             <FileText size={18} className="text-slate-400" />
                             Facturación Reciente
                         </h3>
-                        <div className="flex gap-2">
-                            <button className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-all">
-                                <Download size={16} />
-                            </button>
-                        </div>
+                        <Button variant="ghost" size="sm" icon={<Download size={14} />} />
                     </div>
 
                     <div className="space-y-3">
                         {isLoading && bills.length === 0 ? (
-                            <div className="py-12 flex flex-col items-center justify-center bg-slate-50 rounded-xl border border-slate-100 border-dashed animate-pulse">
+                            <div className="py-12 flex flex-col items-center justify-center bg-slate-50 rounded-xl border border-slate-100 border-dashed">
                                 <LoadingSpinner size="sm" label="Cargando facturas..." />
                             </div>
                         ) : hasTimedOut && bills.length === 0 ? (
@@ -303,7 +249,7 @@ export function BillingDashboard() {
                             <div className="text-center py-8 text-slate-400">No hay facturas registradas</div>
                         ) : (
                             bills.map((bill) => (
-                                <div key={bill.id} className="p-4 border border-slate-50 rounded-xl hover:bg-slate-50/50 transition-all flex justify-between items-center">
+                                <div key={bill.id} className="p-4 border border-slate-100 rounded-xl hover:bg-slate-50/50 transition-all flex justify-between items-center">
                                     <div className="flex items-center gap-4">
                                         <div className="h-10 w-10 bg-slate-50 rounded-lg flex items-center justify-center text-slate-400">
                                             <FileText size={20} />
@@ -314,9 +260,9 @@ export function BillingDashboard() {
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <span className={`px-2 py-1 rounded-md text-[10px] font-black border uppercase ${getStatusStyle(bill.status)}`}>
-                                            {bill.status}
-                                        </span>
+                                        <Badge variant={getStatusBadge(bill.status).variant} dot>
+                                            {getStatusBadge(bill.status).label}
+                                        </Badge>
                                         <p className="text-[10px] text-slate-400 mt-1 flex items-center justify-end gap-1">
                                             <Clock size={10} />
                                             {bill.radicationDate || 'Sin radicar'}
@@ -335,26 +281,27 @@ export function BillingDashboard() {
                             </button>
                         )}
                     </div>
-                </div>
+                </Card>
 
                 <div className="space-y-6">
-                    <div className="bg-slate-900 p-6 rounded-2xl text-white shadow-xl shadow-blue-500/10 border border-slate-800">
+                    {/* AI Billing Assistant — white card style */}
+                    <Card>
                         <div className="flex items-center gap-2 mb-4">
-                            <Sparkles className="text-blue-400" size={20} />
-                            <h3 className="font-black text-lg">AI Billing Assistant</h3>
+                            <div className="p-1.5 bg-blue-50 rounded-lg">
+                                <Sparkles className="text-blue-600" size={18} />
+                            </div>
+                            <h3 className="font-bold text-slate-900">AI Billing Assistant</h3>
                         </div>
 
-                        <div className="space-y-4">
-                            <div
+                        <div className="space-y-3">
+                            <button
                                 data-tour="ai-glosa"
-                                className={`p-4 bg-white/5 rounded-xl border border-white/10 transition-all ${isGeneratingDefense
-                                        ? 'opacity-60 cursor-not-allowed'
-                                        : 'hover:border-blue-500/50 cursor-pointer group'
-                                    }`}
+                                className={`w-full text-left p-4 rounded-xl border transition-all ${isGeneratingDefense
+                                    ? 'opacity-60 cursor-not-allowed border-slate-200 bg-slate-50'
+                                    : 'border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 cursor-pointer group'
+                                }`}
                                 onClick={() => {
-                                    if (isGeneratingDefense) return; // Prevent clicks while processing
-
-                                    // For demo purposes, use the first billing record if available
+                                    if (isGeneratingDefense) return;
                                     if (bills.length > 0) {
                                         handleGenerateDefense(bills[0].id);
                                     } else {
@@ -362,30 +309,33 @@ export function BillingDashboard() {
                                     }
                                 }}
                             >
-                                <div className="flex justify-between items-start mb-2">
-                                    <span className="text-[10px] font-black uppercase text-blue-400 tracking-wider">Glosa Defender</span>
+                                <div className="flex justify-between items-start mb-1.5">
+                                    <span className="text-[10px] font-bold uppercase text-blue-600 tracking-wider">Glosa Defender</span>
                                     {isGeneratingDefense && <LoadingSpinner size="sm" />}
                                 </div>
-                                <h4 className={`font-bold mb-1 ${!isGeneratingDefense && 'group-hover:text-blue-400'}`}>
+                                <h4 className={`font-bold text-sm text-slate-900 mb-1 ${!isGeneratingDefense && 'group-hover:text-blue-600'}`}>
                                     {isGeneratingDefense ? 'Generando...' : 'Generar Respuesta AI'}
                                 </h4>
-                                <p className="text-xs text-slate-400 italic">Generar sustento técnico basado en historia clínica para contestación de glosa.</p>
-                            </div>
+                                <p className="text-xs text-slate-500">Generar sustento técnico basado en historia clínica para contestación de glosa.</p>
+                            </button>
 
-                            <div className="p-4 bg-white/5 rounded-xl border border-white/10 hover:border-emerald-500/50 transition-all cursor-pointer group" onClick={handleValidateRIPS}>
-                                <div className="flex justify-between items-start mb-2">
-                                    <span className="text-[10px] font-black uppercase text-emerald-400 tracking-wider">RIPS 2275 Validator</span>
+                            <button
+                                className="w-full text-left p-4 rounded-xl border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/30 transition-all cursor-pointer group"
+                                onClick={handleValidateRIPS}
+                            >
+                                <div className="flex justify-between items-start mb-1.5">
+                                    <span className="text-[10px] font-bold uppercase text-emerald-600 tracking-wider">RIPS 2275 Validator</span>
                                     {isValidating && <LoadingSpinner size="sm" />}
                                 </div>
-                                <h4 className="font-bold mb-1 group-hover:text-emerald-400">Validación de Archivos RIPS</h4>
-                                <p className="text-xs text-slate-400 italic">Verificar cumplimiento de Resolución 2275 antes del envío al portal del Ministerio.</p>
-                            </div>
+                                <h4 className="font-bold text-sm text-slate-900 mb-1 group-hover:text-emerald-600">Validación de Archivos RIPS</h4>
+                                <p className="text-xs text-slate-500">Verificar cumplimiento de Resolución 2275 antes del envío al portal del Ministerio.</p>
+                            </button>
                         </div>
-                    </div>
+                    </Card>
 
                     {/* Error Message Display */}
                     {errorMessage && (
-                        <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex gap-3 text-red-800 animate-in fade-in duration-200">
+                        <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex gap-3 text-red-800">
                             <AlertTriangle className="shrink-0" size={20} />
                             <div className="flex-1">
                                 <h4 className="font-bold mb-1">Error</h4>
@@ -400,8 +350,9 @@ export function BillingDashboard() {
                         </div>
                     )}
 
-                    <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-                        <h3 className="font-black text-slate-900 mb-4 flex items-center gap-2">
+                    {/* Billing Alerts */}
+                    <Card>
+                        <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
                             <AlertTriangle size={18} className="text-orange-400" />
                             Alertas de Facturación
                         </h3>
@@ -409,12 +360,12 @@ export function BillingDashboard() {
                             <div className="p-3 bg-amber-50 rounded-xl border border-amber-100 flex gap-3">
                                 <div className="h-2 w-2 bg-amber-500 rounded-full mt-1.5 shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
                                 <div>
-                                    <p className="text-xs font-bold text-amber-900">3 visistas sin facturar</p>
+                                    <p className="text-xs font-bold text-amber-900">3 visitas sin facturar</p>
                                     <p className="text-[10px] text-amber-700">Se requiere aprobación de coordinación para generar factura.</p>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </Card>
                 </div>
             </div>
 
@@ -436,64 +387,28 @@ export function BillingDashboard() {
             </div>
 
             {/* AI Rebuttal Review Modal */}
-            {rebuttalResult && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 animate-in fade-in zoom-in duration-200">
-                        <div className="flex justify-between items-center mb-6">
-                            <div className="flex items-center gap-2">
-                                <Sparkles className="text-blue-500" size={20} />
-                                <h3 className="font-bold text-lg text-slate-900">Defensa Generada por IA</h3>
-                            </div>
-                            <button onClick={() => setRebuttalResult(null)} className="text-slate-400 hover:text-slate-600">
-                                <X size={20} />
-                            </button>
-                        </div>
-                        <div className="mb-6">
-                            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Respuesta Técnica (Editable)</label>
-                            <textarea
-                                className="w-full h-64 p-4 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none leading-relaxed"
-                                value={rebuttalResult}
-                                onChange={(e) => setRebuttalResult(e.target.value)}
-                            />
-                        </div>
-                        <div className="flex justify-end gap-3">
-                            <button
-                                onClick={() => setRebuttalResult(null)}
-                                className="px-5 py-3 text-slate-500 font-bold hover:bg-slate-50 rounded-xl transition-all"
-                            >
-                                Discard
-                            </button>
-                            <button
-                                onClick={handleSaveRebuttal}
-                                className="px-5 py-3 bg-[#2563eb] text-white font-bold rounded-xl hover:bg-blue-600 transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20"
-                            >
-                                <Save size={18} />
-                                Save to Record
-                            </button>
-                        </div>
-                    </div>
+            <Modal isOpen={!!rebuttalResult} onClose={() => setRebuttalResult(null)} title="Defensa Generada por IA" maxWidth="2xl">
+                <div className="mb-6">
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Respuesta Técnica (Editable)</label>
+                    <textarea
+                        className="w-full h-64 p-4 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none leading-relaxed"
+                        value={rebuttalResult || ''}
+                        onChange={(e) => setRebuttalResult(e.target.value)}
+                    />
                 </div>
-            )}
+                <div className="flex justify-end gap-3">
+                    <Button variant="ghost" onClick={() => setRebuttalResult(null)}>Descartar</Button>
+                    <Button variant="primary" icon={<Save size={16} />} onClick={handleSaveRebuttal}>Guardar en Registro</Button>
+                </div>
+            </Modal>
 
             {/* RIPS Validation Modal */}
-            {ripsResult && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 animate-in fade-in zoom-in duration-200">
-                        <div className="flex justify-between items-center mb-6">
-                            <div className="flex items-center gap-2">
-                                <ClipboardCheck className={ripsResult.valid ? "text-emerald-500" : "text-red-500"} size={20} />
-                                <h3 className="font-bold text-lg text-slate-900">
-                                    Resultado de Validación RIPS
-                                </h3>
-                            </div>
-                            <button onClick={() => setRipsResult(null)} className="text-slate-400 hover:text-slate-600">
-                                <X size={20} />
-                            </button>
-                        </div>
-
+            <Modal isOpen={!!ripsResult} onClose={() => setRipsResult(null)} title="Resultado de Validación RIPS" maxWidth="lg">
+                {ripsResult && (
+                    <>
                         {ripsResult.valid ? (
                             <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 mb-6 flex gap-3 text-emerald-800">
-                                <Check className="shrink-0" size={20} />
+                                <ClipboardCheck className="shrink-0" size={20} />
                                 <div>
                                     <h4 className="font-bold">Validación Exitosa</h4>
                                     <p className="text-sm opacity-90">Todos los archivos RIPS cumplen con la Res 2275.</p>
@@ -514,9 +429,7 @@ export function BillingDashboard() {
                                 <h5 className="text-xs font-bold text-slate-500 uppercase mb-2">Archivos Procesados</h5>
                                 <div className="flex flex-wrap gap-2">
                                     {ripsResult.files.map((file: string) => (
-                                        <span key={file} className="px-2 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-md border border-slate-200">
-                                            {file}
-                                        </span>
+                                        <Badge key={file} variant="default">{file}</Badge>
                                     ))}
                                 </div>
                             </div>
@@ -535,67 +448,44 @@ export function BillingDashboard() {
                             )}
                         </div>
 
-                        <button
-                            onClick={() => setRipsResult(null)}
-                            className="w-full py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-all"
-                        >
-                            Close Report
-                        </button>
-                    </div>
-                </div>
-            )}
+                        <Button variant="secondary" className="w-full" onClick={() => setRipsResult(null)}>Cerrar Reporte</Button>
+                    </>
+                )}
+            </Modal>
 
             {/* Defense Letter Modal */}
-            {defenseLetterModal.isOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 animate-in fade-in zoom-in duration-200">
-                        <div className="flex justify-between items-center mb-6">
-                            <div className="flex items-center gap-2">
-                                <Sparkles className="text-blue-500" size={20} />
-                                <h3 className="font-bold text-lg text-slate-900">Carta de Defensa Generada</h3>
-                            </div>
-                            <button
-                                onClick={() => setDefenseLetterModal({ ...defenseLetterModal, isOpen: false })}
-                                className="text-slate-400 hover:text-slate-600"
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
-
-                        <div className="mb-6">
-                            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">
-                                Contenido de la Defensa (Editable)
-                            </label>
-                            <textarea
-                                className="w-full h-64 p-4 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none leading-relaxed"
-                                value={defenseLetterModal.content}
-                                onChange={(e) => setDefenseLetterModal({ ...defenseLetterModal, content: e.target.value })}
-                            />
-                        </div>
-
-                        <div className="flex justify-end gap-3">
-                            <button
-                                onClick={() => setDefenseLetterModal({ ...defenseLetterModal, isOpen: false })}
-                                className="px-5 py-3 text-slate-500 font-bold hover:bg-slate-50 rounded-xl transition-all"
-                            >
-                                Cerrar
-                            </button>
-                            <button
-                                onClick={() => {
-                                    navigator.clipboard.writeText(defenseLetterModal.content);
-                                    // Show success feedback (could add a toast notification here)
-                                    showToast('success', '¡Copiado!', 'Carta de defensa copiada al portapapeles.');
-                                }}
-                                className="px-5 py-3 bg-[#2563eb] text-white font-bold rounded-xl hover:bg-blue-600 transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20"
-                            >
-                                <ClipboardCheck size={18} />
-                                Copiar al Portapapeles
-                            </button>
-                        </div>
-                    </div>
+            <Modal
+                isOpen={defenseLetterModal.isOpen}
+                onClose={() => setDefenseLetterModal({ ...defenseLetterModal, isOpen: false })}
+                title="Carta de Defensa Generada"
+                maxWidth="2xl"
+            >
+                <div className="mb-6">
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">
+                        Contenido de la Defensa (Editable)
+                    </label>
+                    <textarea
+                        className="w-full h-64 p-4 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none leading-relaxed"
+                        value={defenseLetterModal.content}
+                        onChange={(e) => setDefenseLetterModal({ ...defenseLetterModal, content: e.target.value })}
+                    />
                 </div>
-            )}
+                <div className="flex justify-end gap-3">
+                    <Button variant="ghost" onClick={() => setDefenseLetterModal({ ...defenseLetterModal, isOpen: false })}>
+                        Cerrar
+                    </Button>
+                    <Button
+                        variant="primary"
+                        icon={<ClipboardCheck size={16} />}
+                        onClick={() => {
+                            navigator.clipboard.writeText(defenseLetterModal.content);
+                            showToast('success', '¡Copiado!', 'Carta de defensa copiada al portapapeles.');
+                        }}
+                    >
+                        Copiar al Portapapeles
+                    </Button>
+                </div>
+            </Modal>
         </div>
     );
 }
-

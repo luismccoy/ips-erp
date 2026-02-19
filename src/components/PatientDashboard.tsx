@@ -1,10 +1,62 @@
 import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+    ChevronDown, ChevronUp, CheckCircle, Circle,
+    MapPin, FileText, Stethoscope, Pill, ListChecks, Activity, AlertTriangle
+} from 'lucide-react';
 import { client, MOCK_USER } from '../amplify-utils';
 import { usePagination } from '../hooks/usePagination';
 import { type Patient, type Medication, type Task } from '../types';
 import { AssessmentForm, AssessmentHistory, DeteriorationRiskPanel } from './clinical';
 import type { DeteriorationAnalysis } from './clinical';
-import { Person, Medicines, Stethoscope } from 'healthicons-react/outline';
+import { Avatar } from './ui/Avatar';
+import { MetricCard } from './ui/MetricCard';
+import { Badge } from './ui/Badge';
+import { Button } from './ui/Button';
+import { Card } from './ui/Card';
+
+// Collapsible section component
+function Section({ title, icon, defaultOpen = true, children, actions }: {
+    title: string;
+    icon: React.ReactNode;
+    defaultOpen?: boolean;
+    children: React.ReactNode;
+    actions?: React.ReactNode;
+}) {
+    const [open, setOpen] = useState(defaultOpen);
+    return (
+        <Card noPadding disableAnimation>
+            <button
+                onClick={() => setOpen(!open)}
+                className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-slate-50/50 transition-colors"
+            >
+                <div className="flex items-center gap-2.5">
+                    <span className="text-slate-400">{icon}</span>
+                    <span className="font-bold text-slate-900">{title}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    {actions && <div onClick={e => e.stopPropagation()}>{actions}</div>}
+                    {open ? <ChevronUp size={16} className="text-slate-400" /> : <ChevronDown size={16} className="text-slate-400" />}
+                </div>
+            </button>
+            <AnimatePresence initial={false}>
+                {open && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+                        className="overflow-hidden"
+                    >
+                        <div className="px-5 pb-5 border-t border-slate-100 pt-4">
+                            {children}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </Card>
+    );
+}
 
 export const PatientDashboard: React.FC = () => {
     const { items: patients, loadMore, hasMore, isLoading } = usePagination<Patient>();
@@ -18,15 +70,10 @@ export const PatientDashboard: React.FC = () => {
     const tenantId = MOCK_USER.attributes['custom:tenantId'];
     const nurseId = MOCK_USER.attributes.sub;
 
-    // Real-time subscription for selected patient updates
     useEffect(() => {
         if (!selectedPatient) return;
-
         const patientSub = (client.models.Patient as any).observeQuery({
-            filter: {
-                id: { eq: selectedPatient.id },
-                tenantId: { eq: tenantId }
-            }
+            filter: { id: { eq: selectedPatient.id }, tenantId: { eq: tenantId } }
         }).subscribe({
             next: (data: any) => {
                 if (data.items[0]) {
@@ -36,38 +83,26 @@ export const PatientDashboard: React.FC = () => {
                 }
             }
         });
-
         return () => patientSub.unsubscribe();
     }, [selectedPatient?.id, tenantId]);
 
     useEffect(() => {
-        const fetchPatients = async () => {
-            loadMore(async (token) => {
-                const response = await (client.models.Patient as any).list({
-                    filter: {
-                        tenantId: { eq: tenantId }
-                    },
-                    limit: 50,
-                    nextToken: token
-                });
-
-                const data = response.data || [];
-                if (data.length > 0 && !selectedPatient) {
-                    setSelectedPatient(data[0]);
-                }
-                return { data, nextToken: response.nextToken };
-            }, true);
-        };
-
-        fetchPatients();
+        loadMore(async (token) => {
+            const response = await (client.models.Patient as any).list({
+                filter: { tenantId: { eq: tenantId } },
+                limit: 50,
+                nextToken: token
+            });
+            const data = response.data || [];
+            if (data.length > 0 && !selectedPatient) setSelectedPatient(data[0]);
+            return { data, nextToken: response.nextToken };
+        }, true);
     }, [loadMore, selectedPatient, tenantId]);
 
     const handleLoadMore = () => {
         loadMore(async (token) => {
             const response = await (client.models.Patient as any).list({
-                filter: {
-                    tenantId: { eq: tenantId }
-                },
+                filter: { tenantId: { eq: tenantId } },
                 limit: 50,
                 nextToken: token
             });
@@ -77,16 +112,10 @@ export const PatientDashboard: React.FC = () => {
 
     const handleToggleTask = async (task: Task) => {
         if (!selectedPatient) return;
-
-        // Update the tasks array in the Patient model
         const updatedTasks = selectedPatient.tasks?.map(t =>
             t.id === task.id ? { ...t, completed: !t.completed } : t
         ) || [];
-
-        await (client.models.Patient as any).update({
-            id: selectedPatient.id,
-            tasks: updatedTasks
-        });
+        await (client.models.Patient as any).update({ id: selectedPatient.id, tasks: updatedTasks });
     };
 
     const handleAnalyzeDeteriorationRisk = async () => {
@@ -107,7 +136,7 @@ export const PatientDashboard: React.FC = () => {
                 confidence: 0,
                 risks: [],
                 correlations: [],
-                summary: 'Error al realizar el analisis.',
+                summary: 'Error al realizar el análisis.',
                 error: error instanceof Error ? error.message : 'Error desconocido',
             });
         } finally {
@@ -116,29 +145,46 @@ export const PatientDashboard: React.FC = () => {
     };
 
     if (!selectedPatient) {
-        return <div className="loading">Loading patient data...</div>;
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="h-8 w-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin" />
+            </div>
+        );
     }
 
+    const completedTasks = tasks.filter(t => t.completed).length;
+    const activeMeds = medications.filter(m => m.status === 'ACTIVE').length;
+
     return (
-        <div className="patient-dashboard-container">
-            <aside className="patient-sidebar glass">
-                <h3>Mis Pacientes</h3>
-                <div className="patient-list-sidebar">
+        <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6 min-h-[80vh]">
+            {/* Patient sidebar */}
+            <aside className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 h-fit lg:sticky lg:top-6">
+                <h3 className="text-sm font-bold text-slate-900 pb-3 mb-3 border-b border-slate-100">Mis Pacientes</h3>
+                <div className="flex flex-col gap-1 max-h-[60vh] overflow-y-auto">
                     {patients.map(p => (
-                        <div
+                        <button
                             key={p.id}
-                            className={`sidebar-patient-item ${selectedPatient.id === p.id ? 'active' : ''}`}
                             onClick={() => setSelectedPatient(p)}
+                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                                selectedPatient.id === p.id
+                                    ? 'bg-blue-50 border border-blue-200'
+                                    : 'hover:bg-slate-50 border border-transparent'
+                            }`}
                         >
-                            <span className="name">{p.name}</span>
-                            <span className="doc-id-small">{p.documentId}</span>
-                        </div>
+                            <Avatar name={p.name} size="sm" />
+                            <div className="min-w-0">
+                                <div className={`text-sm font-medium truncate ${selectedPatient.id === p.id ? 'text-blue-700' : 'text-slate-900'}`}>
+                                    {p.name}
+                                </div>
+                                <div className="text-[11px] text-slate-400 font-mono">{p.documentId}</div>
+                            </div>
+                        </button>
                     ))}
                     {hasMore && (
                         <button
                             onClick={handleLoadMore}
                             disabled={isLoading}
-                            className="w-full py-2 text-xs font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-lg transition-all disabled:opacity-50 mt-2"
+                            className="mt-2 w-full py-2 text-xs font-semibold text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
                         >
                             {isLoading ? 'Cargando...' : 'Ver más pacientes'}
                         </button>
@@ -146,374 +192,172 @@ export const PatientDashboard: React.FC = () => {
                 </div>
             </aside>
 
-            <div className="patient-dashboard-main">
-                <div className="patient-header-grid">
-                    <div className="patient-card glass">
-                        <div className="card-header">
-                            <div className="avatar">
-                                <Person width={32} height={32} />
+            {/* Main content */}
+            <div className="space-y-5">
+                {/* Patient profile card */}
+                <Card>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+                        <Avatar name={selectedPatient.name} size="xl" />
+                        <div className="flex-1">
+                            <h2 className="text-xl font-bold text-slate-900">{selectedPatient.name}</h2>
+                            <div className="flex items-center gap-2 mt-1">
+                                <span className="text-sm text-slate-500 font-mono flex items-center gap-1">
+                                    <FileText size={12} /> CC: {selectedPatient.documentId}
+                                </span>
+                                <span className="text-slate-300">|</span>
+                                <span className="text-sm text-slate-500">{selectedPatient.age} años</span>
                             </div>
-                            <div className="info">
-                                <h2>{selectedPatient.name}</h2>
-                                <p className="doc-id">CC: {selectedPatient.documentId}</p>
-                            </div>
-                        </div>
-                        <div className="card-body">
-                            <div className="info-row">
-                                <span className="label">Edad:</span>
-                                <span className="value">{selectedPatient.age} años</span>
-                            </div>
-                            <div className="info-row">
-                                <span className="label">Dirección:</span>
-                                <span className="value">{selectedPatient.address}</span>
-                            </div>
-                            <div className="info-row highlight">
-                                <span className="label">Diagnóstico:</span>
-                                <span className="value">{selectedPatient.diagnosis}</span>
+                            <div className="flex flex-wrap items-center gap-2 mt-2">
+                                <Badge variant="default">{selectedPatient.diagnosis || 'Sin diagnóstico'}</Badge>
+                                {selectedPatient.address && (
+                                    <span className="text-xs text-slate-400 flex items-center gap-1">
+                                        <MapPin size={12} /> {selectedPatient.address}
+                                    </span>
+                                )}
                             </div>
                         </div>
                     </div>
+                </Card>
 
-                    <div className="task-summary-card glass">
-                        <div className="summary-stat">
-                            <span className="stat-value">{tasks.filter(t => t.completed).length}/{tasks.length}</span>
-                            <span className="stat-label">Tareas Completadas</span>
-                        </div>
-                        <div className="summary-stat">
-                            <span className="stat-value text-primary">{medications.filter(m => m.status === 'ACTIVE').length}</span>
-                            <span className="stat-label">Medicamentos Activos</span>
-                        </div>
-                    </div>
+                {/* Metric cards */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <MetricCard
+                        icon={<ListChecks size={18} />}
+                        value={`${completedTasks}/${tasks.length}`}
+                        label="Tareas"
+                        trendDirection={completedTasks === tasks.length && tasks.length > 0 ? 'up' : 'neutral'}
+                        color="green"
+                        delay={0}
+                    />
+                    <MetricCard
+                        icon={<Pill size={18} />}
+                        value={activeMeds}
+                        label="Medicamentos"
+                        trendDirection="neutral"
+                        color="blue"
+                        delay={0.05}
+                    />
+                    <MetricCard
+                        icon={<Activity size={18} />}
+                        value={medications.length}
+                        label="Total Kardex"
+                        trendDirection="neutral"
+                        color="purple"
+                        delay={0.1}
+                    />
+                    <MetricCard
+                        icon={<AlertTriangle size={18} />}
+                        value={deteriorationAnalysis?.overallRiskLevel || '—'}
+                        label="Riesgo"
+                        trendDirection={deteriorationAnalysis?.hasRisk ? 'down' : 'neutral'}
+                        color={deteriorationAnalysis?.hasRisk ? 'red' : 'slate'}
+                        delay={0.15}
+                    />
                 </div>
 
-                <div className="dashboard-grid">
-                    <section className="medications-section glass">
-                        <div className="section-header">
-                            <h3>Digital Kardex (Medicamentos)</h3>
-                            <Medicines className="icon" width={24} height={24} />
-                        </div>
-                        <div className="med-list">
+                {/* Medications Section */}
+                <Section title="Digital Kardex (Medicamentos)" icon={<Pill size={18} />}>
+                    {medications.length === 0 ? (
+                        <p className="text-sm text-slate-400 text-center py-6">No hay medicamentos registrados.</p>
+                    ) : (
+                        <div className="space-y-2">
                             {medications.map(med => (
-                                <div key={med.id} className={`med-item ${med.status.toLowerCase()}`}>
-                                    <div className="med-info">
-                                        <span className="med-name">{med.name}</span>
-                                        <span className="med-details">{med.dosage} • {med.frequency}</span>
+                                <div
+                                    key={med.id}
+                                    className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100 hover:translate-x-1 transition-transform"
+                                >
+                                    <div>
+                                        <span className="font-semibold text-sm text-slate-900">{med.name}</span>
+                                        <p className="text-xs text-slate-500">{med.dosage} - {med.frequency}</p>
                                     </div>
-                                    <span className={`status-pill ${med.status.toLowerCase()}`}>{med.status}</span>
+                                    <Badge variant={med.status === 'ACTIVE' ? 'success' : 'error'} dot>
+                                        {med.status}
+                                    </Badge>
                                 </div>
                             ))}
                         </div>
-                    </section>
+                    )}
+                </Section>
 
-                    <section className="tasks-section glass">
-                        <div className="section-header">
-                            <h3>Ruta de Cuidado (Tareas)</h3>
-                            <Stethoscope className="icon" width={24} height={24} />
-                        </div>
-                        <div className="task-list">
+                {/* Tasks Section */}
+                <Section title="Ruta de Cuidado (Tareas)" icon={<ListChecks size={18} />}>
+                    {tasks.length === 0 ? (
+                        <p className="text-sm text-slate-400 text-center py-6">No hay tareas asignadas.</p>
+                    ) : (
+                        <div className="space-y-2">
                             {tasks.map(task => (
-                                <div key={task.id} className="task-item" onClick={() => handleToggleTask(task)}>
-                                    <div className={`checkbox ${task.completed ? 'checked' : ''}`}>
-                                        {task.completed && (
-                                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M20 6L9 17l-5-5" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                                            </svg>
+                                <button
+                                    key={task.id}
+                                    onClick={() => handleToggleTask(task)}
+                                    className="w-full flex items-start gap-3 p-3 bg-white border border-slate-100 rounded-lg hover:border-blue-200 hover:bg-blue-50/30 transition-colors text-left"
+                                >
+                                    {task.completed ? (
+                                        <CheckCircle size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+                                    ) : (
+                                        <Circle size={20} className="text-slate-300 flex-shrink-0 mt-0.5" />
+                                    )}
+                                    <div>
+                                        <span className={`text-sm font-medium ${task.completed ? 'line-through text-slate-400' : 'text-slate-800'}`}>
+                                            {task.description}
+                                        </span>
+                                        {task.dueDate && (
+                                            <p className="text-[11px] text-slate-400 mt-0.5">
+                                                Vence: {new Date(task.dueDate).toLocaleTimeString()}
+                                            </p>
                                         )}
                                     </div>
-                                    <div className="task-content">
-                                        <span className={`task-desc ${task.completed ? 'completed' : ''}`}>{task.description}</span>
-                                        {task.dueDate && <span className="task-date">Vence: {new Date(task.dueDate).toLocaleTimeString()}</span>}
-                                    </div>
-                                </div>
+                                </button>
                             ))}
                         </div>
-                    </section>
+                    )}
+                </Section>
 
-                    {/* Clinical Assessment Scales Section */}
-                    <section className="assessment-section glass">
-                        <div className="section-header">
-                            <h3>Evaluaciones Clínicas</h3>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={handleAnalyzeDeteriorationRisk}
-                                    disabled={isAnalyzing}
-                                    className="px-3 py-1.5 text-sm font-medium text-white bg-amber-600 rounded-md hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {isAnalyzing ? 'Analizando...' : 'Analizar Riesgo de Deterioro'}
-                                </button>
-                                <button
-                                    onClick={() => setShowAssessmentForm(!showAssessmentForm)}
-                                    className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
-                                >
-                                    {showAssessmentForm ? 'Ver Historial' : 'Nueva Evaluación'}
-                                </button>
-                            </div>
+                {/* Clinical Assessments Section */}
+                <Section
+                    title="Evaluaciones Clínicas"
+                    icon={<Stethoscope size={18} />}
+                    actions={
+                        <div className="flex gap-2" onClick={e => e.stopPropagation()}>
+                            <Button
+                                variant="cta"
+                                size="sm"
+                                onClick={handleAnalyzeDeteriorationRisk}
+                                isLoading={isAnalyzing}
+                                icon={<AlertTriangle size={14} />}
+                            >
+                                Analizar Riesgo
+                            </Button>
+                            <Button
+                                size="sm"
+                                onClick={() => setShowAssessmentForm(!showAssessmentForm)}
+                            >
+                                {showAssessmentForm ? 'Ver Historial' : 'Nueva Evaluación'}
+                            </Button>
                         </div>
-
-                        {deteriorationAnalysis && (
-                            <div className="mb-4">
-                                <DeteriorationRiskPanel
-                                    analysis={deteriorationAnalysis}
-                                    onDismiss={() => setDeteriorationAnalysis(null)}
-                                />
-                            </div>
-                        )}
-
-                        {showAssessmentForm ? (
-                            <AssessmentForm
-                                patientId={selectedPatient.id}
-                                nurseId={nurseId}
-                                tenantId={tenantId}
-                                onSubmit={() => {
-                                    setShowAssessmentForm(false);
-                                }}
-                                onCancel={() => setShowAssessmentForm(false)}
+                    }
+                >
+                    {deteriorationAnalysis && (
+                        <div className="mb-4">
+                            <DeteriorationRiskPanel
+                                analysis={deteriorationAnalysis}
+                                onDismiss={() => setDeteriorationAnalysis(null)}
                             />
-                        ) : (
-                            <AssessmentHistory
-                                patientId={selectedPatient.id}
-                            />
-                        )}
-                    </section>
-                </div>
+                        </div>
+                    )}
+
+                    {showAssessmentForm ? (
+                        <AssessmentForm
+                            patientId={selectedPatient.id}
+                            nurseId={nurseId}
+                            tenantId={tenantId}
+                            onSubmit={() => setShowAssessmentForm(false)}
+                            onCancel={() => setShowAssessmentForm(false)}
+                        />
+                    ) : (
+                        <AssessmentHistory patientId={selectedPatient.id} />
+                    )}
+                </Section>
             </div>
-
-            <style>{`
-                .patient-dashboard-container {
-                    display: grid;
-                    grid-template-columns: 280px 1fr;
-                    gap: 1.5rem;
-                    min-height: 80vh;
-                }
-
-                .patient-sidebar {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 1.5rem;
-                    height: fit-content;
-                    position: sticky;
-                    top: 1.5rem;
-                }
-
-                .patient-sidebar h3 {
-                    margin: 0;
-                    font-size: 1.125rem;
-                    color: var(--neutral-800);
-                    padding-bottom: 1rem;
-                    border-bottom: 1px solid var(--neutral-100);
-                }
-
-                .patient-list-sidebar {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 0.5rem;
-                }
-
-                .sidebar-patient-item {
-                    padding: 1rem;
-                    border-radius: var(--radius-md);
-                    cursor: pointer;
-                    transition: all 0.2s;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 4px;
-                    border: 2px solid transparent;
-                }
-
-                .sidebar-patient-item:hover {
-                    background: var(--neutral-50);
-                }
-
-                .sidebar-patient-item.active {
-                    background: var(--primary-50);
-                    border-color: var(--primary-500);
-                }
-
-                .sidebar-patient-item .name {
-                    font-weight: 700;
-                    color: var(--neutral-900);
-                }
-
-                .sidebar-patient-item .doc-id-small {
-                    font-size: 0.75rem;
-                    color: var(--neutral-500);
-                    font-family: monospace;
-                }
-
-                .patient-dashboard-main {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 1.5rem;
-                }
-
-                .glass {
-                    background: rgba(255, 255, 255, 0.9);
-                    backdrop-filter: blur(10px);
-                    border: 1px solid rgba(255, 255, 255, 0.2);
-                    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-                    border-radius: var(--radius-xl);
-                    padding: 1.5rem;
-                }
-
-                .patient-header-grid {
-                    display: grid;
-                    grid-template-columns: 2fr 1fr;
-                    gap: 1.5rem;
-                }
-
-                .patient-card .card-header {
-                    display: flex;
-                    align-items: center;
-                    gap: 1.5rem;
-                    margin-bottom: 1.5rem;
-                    padding-bottom: 1rem;
-                    border-bottom: 1px solid var(--neutral-100);
-                }
-
-                .avatar {
-                    width: 64px;
-                    height: 64px;
-                    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    color: white;
-                    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-                }
-
-                .avatar svg { width: 32px; height: 32px; }
-
-                .info h2 { margin: 0; font-size: 1.5rem; color: var(--neutral-900); }
-                .doc-id { margin: 4px 0 0; color: var(--neutral-500); font-weight: 600; font-family: monospace; }
-
-                .card-body {
-                    display: grid;
-                    gap: 0.75rem;
-                }
-
-                .info-row {
-                    display: flex;
-                    justify-content: space-between;
-                    font-size: 0.95rem;
-                }
-
-                .info-row.highlight {
-                    background: var(--primary-50);
-                    padding: 0.75rem;
-                    border-radius: var(--radius-md);
-                    margin-top: 0.5rem;
-                }
-
-                .info-row .label { color: var(--neutral-500); font-weight: 500; }
-                .info-row .value { color: var(--neutral-800); font-weight: 700; }
-                .info-row.highlight .value { color: var(--primary-700); }
-
-                .task-summary-card {
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    gap: 1.5rem;
-                    text-align: center;
-                }
-
-                .summary-stat {
-                    display: flex;
-                    flex-direction: column;
-                }
-
-                .stat-value { font-size: 2.25rem; font-weight: 800; color: var(--neutral-900); line-height: 1; }
-                .stat-label { font-size: 0.875rem; color: var(--neutral-500); font-weight: 600; margin-top: 4px; }
-                .text-primary { color: var(--primary-600); }
-
-                .dashboard-grid {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 1.5rem;
-                }
-
-                .section-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 1.5rem;
-                }
-
-                .section-header h3 { margin: 0; font-size: 1.125rem; color: var(--neutral-900); }
-                .icon { width: 24px; height: 24px; color: var(--primary-500); }
-
-                .med-list, .task-list {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 0.75rem;
-                }
-
-                .med-item {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    padding: 1rem;
-                    background: var(--neutral-50);
-                    border-radius: var(--radius-md);
-                    border: 1px solid var(--neutral-100);
-                    transition: transform 0.2s;
-                }
-
-                .med-item:hover { transform: translateX(4px); }
-
-                .med-info { display: flex; flex-direction: column; gap: 2px; }
-                .med-name { font-weight: 700; color: var(--neutral-800); }
-                .med-details { font-size: 0.875rem; color: var(--neutral-500); }
-
-                .status-pill {
-                    padding: 0.25rem 0.75rem;
-                    border-radius: 999px;
-                    font-size: 0.75rem;
-                    font-weight: 700;
-                    text-transform: uppercase;
-                }
-
-                .status-pill.active { background: #dcfce7; color: #15803d; }
-                .status-pill.discontinued { background: #fee2e2; color: #991b1b; }
-
-                .task-item {
-                    display: flex;
-                    gap: 1rem;
-                    padding: 1rem;
-                    background: white;
-                    border: 1px solid var(--neutral-100);
-                    border-radius: var(--radius-md);
-                    cursor: pointer;
-                    transition: all 0.2s;
-                }
-
-                .task-item:hover { border-color: var(--primary-300); background: var(--primary-50); }
-
-                .checkbox {
-                    width: 24px;
-                    height: 24px;
-                    border: 2px solid var(--neutral-300);
-                    border-radius: 6px;
-                    flex-shrink: 0;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    transition: all 0.2s;
-                }
-
-                .checkbox.checked { background: var(--success-500); border-color: var(--success-500); }
-
-                .task-content { display: flex; flex-direction: column; gap: 2px; }
-                .task-desc { font-weight: 600; color: var(--neutral-800); }
-                .task-desc.completed { text-decoration: line-through; color: var(--neutral-400); }
-                .task-date { font-size: 0.75rem; color: var(--neutral-500); }
-
-                @media (max-width: 1024px) {
-                    .patient-dashboard-container { grid-template-columns: 1fr; }
-                    .patient-sidebar { position: static; }
-                    .patient-header-grid, .dashboard-grid { grid-template-columns: 1fr; }
-                }
-            `}</style>
         </div>
     );
 };

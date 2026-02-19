@@ -1,12 +1,12 @@
 /**
  * Sync Progress Indicator Component
- * 
+ *
  * Floating indicator showing sync progress when synchronization is in progress.
  * Displays:
  * - Progress bar
  * - Count of synced/pending items
  * - Option to dismiss
- * 
+ *
  * @see docs/OFFLINE_SYNC_SPEC.md - Section 8.4: Sync Progress Indicator
  */
 
@@ -44,7 +44,7 @@ export function SyncProgressIndicator({
     retryFailed,
     clearAllErrors,
   } = useSyncStatus();
-  
+
   const [isDismissed, setIsDismissed] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
 
@@ -69,14 +69,13 @@ export function SyncProgressIndicator({
   };
 
   // Calculate progress
-  // For this implementation, we use pending count as an approximation
   const progress = isSyncing ? 50 : hasErrors ? 100 : 0;
 
   return (
     <div
       className={`
         fixed ${positionClasses[position]} z-40
-        bg-slate-800 border border-slate-700 rounded-xl shadow-lg
+        bg-white border border-slate-200 rounded-xl shadow-lg
         min-w-[240px] max-w-[320px] overflow-hidden
         ${className}
       `}
@@ -84,28 +83,28 @@ export function SyncProgressIndicator({
       aria-live="polite"
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
         <div className="flex items-center gap-2">
           {isSyncing ? (
-            <Loader2 size={16} className="animate-spin text-blue-400" />
+            <Loader2 size={16} className="animate-spin text-blue-500" />
           ) : hasErrors ? (
-            <AlertCircle size={16} className="text-red-400" />
+            <AlertCircle size={16} className="text-red-500" />
           ) : pendingCount > 0 ? (
-            <Loader2 size={16} className="text-yellow-400" />
+            <Loader2 size={16} className="text-amber-500" />
           ) : (
-            <Check size={16} className="text-green-400" />
+            <Check size={16} className="text-green-500" />
           )}
-          <span className="text-sm font-medium text-white">
-            {isSyncing ? 'Sincronizando...' : 
+          <span className="text-sm font-medium text-slate-900">
+            {isSyncing ? 'Sincronizando...' :
              hasErrors ? 'Error de sincronización' :
-             pendingCount > 0 ? 'Cambios pendientes' : 
+             pendingCount > 0 ? 'Cambios pendientes' :
              'Sincronizado'}
           </span>
         </div>
         {dismissible && (
           <button
             onClick={handleDismiss}
-            className="text-slate-400 hover:text-white p-1 -mr-1"
+            className="text-slate-400 hover:text-slate-600 p-1 -mr-1"
             aria-label="Cerrar"
           >
             <X size={14} />
@@ -117,7 +116,7 @@ export function SyncProgressIndicator({
       <div className="px-4 py-3 space-y-3">
         {/* Progress bar (only when syncing) */}
         {isSyncing && (
-          <div className="w-full bg-slate-700 rounded-full h-1.5">
+          <div className="w-full bg-slate-100 rounded-full h-1.5">
             <div
               className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
               style={{ width: `${progress}%` }}
@@ -127,8 +126,8 @@ export function SyncProgressIndicator({
 
         {/* Pending count */}
         {pendingCount > 0 && (
-          <div className="text-sm text-slate-300">
-            <span className="font-medium text-white">{pendingCount}</span>
+          <div className="text-sm text-slate-500">
+            <span className="font-medium text-slate-900">{pendingCount}</span>
             {' '}cambio{pendingCount !== 1 ? 's' : ''} pendiente{pendingCount !== 1 ? 's' : ''}
           </div>
         )}
@@ -136,21 +135,21 @@ export function SyncProgressIndicator({
         {/* Errors section */}
         {hasErrors && (
           <div className="space-y-2">
-            <div className="text-xs text-red-400">
+            <div className="text-xs text-red-500">
               {errors.length} error{errors.length !== 1 ? 'es' : ''} de sincronización
             </div>
             <div className="flex gap-2">
               <button
                 onClick={handleRetry}
                 disabled={isRetrying}
-                className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <RefreshCw size={12} className={isRetrying ? 'animate-spin' : ''} />
                 Reintentar
               </button>
               <button
                 onClick={clearAllErrors}
-                className="px-2 py-1 text-xs font-medium text-slate-300 hover:text-white border border-slate-600 hover:border-slate-500 rounded"
+                className="px-2 py-1 text-xs font-medium text-slate-500 hover:text-slate-700 border border-slate-200 hover:border-slate-300 rounded-lg"
               >
                 Descartar
               </button>

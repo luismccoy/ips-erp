@@ -504,10 +504,31 @@
   --nav-item-border-radius: var(--radius-lg);
 
   /* Sidebar */
-  --sidebar-width: 280px;
+  --sidebar-width: 260px;
   --sidebar-width-collapsed: 72px;
   --sidebar-bg: var(--bg-card);
   --sidebar-border-color: var(--color-neutral-200);
+
+  /* ============================================
+   * 9. ZENDENTA DESIGN SYSTEM TOKENS
+   * ============================================ */
+
+  /* CTA Color (Coral Red) */
+  --color-cta: #E8594F;
+  --color-cta-hover: #D14940;
+  --color-cta-light: #FEF2F2;
+  --color-cta-shadow: rgba(232, 89, 79, 0.3);
+
+  /* Zendenta Shadows */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+  --shadow-sidebar: 1px 0 3px rgba(0, 0, 0, 0.04);
+  --shadow-dropdown: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.15);
+
+  /* Page transitions */
+  --transition-page: 300ms var(--ease-in-out);
+  --transition-sidebar: 250ms var(--ease-spring);
 }
 
 /* ============================================

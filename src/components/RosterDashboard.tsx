@@ -1,9 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Calendar, Sparkles, Clock, MapPin, Plus, User, Check, X, Users, RefreshCw, Navigation } from 'lucide-react';
+import { Calendar, Sparkles, Clock, MapPin, Plus, User, Check, X, Users, Navigation } from 'lucide-react';
 import { client, isUsingRealBackend, MOCK_USER } from '../amplify-utils';
 import { usePagination } from '../hooks/usePagination';
 import { useLoadingTimeout } from '../hooks/useLoadingTimeout';
 import { ErrorState } from './ui/ErrorState';
+import { Card } from './ui/Card';
+import { Button } from './ui/Button';
+import { Badge } from './ui/Badge';
+import { Modal } from './ui/Modal';
+import { Avatar } from './ui/Avatar';
 import type { Shift, Patient, Nurse } from '../types';
 import { LoadingSpinner } from './ui/LoadingSpinner';
 
@@ -11,7 +16,7 @@ export function RosterDashboard() {
     const { items: shifts, setItems, loadMore, hasMore, isLoading: isPaginationLoading } = usePagination<Shift>();
     const { isLoading, hasTimedOut, startLoading, stopLoading } = useLoadingTimeout();
     const [patients, setPatients] = useState<Patient[]>([]);
-    const [nurses, setNurses] = useState<Nurse[]>([]); // Added for assignment
+    const [nurses, setNurses] = useState<Nurse[]>([]);
 
     // Modal States
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -38,9 +43,7 @@ export function RosterDashboard() {
 
     const fetchData = async () => {
         startLoading();
-        
         try {
-            // Always use the client - it returns mock data in demo mode
             const [patientsRes, nursesRes] = await Promise.all([
                 (client.models.Patient as any).list(),
                 (client.models.Nurse as any).list()
@@ -85,9 +88,6 @@ export function RosterDashboard() {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            // Placeholder for real mutation:
-            // await client.models.Shift.create({ ... });
-
             const tempShift: any = {
                 id: `temp-${Date.now()}`,
                 patientId: newShiftPatientId,
@@ -101,7 +101,6 @@ export function RosterDashboard() {
             setItems(prev => [tempShift, ...prev]);
             setIsCreateModalOpen(false);
             resetForm();
-            alert('Turno creado correctamente');
         } catch (error) {
             console.error('Failed to create shift:', error);
             alert('No se pudo crear el turno');
@@ -113,66 +112,60 @@ export function RosterDashboard() {
     const handleOptimizeRoutes = async () => {
         setIsOptimizing(true);
         try {
-            // Get unassigned shifts
-            const unassignedShifts = shifts.filter(s => 
+            const unassignedShifts = shifts.filter(s =>
                 s.nurseId === 'UNASSIGNED' || s.nurseId === 'unassigned' || !s.nurseId
             );
-            
+
             if (unassignedShifts.length === 0) {
-                alert('✅ Todos los turnos ya están asignados. No hay turnos para optimizar.');
+                alert('Todos los turnos ya están asignados. No hay turnos para optimizar.');
                 setIsOptimizing(false);
                 return;
             }
 
-            // Call AI generateRoster function
             const response = await (client.queries as any).generateRoster({
                 nurses: JSON.stringify(nurses),
                 unassignedShifts: JSON.stringify(unassignedShifts)
             });
 
-            console.log('AI Roster Response:', response);
-
             if (response.data) {
                 const result = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
-                
-                // Apply the AI assignments to the shifts
+
                 if (result.assignments && result.assignments.length > 0) {
                     const newlyAssignedIds = new Set<string>();
                     const assignmentDetails: any[] = [];
-                    
+
                     const updatedShifts = shifts.map(shift => {
                         const assignment = result.assignments.find((a: any) => a.shiftId === shift.id);
                         if (assignment && assignment.nurseId !== 'UNASSIGNED') {
                             const nurse = nurses.find(n => n.id === assignment.nurseId);
                             const patient = patients.find(p => p.id === shift.patientId);
-                            
+
                             newlyAssignedIds.add(shift.id);
                             assignmentDetails.push({
                                 patientName: patient?.name || 'Paciente desconocido',
                                 nurseName: nurse?.name || assignment.nurseName || 'Asignado',
                                 location: shift.location || 'Sin ubicación',
-                                time: new Date(shift.scheduledTime).toLocaleString('es-CO', { 
-                                    hour: '2-digit', 
-                                    minute: '2-digit', 
-                                    day: '2-digit', 
-                                    month: 'short' 
+                                time: new Date(shift.scheduledTime).toLocaleString('es-CO', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    day: '2-digit',
+                                    month: 'short'
                                 })
                             });
-                            
+
                             return {
                                 ...shift,
                                 nurseId: assignment.nurseId,
                                 nurseName: nurse?.name || assignment.nurseName || 'Asignado',
-                                status: 'PENDING' as const // Update status to show it's now assigned
+                                status: 'PENDING' as const
                             };
                         }
                         return shift;
                     });
-                    
+
                     setItems(updatedShifts);
                     setRecentlyAssignedIds(newlyAssignedIds);
-                    
-                    // Store result for detailed modal
+
                     const assignedCount = result.assignments.filter((a: any) => a.nurseId !== 'UNASSIGNED').length;
                     setOptimizationResult({
                         assignedCount,
@@ -180,11 +173,9 @@ export function RosterDashboard() {
                         totalTravelTime: result.totalTravelTime || '2h 15min',
                         assignments: assignmentDetails
                     });
-                    
-                    // Show detailed result modal
+
                     setIsOptimizationResultOpen(true);
-                    
-                    // Auto-scroll to first assigned shift after modal closes
+
                     setTimeout(() => {
                         const firstAssignedId = Array.from(newlyAssignedIds)[0];
                         if (firstAssignedId) {
@@ -194,8 +185,7 @@ export function RosterDashboard() {
                             }
                         }
                     }, 500);
-                    
-                    // Clear highlights after 5 seconds
+
                     setTimeout(() => {
                         setRecentlyAssignedIds(new Set());
                     }, 5000);
@@ -220,8 +210,7 @@ export function RosterDashboard() {
     };
 
     const handleRouteOptimize = async () => {
-        // Get assigned shifts that have locations
-        const assignedShifts = shifts.filter(s => 
+        const assignedShifts = shifts.filter(s =>
             s.nurseId && s.nurseId !== 'UNASSIGNED' && s.nurseId !== 'unassigned' && s.location
         );
 
@@ -253,14 +242,12 @@ export function RosterDashboard() {
                 const result = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
 
                 if (result.success) {
-                    // Build order map for display
                     const orderMap = new Map<string, number>();
                     (result.optimizedShifts || []).forEach((os: any) => {
                         orderMap.set(os.id, os.order);
                     });
                     setOptimizedShiftOrder(orderMap);
 
-                    // Reorder shifts in the list based on optimization
                     const reordered = [...shifts].sort((a, b) => {
                         const orderA = orderMap.get(a.id) ?? 999;
                         const orderB = orderMap.get(b.id) ?? 999;
@@ -277,7 +264,6 @@ export function RosterDashboard() {
                     });
                     setIsRouteResultOpen(true);
 
-                    // Clear order badges after 8 seconds
                     setTimeout(() => setOptimizedShiftOrder(new Map()), 8000);
                 } else {
                     alert('No se pudo optimizar la ruta. Verifique que las direcciones sean válidas.');
@@ -296,9 +282,11 @@ export function RosterDashboard() {
 
     if (isLoading && shifts.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-12 bg-white rounded-2xl border border-slate-100 border-dashed animate-pulse">
-                <LoadingSpinner size="lg" label="Sincronizando Roster..." />
-            </div>
+            <Card>
+                <div className="flex flex-col items-center justify-center py-12">
+                    <LoadingSpinner size="lg" label="Sincronizando Roster..." />
+                </div>
+            </Card>
         );
     }
 
@@ -313,49 +301,45 @@ export function RosterDashboard() {
     }
 
     return (
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 relative">
-            <div className="flex justify-between items-center mb-6">
-                <h3 className="font-black text-slate-900 flex items-center gap-2">
+        <Card>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <h3 className="font-bold text-slate-900 flex items-center gap-2">
                     <Calendar size={18} className="text-slate-400" />
                     Gestión de Turnos
                 </h3>
-                <div className="flex gap-3">
-                    <button
+                <div className="flex gap-2 flex-wrap">
+                    <Button
+                        variant="success"
+                        size="sm"
+                        icon={isRouteOptimizing ? undefined : <Navigation size={14} />}
+                        isLoading={isRouteOptimizing}
                         onClick={handleRouteOptimize}
-                        disabled={isRouteOptimizing}
-                        className="bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl font-bold text-xs hover:bg-emerald-100 transition-all flex items-center gap-2 border border-emerald-100"
                     >
-                        {isRouteOptimizing ? <LoadingSpinner size="sm" /> : <Navigation size={14} />}
                         {isRouteOptimizing ? 'Calculando...' : 'Optimizar Ruta'}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        icon={isOptimizing ? undefined : <Sparkles size={14} />}
+                        isLoading={isOptimizing}
                         onClick={handleOptimizeRoutes}
-                        disabled={isOptimizing}
                         data-tour="ai-optimizer"
-                        className="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-xl font-bold text-xs hover:bg-indigo-100 transition-all flex items-center gap-2 border border-indigo-100"
                     >
-                        {isOptimizing ? <LoadingSpinner size="sm" /> : <Sparkles size={14} />}
                         {isOptimizing ? 'Optimizando...' : 'Asignar Turnos (IA)'}
-                    </button>
-                    <button
-                        onClick={() => setIsCreateModalOpen(true)}
-                        className="bg-[#2563eb] text-white px-4 py-2 rounded-xl font-bold text-xs hover:bg-blue-700 transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20"
-                    >
-                        <Plus size={16} /> Nuevo Turno
-                    </button>
+                    </Button>
+                    <Button variant="cta" size="sm" icon={<Plus size={14} />} onClick={() => setIsCreateModalOpen(true)}>
+                        Nuevo Turno
+                    </Button>
                 </div>
             </div>
 
             {shifts.length === 0 && !isLoading && (
-                <div className="text-center py-12 bg-slate-50 rounded-2xl border border-slate-100 border-dashed">
+                <div className="text-center py-12 bg-slate-50 rounded-xl border border-slate-100 border-dashed">
                     <Calendar className="mx-auto text-slate-300 mb-4" size={48} />
                     <p className="text-slate-400 mb-4 font-medium">No hay turnos programados</p>
-                    <button
-                        onClick={() => setIsCreateModalOpen(true)}
-                        className="text-[#2563eb] font-bold text-sm hover:underline"
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => setIsCreateModalOpen(true)}>
                         Crear su primer turno
-                    </button>
+                    </Button>
                 </div>
             )}
 
@@ -366,28 +350,26 @@ export function RosterDashboard() {
                     const isRecentlyAssigned = recentlyAssignedIds.has(shift.id);
 
                     return (
-                        <div 
-                            key={shift.id} 
+                        <div
+                            key={shift.id}
                             id={`shift-${shift.id}`}
                             className={`p-4 border rounded-xl transition-all flex justify-between items-center ${
-                                isRecentlyAssigned 
-                                    ? 'border-green-300 bg-green-50 animate-pulse-green shadow-lg shadow-green-200/50' 
-                                    : 'border-slate-50 hover:bg-slate-50/50'
+                                isRecentlyAssigned
+                                    ? 'border-green-300 bg-green-50 shadow-lg shadow-green-200/50'
+                                    : 'border-slate-100 hover:bg-slate-50/50'
                             }`}
                         >
                             <div className="flex gap-4 items-center">
-                                <div className={`h-10 w-10 rounded-full flex items-center justify-center shadow-sm ${
-                                    isRecentlyAssigned ? 'bg-green-100 text-green-600' : 'bg-blue-50 text-blue-600'
-                                }`}>
-                                    {isRecentlyAssigned ? <Check size={18} /> : <Clock size={18} />}
-                                </div>
+                                <Avatar
+                                    name={patient?.name || 'P'}
+                                    size="sm"
+                                    status={isRecentlyAssigned ? 'online' : undefined}
+                                />
                                 <div>
                                     <div className="flex items-center gap-2">
                                         <h4 className="font-bold text-slate-900">{patient?.name || 'Unknown Patient'}</h4>
                                         {isRecentlyAssigned && (
-                                            <span className="px-2 py-0.5 bg-green-500 text-white text-[9px] font-black rounded-full uppercase animate-bounce">
-                                                ✨ Recién Asignado
-                                            </span>
+                                            <Badge variant="success" dot>Recién Asignado</Badge>
                                         )}
                                     </div>
                                     <div className="flex flex-col gap-0.5 mt-1">
@@ -406,16 +388,19 @@ export function RosterDashboard() {
                             </div>
                             <div className="text-right">
                                 {optimizedShiftOrder.has(shift.id) && (
-                                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-black bg-emerald-50 text-emerald-600 border border-emerald-100 mb-1">
+                                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100 mb-1">
                                         <Navigation size={10} /> #{optimizedShiftOrder.get(shift.id)}
                                     </span>
                                 )}
-                                <span className={`px-2 py-1 rounded-md text-[10px] font-black border uppercase ${shift.status === 'COMPLETED' ? 'bg-green-50 text-green-600 border-green-100' :
-                                    shift.status === 'IN_PROGRESS' ? 'bg-blue-50 text-blue-600 border-blue-100' :
-                                        'bg-yellow-50 text-yellow-600 border-yellow-100'
-                                    }`}>
+                                <Badge
+                                    variant={
+                                        shift.status === 'COMPLETED' ? 'success' :
+                                        shift.status === 'IN_PROGRESS' ? 'info' : 'warning'
+                                    }
+                                    dot
+                                >
                                     {shift.status}
-                                </span>
+                                </Badge>
                                 <p className="text-[10px] text-slate-400 mt-1 font-bold">
                                     {new Date(shift.scheduledTime).toLocaleString('es-CO', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}
                                 </p>
@@ -435,56 +420,24 @@ export function RosterDashboard() {
             </div>
 
             {/* Optimization Result Modal */}
-            {isOptimizationResultOpen && optimizationResult && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-6 animate-in fade-in zoom-in duration-200">
-                        <div className="flex justify-between items-center mb-6">
-                            <div className="flex items-center gap-3">
-                                <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
-                                    <Sparkles className="text-green-600" size={24} />
-                                </div>
-                                <div>
-                                    <h3 className="font-black text-xl text-slate-900">¡Optimización Completada!</h3>
-                                    <p className="text-sm text-slate-500">Turnos asignados automáticamente por IA</p>
-                                </div>
-                            </div>
-                            <button 
-                                onClick={() => setIsOptimizationResultOpen(false)} 
-                                className="text-slate-400 hover:text-slate-600 transition-colors"
-                            >
-                                <X size={24} />
-                            </button>
-                        </div>
-
-                        {/* Summary Stats */}
+            <Modal isOpen={isOptimizationResultOpen && !!optimizationResult} onClose={() => setIsOptimizationResultOpen(false)} title="Optimización Completada" maxWidth="2xl">
+                {optimizationResult && (
+                    <>
                         <div className="grid grid-cols-3 gap-4 mb-6">
                             <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
-                                <div className="text-3xl font-black text-green-600 mb-1">
-                                    {optimizationResult.assignedCount}
-                                </div>
-                                <div className="text-xs font-bold text-green-700 uppercase">
-                                    Turnos Asignados
-                                </div>
+                                <div className="text-3xl font-extrabold text-green-600 mb-1">{optimizationResult.assignedCount}</div>
+                                <div className="text-xs font-bold text-green-700 uppercase">Turnos Asignados</div>
                             </div>
                             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
-                                <div className="text-3xl font-black text-blue-600 mb-1">
-                                    {optimizationResult.optimizationScore}%
-                                </div>
-                                <div className="text-xs font-bold text-blue-700 uppercase">
-                                    Score de Optimización
-                                </div>
+                                <div className="text-3xl font-extrabold text-blue-600 mb-1">{optimizationResult.optimizationScore}%</div>
+                                <div className="text-xs font-bold text-blue-700 uppercase">Score de Optimización</div>
                             </div>
                             <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 text-center">
-                                <div className="text-3xl font-black text-purple-600 mb-1">
-                                    {optimizationResult.totalTravelTime}
-                                </div>
-                                <div className="text-xs font-bold text-purple-700 uppercase">
-                                    Tiempo de Viaje
-                                </div>
+                                <div className="text-3xl font-extrabold text-purple-600 mb-1">{optimizationResult.totalTravelTime}</div>
+                                <div className="text-xs font-bold text-purple-700 uppercase">Tiempo de Viaje</div>
                             </div>
                         </div>
 
-                        {/* Assignment Details Table */}
                         <div className="mb-6">
                             <h4 className="font-bold text-sm text-slate-700 mb-3 flex items-center gap-2">
                                 <Users size={16} />
@@ -494,10 +447,10 @@ export function RosterDashboard() {
                                 <table className="w-full">
                                     <thead className="bg-slate-50 sticky top-0">
                                         <tr>
-                                            <th className="text-left px-4 py-3 text-xs font-black text-slate-600 uppercase">Paciente</th>
-                                            <th className="text-left px-4 py-3 text-xs font-black text-slate-600 uppercase">Enfermera Asignada</th>
-                                            <th className="text-left px-4 py-3 text-xs font-black text-slate-600 uppercase">Ubicación</th>
-                                            <th className="text-left px-4 py-3 text-xs font-black text-slate-600 uppercase">Horario</th>
+                                            <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 uppercase">Paciente</th>
+                                            <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 uppercase">Enfermera</th>
+                                            <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 uppercase">Ubicación</th>
+                                            <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 uppercase">Horario</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -517,48 +470,28 @@ export function RosterDashboard() {
                             </div>
                         </div>
 
-                        {/* Action Button */}
                         <div className="flex justify-end">
-                            <button
-                                onClick={() => setIsOptimizationResultOpen(false)}
-                                className="px-6 py-3 bg-[#2563eb] text-white font-bold rounded-xl hover:bg-blue-600 transition-colors flex items-center gap-2 shadow-lg shadow-blue-500/20"
-                            >
-                                <Check size={18} />
+                            <Button variant="primary" icon={<Check size={16} />} onClick={() => setIsOptimizationResultOpen(false)}>
                                 Entendido
-                            </button>
+                            </Button>
                         </div>
-                    </div>
-                </div>
-            )}
+                    </>
+                )}
+            </Modal>
 
             {/* Route Optimization Result Modal */}
-            {isRouteResultOpen && routeResult && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 animate-in fade-in zoom-in duration-200">
-                        <div className="flex justify-between items-center mb-6">
-                            <div className="flex items-center gap-3">
-                                <div className="h-12 w-12 bg-emerald-100 rounded-full flex items-center justify-center">
-                                    <Navigation className="text-emerald-600" size={24} />
-                                </div>
-                                <div>
-                                    <h3 className="font-black text-xl text-slate-900">Ruta Optimizada</h3>
-                                    <p className="text-sm text-slate-500">{routeResult.shiftCount} turnos reordenados</p>
-                                </div>
-                            </div>
-                            <button onClick={() => setIsRouteResultOpen(false)} className="text-slate-400 hover:text-slate-600">
-                                <X size={24} />
-                            </button>
-                        </div>
-
+            <Modal isOpen={isRouteResultOpen && !!routeResult} onClose={() => setIsRouteResultOpen(false)} title="Ruta Optimizada" maxWidth="lg">
+                {routeResult && (
+                    <>
                         <div className="grid grid-cols-2 gap-4 mb-6">
                             <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
-                                <div className="text-3xl font-black text-emerald-600 mb-1">
+                                <div className="text-3xl font-extrabold text-emerald-600 mb-1">
                                     {Math.round(routeResult.totalTravelTimeMinutes || 0)}
                                 </div>
                                 <div className="text-xs font-bold text-emerald-700 uppercase">Minutos de Viaje</div>
                             </div>
                             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
-                                <div className="text-3xl font-black text-blue-600 mb-1">
+                                <div className="text-3xl font-extrabold text-blue-600 mb-1">
                                     {(routeResult.totalDistanceKm || 0).toFixed(1)}
                                 </div>
                                 <div className="text-xs font-bold text-blue-700 uppercase">Km Totales</div>
@@ -574,9 +507,9 @@ export function RosterDashboard() {
                                 <table className="w-full">
                                     <thead className="bg-slate-50 sticky top-0">
                                         <tr>
-                                            <th className="text-left px-3 py-2 text-xs font-black text-slate-600">#</th>
-                                            <th className="text-left px-3 py-2 text-xs font-black text-slate-600">Turno</th>
-                                            <th className="text-right px-3 py-2 text-xs font-black text-slate-600">Viaje</th>
+                                            <th className="text-left px-3 py-2 text-xs font-bold text-slate-600">#</th>
+                                            <th className="text-left px-3 py-2 text-xs font-bold text-slate-600">Turno</th>
+                                            <th className="text-right px-3 py-2 text-xs font-bold text-slate-600">Viaje</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -586,7 +519,7 @@ export function RosterDashboard() {
                                             return (
                                                 <tr key={os.id} className="border-t border-slate-100">
                                                     <td className="px-3 py-2">
-                                                        <span className="h-6 w-6 bg-emerald-500 text-white rounded-full text-xs font-black flex items-center justify-center">
+                                                        <span className="h-6 w-6 bg-emerald-500 text-white rounded-full text-xs font-bold flex items-center justify-center">
                                                             {os.order}
                                                         </span>
                                                     </td>
@@ -606,110 +539,89 @@ export function RosterDashboard() {
                         )}
 
                         <div className="flex justify-end">
-                            <button
-                                onClick={() => setIsRouteResultOpen(false)}
-                                className="px-6 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors flex items-center gap-2"
-                            >
-                                <Check size={18} /> Entendido
-                            </button>
+                            <Button variant="success" icon={<Check size={16} />} onClick={() => setIsRouteResultOpen(false)}>
+                                Entendido
+                            </Button>
                         </div>
-                    </div>
-                </div>
-            )}
+                    </>
+                )}
+            </Modal>
 
             {/* Create Shift Modal */}
-            {isCreateModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-sm">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 animate-in fade-in zoom-in duration-200">
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="font-bold text-lg text-slate-900">Schedule New Shift</h3>
-                            <button onClick={() => setIsCreateModalOpen(false)} className="text-slate-400 hover:text-slate-600">
-                                <X size={20} />
-                            </button>
-                        </div>
-                        <form onSubmit={handleCreateShift} className="space-y-4">
-                            <div>
-                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Patient</label>
-                                <select
-                                    required
-                                    className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] font-bold text-slate-900 bg-white"
-                                    value={newShiftPatientId}
-                                    onChange={e => setNewShiftPatientId(e.target.value)}
-                                >
-                                    <option value="">Select Patient</option>
-                                    {patients.map(p => (
-                                        <option key={p.id} value={p.id}>{p.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Assigned Nurse</label>
-                                <select
-                                    required
-                                    className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] font-bold text-slate-900 bg-white"
-                                    value={newShiftNurseId}
-                                    onChange={e => setNewShiftNurseId(e.target.value)}
-                                >
-                                    <option value="">Select Nurse (Optional)</option>
-                                    {nurses.map(n => (
-                                        <option key={n.id} value={n.id}>{n.name}</option>
-                                    ))}
-                                    <option value="unassigned">Leaving Unassigned</option>
-                                </select>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Date</label>
-                                    <input
-                                        type="date"
-                                        required
-                                        className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] font-bold text-slate-900"
-                                        value={newShiftDate}
-                                        onChange={e => setNewShiftDate(e.target.value)}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Time</label>
-                                    <input
-                                        type="time"
-                                        required
-                                        className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] font-bold text-slate-900"
-                                        value={newShiftTime}
-                                        onChange={e => setNewShiftTime(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Location</label>
-                                <input
-                                    type="text"
-                                    className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] font-bold text-slate-900"
-                                    placeholder="Patient Address (Default)"
-                                    value={newShiftLocation}
-                                    onChange={e => setNewShiftLocation(e.target.value)}
-                                />
-                            </div>
-
-                            <div className="pt-4 flex gap-3">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsCreateModalOpen(false)}
-                                    className="flex-1 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={isSubmitting}
-                                    className="flex-1 py-3 bg-[#2563eb] text-white font-bold rounded-xl hover:bg-blue-600 transition-colors flex justify-center items-center gap-2"
-                                >
-                                    {isSubmitting ? <LoadingSpinner size="sm" /> : 'Create Schedule'}
-                                </button>
-                            </div>
-                        </form>
+            <Modal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} title="Programar Nuevo Turno">
+                <form onSubmit={handleCreateShift} className="space-y-4">
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Paciente</label>
+                        <select
+                            required
+                            className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-900 bg-white"
+                            value={newShiftPatientId}
+                            onChange={e => setNewShiftPatientId(e.target.value)}
+                        >
+                            <option value="">Seleccionar Paciente</option>
+                            {patients.map(p => (
+                                <option key={p.id} value={p.id}>{p.name}</option>
+                            ))}
+                        </select>
                     </div>
-                </div>
-            )}
-        </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Enfermera Asignada</label>
+                        <select
+                            required
+                            className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-900 bg-white"
+                            value={newShiftNurseId}
+                            onChange={e => setNewShiftNurseId(e.target.value)}
+                        >
+                            <option value="">Seleccionar Enfermera (Opcional)</option>
+                            {nurses.map(n => (
+                                <option key={n.id} value={n.id}>{n.name}</option>
+                            ))}
+                            <option value="unassigned">Dejar Sin Asignar</option>
+                        </select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Fecha</label>
+                            <input
+                                type="date"
+                                required
+                                className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-900"
+                                value={newShiftDate}
+                                onChange={e => setNewShiftDate(e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Hora</label>
+                            <input
+                                type="time"
+                                required
+                                className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-900"
+                                value={newShiftTime}
+                                onChange={e => setNewShiftTime(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Ubicación</label>
+                        <input
+                            type="text"
+                            className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-900"
+                            placeholder="Dirección del paciente (por defecto)"
+                            value={newShiftLocation}
+                            onChange={e => setNewShiftLocation(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="pt-4 flex gap-3">
+                        <Button variant="secondary" className="flex-1" type="button" onClick={() => setIsCreateModalOpen(false)}>
+                            Cancelar
+                        </Button>
+                        <Button variant="primary" className="flex-1" type="submit" isLoading={isSubmitting}>
+                            Crear Turno
+                        </Button>
+                    </div>
+                </form>
+            </Modal>
+        </Card>
     );
 }

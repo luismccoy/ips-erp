@@ -41,21 +41,21 @@ export function SyncProgressIndicator({
     : 0;
 
   return (
-    <div 
-      className="fixed bottom-4 right-4 bg-slate-800 p-4 rounded-xl shadow-lg min-w-[220px] z-40 border border-slate-700"
+    <div
+      className="fixed bottom-4 right-4 bg-white p-4 rounded-xl shadow-lg min-w-[220px] z-40 border border-slate-200"
       role="status"
       aria-live="polite"
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <Loader2 size={16} className="animate-spin text-blue-400" />
-          <span className="text-sm font-medium text-white">Sincronizando...</span>
+          <Loader2 size={16} className="animate-spin text-blue-500" />
+          <span className="text-sm font-medium text-slate-900">Sincronizando...</span>
         </div>
         {dismissible && onDismiss && (
           <button
             onClick={onDismiss}
-            className="text-slate-400 hover:text-white p-1"
+            className="text-slate-400 hover:text-slate-600 p-1"
             aria-label="Cerrar"
           >
             <X size={14} />
@@ -64,7 +64,7 @@ export function SyncProgressIndicator({
       </div>
 
       {/* Progress Bar */}
-      <div className="w-full bg-slate-700 rounded-full h-2 mb-2">
+      <div className="w-full bg-slate-100 rounded-full h-2 mb-2">
         <div
           className="bg-blue-500 h-2 rounded-full transition-all duration-300"
           style={{ width: `${progress}%` }}
@@ -76,10 +76,10 @@ export function SyncProgressIndicator({
       </div>
 
       {/* Details */}
-      <div className="text-xs text-slate-400">
+      <div className="text-xs text-slate-500">
         {pendingCount} cambios pendientes
         {hasErrors && (
-          <span className="text-red-400 ml-2">
+          <span className="text-red-500 ml-2">
             • {errors.length} errores
           </span>
         )}
