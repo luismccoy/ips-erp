@@ -375,7 +375,7 @@ export function RosterDashboard() {
                                     <div className="flex flex-col gap-0.5 mt-1">
                                         <p className="text-xs text-slate-500 flex items-center gap-1">
                                             <MapPin size={10} />
-                                            {shift.location || 'No location set'}
+                                            {shift.location || patient?.address || 'Sin ubicación'}
                                         </p>
                                         <p className={`text-xs flex items-center gap-1 font-medium ${
                                             isRecentlyAssigned ? 'text-green-600' : 'text-slate-400'
@@ -399,7 +399,9 @@ export function RosterDashboard() {
                                     }
                                     dot
                                 >
-                                    {shift.status}
+                                    {shift.status === 'COMPLETED' ? 'Completado' :
+                                     shift.status === 'IN_PROGRESS' ? 'En Progreso' :
+                                     shift.status === 'PENDING' ? 'Pendiente' : shift.status}
                                 </Badge>
                                 <p className="text-[10px] text-slate-400 mt-1 font-bold">
                                     {new Date(shift.scheduledTime).toLocaleString('es-CO', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}
