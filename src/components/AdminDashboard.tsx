@@ -1,9 +1,10 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import {
-    Activity, ClipboardCheck, Package, Calendar, ShieldAlert,
-    FileText, LogOut, DollarSign, ClipboardList, BarChart,
-    Users, Stethoscope, HeartPulse, Globe
-} from 'lucide-react';
+    ClipboardText, Package, CalendarBlank, ShieldWarning,
+    FileText, SignOut, CurrencyDollar, ChartBar,
+    Users, Globe
+} from '@phosphor-icons/react';
+import { ActivityIcon, StethoscopeIcon, HeartPulseIcon } from './ui/icons';
 
 import { client, isUsingRealBackend, isDemoMode, MOCK_USER } from '../amplify-utils';
 import { GuidedTour } from './GuidedTour';
@@ -51,26 +52,26 @@ const adminSections: NavSection[] = [
     {
         label: 'Principal',
         items: [
-            { id: 'dashboard', label: 'Panel Principal', icon: Activity, dataTour: 'nav-dashboard', 'data-testid': 'nav-dashboard' },
+            { id: 'dashboard', label: 'Panel Principal', icon: ActivityIcon, dataTour: 'nav-dashboard', 'data-testid': 'nav-dashboard' },
             { id: 'patients', label: 'Pacientes', icon: Users, dataTour: 'nav-patients', 'data-testid': 'nav-patients' },
-            { id: 'staff', label: 'Personal', icon: Stethoscope, dataTour: 'nav-staff', 'data-testid': 'nav-staff' },
+            { id: 'staff', label: 'Personal', icon: StethoscopeIcon, dataTour: 'nav-staff', 'data-testid': 'nav-staff' },
         ],
     },
     {
         label: 'Clínico',
         items: [
-            { id: 'pending-reviews', label: 'Revisiones Pendientes', icon: ClipboardList, dataTour: 'nav-pending', 'data-testid': 'nav-pending-reviews' },
-            { id: 'audit', label: 'Auditoría Clínica', icon: ClipboardCheck, dataTour: 'nav-audit', 'data-testid': 'nav-audit' },
-            { id: 'compliance', label: 'Cumplimiento', icon: ShieldAlert, dataTour: 'nav-compliance', 'data-testid': 'nav-compliance' },
+            { id: 'pending-reviews', label: 'Revisiones Pendientes', icon: ClipboardText, dataTour: 'nav-pending', 'data-testid': 'nav-pending-reviews' },
+            { id: 'audit', label: 'Auditoría Clínica', icon: ClipboardText, dataTour: 'nav-audit', 'data-testid': 'nav-audit' },
+            { id: 'compliance', label: 'Cumplimiento', icon: ShieldWarning, dataTour: 'nav-compliance', 'data-testid': 'nav-compliance' },
         ],
     },
     {
         label: 'Operaciones',
         items: [
-            { id: 'roster', label: 'Turnos', icon: Calendar, dataTour: 'nav-roster', 'data-testid': 'nav-roster' },
+            { id: 'roster', label: 'Turnos', icon: CalendarBlank, dataTour: 'nav-roster', 'data-testid': 'nav-roster' },
             { id: 'inventory', label: 'Inventario', icon: Package, dataTour: 'nav-inventory', 'data-testid': 'nav-inventory' },
             { id: 'billing', label: 'Facturación', icon: FileText, dataTour: 'nav-billing', 'data-testid': 'nav-billing' },
-            { id: 'reporting', label: 'Reportes', icon: BarChart, dataTour: 'nav-reporting', 'data-testid': 'nav-reporting' },
+            { id: 'reporting', label: 'Reportes', icon: ChartBar, dataTour: 'nav-reporting', 'data-testid': 'nav-reporting' },
         ],
     },
 ];
@@ -150,7 +151,7 @@ export default function AdminDashboard({ onLogout, tenant }: AdminDashboardProps
                 <p className="text-sm text-slate-700 font-medium truncate">{tenant?.name}</p>
             </div>
             <button onClick={onLogout} className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-colors">
-                <LogOut size={16} /> Cerrar Sesión
+                <SignOut size={16} /> Cerrar Sesión
             </button>
         </div>
     );
@@ -363,7 +364,7 @@ function DashboardView() {
                     delay={0}
                 />
                 <MetricCard
-                    icon={<Calendar size={20} />}
+                    icon={<CalendarBlank size={20} />}
                     value={stats.shifts}
                     label="Turnos"
                     trend="Total"
@@ -404,7 +405,7 @@ function DashboardView() {
                         </div>
                         <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
                             <div className="h-8 w-8 bg-blue-50 rounded-full flex items-center justify-center text-blue-600">
-                                <HeartPulse size={16} />
+                                <HeartPulseIcon size={16} />
                             </div>
                             <span className="text-sm text-slate-700 font-medium">
                                 Escalas Clínicas: Glasgow, Braden, Morse, NEWS, Barthel, Norton, RASS

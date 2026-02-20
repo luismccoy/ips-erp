@@ -9,7 +9,7 @@
  * @see docs/OFFLINE_SYNC_SPEC.md - Section 8: UI Indicators
  */
 
-import { Wifi, WifiOff, Cloud, CloudOff, Loader2 } from 'lucide-react';
+import { WifiHigh, WifiSlash, Cloud, CloudSlash, CircleNotch } from '@phosphor-icons/react';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
 import { useSyncStatus } from '../hooks/useSyncStatus';
 
@@ -38,15 +38,15 @@ export function NetworkStatusIndicator({
   let tooltip: string;
 
   if (isOffline) {
-    icon = <WifiOff size={iconSize} />;
+    icon = <WifiSlash size={iconSize} />;
     colorClass = 'text-red-400';
     tooltip = 'Sin conexión';
   } else if (isSlow) {
-    icon = <Wifi size={iconSize} className="opacity-60" />;
+    icon = <WifiHigh size={iconSize} className="opacity-60" />;
     colorClass = 'text-yellow-400';
     tooltip = 'Conexión lenta';
   } else if (isSyncing) {
-    icon = <Loader2 size={iconSize} className="animate-spin" />;
+    icon = <CircleNotch size={iconSize} className="animate-spin" />;
     colorClass = 'text-blue-400';
     tooltip = 'Sincronizando...';
   } else if (pendingCount > 0) {

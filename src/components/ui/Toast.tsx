@@ -1,5 +1,5 @@
 import { useState, useEffect, createContext, useContext, useCallback } from 'react';
-import { CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react';
+import { CheckCircle, XCircle, Warning, Info, X } from '@phosphor-icons/react';
 
 // Toast Types
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
@@ -37,7 +37,7 @@ export function useToast() {
 const TOAST_ICONS = {
     success: CheckCircle,
     error: XCircle,
-    warning: AlertTriangle,
+    warning: Warning,
     info: Info,
 };
 
@@ -87,7 +87,7 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: () => void }) 
             className={`${colors.bg} ${colors.border} border rounded-xl p-4 shadow-lg flex items-start gap-3 animate-slide-in min-w-[320px] max-w-md`}
             role="alert"
         >
-            <Icon className={`${colors.icon} h-5 w-5 flex-shrink-0 mt-0.5`} />
+            <Icon size={20} className={`${colors.icon} flex-shrink-0 mt-0.5`} />
             <div className="flex-1 min-w-0">
                 <p className={`${colors.title} font-semibold text-sm`}>{toast.title}</p>
                 {toast.message && (
@@ -98,7 +98,7 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: () => void }) 
                 onClick={onRemove}
                 className={`${colors.icon} hover:opacity-70 transition-opacity flex-shrink-0`}
             >
-                <X className="h-4 w-4" />
+                <X size={16} />
             </button>
         </div>
     );

@@ -276,7 +276,7 @@ export {
  * Call on app startup after authentication
  */
 export function initializeOfflineServices(): void {
-  console.log('🚀 Initializing offline services...');
+  console.log('[APP] Initializing offline services...');
   
   // Initialize queue manager first
   initializeQueueManager();
@@ -289,7 +289,7 @@ export function initializeOfflineServices(): void {
   // Setup network listener for automatic sync
   setupNetworkListener();
   
-  console.log('✅ Offline services initialized');
+  console.log('[OK] Offline services initialized');
 }
 
 /**
@@ -297,7 +297,7 @@ export function initializeOfflineServices(): void {
  * Call on logout
  */
 export function cleanupOfflineServices(): void {
-  console.log('🧹 Cleaning up offline services...');
+  console.log('[DATA] Cleaning up offline services...');
   
   // Clear service caches
   visitService.clearVisitCache();
@@ -307,7 +307,7 @@ export function cleanupOfflineServices(): void {
   // Cleanup queue manager
   cleanupQueueManager();
   
-  console.log('✅ Offline services cleaned up');
+  console.log('[OK] Offline services cleaned up');
 }
 
 /**
@@ -326,12 +326,12 @@ export function getTotalPendingCount(): number {
  * Call periodically (e.g., daily)
  */
 export function runDataCleanup(): { vitals: number; assessments: number } {
-  console.log('🧹 Running data cleanup...');
+  console.log('[DATA] Running data cleanup...');
   
   const vitals = vitalsService.cleanupOldVitals();
   const assessments = assessmentService.cleanupOldAssessments();
   
-  console.log(`🧹 Cleanup complete: ${vitals} vitals, ${assessments} assessments removed`);
+  console.log(`[DATA] Cleanup complete: ${vitals} vitals, ${assessments} assessments removed`);
   
   return { vitals, assessments };
 }

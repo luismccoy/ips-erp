@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Plus, Edit, Trash2, HeartPulse, MapPin, FileText, XCircle } from 'lucide-react';
+import { Plus, PencilSimple, Trash, MapPin, FileText, XCircle } from '@phosphor-icons/react';
+import { HeartPulseIcon } from '../../components/ui/icons';
 import { client, isUsingRealBackend } from '../../amplify-utils';
 import type { Patient } from '../../types';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
@@ -167,21 +168,21 @@ function PatientsPageContent() {
                         className="p-2 text-slate-400 hover:text-pink-600 hover:bg-pink-50 rounded-lg transition-colors"
                         title="Escalas Clínicas"
                     >
-                        <HeartPulse size={16} />
+                        <HeartPulseIcon size={16} />
                     </button>
                     <button
                         onClick={(e) => { e.stopPropagation(); handleEditClick(patient); }}
                         className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                         title="Editar"
                     >
-                        <Edit size={16} />
+                        <PencilSimple size={16} />
                     </button>
                     <button
                         onClick={(e) => { e.stopPropagation(); handleDeleteClick(patient); }}
                         className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         title="Eliminar"
                     >
-                        <Trash2 size={16} />
+                        <Trash size={16} />
                     </button>
                 </div>
             ),
@@ -247,7 +248,7 @@ function PatientsPageContent() {
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
                         <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100">
                             <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                                <HeartPulse className="text-pink-600" size={20} />
+                                <HeartPulseIcon className="text-pink-600" size={20} />
                                 Escalas Clínicas — {selectedPatient.name}
                             </h3>
                             <button

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, Inbox } from 'lucide-react';
+import { CaretUp, CaretDown, CaretUpDown, CaretLeft, CaretRight, Tray } from '@phosphor-icons/react';
 import { Avatar } from './Avatar';
 import { Badge } from './Badge';
 
@@ -82,9 +82,9 @@ export function DataTable<T extends Record<string, any>>({
         : sortedData;
 
     const SortIcon = ({ columnKey }: { columnKey: string }) => {
-        if (sortKey !== columnKey) return <ChevronsUpDown size={14} className="text-slate-300" />;
-        if (sortDir === 'asc') return <ChevronUp size={14} className="text-blue-600" />;
-        return <ChevronDown size={14} className="text-blue-600" />;
+        if (sortKey !== columnKey) return <CaretUpDown size={14} className="text-slate-300" />;
+        if (sortDir === 'asc') return <CaretUp size={14} className="text-blue-600" />;
+        return <CaretDown size={14} className="text-blue-600" />;
     };
 
     const renderCell = (col: Column<T>, row: T, rowIndex: number) => {
@@ -118,7 +118,7 @@ export function DataTable<T extends Record<string, any>>({
         return (
             <div className={`bg-white rounded-xl border border-slate-200 shadow-sm ${className}`}>
                 <div className="flex flex-col items-center justify-center py-16 px-6">
-                    {emptyIcon || <Inbox size={48} className="text-slate-300 mb-3" />}
+                    {emptyIcon || <Tray size={48} className="text-slate-300 mb-3" />}
                     <p className="text-sm text-slate-400 font-medium">{emptyMessage}</p>
                 </div>
             </div>
@@ -183,7 +183,7 @@ export function DataTable<T extends Record<string, any>>({
                             disabled={currentPage === 1}
                             className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         >
-                            <ChevronLeft size={16} />
+                            <CaretLeft size={16} />
                         </button>
                         {pagination.showPageNumbers !== false && Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
                             let page: number;
@@ -215,7 +215,7 @@ export function DataTable<T extends Record<string, any>>({
                             disabled={currentPage === totalPages}
                             className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         >
-                            <ChevronRight size={16} />
+                            <CaretRight size={16} />
                         </button>
                     </div>
                 </div>

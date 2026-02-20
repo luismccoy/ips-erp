@@ -29,7 +29,7 @@ export function initServiceWorker(): void {
      * The app should prompt the user to refresh.
      */
     onNeedRefresh() {
-      console.log('🔄 Nueva versión de la app disponible');
+      console.log('[UPDATE] Nueva version de la app disponible');
       
       if (onNeedRefreshCallback) {
         onNeedRefreshCallback();
@@ -48,7 +48,7 @@ export function initServiceWorker(): void {
      * Called when the app has been cached and is ready for offline use.
      */
     onOfflineReady() {
-      console.log('✅ App lista para uso sin conexión');
+      console.log('[OK] App lista para uso sin conexion');
       
       if (onOfflineReadyCallback) {
         onOfflineReadyCallback();
@@ -60,12 +60,12 @@ export function initServiceWorker(): void {
      * Sets up periodic update checks.
      */
     onRegistered(registration) {
-      console.log('📦 Service Worker registrado');
+      console.log('[SW] Service Worker registrado');
       
       if (registration) {
         // Check for updates every hour
         setInterval(() => {
-          console.log('🔍 Verificando actualizaciones...');
+          console.log('[SW] Verificando actualizaciones...');
           registration.update();
         }, 60 * 60 * 1000); // 1 hour
       }
@@ -75,7 +75,7 @@ export function initServiceWorker(): void {
      * Called when service worker registration fails.
      */
     onRegisterError(error) {
-      console.error('❌ Error al registrar Service Worker:', error);
+      console.error('[ERROR] Error al registrar Service Worker:', error);
     }
   });
 }
@@ -127,11 +127,11 @@ export function setupInstallPrompt(): void {
     e.preventDefault();
     // Store the event for later
     deferredPrompt = e as BeforeInstallPromptEvent;
-    console.log('📱 App puede ser instalada');
+    console.log('[PWA] App puede ser instalada');
   });
 
   window.addEventListener('appinstalled', () => {
-    console.log('✅ App instalada correctamente');
+    console.log('[OK] App instalada correctamente');
     deferredPrompt = null;
   });
 }

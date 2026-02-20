@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Download, Calendar as CalendarIcon, DollarSign, CheckCircle2, Users, UserCheck } from 'lucide-react';
+import { DownloadSimple, CalendarBlank as CalendarIcon, CurrencyDollar, CheckCircle, Users, UserCheck } from '@phosphor-icons/react';
 import { client } from '../amplify-utils';
 import { usePagination } from '../hooks/usePagination';
 import { useLoadingTimeout } from '../hooks/useLoadingTimeout';
@@ -137,7 +137,7 @@ export const ReportingDashboard: React.FC = () => {
                         <Button variant="secondary" size="sm" icon={<CalendarIcon size={14} />}>
                             Últimos 6 Meses
                         </Button>
-                        <Button variant="cta" size="sm" icon={<Download size={14} />} onClick={handleExportReport}>
+                        <Button variant="cta" size="sm" icon={<DownloadSimple size={14} />} onClick={handleExportReport}>
                             Exportar Reporte
                         </Button>
                     </div>
@@ -163,7 +163,7 @@ export const ReportingDashboard: React.FC = () => {
                     {/* KPI Cards */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                         <MetricCard
-                            icon={<DollarSign size={18} />}
+                            icon={<CurrencyDollar size={18} />}
                             value={`$${(stats.totalRevenue / 1000000).toFixed(1)}M`}
                             label="Ingresos Totales"
                             trendDirection="up"
@@ -171,7 +171,7 @@ export const ReportingDashboard: React.FC = () => {
                             delay={0}
                         />
                         <MetricCard
-                            icon={<CheckCircle2 size={18} />}
+                            icon={<CheckCircle size={18} />}
                             value={stats.completedShifts}
                             label="Turnos Completados"
                             trendDirection="up"

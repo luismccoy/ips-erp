@@ -9,6 +9,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Joyride, { STATUS, EVENTS } from 'react-joyride';
 import type { Step, CallBackProps } from 'react-joyride';
 import { STORAGE_KEYS } from '../constants/navigation';
+import { ChartBar, CalendarBlank, Robot, CurrencyDollar, Scales, CheckCircle, ClipboardText, Package, Users, Confetti, RocketLaunch, Crosshair } from '@phosphor-icons/react';
+import { HospitalIcon } from './ui/icons';
 
 interface GuidedTourProps {
     /** Current view in the admin dashboard */
@@ -134,7 +136,7 @@ export function GuidedTour({ currentView, onViewChange, autoStart = false }: Gui
             target: '[data-tour="dashboard-stats"]',
             content: (
                 <div>
-                    <p className="mb-2">📊 <strong>Panel de Control</strong></p>
+                    <p className="mb-2"><ChartBar size={16} weight="bold" className="inline-block align-text-bottom text-blue-600" /> <strong>Panel de Control</strong></p>
                     <p>Aquí ve un resumen en tiempo real: <strong>8 pacientes activos</strong>, <strong>12 turnos programados</strong>, y alertas de inventario.</p>
                 </div>
             ),
@@ -147,7 +149,7 @@ export function GuidedTour({ currentView, onViewChange, autoStart = false }: Gui
             target: '[data-tour="nav-roster"]',
             content: (
                 <div>
-                    <p className="mb-2">📅 <strong>Programación de Turnos</strong></p>
+                    <p className="mb-2"><CalendarBlank size={16} weight="bold" className="inline-block align-text-bottom text-blue-600" /> <strong>Programación de Turnos</strong></p>
                     <p>Gestione todos los turnos de enfermería. Haga clic aquí para ver la <strong>magia de la IA</strong>.</p>
                 </div>
             ),
@@ -160,7 +162,7 @@ export function GuidedTour({ currentView, onViewChange, autoStart = false }: Gui
             target: '[data-tour="ai-optimizer"]',
             content: (
                 <div>
-                    <p className="mb-2">🤖 <strong>¡Pruébelo Ahora!</strong></p>
+                    <p className="mb-2"><Robot size={16} weight="bold" className="inline-block align-text-bottom text-blue-600" /> <strong>¡Pruébelo Ahora!</strong></p>
                     <p>Tenemos <strong>3 turnos sin asignar</strong>. Haga clic en este botón y observe cómo la IA asigna enfermeras automáticamente basándose en habilidades y ubicación.</p>
                 </div>
             ),
@@ -173,7 +175,7 @@ export function GuidedTour({ currentView, onViewChange, autoStart = false }: Gui
             target: '[data-tour="nav-billing"]',
             content: (
                 <div>
-                    <p className="mb-2">💰 <strong>Facturación y RIPS</strong></p>
+                    <p className="mb-2"><CurrencyDollar size={16} weight="bold" className="inline-block align-text-bottom text-blue-600" /> <strong>Facturación y RIPS</strong></p>
                     <p>Aquí es donde la IA realmente brilla. Vamos a ver cómo <strong>defiende sus glosas automáticamente</strong>.</p>
                 </div>
             ),
@@ -186,7 +188,7 @@ export function GuidedTour({ currentView, onViewChange, autoStart = false }: Gui
             target: '[data-tour="ai-glosa"]',
             content: (
                 <div>
-                    <p className="mb-2">⚖️ <strong>Defensor de Glosas con IA</strong></p>
+                    <p className="mb-2"><Scales size={16} weight="bold" className="inline-block align-text-bottom text-blue-600" /> <strong>Defensor de Glosas con IA</strong></p>
                     <p>Tenemos <strong>2 facturas glosadas</strong>. Haga clic aquí para generar una carta de defensa técnica basada en la historia clínica del paciente.</p>
                     <p className="mt-2 text-sm text-slate-500">La IA cita regulaciones colombianas (Res 3100, Ley 100) automáticamente.</p>
                 </div>
@@ -200,7 +202,7 @@ export function GuidedTour({ currentView, onViewChange, autoStart = false }: Gui
             target: '[data-tour="nav-pending"]',
             content: (
                 <div>
-                    <p className="mb-2">✅ <strong>Flujo de Aprobación</strong></p>
+                    <p className="mb-2"><CheckCircle size={16} weight="bold" className="inline-block align-text-bottom text-blue-600" /> <strong>Flujo de Aprobación</strong></p>
                     <p>Las enfermeras documentan visitas en campo. Usted las revisa y aprueba aquí. Veamos las <strong>2 visitas pendientes</strong>.</p>
                 </div>
             ),
@@ -213,7 +215,7 @@ export function GuidedTour({ currentView, onViewChange, autoStart = false }: Gui
             target: '[data-tour="pending-list"]',
             content: (
                 <div>
-                    <p className="mb-2">📋 <strong>Documentación Completa</strong></p>
+                    <p className="mb-2"><ClipboardText size={16} weight="bold" className="inline-block align-text-bottom text-blue-600" /> <strong>Documentación Completa</strong></p>
                     <p>Cada visita incluye: <strong>KARDEX</strong>, signos vitales, medicamentos administrados, y tareas completadas. Todo auditable para la Supersalud.</p>
                 </div>
             ),
@@ -225,7 +227,7 @@ export function GuidedTour({ currentView, onViewChange, autoStart = false }: Gui
             target: '[data-tour="nav-inventory"]',
             content: (
                 <div>
-                    <p className="mb-2">📦 <strong>Control de Inventario</strong></p>
+                    <p className="mb-2"><Package size={16} weight="bold" className="inline-block align-text-bottom text-blue-600" /> <strong>Control de Inventario</strong></p>
                     <p>Vea alertas de stock bajo y productos agotados. El sistema tiene <strong>4 items en bajo stock</strong> y <strong>2 agotados</strong>.</p>
                 </div>
             ),
@@ -238,7 +240,7 @@ export function GuidedTour({ currentView, onViewChange, autoStart = false }: Gui
             target: '[data-tour="nav-patients"]',
             content: (
                 <div>
-                    <p className="mb-2">👥 <strong>Gestión de Pacientes</strong></p>
+                    <p className="mb-2"><Users size={16} weight="bold" className="inline-block align-text-bottom text-blue-600" /> <strong>Gestión de Pacientes</strong></p>
                     <p>Acceda a los <strong>8 perfiles de pacientes</strong> con diagnósticos, EPS, historial de signos vitales, y medicamentos activos.</p>
                 </div>
             ),
@@ -251,7 +253,7 @@ export function GuidedTour({ currentView, onViewChange, autoStart = false }: Gui
             target: '[data-tour="dashboard-stats"]',
             content: (
                 <div>
-                    <p className="mb-3">🎉 <strong>¡Tour Completado!</strong></p>
+                    <p className="mb-3"><Confetti size={16} weight="bold" className="inline-block align-text-bottom text-blue-600" /> <strong>¡Tour Completado!</strong></p>
                     <p>Ha visto las funciones principales de IPS ERP:</p>
                     <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
                         <li>IA para optimizar turnos</li>
@@ -329,7 +331,7 @@ export function GuidedTour({ currentView, onViewChange, autoStart = false }: Gui
                 <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8 animate-in zoom-in-95 duration-300">
                     <div className="text-center">
                         <div className="h-20 w-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/30">
-                            <span className="text-4xl">🏥</span>
+                            <HospitalIcon size={40} className="text-white" />
                         </div>
                         <h2 className="text-2xl font-black text-slate-900 mb-3">
                             ¡Bienvenido a IPS ERP!
@@ -342,10 +344,10 @@ export function GuidedTour({ currentView, onViewChange, autoStart = false }: Gui
                         <div className="bg-slate-50 rounded-2xl p-4 mb-6">
                             <p className="text-sm font-bold text-slate-700 mb-2">Lo que verá:</p>
                             <div className="flex flex-wrap justify-center gap-2">
-                                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">🤖 IA Roster</span>
-                                <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold">⚖️ IA Glosas</span>
-                                <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold">✅ Aprobaciones</span>
-                                <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-bold">📦 Inventario</span>
+                                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold"><Robot size={12} weight="bold" className="inline-block align-text-bottom" /> IA Roster</span>
+                                <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold"><Scales size={12} weight="bold" className="inline-block align-text-bottom" /> IA Glosas</span>
+                                <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold"><CheckCircle size={12} weight="bold" className="inline-block align-text-bottom" /> Aprobaciones</span>
+                                <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-bold"><Package size={12} weight="bold" className="inline-block align-text-bottom" /> Inventario</span>
                             </div>
                         </div>
 
@@ -354,7 +356,7 @@ export function GuidedTour({ currentView, onViewChange, autoStart = false }: Gui
                                 onClick={startTour}
                                 className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2"
                             >
-                                <span>🚀</span> Comenzar Tour Guiado
+                                <RocketLaunch size={18} weight="bold" /> Comenzar Tour Guiado
                             </button>
                             <button
                                 onClick={skipTour}
@@ -389,7 +391,7 @@ export function GuidedTour({ currentView, onViewChange, autoStart = false }: Gui
                 close: 'Cerrar',
                 last: '¡Finalizar!',
                 next: 'Siguiente',
-                skip: '✕ Saltar Tour', // Added icon for better visibility
+                skip: 'Saltar Tour',
             }}
             floaterProps={{
                 disableAnimation: false,
@@ -408,7 +410,7 @@ export function RestartTourButton({ onClick }: { onClick: () => void }) {
             }}
             className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors"
         >
-            <span>🎯</span> Reiniciar Tour
+            <Crosshair size={16} weight="bold" /> Reiniciar Tour
         </button>
     );
 }

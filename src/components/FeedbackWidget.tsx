@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { MessageSquarePlus, X, Send, CheckCircle } from 'lucide-react';
+import { ChatCenteredDots, X, PaperPlaneTilt, CheckCircle, Star } from '@phosphor-icons/react';
 import { client, isDemoMode } from '../amplify-utils';
 
 interface FeedbackData {
@@ -94,7 +94,7 @@ export function FeedbackWidget() {
                 className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-violet-600 to-indigo-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 group"
                 title="Enviar Feedback"
             >
-                <MessageSquarePlus className="h-6 w-6" />
+                <ChatCenteredDots className="h-6 w-6" />
                 <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-slate-900 text-white text-sm px-3 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                     ¡Tu opinión importa!
                 </span>
@@ -108,7 +108,7 @@ export function FeedbackWidget() {
                         <div className="bg-gradient-to-r from-violet-600 to-indigo-600 p-6 rounded-t-2xl">
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <h2 className="text-xl font-bold text-white">💬 Tu Feedback</h2>
+                                    <h2 className="text-xl font-bold text-white flex items-center gap-2"><ChatCenteredDots size={22} /> Tu Feedback</h2>
                                     <p className="text-violet-200 text-sm mt-1">
                                         Ayúdanos a mejorar la aplicación
                                     </p>
@@ -127,7 +127,7 @@ export function FeedbackWidget() {
                             <div className="p-8 text-center">
                                 <CheckCircle className="h-16 w-16 text-emerald-500 mx-auto mb-4" />
                                 <h3 className="text-xl font-bold text-slate-900 mb-2">
-                                    ¡Gracias! 🙏
+                                    ¡Gracias!
                                 </h3>
                                 <p className="text-slate-600">
                                     Tu feedback es muy valioso para nosotros.
@@ -173,7 +173,7 @@ export function FeedbackWidget() {
                                                     feedback.rating >= star ? 'opacity-100' : 'opacity-30'
                                                 }`}
                                             >
-                                                ⭐
+                                                <Star size={24} weight={feedback.rating >= star ? "fill" : "regular"} />
                                             </button>
                                         ))}
                                     </div>
@@ -182,7 +182,7 @@ export function FeedbackWidget() {
                                 {/* What they liked */}
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                        ¿Qué te gustó? 👍
+                                        ¿Qué te gustó?
                                     </label>
                                     <textarea
                                         value={feedback.liked}
@@ -196,7 +196,7 @@ export function FeedbackWidget() {
                                 {/* What confused them */}
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                        ¿Qué te confundió? 🤔
+                                        ¿Qué te confundió?
                                     </label>
                                     <textarea
                                         value={feedback.confused}
@@ -210,7 +210,7 @@ export function FeedbackWidget() {
                                 {/* Suggestions */}
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                        ¿Qué agregarías o cambiarías? 💡
+                                        ¿Qué agregarías o cambiarías?
                                     </label>
                                     <textarea
                                         value={feedback.suggestions}
@@ -248,7 +248,7 @@ export function FeedbackWidget() {
                                         </>
                                     ) : (
                                         <>
-                                            <Send className="h-5 w-5" />
+                                            <PaperPlaneTilt className="h-5 w-5" />
                                             Enviar Feedback
                                         </>
                                     )}

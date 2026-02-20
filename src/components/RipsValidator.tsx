@@ -74,14 +74,14 @@ export const RipsValidator: React.FC = () => {
         setValidationResult(null);
         
         try {
-            console.log('🔄 Calling validateRIPS Lambda with billingRecordId:', billingRecordId);
+            console.log('[SYNC] Calling validateRIPS Lambda with billingRecordId:', billingRecordId);
             
             // Call real Lambda function via GraphQL query
             const result = await client.queries.validateRIPS({ 
                 billingRecordId: billingRecordId.trim() 
             });
             
-            console.log('✅ validateRIPS Lambda response:', result);
+            console.log('[OK] validateRIPS Lambda response:', result);
             
             if (result.data) {
                 // Type guard to ensure result.data has the expected structure
@@ -95,14 +95,14 @@ export const RipsValidator: React.FC = () => {
                 });
                 
                 if (data.isValid) {
-                    console.log('✅ RIPS validation passed');
+                    console.log('[OK] RIPS validation passed');
                 } else {
-                    console.log('❌ RIPS validation failed with errors:', data.errors);
+                    console.log('[ERROR] RIPS validation failed with errors:', data.errors);
                 }
             } else if (result.errors && result.errors.length > 0) {
                 // GraphQL errors
                 const errorMsg = result.errors[0].message || 'Error desconocido';
-                console.error('❌ GraphQL error:', errorMsg);
+                console.error('[ERROR] GraphQL error:', errorMsg);
                 
                 // Map common errors to Spanish
                 if (errorMsg.includes('timeout') || errorMsg.includes('timed out')) {
@@ -116,11 +116,11 @@ export const RipsValidator: React.FC = () => {
                 }
             } else {
                 // Unexpected response format
-                console.error('❌ Unexpected response format:', result);
+                console.error('[ERROR] Unexpected response format:', result);
                 setErrorMessage('Respuesta inesperada del servidor. Por favor intente nuevamente.');
             }
         } catch (error: any) {
-            console.error('❌ Error calling validateRIPS Lambda:', error);
+            console.error('[ERROR] Error calling validateRIPS Lambda:', error);
             
             // Handle network and other errors
             if (error.message?.includes('Network') || error.message?.includes('fetch')) {

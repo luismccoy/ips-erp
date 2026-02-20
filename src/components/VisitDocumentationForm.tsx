@@ -1,7 +1,7 @@
 // Update the imports at the top
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Mic, MicOff, Square } from 'lucide-react';
+import { ArrowLeft, Microphone, MicrophoneSlash, Square } from '@phosphor-icons/react';
 import { generateClient } from 'aws-amplify/data';
 import { useVoiceRecognition } from '../hooks/useVoiceRecognition';
 import { isUsingRealBackend, client, getUserId, getTenantId } from '../amplify-utils';
@@ -709,7 +709,7 @@ function VoiceDictationBar({
             </>
           ) : (
             <>
-              <Mic size={16} />
+              <Microphone size={16} />
               <span>Dictar Observaciones</span>
             </>
           )}
@@ -733,7 +733,7 @@ function VoiceDictationBar({
       {/* Error message */}
       {error && (
         <p className="mt-2 text-xs text-red-500 flex items-center gap-1">
-          <MicOff size={12} />
+          <MicrophoneSlash size={12} />
           {error}
         </p>
       )}

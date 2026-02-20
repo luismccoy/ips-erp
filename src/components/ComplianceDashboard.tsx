@@ -1,4 +1,4 @@
-import { ShieldAlert, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { ShieldWarning, Warning, CheckCircle } from '@phosphor-icons/react';
 import { MetricCard } from './ui/MetricCard';
 import { Card } from './ui/Card';
 import { Badge } from './ui/Badge';
@@ -9,7 +9,7 @@ export function ComplianceDashboard() {
             {/* Compliance Metrics */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <MetricCard
-                    icon={<ShieldAlert size={18} />}
+                    icon={<ShieldWarning size={18} />}
                     value="98%"
                     label="Audit Score"
                     trendDirection="up"
@@ -17,7 +17,7 @@ export function ComplianceDashboard() {
                     delay={0}
                 />
                 <MetricCard
-                    icon={<AlertTriangle size={18} />}
+                    icon={<Warning size={18} />}
                     value={2}
                     label="Critical Alerts"
                     trendDirection="down"

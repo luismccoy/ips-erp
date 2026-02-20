@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from 'framer-motion';
 import {
-    BillingAuditIcon,
-    ProcessFlowIcon,
-    SchedulingIcon,
-    ComplianceShieldIcon,
-} from './ui/healthcare-icons';
+    Invoice,
+    FlowArrow,
+    CalendarBlank,
+    ShieldCheck,
+} from '@phosphor-icons/react';
 
 const FEATURES = [
     {
@@ -19,7 +19,7 @@ const FEATURES = [
             'Trazabilidad total de cada objeción.'
         ],
         image: '/images/challenge-glosadas.png',
-        icon: BillingAuditIcon,
+        icon: Invoice,
         color: '#ef4444'
     },
     {
@@ -33,7 +33,7 @@ const FEATURES = [
             'Acceso desde cualquier lugar.'
         ],
         image: '/images/challenge-manuales.png',
-        icon: ProcessFlowIcon,
+        icon: FlowArrow,
         color: '#f59e0b'
     },
     {
@@ -47,7 +47,7 @@ const FEATURES = [
             'Reducción de costos operativos.'
         ],
         image: '/images/challenge-planillas.png',
-        icon: SchedulingIcon,
+        icon: CalendarBlank,
         color: '#3b82f6'
     },
     {
@@ -61,7 +61,7 @@ const FEATURES = [
             'Reportes para entes de control.'
         ],
         image: '/images/challenge-cumplimiento.png',
-        icon: ComplianceShieldIcon,
+        icon: ShieldCheck,
         color: '#8b5cf6'
     }
 ];

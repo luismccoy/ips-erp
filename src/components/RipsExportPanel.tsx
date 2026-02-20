@@ -6,7 +6,8 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { FileJson, Download, Calendar, AlertCircle, CheckCircle, Loader2, RefreshCw, Eye, Users, ClipboardList, Stethoscope } from 'lucide-react';
+import { FileCode, DownloadSimple, CalendarBlank, WarningCircle, CheckCircle, CircleNotch, ArrowsClockwise, Eye, Users, ClipboardText } from '@phosphor-icons/react';
+import { StethoscopeIcon } from './ui/icons';
 import { client } from '../amplify-utils';
 import { useLoadingTimeout } from '../hooks/useLoadingTimeout';
 import {
@@ -222,7 +223,7 @@ export const RipsExportPanel: React.FC<RipsExportPanelProps> = ({
       {/* Header */}
       <div className="panel-header glass">
         <div className="header-content">
-          <FileJson className="header-icon" size={24} />
+          <FileCode className="header-icon" size={24} />
           <div>
             <h2>Exportar RIPS JSON</h2>
             <p>Genere archivos RIPS según Resolución 2275/2023</p>
@@ -238,7 +239,7 @@ export const RipsExportPanel: React.FC<RipsExportPanelProps> = ({
           {/* Date Range */}
           <div className="date-range-section">
             <label className="section-label">
-              <Calendar size={16} />
+              <CalendarBlank size={16} />
               Período de Facturación
             </label>
             <div className="date-inputs">
@@ -292,12 +293,12 @@ export const RipsExportPanel: React.FC<RipsExportPanelProps> = ({
           >
             {isLoading ? (
               <>
-                <Loader2 className="animate-spin" size={18} />
+                <CircleNotch className="animate-spin" size={18} />
                 Generando...
               </>
             ) : (
               <>
-                <RefreshCw size={18} />
+                <ArrowsClockwise size={18} />
                 Generar RIPS JSON
               </>
             )}
@@ -311,7 +312,7 @@ export const RipsExportPanel: React.FC<RipsExportPanelProps> = ({
           {/* Error State */}
           {(errorMessage || hasTimedOut) && !isLoading && (
             <div className="error-banner">
-              <AlertCircle size={20} />
+              <WarningCircle size={20} />
               <div>
                 <strong>Error</strong>
                 <p>{errorMessage || 'Tiempo de espera agotado'}</p>
@@ -325,7 +326,7 @@ export const RipsExportPanel: React.FC<RipsExportPanelProps> = ({
           {/* Loading State */}
           {isLoading && (
             <div className="loading-state">
-              <Loader2 className="animate-spin" size={40} />
+              <CircleNotch className="animate-spin" size={40} />
               <p>Consultando datos y generando RIPS...</p>
             </div>
           )}
@@ -333,7 +334,7 @@ export const RipsExportPanel: React.FC<RipsExportPanelProps> = ({
           {/* Empty State */}
           {!generationResult && !isLoading && !errorMessage && (
             <div className="empty-state">
-              <FileJson size={48} />
+              <FileCode size={48} />
               <p>Seleccione el período y haga clic en "Generar RIPS JSON"</p>
             </div>
           )}
@@ -350,7 +351,7 @@ export const RipsExportPanel: React.FC<RipsExportPanelProps> = ({
                   </>
                 ) : (
                   <>
-                    <AlertCircle size={20} />
+                    <WarningCircle size={20} />
                     <span>Generación con errores</span>
                   </>
                 )}
@@ -366,14 +367,14 @@ export const RipsExportPanel: React.FC<RipsExportPanelProps> = ({
                   </div>
                 </div>
                 <div className="stat-card">
-                  <Stethoscope size={24} />
+                  <StethoscopeIcon size={24} />
                   <div className="stat-content">
                     <span className="stat-value">{generationResult.stats.totalConsultas}</span>
                     <span className="stat-label">Consultas (AC)</span>
                   </div>
                 </div>
                 <div className="stat-card">
-                  <ClipboardList size={24} />
+                  <ClipboardText size={24} />
                   <div className="stat-content">
                     <span className="stat-value">{generationResult.stats.totalProcedimientos}</span>
                     <span className="stat-label">Procedimientos (AP)</span>
@@ -446,7 +447,7 @@ export const RipsExportPanel: React.FC<RipsExportPanelProps> = ({
                   onClick={handleDownload}
                   disabled={!generationResult.success || !generationResult.document}
                 >
-                  <Download size={18} />
+                  <DownloadSimple size={18} />
                   Descargar JSON
                 </button>
               </div>

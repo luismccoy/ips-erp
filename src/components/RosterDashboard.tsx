@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Calendar, Sparkles, Clock, MapPin, Plus, User, Check, X, Users, Navigation } from 'lucide-react';
+import { CalendarBlank, Sparkle, Clock, MapPin, Plus, User, Check, X, Users, NavigationArrow } from '@phosphor-icons/react';
 import { client, isUsingRealBackend, MOCK_USER } from '../amplify-utils';
 import { usePagination } from '../hooks/usePagination';
 import { useLoadingTimeout } from '../hooks/useLoadingTimeout';
@@ -304,14 +304,14 @@ export function RosterDashboard() {
         <Card>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <h3 className="font-bold text-slate-900 flex items-center gap-2">
-                    <Calendar size={18} className="text-slate-400" />
+                    <CalendarBlank size={18} className="text-slate-400" />
                     Gestión de Turnos
                 </h3>
                 <div className="flex gap-2 flex-wrap">
                     <Button
                         variant="success"
                         size="sm"
-                        icon={isRouteOptimizing ? undefined : <Navigation size={14} />}
+                        icon={isRouteOptimizing ? undefined : <NavigationArrow size={14} />}
                         isLoading={isRouteOptimizing}
                         onClick={handleRouteOptimize}
                     >
@@ -320,7 +320,7 @@ export function RosterDashboard() {
                     <Button
                         variant="outline"
                         size="sm"
-                        icon={isOptimizing ? undefined : <Sparkles size={14} />}
+                        icon={isOptimizing ? undefined : <Sparkle size={14} />}
                         isLoading={isOptimizing}
                         onClick={handleOptimizeRoutes}
                         data-tour="ai-optimizer"
@@ -335,7 +335,7 @@ export function RosterDashboard() {
 
             {shifts.length === 0 && !isLoading && (
                 <div className="text-center py-12 bg-slate-50 rounded-xl border border-slate-100 border-dashed">
-                    <Calendar className="mx-auto text-slate-300 mb-4" size={48} />
+                    <CalendarBlank className="mx-auto text-slate-300 mb-4" size={48} />
                     <p className="text-slate-400 mb-4 font-medium">No hay turnos programados</p>
                     <Button variant="ghost" size="sm" onClick={() => setIsCreateModalOpen(true)}>
                         Crear su primer turno
@@ -389,7 +389,7 @@ export function RosterDashboard() {
                             <div className="text-right">
                                 {optimizedShiftOrder.has(shift.id) && (
                                     <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100 mb-1">
-                                        <Navigation size={10} /> #{optimizedShiftOrder.get(shift.id)}
+                                        <NavigationArrow size={10} /> #{optimizedShiftOrder.get(shift.id)}
                                     </span>
                                 )}
                                 <Badge

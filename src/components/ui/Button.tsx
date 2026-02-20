@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Check } from 'lucide-react';
+import { Check } from '@phosphor-icons/react';
 
 type Variant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'success' | 'cta';
 type Size = 'sm' | 'md' | 'lg' | 'xl';

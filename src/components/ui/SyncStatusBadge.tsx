@@ -13,7 +13,7 @@
  * @see docs/OFFLINE_SYNC_SPEC.md - Section 8.2: Sync Status Badge
  */
 
-import { Cloud, CloudOff, Check, Loader2 } from 'lucide-react';
+import { Cloud, CloudSlash, Check, CircleNotch } from '@phosphor-icons/react';
 import type { SyncStatus } from '../../datastore';
 
 interface SyncStatusBadgeProps {
@@ -41,7 +41,7 @@ const CONFIG = {
     bgClassName: 'bg-yellow-500/10',
   },
   error: {
-    icon: CloudOff,
+    icon: CloudSlash,
     label: 'Error de sync',
     className: 'text-red-400',
     bgClassName: 'bg-red-500/10',
@@ -65,7 +65,7 @@ export function SyncStatusBadge({
       aria-label={config.label}
     >
       {status === 'pending' ? (
-        <Loader2 size={iconSize} className="animate-spin" />
+        <CircleNotch size={iconSize} className="animate-spin" />
       ) : (
         <Icon size={iconSize} />
       )}
@@ -91,7 +91,7 @@ export function SyncStatusBadgeFull({ status }: { status: SyncStatus }) {
       aria-label={config.label}
     >
       {status === 'pending' ? (
-        <Loader2 size={12} className="animate-spin" />
+        <CircleNotch size={12} className="animate-spin" />
       ) : (
         <Icon size={12} />
       )}

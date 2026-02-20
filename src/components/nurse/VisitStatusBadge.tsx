@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { AlertCircle, CheckCircle, Clock, Edit3, XCircle } from 'lucide-react';
+import { WarningCircle, CheckCircle, Clock, PencilSimple, XCircle } from '@phosphor-icons/react';
 import type { VisitStatus } from '../../types/workflow';
 
 interface VisitStatusBadgeProps {
@@ -13,7 +13,7 @@ const VisitStatusBadge = memo(({ status, rejectionReason }: VisitStatusBadgeProp
             label: 'Borrador',
             bgColor: 'bg-slate-500/20',
             textColor: 'text-slate-400',
-            icon: <Edit3 size={12} />,
+            icon: <PencilSimple size={12} />,
         },
         SUBMITTED: {
             label: 'Pendiente',
@@ -45,7 +45,7 @@ const VisitStatusBadge = memo(({ status, rejectionReason }: VisitStatusBadgeProp
             </span>
             {status === 'REJECTED' && rejectionReason && (
                 <p className="text-xs text-red-400 mt-1 flex items-start gap-1">
-                    <AlertCircle size={12} className="mt-0.5 flex-shrink-0" />
+                    <WarningCircle size={12} className="mt-0.5 flex-shrink-0" />
                     <span>{rejectionReason}</span>
                 </p>
             )}

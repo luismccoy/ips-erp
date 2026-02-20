@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { List, X, CaretLeft, CaretRight } from '@phosphor-icons/react';
+import type { AppIcon } from './icons';
 
 export interface NavItem {
     id: string;
     label: string;
-    icon: LucideIcon;
+    icon: AppIcon;
     dataTour?: string;
     'data-testid'?: string;
 }
@@ -130,9 +130,9 @@ export function Sidebar({
                     onClick={() => setCollapsed(!collapsed)}
                     className="w-full flex items-center justify-center gap-2 px-3 py-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors text-xs"
                 >
-                    {collapsed ? <ChevronRight size={16} /> : (
+                    {collapsed ? <CaretRight size={16} /> : (
                         <>
-                            <ChevronLeft size={16} />
+                            <CaretLeft size={16} />
                             <span className="font-medium">Colapsar</span>
                         </>
                     )}
@@ -156,7 +156,7 @@ export function Sidebar({
                 className="fixed top-4 left-4 z-50 md:hidden p-2 bg-white rounded-lg shadow-md border border-slate-200 text-slate-600 hover:text-slate-900"
                 aria-label={mobileOpen ? 'Cerrar menú' : 'Abrir menú'}
             >
-                {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+                {mobileOpen ? <X size={20} /> : <List size={20} />}
             </button>
 
             {/* Mobile overlay */}

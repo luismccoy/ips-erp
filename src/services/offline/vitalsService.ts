@@ -520,7 +520,7 @@ export function cleanupOldVitals(): number {
   }
   
   if (removedCount > 0) {
-    console.log(`🧹 Cleaned up ${removedCount} old vitals records`);
+    console.log(`[DATA] Cleaned up ${removedCount} old vitals records`);
   }
   
   return removedCount;
@@ -535,7 +535,7 @@ export function cleanupOldVitals(): number {
  */
 export function initializeVitalsService(): void {
   registerExecutor('VitalSigns', executeVitalsMutation);
-  console.log('✅ Vitals service initialized');
+  console.log('[OK] Vitals service initialized');
 }
 
 /**
@@ -545,7 +545,7 @@ export function clearVitalsCache(): void {
   vitalsCache.clear();
   vitalsByPatient.clear();
   vitalsListeners.clear();
-  console.log('🧹 Vitals cache cleared');
+  console.log('[DATA] Vitals cache cleared');
 }
 
 /**
@@ -562,5 +562,5 @@ export function populateVitalsCache(vitals: VitalSigns[]): void {
     vitalsCache.set(v.id, offlineVitals);
     indexByPatient(offlineVitals);
   }
-  console.log(`📥 Populated vitals cache with ${vitals.length} records`);
+  console.log(`[DATA] Populated vitals cache with ${vitals.length} records`);
 }

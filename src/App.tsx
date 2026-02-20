@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
-import { Activity } from 'lucide-react';
+import { ActivityIcon } from './components/ui/icons';
 import LandingPage from './components/LandingPage';
 import DemoSelection from './components/DemoSelection';
 import { useAuth } from './hooks/useAuth';
@@ -55,17 +55,17 @@ if (typeof window !== 'undefined') {
     sessionStorage.removeItem(STORAGE_KEYS.DEMO_MODE);
     sessionStorage.removeItem(STORAGE_KEYS.DEMO_ROLE);
     sessionStorage.removeItem(STORAGE_KEYS.DEMO_TENANT);
-    console.log('🔄 Demo state cleared for landing/login path:', path);
+    console.log('[APP] Demo state cleared for landing/login path:', path);
   }
   // Enable demo mode for deep link paths ONLY if no real Cognito session exists
   else if (shouldEnableDemoMode(path) && !hasCognitoSession) {
     enableDemoMode();
-    console.log('🎭 Demo mode pre-enabled for deep link:', path);
+    console.log('[APP] Demo mode pre-enabled for deep link:', path);
   }
   // If Cognito session exists, ensure demo mode is OFF so real auth is used
   else if (hasCognitoSession && isDemoMode()) {
     sessionStorage.removeItem(STORAGE_KEYS.DEMO_MODE);
-    console.log('🔐 Demo mode disabled - active Cognito session detected');
+    console.log('[AUTH] Demo mode disabled - active Cognito session detected');
   }
 }
 
@@ -247,7 +247,7 @@ export default function App() {
         <div className="max-w-md w-full bg-white p-12 rounded-[40px] shadow-2xl border border-slate-100 z-10">
           <div className="flex justify-center mb-10">
             <div className="h-20 w-20 bg-[#2563eb] rounded-[24px] flex items-center justify-center shadow-xl">
-              <Activity className="h-10 w-10 text-white" />
+              <ActivityIcon className="h-10 w-10 text-white" />
             </div>
           </div>
           <h1 className="text-3xl font-black text-center text-slate-900 tracking-tighter mb-2 italic">IPS ERP</h1>

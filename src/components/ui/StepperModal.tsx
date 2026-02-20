@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react';
+import { X, Check, CaretRight, CaretLeft, CircleNotch } from '@phosphor-icons/react';
 
 export interface Step {
     label: string;
@@ -183,7 +183,7 @@ export function StepperModal({
                                 disabled={currentStep === 0}
                                 className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-lg transition-colors disabled:opacity-0 disabled:pointer-events-none"
                             >
-                                <ChevronLeft size={16} />
+                                <CaretLeft size={16} />
                                 Atrás
                             </button>
                             <div className="flex items-center gap-2">
@@ -197,7 +197,7 @@ export function StepperModal({
                                         className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-sm disabled:opacity-60"
                                     >
                                         {isSubmitting ? (
-                                            <Loader2 size={16} className="animate-spin" />
+                                            <CircleNotch size={16} className="animate-spin" />
                                         ) : (
                                             <Check size={16} />
                                         )}
@@ -209,7 +209,7 @@ export function StepperModal({
                                         className="flex items-center gap-1.5 px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-sm"
                                     >
                                         Siguiente
-                                        <ChevronRight size={16} />
+                                        <CaretRight size={16} />
                                     </button>
                                 )}
                             </div>

@@ -11,7 +11,7 @@
  */
 
 import { useState } from 'react';
-import { Loader2, X, Check, AlertCircle, RefreshCw } from 'lucide-react';
+import { CircleNotch, X, Check, WarningCircle, ArrowsClockwise } from '@phosphor-icons/react';
 import { useSyncStatus } from '../hooks/useSyncStatus';
 
 export interface SyncProgressIndicatorProps {
@@ -86,11 +86,11 @@ export function SyncProgressIndicator({
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
         <div className="flex items-center gap-2">
           {isSyncing ? (
-            <Loader2 size={16} className="animate-spin text-blue-500" />
+            <CircleNotch size={16} className="animate-spin text-blue-500" />
           ) : hasErrors ? (
-            <AlertCircle size={16} className="text-red-500" />
+            <WarningCircle size={16} className="text-red-500" />
           ) : pendingCount > 0 ? (
-            <Loader2 size={16} className="text-amber-500" />
+            <CircleNotch size={16} className="text-amber-500" />
           ) : (
             <Check size={16} className="text-green-500" />
           )}
@@ -144,7 +144,7 @@ export function SyncProgressIndicator({
                 disabled={isRetrying}
                 className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <RefreshCw size={12} className={isRetrying ? 'animate-spin' : ''} />
+                <ArrowsClockwise size={12} className={isRetrying ? 'animate-spin' : ''} />
                 Reintentar
               </button>
               <button

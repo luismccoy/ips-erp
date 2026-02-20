@@ -12,7 +12,7 @@
  */
 
 import React from 'react';
-import { Sparkles } from 'lucide-react';
+import { Sparkle, X, CheckCircle } from '@phosphor-icons/react';
 import { Button } from '../ui/Button';
 import { AISuggestionList } from './AISuggestionCard';
 import { useAISuggestions } from './useAISuggestions';
@@ -54,7 +54,7 @@ export function BillingDashboard() {
 <Button
     size="sm"
     variant="secondary"
-    icon={<Sparkles className="w-4 h-4" />}
+    icon={<Sparkle className="w-4 h-4" />}
     onClick={() => validateBillingData(bill)}
     disabled={isValidating}
     isLoading={isValidating}
@@ -115,7 +115,7 @@ export function BillingRowWithValidation({ bill }: { bill: any }) {
                 <Button
                     size="sm"
                     variant="secondary"
-                    icon={<Sparkles className="w-4 h-4" />}
+                    icon={<Sparkle className="w-4 h-4" />}
                     onClick={() => validateBillingData(bill)}
                     disabled={isValidating}
                 >
@@ -165,11 +165,11 @@ export function BillingValidationModal({
                     <h2 className="text-xl font-bold">
                         Validación RIPS - {bill?.patientName}
                     </h2>
-                    <button 
+                    <button
                         onClick={onClose}
                         className="text-slate-400 hover:text-slate-600"
                     >
-                        ✕
+                        <X size={20} weight="bold" />
                     </button>
                 </div>
 
@@ -180,8 +180,8 @@ export function BillingValidationModal({
                 )}
 
                 {!isValidating && suggestions.length === 0 && (
-                    <div className="text-center py-8 text-green-600">
-                        ✅ No se encontraron problemas
+                    <div className="text-center py-8 text-green-600 flex items-center justify-center gap-2">
+                        <CheckCircle size={20} weight="bold" /> No se encontraron problemas
                     </div>
                 )}
 

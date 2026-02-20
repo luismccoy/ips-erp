@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { DollarSign, FileText, Sparkles, ClipboardCheck, AlertTriangle, Clock, Download, X, Save } from 'lucide-react';
+import { CurrencyDollar, FileText, Sparkle, ClipboardText, Warning, Clock, DownloadSimple, X, FloppyDisk } from '@phosphor-icons/react';
 import { client, isUsingRealBackend, MOCK_USER } from '../amplify-utils';
 import { usePagination } from '../hooks/usePagination';
 import { useLoadingTimeout } from '../hooks/useLoadingTimeout';
@@ -198,7 +198,7 @@ export function BillingDashboard() {
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <MetricCard
-                    icon={<DollarSign size={18} />}
+                    icon={<CurrencyDollar size={18} />}
                     value="$42.5M"
                     label="Total Facturado (HFC)"
                     trendDirection="up"
@@ -206,7 +206,7 @@ export function BillingDashboard() {
                     delay={0}
                 />
                 <MetricCard
-                    icon={<AlertTriangle size={18} />}
+                    icon={<Warning size={18} />}
                     value="$3.4M"
                     label="Glosas Pendientes"
                     trendDirection="down"
@@ -214,7 +214,7 @@ export function BillingDashboard() {
                     delay={0.05}
                 />
                 <MetricCard
-                    icon={<ClipboardCheck size={18} />}
+                    icon={<ClipboardText size={18} />}
                     value="100%"
                     label="RIPS 2275 Compliance"
                     trendDirection="up"
@@ -231,7 +231,7 @@ export function BillingDashboard() {
                             <FileText size={18} className="text-slate-400" />
                             Facturación Reciente
                         </h3>
-                        <Button variant="ghost" size="sm" icon={<Download size={14} />} />
+                        <Button variant="ghost" size="sm" icon={<DownloadSimple size={14} />} />
                     </div>
 
                     <div className="space-y-3">
@@ -288,7 +288,7 @@ export function BillingDashboard() {
                     <Card>
                         <div className="flex items-center gap-2 mb-4">
                             <div className="p-1.5 bg-blue-50 rounded-lg">
-                                <Sparkles className="text-blue-600" size={18} />
+                                <Sparkle className="text-blue-600" size={18} />
                             </div>
                             <h3 className="font-bold text-slate-900">AI Billing Assistant</h3>
                         </div>
@@ -336,7 +336,7 @@ export function BillingDashboard() {
                     {/* Error Message Display */}
                     {errorMessage && (
                         <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex gap-3 text-red-800">
-                            <AlertTriangle className="shrink-0" size={20} />
+                            <Warning className="shrink-0" size={20} />
                             <div className="flex-1">
                                 <h4 className="font-bold mb-1">Error</h4>
                                 <p className="text-sm">{errorMessage}</p>
@@ -353,7 +353,7 @@ export function BillingDashboard() {
                     {/* Billing Alerts */}
                     <Card>
                         <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-                            <AlertTriangle size={18} className="text-orange-400" />
+                            <Warning size={18} className="text-orange-400" />
                             Alertas de Facturación
                         </h3>
                         <div className="space-y-3">
@@ -398,7 +398,7 @@ export function BillingDashboard() {
                 </div>
                 <div className="flex justify-end gap-3">
                     <Button variant="ghost" onClick={() => setRebuttalResult(null)}>Descartar</Button>
-                    <Button variant="primary" icon={<Save size={16} />} onClick={handleSaveRebuttal}>Guardar en Registro</Button>
+                    <Button variant="primary" icon={<FloppyDisk size={16} />} onClick={handleSaveRebuttal}>Guardar en Registro</Button>
                 </div>
             </Modal>
 
@@ -408,7 +408,7 @@ export function BillingDashboard() {
                     <>
                         {ripsResult.valid ? (
                             <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 mb-6 flex gap-3 text-emerald-800">
-                                <ClipboardCheck className="shrink-0" size={20} />
+                                <ClipboardText className="shrink-0" size={20} />
                                 <div>
                                     <h4 className="font-bold">Validación Exitosa</h4>
                                     <p className="text-sm opacity-90">Todos los archivos RIPS cumplen con la Res 2275.</p>
@@ -416,7 +416,7 @@ export function BillingDashboard() {
                             </div>
                         ) : (
                             <div className="bg-red-50 border border-red-100 rounded-xl p-4 mb-6 flex gap-3 text-red-800">
-                                <AlertTriangle className="shrink-0" size={20} />
+                                <Warning className="shrink-0" size={20} />
                                 <div>
                                     <h4 className="font-bold">Validación Fallida</h4>
                                     <p className="text-sm opacity-90">Se encontraron errores críticos.</p>
@@ -476,7 +476,7 @@ export function BillingDashboard() {
                     </Button>
                     <Button
                         variant="primary"
-                        icon={<ClipboardCheck size={16} />}
+                        icon={<ClipboardText size={16} />}
                         onClick={() => {
                             navigator.clipboard.writeText(defenseLetterModal.content);
                             showToast('success', '¡Copiado!', 'Carta de defensa copiada al portapapeles.');

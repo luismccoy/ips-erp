@@ -11,7 +11,7 @@
  * @see docs/OFFLINE_SYNC_SPEC.md - Section 8.4: Sync Progress Indicator
  */
 
-import { Loader2, X } from 'lucide-react';
+import { CircleNotch, X } from '@phosphor-icons/react';
 import { useSyncStatus } from '../../hooks/useSyncStatus';
 
 interface SyncProgressIndicatorProps {
@@ -49,7 +49,7 @@ export function SyncProgressIndicator({
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <Loader2 size={16} className="animate-spin text-blue-500" />
+          <CircleNotch size={16} className="animate-spin text-blue-500" />
           <span className="text-sm font-medium text-slate-900">Sincronizando...</span>
         </div>
         {dismissible && onDismiss && (

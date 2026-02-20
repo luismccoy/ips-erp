@@ -1,4 +1,4 @@
-import { AlertTriangle, XCircle, RefreshCw } from 'lucide-react';
+import { Warning, XCircle, ArrowsClockwise } from '@phosphor-icons/react';
 
 
 interface ErrorAlertProps {
@@ -69,7 +69,7 @@ export function ErrorAlert({
             <div className="flex items-start gap-4">
                 {/* Error Icon */}
                 <div className="flex-shrink-0 text-red-500 mt-1">
-                    <AlertTriangle size={20} />
+                    <Warning size={20} />
                 </div>
                 
                 {/* Content */}
@@ -87,9 +87,9 @@ export function ErrorAlert({
                             className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-700 bg-red-100 hover:bg-red-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             aria-label={retryLabel}
                         >
-                            <RefreshCw 
-                                size={14} 
-                                className={isRetrying ? 'animate-spin' : ''} 
+                            <ArrowsClockwise
+                                size={14}
+                                className={isRetrying ? 'animate-spin' : ''}
                             />
                             {isRetrying ? 'Reintentando...' : retryLabel}
                         </button>

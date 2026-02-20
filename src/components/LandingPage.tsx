@@ -1,23 +1,16 @@
 import { useState } from 'react';
 import {
-    Activity, ArrowRight, PlayCircle, Calendar, WifiOff, ShieldCheck,
-    Package, Sparkles, Bot, FileText, Check, CheckCircle2, Lock,
-    Globe, Cloud, X, DollarSign, CalendarCheck, AlertTriangle, Map,
-    Shield, Heart, PlusCircle, Users, CheckCircle, ArrowUpRight, Menu
-} from 'lucide-react';
+    ArrowRight, PlayCircle, ShieldCheck,
+    Package, Sparkle, Robot, FileText, Check, CheckCircle, Lock,
+    Globe, Cloud, X, CurrencyDollar, CalendarCheck, Warning, MapTrifold,
+    Shield, PlusCircle, Users, ArrowUpRight, List,
+    Invoice, FlowArrow, CalendarBlank,
+    CurrencyCircleDollar, ChartLineUp, Headset
+} from '@phosphor-icons/react';
+import { ActivityIcon, HeartIcon } from './ui/icons';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
 import { Card, CardContent } from './ui/Card';
-import {
-    BillingAuditIcon,
-    ProcessFlowIcon,
-    SchedulingIcon,
-    ComplianceShieldIcon,
-    AIAgentIcon,
-    PricingIcon,
-    RoadmapIcon,
-    VipSupportIcon
-} from './ui/healthcare-icons';
 import FeatureSection from './FeatureSection';
 
 export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => void, onViewDemo: () => void }) {
@@ -54,12 +47,12 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
                                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                                 className="p-2 text-foreground hover:bg-slate-100 rounded-lg transition-colors"
                             >
-                                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                                {isMenuOpen ? <X className="h-6 w-6" /> : <List className="h-6 w-6" />}
                             </button>
                         </div>
                         <div className="flex items-center gap-2">
                             <div className="bg-primary text-primary-foreground p-2 rounded-lg shadow-lg shadow-primary/20">
-                                <Activity className="h-6 w-6" />
+                                <ActivityIcon className="h-6 w-6" />
                             </div>
                             <span className="font-bold text-xl text-foreground tracking-tight">IPS-ERP</span>
                         </div>
@@ -215,7 +208,7 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="flex gap-4 p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group">
                                     <div className="h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 shrink-0 group-hover:scale-110 transition-transform">
-                                        <AIAgentIcon className="h-5 w-5" />
+                                        <Robot className="h-5 w-5" />
                                     </div>
                                     <div>
                                         <div className="font-semibold text-slate-100 text-sm">Acceso Anticipado</div>
@@ -224,7 +217,7 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
                                 </div>
                                 <div className="flex gap-4 p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group">
                                     <div className="h-10 w-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0 group-hover:scale-110 transition-transform">
-                                        <PricingIcon className="h-5 w-5" />
+                                        <CurrencyCircleDollar className="h-5 w-5" />
                                     </div>
                                     <div>
                                         <div className="font-semibold text-slate-100 text-sm">Pricing Preferencial</div>
@@ -233,7 +226,7 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
                                 </div>
                                 <div className="flex gap-4 p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group">
                                     <div className="h-10 w-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 shrink-0 group-hover:scale-110 transition-transform">
-                                        <RoadmapIcon className="h-5 w-5" />
+                                        <ChartLineUp className="h-5 w-5" />
                                     </div>
                                     <div>
                                         <div className="font-semibold text-slate-100 text-sm">Influya en el Roadmap</div>
@@ -242,7 +235,7 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
                                 </div>
                                 <div className="flex gap-4 p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group">
                                     <div className="h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 shrink-0 group-hover:scale-110 transition-transform">
-                                        <VipSupportIcon className="h-5 w-5" />
+                                        <Headset className="h-5 w-5" />
                                     </div>
                                     <div>
                                         <div className="font-semibold text-slate-100 text-sm">Soporte VIP</div>
@@ -337,7 +330,7 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
             <footer className="bg-slate-950 border-t border-white/5 py-10">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="flex items-center gap-2">
-                        <Activity className="h-5 w-5 text-blue-500" />
+                        <ActivityIcon className="h-5 w-5 text-blue-500" />
                         <span className="font-bold text-white text-sm tracking-wide">IPS-ERP</span>
                     </div>
                     <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">

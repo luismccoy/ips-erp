@@ -248,7 +248,7 @@ export const AssessmentForm: React.FC<AssessmentFormProps> = ({
 
       // Save to backend (or mock in demo mode)
       if (isDemoMode()) {
-        console.log('🎭 Demo Mode: Assessment saved locally', assessment);
+        console.log('[APP] Demo Mode: Assessment saved locally', assessment);
         // In demo mode, just call the optional onSubmit callback
         await onSubmit?.(assessment);
       } else {

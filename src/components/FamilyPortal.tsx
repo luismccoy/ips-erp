@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { ShieldAlert, LogOut, Activity, Calendar, Clock, CheckCircle, User, Lock, ArrowRight, HeartPulse, Bell, AlertCircle } from 'lucide-react';
+import { ShieldWarning, SignOut, CalendarBlank, Clock, CheckCircle, User, Lock, ArrowRight, Bell, WarningCircle } from '@phosphor-icons/react';
+import { ActivityIcon, HeartPulseIcon } from './ui/icons';
 import { client, isUsingRealBackend } from '../amplify-utils';
 import { listApprovedVisitSummaries } from '../api/workflow-api';
 import { usePagination } from '../hooks/usePagination';
@@ -156,7 +157,7 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
 
                         {authError && (
                             <div className="p-3 bg-red-50 text-red-600 text-sm font-medium rounded-xl flex items-center gap-2 justify-center" data-testid="family-auth-error">
-                                <ShieldAlert size={16} /> {authError}
+                                <ShieldWarning size={16} /> {authError}
                             </div>
                         )}
 
@@ -195,7 +196,7 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
             <header className="bg-white border-b border-slate-200 px-4 py-3 sticky top-0 z-10 flex justify-between items-center shadow-sm" data-testid="family-portal-header">
                 <div className="flex items-center gap-3">
                     <div className="h-10 w-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-md">
-                        <Activity size={20} />
+                        <ActivityIcon size={20} />
                     </div>
                     <div>
                         <h1 className="font-black text-slate-900 tracking-tight leading-none" data-testid="family-portal-title">IPS Familia</h1>
@@ -203,7 +204,7 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
                     </div>
                 </div>
                 <button onClick={() => setIsAuthenticated(false)} className="bg-slate-100 hover:bg-slate-200 text-slate-600 p-2 rounded-lg transition-colors" title="Salir" data-testid="family-logout-button">
-                    <LogOut size={18} />
+                    <SignOut size={18} />
                 </button>
             </header>
 
@@ -245,7 +246,7 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
                             <div className="flex items-start justify-between mb-2">
                                 <div className="flex items-center gap-2">
                                     <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                        <Calendar className="text-blue-600" size={14} />
+                                        <CalendarBlank className="text-blue-600" size={14} />
                                     </div>
                                     <div>
                                         <p className="font-bold text-slate-900 text-sm">Visita Programada</p>
@@ -266,7 +267,7 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
                             <div className="flex items-start justify-between mb-2">
                                 <div className="flex items-center gap-2">
                                     <div className="h-8 w-8 bg-amber-100 rounded-full flex items-center justify-center">
-                                        <AlertCircle className="text-amber-600" size={14} />
+                                        <WarningCircle className="text-amber-600" size={14} />
                                     </div>
                                     <div>
                                         <p className="font-bold text-slate-900 text-sm">Recordatorio</p>
@@ -287,7 +288,7 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
                 {/* Vitals Chart */}
                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
                     <div className="flex items-center gap-2 mb-4">
-                        <HeartPulse className="text-pink-500" size={20} />
+                        <HeartPulseIcon className="text-pink-500" size={20} />
                         <h3 className="font-black text-slate-900">Evolución Presión Arterial</h3>
                     </div>
                     <VitalsChart data={vitalsHistory} />
@@ -296,7 +297,7 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
                 {/* Visit Timeline */}
                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
                     <h3 className="font-black text-slate-900 mb-6 flex items-center gap-2">
-                        <Calendar size={18} className="text-indigo-600" /> Historial de Visitas
+                        <CalendarBlank size={18} className="text-indigo-600" /> Historial de Visitas
                     </h3>
 
                     {loadingVisits ? (
@@ -305,7 +306,7 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
                         </div>
                     ) : visitSummaries.length === 0 ? (
                         <div className="text-center py-12 bg-slate-50 rounded-2xl border border-slate-100 border-dashed">
-                            <Calendar className="mx-auto text-slate-300 mb-4" size={32} />
+                            <CalendarBlank className="mx-auto text-slate-300 mb-4" size={32} />
                             <p className="text-slate-400 font-medium text-sm">No hay visitas registradas aún.</p>
                         </div>
                     ) : (
@@ -352,7 +353,7 @@ export default function FamilyPortal({ onLogout }: SimpleNurseAppProps) {
 
                 <div className="bg-blue-50 border border-blue-100 p-5 rounded-3xl flex items-start gap-4">
                     <div className="h-10 w-10 bg-white rounded-full flex items-center justify-center text-blue-600 shadow-sm shrink-0">
-                        <ShieldAlert size={20} />
+                        <ShieldWarning size={20} />
                     </div>
                     <div>
                         <h4 className="font-black text-blue-900 text-sm mb-1">Privacidad Protegida</h4>

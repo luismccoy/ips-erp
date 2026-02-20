@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight } from 'lucide-react';
+import { CaretRight } from '@phosphor-icons/react';
 
 interface Breadcrumb {
     label: string;
@@ -27,7 +27,7 @@ export function PageHeader({
                 <nav className="flex items-center gap-1 mb-2 text-xs text-slate-400">
                     {breadcrumbs.map((crumb, i) => (
                         <React.Fragment key={i}>
-                            {i > 0 && <ChevronRight size={12} className="text-slate-300" />}
+                            {i > 0 && <CaretRight size={12} className="text-slate-300" />}
                             {crumb.onClick ? (
                                 <button
                                     onClick={crumb.onClick}

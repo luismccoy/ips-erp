@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import { Sparkles, Save, FileText } from 'lucide-react';
+import { Sparkle, FloppyDisk, FileText, CheckCircle } from '@phosphor-icons/react';
 import { AISuggestionList } from './AISuggestionCard';
 import { useAISuggestions } from './useAISuggestions';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
@@ -220,7 +220,7 @@ export const BillingFormWithAI: React.FC = () => {
                         <Button
                             type="button"
                             variant="secondary"
-                            icon={<Sparkles className="w-4 h-4" />}
+                            icon={<Sparkle className="w-4 h-4" />}
                             onClick={validateBillingRecord}
                             disabled={isValidating}
                             isLoading={isValidating}
@@ -231,7 +231,7 @@ export const BillingFormWithAI: React.FC = () => {
                         <Button
                             type="submit"
                             variant="primary"
-                            icon={<Save className="w-4 h-4" />}
+                            icon={<FloppyDisk className="w-4 h-4" />}
                             disabled={isValidating}
                         >
                             Guardar
@@ -284,9 +284,9 @@ export const BillingFormWithAI: React.FC = () => {
             {!isValidating && !error && suggestions.length === 0 && formData.date && (
                 <Card className="border-green-200 bg-green-50">
                     <div className="flex items-center gap-2 text-green-700">
-                        <Sparkles className="w-5 h-5" />
+                        <CheckCircle size={20} weight="bold" className="text-green-600 flex-shrink-0" />
                         <span className="text-sm font-medium">
-                            ✅ No se encontraron problemas. El registro cumple con las validaciones RIPS.
+                            No se encontraron problemas. El registro cumple con las validaciones RIPS.
                         </span>
                     </div>
                 </Card>

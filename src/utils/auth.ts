@@ -25,7 +25,7 @@ import { isUsingRealBackend } from '../amplify-utils';
  */
 export async function logout(): Promise<void> {
   try {
-    console.log('🔐 Starting secure logout...');
+    console.log('[AUTH] Starting secure logout...');
     
     // 1. Sign out from Amplify/Cognito (invalidate server-side session)
     if (isUsingRealBackend()) {
@@ -41,19 +41,19 @@ export async function logout(): Promise<void> {
     localStorageKeys
       .filter(key => key.startsWith('ips-'))
       .forEach(key => {
-        console.log(`     ✓ Removed: ${key}`);
+        console.log(`     [OK] Removed: ${key}`);
         localStorage.removeItem(key);
       });
-    
+
     // Clear all Amplify/Cognito keys (auth cache)
     localStorageKeys
-      .filter(key => 
+      .filter(key =>
         key.startsWith('CognitoIdentityServiceProvider.') ||
         key.includes('amplify-') ||
         key.includes('aws.')
       )
       .forEach(key => {
-        console.log(`     ✓ Removed: ${key}`);
+        console.log(`     [OK] Removed: ${key}`);
         localStorage.removeItem(key);
       });
     
@@ -66,10 +66,10 @@ export async function logout(): Promise<void> {
     try {
       cleanupOfflineServices();
     } catch (err) {
-      console.warn('   ⚠️  Offline cleanup failed (non-critical):', err);
+      console.warn('   [WARN] Offline cleanup failed (non-critical):', err);
     }
     
-    console.log('✅ Logout complete - redirecting to landing page');
+    console.log('[OK] Logout complete - redirecting to landing page');
     
     // 5. Force hard redirect to landing page
     // This ensures:
@@ -84,7 +84,7 @@ export async function logout(): Promise<void> {
     window.location.href = '/';
     
   } catch (error) {
-    console.error('❌ Logout failed:', error);
+    console.error('[ERROR] Logout failed:', error);
     
     // Even if logout fails, still clear local state and redirect
     // (defensive programming - prefer to clear everything than leave session active)

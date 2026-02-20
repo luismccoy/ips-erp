@@ -7,7 +7,7 @@
  * @see docs/OFFLINE_SYNC_SPEC.md - Section 8.2: Sync Status Badge
  */
 
-import { Cloud, CloudOff, Loader2, Check, AlertTriangle } from 'lucide-react';
+import { Cloud, CloudSlash, CircleNotch, Check, Warning } from '@phosphor-icons/react';
 
 export type SyncStatusType = 'synced' | 'pending' | 'syncing' | 'error';
 
@@ -53,7 +53,7 @@ const statusConfig: Record<SyncStatusType, {
     textColor: 'text-yellow-400',
   },
   syncing: {
-    icon: Loader2,
+    icon: CircleNotch,
     label: 'Syncing',
     labelEs: 'Sincronizando',
     bgColor: 'bg-blue-500/20',
@@ -61,7 +61,7 @@ const statusConfig: Record<SyncStatusType, {
     animate: true,
   },
   error: {
-    icon: AlertTriangle,
+    icon: Warning,
     label: 'Error',
     labelEs: 'Error',
     bgColor: 'bg-red-500/20',

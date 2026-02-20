@@ -28,6 +28,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { client } from '../amplify-utils';
 import { usePagination } from '../hooks/usePagination';
+import { ClipboardText, User, CalendarBlank, Clock, ListChecks, ArrowLeft, Check, X, Tray } from '@phosphor-icons/react';
+import { HeartIcon, PillIcon } from './ui/icons';
 import { LoadingSpinner } from './ui/LoadingSpinner';
 import type {
   PendingReviewsPanelProps,
@@ -121,75 +123,6 @@ function getPainLevelColor(level: number): string {
   return 'text-green-600 bg-green-50';
 }
 
-// ============================================================================
-// Icons
-// ============================================================================
-
-const ClipboardCheckIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-  </svg>
-);
-
-const UserIcon = () => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-  </svg>
-);
-
-const CalendarIcon = () => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-  </svg>
-);
-
-const ClockIcon = () => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-);
-
-const HeartIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-  </svg>
-);
-
-const PillIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-  </svg>
-);
-
-const ChecklistIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-  </svg>
-);
-
-const ArrowLeftIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-  </svg>
-);
-
-const CheckIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-  </svg>
-);
-
-const XIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-  </svg>
-);
-
-const InboxIcon = () => (
-  <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-  </svg>
-);
 
 
 // ============================================================================
@@ -451,7 +384,7 @@ const RejectionModal: React.FC<RejectionModalInternalProps> = ({ visit, onConfir
               </>
             ) : (
               <>
-                <XIcon />
+                <X size={20} />
                 Rechazar Visita
               </>
             )}
@@ -667,7 +600,7 @@ export const PendingReviewsPanel: React.FC<PendingReviewsPanelExtendedProps> = (
             onClick={() => setSelectedVisit(null)}
             className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
           >
-            <ArrowLeftIcon />
+            <ArrowLeft size={20} />
             <span className="font-medium">Volver a la lista</span>
           </button>
           <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-full">
@@ -682,15 +615,15 @@ export const PendingReviewsPanel: React.FC<PendingReviewsPanelExtendedProps> = (
               <h3 className="text-xl font-bold text-slate-900">{selectedVisit.patientName}</h3>
               <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-slate-600">
                 <span className="flex items-center gap-1">
-                  <UserIcon />
+                  <User size={16} />
                   {selectedVisit.nurseName}
                 </span>
                 <span className="flex items-center gap-1">
-                  <CalendarIcon />
+                  <CalendarBlank size={16} />
                   {formatDate(selectedVisit.visitDate)}
                 </span>
                 <span className="flex items-center gap-1">
-                  <ClockIcon />
+                  <Clock size={16} />
                   Enviado {formatRelativeTime(selectedVisit.submittedAt)}
                 </span>
               </div>
@@ -702,25 +635,25 @@ export const PendingReviewsPanel: React.FC<PendingReviewsPanelExtendedProps> = (
         <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
           {/* Vitals Section */}
           <section>
-            <SectionHeader title="Signos Vitales" icon={<HeartIcon />} />
+            <SectionHeader title="Signos Vitales" icon={<HeartIcon size={20} />} />
             <VitalsCard vitals={selectedVisit.vitals} />
           </section>
 
           {/* KARDEX Section */}
           <section>
-            <SectionHeader title="Documentación KARDEX" icon={<ClipboardCheckIcon />} />
+            <SectionHeader title="Documentación KARDEX" icon={<ClipboardText size={20} />} />
             <KardexDisplay kardex={selectedVisit.kardex} />
           </section>
 
           {/* Medications Section */}
           <section>
-            <SectionHeader title="Medicamentos Administrados" icon={<PillIcon />} />
+            <SectionHeader title="Medicamentos Administrados" icon={<PillIcon size={20} />} />
             <MedicationsDisplay medications={selectedVisit.medications} />
           </section>
 
           {/* Tasks Section */}
           <section>
-            <SectionHeader title="Tareas Completadas" icon={<ChecklistIcon />} />
+            <SectionHeader title="Tareas Completadas" icon={<ListChecks size={20} />} />
             <TasksDisplay tasks={selectedVisit.tasks} />
           </section>
         </div>
@@ -732,7 +665,7 @@ export const PendingReviewsPanel: React.FC<PendingReviewsPanelExtendedProps> = (
             disabled={isApproving || isRejecting}
             className="px-6 py-2.5 text-sm font-bold text-red-600 bg-white border border-red-200 rounded-xl hover:bg-red-50 transition-colors disabled:opacity-50 flex items-center gap-2"
           >
-            <XIcon />
+            <X size={20} />
             Rechazar
           </button>
           <button
@@ -747,7 +680,7 @@ export const PendingReviewsPanel: React.FC<PendingReviewsPanelExtendedProps> = (
               </>
             ) : (
               <>
-                <CheckIcon />
+                <Check size={20} />
                 Aprobar Visita
               </>
             )}
@@ -775,7 +708,7 @@ export const PendingReviewsPanel: React.FC<PendingReviewsPanelExtendedProps> = (
       <div className="bg-white rounded-2xl border border-slate-100 p-8">
         <div className="flex flex-col items-center justify-center py-12">
           <div className="text-slate-300 mb-4">
-            <InboxIcon />
+            <Tray size={64} />
           </div>
           <h3 className="text-lg font-bold text-slate-900 mb-2">No hay visitas pendientes</h3>
           <p className="text-sm text-slate-500 text-center max-w-md">
@@ -795,7 +728,7 @@ export const PendingReviewsPanel: React.FC<PendingReviewsPanelExtendedProps> = (
       <div className="px-6 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-yellow-100 rounded-lg">
-            <ClipboardCheckIcon />
+            <ClipboardText size={20} />
           </div>
           <div>
             <h3 className="font-bold text-slate-900">Visitas Pendientes de Revisión</h3>
@@ -828,18 +761,18 @@ export const PendingReviewsPanel: React.FC<PendingReviewsPanelExtendedProps> = (
 
                 {/* Nurse Name - Requirement 5.2 */}
                 <div className="flex items-center gap-1 text-sm text-slate-600 mt-1">
-                  <UserIcon />
+                  <User size={16} />
                   <span>{visit.nurseName}</span>
                 </div>
 
                 {/* Visit Date and Submission Time - Requirement 5.2 */}
                 <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-slate-500">
                   <span className="flex items-center gap-1">
-                    <CalendarIcon />
+                    <CalendarBlank size={16} />
                     {formatDate(visit.visitDate)}
                   </span>
                   <span className="flex items-center gap-1">
-                    <ClockIcon />
+                    <Clock size={16} />
                     Enviado {formatRelativeTime(visit.submittedAt)}
                   </span>
                 </div>

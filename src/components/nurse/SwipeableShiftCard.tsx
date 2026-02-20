@@ -7,7 +7,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence } from 'framer-motion';
-import { MapPin, Activity, Phone, ChevronLeft } from 'lucide-react';
+import { MapPin, Phone, CaretLeft } from '@phosphor-icons/react';
+import { ActivityIcon } from '../ui/icons';
 
 export interface SwipeableShiftCardProps {
   children: React.ReactNode;
@@ -98,7 +99,7 @@ export function SwipeableShiftCard({
           className="w-[53px] flex flex-col items-center justify-center gap-1 bg-emerald-500 hover:bg-emerald-600 text-white transition-colors"
           aria-label="Signos vitales rápidos"
         >
-          <Activity size={20} />
+          <ActivityIcon size={20} />
           <span className="text-[10px] font-medium">Vitales</span>
         </button>
         <button
@@ -140,7 +141,7 @@ export function SwipeableShiftCard({
                 animate={{ x: [-3, 3, -3] }}
                 transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
               >
-                <ChevronLeft size={14} />
+                <CaretLeft size={14} />
               </motion.div>
               Desliza
             </motion.div>
@@ -163,7 +164,7 @@ export function SwipeableShiftCard({
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 rounded-lg transition-colors"
           aria-label="Signos vitales rápidos"
         >
-          <Activity size={13} />
+          <ActivityIcon size={13} />
           Vitales
         </button>
         <button

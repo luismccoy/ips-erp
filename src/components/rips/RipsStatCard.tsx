@@ -4,10 +4,10 @@
  */
 
 import React, { memo } from 'react';
-import type { LucideIcon } from 'lucide-react';
+import type { AppIcon } from '../ui/icons';
 
 interface RipsStatCardProps {
-  icon?: LucideIcon;
+  icon?: AppIcon;
   value: string | number;
   label: string;
   highlight?: boolean;

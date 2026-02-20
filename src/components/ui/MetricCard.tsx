@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { TrendUp, TrendDown, Minus } from '@phosphor-icons/react';
 
 type TrendDirection = 'up' | 'down' | 'neutral';
 type ColorVariant = 'blue' | 'green' | 'purple' | 'amber' | 'red' | 'teal' | 'slate';
@@ -27,8 +27,8 @@ const colorMap: Record<ColorVariant, { iconBg: string; iconText: string }> = {
 };
 
 const trendConfig: Record<TrendDirection, { icon: React.FC<any>; color: string }> = {
-    up:      { icon: TrendingUp,   color: 'text-green-600 bg-green-50' },
-    down:    { icon: TrendingDown, color: 'text-red-600 bg-red-50' },
+    up:      { icon: TrendUp,   color: 'text-green-600 bg-green-50' },
+    down:    { icon: TrendDown, color: 'text-red-600 bg-red-50' },
     neutral: { icon: Minus,        color: 'text-slate-500 bg-slate-100' },
 };
 

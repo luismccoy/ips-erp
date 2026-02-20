@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { ShieldAlert, Lock } from 'lucide-react';
+import { ShieldWarning, Lock } from '@phosphor-icons/react';
 import { isAuthorizedForRoute, getDefaultRouteForRole, type UserRole } from '../constants/navigation';
 import { useAnalytics } from '../hooks/useAnalytics';
 
@@ -91,7 +91,7 @@ function UnauthorizedScreen({ userRole, attemptedPath }: { userRole: UserRole | 
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl border border-slate-200 p-12 text-center">
         <div className="mx-auto h-24 w-24 bg-rose-100 rounded-full flex items-center justify-center mb-6">
-          <ShieldAlert className="h-12 w-12 text-rose-600" />
+          <ShieldWarning className="h-12 w-12 text-rose-600" />
         </div>
         
         <h1 className="text-3xl font-black text-slate-900 mb-3">

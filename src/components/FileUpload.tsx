@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import { Upload, File, CheckCircle, AlertCircle } from 'lucide-react';
+import { UploadSimple, File, CheckCircle, WarningCircle } from '@phosphor-icons/react';
 import { useFileUpload } from '../hooks/useFileUpload';
 
 interface FileUploadProps {
@@ -71,7 +71,7 @@ export function FileUpload({
                     onChange={(e) => handleFiles(e.target.files)}
                     className="hidden"
                 />
-                <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                <UploadSimple className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                 <p className="text-gray-600">Arrastra archivos o haz clic para seleccionar</p>
                 <p className="text-sm text-gray-400 mt-2">Máximo {maxSizeMB}MB por archivo</p>
             </div>
@@ -90,7 +90,7 @@ export function FileUpload({
 
             {error && (
                 <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg">
-                    <AlertCircle size={18} />
+                    <WarningCircle size={18} />
                     <span>{error}</span>
                 </div>
             )}

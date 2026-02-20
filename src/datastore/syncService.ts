@@ -92,7 +92,7 @@ export function registerPendingMutation(
     pendingMutations: pendingMutationsMap.size,
   });
   
-  console.log(`📝 Registered pending mutation: ${modelName} ${operation}`, id);
+  console.log(`[QUEUE] Registered pending mutation: ${modelName} ${operation}`, id);
 }
 
 /**
@@ -104,7 +104,7 @@ export function markMutationSynced(id: string): void {
       pendingMutations: pendingMutationsMap.size,
       lastSyncTime: new Date().toISOString(),
     });
-    console.log(`✅ Mutation synced:`, id);
+    console.log(`[OK] Mutation synced:`, id);
   }
 }
 
@@ -129,7 +129,7 @@ export function markMutationFailed(id: string, error: Error): void {
       errors: [...syncState.errors.slice(-9), syncError], // Keep last 10 errors
     });
     
-    console.error(`❌ Mutation failed:`, id, error.message);
+    console.error(`[ERROR] Mutation failed:`, id, error.message);
   }
 }
 
@@ -185,11 +185,11 @@ export function startSyncObservation(): void {
 
   // Hub is used in Amplify for sync events
   // In Gen 2, we use DataStore.observeQuery for model observations
-  console.log('👀 Started sync observation');
+  console.log('[SYNC] Started sync observation');
   
   // Update syncing state based on network
   const handleOnline = () => {
-    console.log('🌐 Network online - sync will resume');
+    console.log('[SYNC] Network online - sync will resume');
     updateSyncState({ isSyncing: true });
     
     // After a short delay, check if sync completed
@@ -201,7 +201,7 @@ export function startSyncObservation(): void {
   };
   
   const handleOffline = () => {
-    console.log('📴 Network offline - sync paused');
+    console.log('[SYNC] Network offline - sync paused');
     updateSyncState({ isSyncing: false });
   };
   
@@ -223,7 +223,7 @@ export function stopSyncObservation(): void {
   if (syncSubscription) {
     syncSubscription.unsubscribe();
     syncSubscription = null;
-    console.log('🛑 Stopped sync observation');
+    console.log('[SYNC] Stopped sync observation');
   }
 }
 
@@ -253,7 +253,7 @@ export async function forceSyncRefresh(): Promise<void> {
       isSyncing: false,
     });
     
-    console.log('🔄 Force sync completed');
+    console.log('[SYNC] Force sync completed');
   } catch (error) {
     console.error('Force sync failed:', error);
     updateSyncState({ isSyncing: false });
@@ -346,7 +346,7 @@ export function initializeSyncService(): void {
     errors: [],
   });
   
-  console.log('🔧 Sync service initialized');
+  console.log('[SYNC] Sync service initialized');
 }
 
 /**
@@ -364,5 +364,5 @@ export function cleanupSyncService(): void {
   });
   listeners.clear();
   
-  console.log('🧹 Sync service cleaned up');
+  console.log('[SYNC] Sync service cleaned up');
 }

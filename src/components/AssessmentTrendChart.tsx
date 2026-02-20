@@ -6,7 +6,8 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
-import { TrendingUp, TrendingDown, Minus, Calendar, Activity } from 'lucide-react';
+import { TrendUp, TrendDown, Minus, CalendarBlank } from '@phosphor-icons/react';
+import { ActivityIcon } from './ui/icons';
 import { client } from '../amplify-utils';
 import type { PatientAssessment } from '../types/clinical-scales';
 
@@ -48,7 +49,7 @@ function TrendIndicator({ current, previous, higherIsBetter }: { current: number
   if (isImproving) {
     return (
       <div className="flex items-center gap-1 text-green-600">
-        <TrendingUp size={16} />
+        <TrendUp size={16} />
         <span className="text-xs font-medium">Mejorando</span>
       </div>
     );
@@ -56,7 +57,7 @@ function TrendIndicator({ current, previous, higherIsBetter }: { current: number
   
   return (
     <div className="flex items-center gap-1 text-red-600">
-      <TrendingDown size={16} />
+      <TrendDown size={16} />
       <span className="text-xs font-medium">Empeorando</span>
     </div>
   );
@@ -173,7 +174,7 @@ export function AssessmentTrendChart({
   if (assessments.length < 2) {
     return (
       <div className="text-center p-8 bg-gray-50 rounded-lg">
-        <Activity className="mx-auto h-12 w-12 text-gray-400" />
+        <ActivityIcon className="mx-auto h-12 w-12 text-gray-400" size={48} />
         <h3 className="mt-2 text-sm font-medium text-gray-900">Sin Datos de Tendencia</h3>
         <p className="mt-1 text-sm text-gray-500">
           {assessments.length === 0
@@ -191,7 +192,7 @@ export function AssessmentTrendChart({
         <div>
           {patientName && <h3 className="font-semibold text-gray-900">{patientName}</h3>}
           <p className="text-sm text-gray-500 flex items-center gap-1">
-            <Calendar size={14} />
+            <CalendarBlank size={14} />
             Últimos {daysBack} días • {assessments.length} valoraciones
           </p>
         </div>

@@ -323,7 +323,7 @@ export function useOfflineMutation<TData, TVariables>({
     try {
       if (!hasConnectivity) {
         // Queue for later sync (in real implementation, this would use DataStore)
-        console.log('📴 Mutation queued for offline sync:', variables);
+        console.log('[SYNC] Mutation queued for offline sync:', variables);
         // For now, we'll simulate success but mark as pending
         throw new Error('OFFLINE_QUEUED');
       }

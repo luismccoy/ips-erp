@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Package, Plus, AlertTriangle, Check, RefreshCw } from 'lucide-react';
+import { Package, Plus, Warning, Check, ArrowsClockwise } from '@phosphor-icons/react';
 import { client, isUsingRealBackend, MOCK_USER } from '../amplify-utils';
 import { usePagination } from '../hooks/usePagination';
 import { useLoadingTimeout } from '../hooks/useLoadingTimeout';
@@ -179,7 +179,7 @@ export function InventoryDashboard() {
             <div className="space-y-3">
                 {isLoading && inventory.length === 0 && (
                     <div className="text-center py-12 bg-slate-50 rounded-xl border border-slate-100 border-dashed">
-                        <RefreshCw className="text-blue-500 animate-spin mx-auto mb-2" size={24} />
+                        <ArrowsClockwise className="text-blue-500 animate-spin mx-auto mb-2" size={24} />
                         <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Cargando inventario...</p>
                     </div>
                 )}
@@ -341,7 +341,7 @@ export function InventoryDashboard() {
 
                         {newItemQuantity <= editingItem.reorderLevel && (
                             <div className="bg-red-50 text-red-600 p-3 rounded-xl flex items-center gap-2 text-xs font-bold">
-                                <AlertTriangle size={16} />
+                                <Warning size={16} />
                                 Advertencia: Nivel por debajo del mínimo ({editingItem.reorderLevel})
                             </div>
                         )}

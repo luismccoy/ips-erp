@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { Shield, Clock, User, Activity } from 'lucide-react';
+import { Shield, Clock, User } from '@phosphor-icons/react';
+import { ActivityIcon } from './ui/icons';
 import { client, isUsingRealBackend, MOCK_USER } from '../amplify-utils';
 import { usePagination } from '../hooks/usePagination';
 import { useLoadingTimeout } from '../hooks/useLoadingTimeout';
@@ -95,7 +96,7 @@ export function AuditLogViewer() {
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-3">
                                         <div className={`p-2 rounded-lg ${log.action.includes('REJECT') ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
-                                            <Activity size={16} />
+                                            <ActivityIcon size={16} />
                                         </div>
                                         <div>
                                             <span className="text-sm font-bold text-slate-900">{log.action}</span>

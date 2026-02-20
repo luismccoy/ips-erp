@@ -1,4 +1,5 @@
-import { Activity, Stethoscope, Users, Building2, ArrowLeft, Sparkles } from 'lucide-react';
+import { Users, Buildings, ArrowLeft, Sparkle } from '@phosphor-icons/react';
+import { ActivityIcon, StethoscopeIcon } from './ui/icons';
 import { enableDemoMode } from '../amplify-utils';
 
 interface DemoSelectionProps {
@@ -47,7 +48,7 @@ export default function DemoSelection({ onSelectAdmin, onSelectNurse, onSelectFa
                     
                     {/* Demo Mode Badge */}
                     <div className="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-200 text-violet-700 px-4 py-2 rounded-full text-sm font-medium">
-                        <Sparkles className="h-4 w-4" />
+                        <Sparkle className="h-4 w-4" />
                         Modo Demo: Datos de muestra precargados
                     </div>
                 </div>
@@ -60,11 +61,11 @@ export default function DemoSelection({ onSelectAdmin, onSelectNurse, onSelectFa
                         data-testid="demo-admin-button"
                     >
                         <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity transform group-hover:scale-110 duration-500">
-                            <Building2 className="h-48 w-48 text-blue-600" />
+                            <Buildings className="h-48 w-48 text-blue-600" />
                         </div>
                         <div className="relative z-10">
                             <div className="h-16 w-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-8 text-blue-600 group-hover:scale-110 transition-transform duration-300 shadow-sm">
-                                <Building2 className="h-8 w-8" />
+                                <Buildings className="h-8 w-8" />
                             </div>
                             <h3 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-blue-600 transition-colors">Portal Administrativo</h3>
                             <p className="text-slate-500 leading-relaxed">
@@ -76,7 +77,7 @@ export default function DemoSelection({ onSelectAdmin, onSelectNurse, onSelectFa
                                 <span className="text-xs bg-amber-50 text-amber-600 px-2 py-1 rounded-full">2 Glosas</span>
                             </div>
                             <div className="mt-6 flex items-center text-blue-600 font-bold text-sm tracking-wide uppercase opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
-                                Iniciar Demo <Activity className="h-4 w-4 ml-2" />
+                                Iniciar Demo <ActivityIcon className="h-4 w-4 ml-2" size={16} />
                             </div>
                         </div>
                     </button>
@@ -88,11 +89,11 @@ export default function DemoSelection({ onSelectAdmin, onSelectNurse, onSelectFa
                         data-testid="demo-nurse-button"
                     >
                         <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity transform group-hover:scale-110 duration-500">
-                            <Stethoscope className="h-48 w-48 text-emerald-600" />
+                            <StethoscopeIcon className="h-48 w-48 text-emerald-600" size={192} />
                         </div>
                         <div className="relative z-10">
                             <div className="h-16 w-16 bg-emerald-50 rounded-2xl flex items-center justify-center mb-8 text-emerald-600 group-hover:scale-110 transition-transform duration-300 shadow-sm">
-                                <Stethoscope className="h-8 w-8" />
+                                <StethoscopeIcon className="h-8 w-8" size={32} />
                             </div>
                             <h3 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-emerald-600 transition-colors">App de Enfermería</h3>
                             <p className="text-slate-500 leading-relaxed">
@@ -104,7 +105,7 @@ export default function DemoSelection({ onSelectAdmin, onSelectNurse, onSelectFa
                                 <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full">Funciona Offline</span>
                             </div>
                             <div className="mt-6 flex items-center text-emerald-600 font-bold text-sm tracking-wide uppercase opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
-                                Iniciar Demo <Activity className="h-4 w-4 ml-2" />
+                                Iniciar Demo <ActivityIcon className="h-4 w-4 ml-2" size={16} />
                             </div>
                         </div>
                     </button>
@@ -131,7 +132,7 @@ export default function DemoSelection({ onSelectAdmin, onSelectNurse, onSelectFa
                                 <span className="text-xs bg-emerald-50 text-emerald-600 px-2 py-1 rounded-full">Última Visita: Hoy</span>
                             </div>
                             <div className="mt-6 flex items-center text-indigo-600 font-bold text-sm tracking-wide uppercase opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
-                                Iniciar Demo <Activity className="h-4 w-4 ml-2" />
+                                Iniciar Demo <ActivityIcon className="h-4 w-4 ml-2" size={16} />
                             </div>
                         </div>
                     </button>

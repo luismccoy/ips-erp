@@ -6,10 +6,10 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { 
-  Save, X, AlertTriangle, CheckCircle, Brain, Activity,
-  Shield, Heart, User, ChevronDown, ChevronUp
-} from 'lucide-react';
+import {
+  FloppyDisk, X, Warning, CheckCircle, Shield, User, CaretDown, CaretUp
+} from '@phosphor-icons/react';
+import { ActivityIcon, HeartIcon, BrainIcon } from './ui/icons';
 import { client, MOCK_USER } from '../amplify-utils';
 import type { PatientAssessment } from '../types/clinical-scales';
 import {
@@ -65,7 +65,7 @@ function ScaleSection({ title, icon, expanded, onToggle, children, score, maxSco
               {score}/{maxScore}
             </span>
           )}
-          {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+          {expanded ? <CaretUp size={18} /> : <CaretDown size={18} />}
         </div>
       </button>
       {expanded && (
@@ -243,7 +243,7 @@ export function AssessmentEntryForm({
       {validationError && (
         <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
           <div className="flex items-center gap-2 text-red-800 font-medium">
-            <AlertTriangle size={18} />
+            <Warning size={18} />
             <span>{validationError}</span>
           </div>
         </div>
@@ -253,7 +253,7 @@ export function AssessmentEntryForm({
       {previewAlerts.length > 0 && (
         <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
           <div className="flex items-center gap-2 text-amber-800 font-medium mb-2">
-            <AlertTriangle size={18} />
+            <Warning size={18} />
             <span>{previewAlerts.length} Alerta(s) Detectada(s)</span>
           </div>
           <ul className="text-sm text-amber-700 space-y-1">
@@ -270,7 +270,7 @@ export function AssessmentEntryForm({
       {/* Glasgow */}
       <ScaleSection
         title="Glasgow (Consciencia)"
-        icon={<Brain size={20} />}
+        icon={<BrainIcon size={20} />}
         expanded={expandedSections.has('glasgow')}
         onToggle={() => toggleSection('glasgow')}
         score={glasgow.total}
@@ -325,7 +325,7 @@ export function AssessmentEntryForm({
       {/* Pain */}
       <ScaleSection
         title="Dolor (EVA)"
-        icon={<Activity size={20} />}
+        icon={<ActivityIcon size={20} />}
         expanded={expandedSections.has('pain')}
         onToggle={() => toggleSection('pain')}
         score={painScore}
@@ -351,7 +351,7 @@ export function AssessmentEntryForm({
       {/* Morse (Fall Risk) */}
       <ScaleSection
         title="Morse (Riesgo de Caídas)"
-        icon={<AlertTriangle size={20} />}
+        icon={<Warning size={20} />}
         expanded={expandedSections.has('morse')}
         onToggle={() => toggleSection('morse')}
         score={morse.total}
@@ -458,7 +458,7 @@ export function AssessmentEntryForm({
       {/* NEWS */}
       <ScaleSection
         title="NEWS (Alerta Temprana)"
-        icon={<Heart size={20} />}
+        icon={<HeartIcon size={20} />}
         expanded={expandedSections.has('news')}
         onToggle={() => toggleSection('news')}
         score={news.total}
@@ -564,7 +564,7 @@ export function AssessmentEntryForm({
       {/* RASS */}
       <ScaleSection
         title="RASS (Sedación/Agitación)"
-        icon={<Activity size={20} />}
+        icon={<ActivityIcon size={20} />}
         expanded={expandedSections.has('rass')}
         onToggle={() => toggleSection('rass')}
         score={rassScore}
@@ -618,7 +618,7 @@ export function AssessmentEntryForm({
             <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
           ) : (
             <>
-              <Save size={18} />
+              <FloppyDisk size={18} />
               Guardar Valoración
             </>
           )}

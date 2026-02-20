@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Clock, Edit3, FileCheck, FileText } from 'lucide-react';
+import { Clock, PencilSimple, FileText } from '@phosphor-icons/react';
 import type { ShiftWithVisit } from './types';
 
 interface DocumentationButtonProps {
@@ -25,7 +25,7 @@ const DocumentationButton = memo(({
         if (visit?.status === 'APPROVED') {
             return {
                 onClick: () => onGeneratePacket(shift.id),
-                icon: <FileCheck size={16} />,
+                icon: <FileText size={16} />,
                 text: 'Generar Paquete',
                 className: 'bg-emerald-600 hover:bg-emerald-700 text-white',
                 disabled: false
@@ -47,7 +47,7 @@ const DocumentationButton = memo(({
         if (visit?.status === 'DRAFT' || visit?.status === 'REJECTED') {
             return {
                 onClick: () => onContinueDocumentation(shift.id),
-                icon: <Edit3 size={16} />,
+                icon: <PencilSimple size={16} />,
                 text: visit.status === 'REJECTED' ? 'Corregir Documentación' : 'Continuar',
                 className: 'bg-indigo-600 hover:bg-indigo-700 text-white',
                 disabled: isLoading

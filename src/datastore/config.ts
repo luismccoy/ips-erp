@@ -45,7 +45,7 @@ let currentTenantId: string | null = null;
 export function setUserContext(nurseId: string, tenantId: string): void {
   currentNurseId = nurseId;
   currentTenantId = tenantId;
-  console.log('📍 DataStore user context set:', { nurseId, tenantId });
+  console.log('[DS] DataStore user context set:', { nurseId, tenantId });
 }
 
 /**
@@ -68,7 +68,7 @@ export function getCurrentTenantId(): string | null {
 export function clearUserContext(): void {
   currentNurseId = null;
   currentTenantId = null;
-  console.log('🧹 DataStore user context cleared');
+  console.log('[DS] DataStore user context cleared');
 }
 
 /**
@@ -87,7 +87,7 @@ export function configureDataStore(): void {
       const { modelConstructor, localModel, remoteModel } = data;
       const modelName = modelConstructor?.name || 'Unknown';
       
-      console.log(`⚠️ Conflict detected for ${modelName}:`, {
+      console.log(`[WARN] Conflict detected for ${modelName}:`, {
         localVersion: (localModel as any)?._version,
         remoteVersion: (remoteModel as any)?._version,
       });
@@ -99,12 +99,12 @@ export function configureDataStore(): void {
         
         // If server has status APPROVED or REJECTED, don't overwrite
         if (['APPROVED', 'REJECTED'].includes(remote?.status)) {
-          console.log('🔒 Visit status is finalized, discarding local changes');
+          console.log('[DS] Visit status is finalized, discarding local changes');
           return { type: 'DISCARD' as const };
         }
         
         // Otherwise, merge: keep local clinical data, server metadata
-        console.log('🔀 Merging Visit: local clinical + server metadata');
+        console.log('[DS] Merging Visit: local clinical + server metadata');
         return {
           type: 'RETRY' as const,
           newModel: {
@@ -123,7 +123,7 @@ export function configureDataStore(): void {
         const local = localModel as any;
         const remote = remoteModel as any;
         
-        console.log('💉 VitalSigns conflict: keeping local measurements');
+        console.log('[DS] VitalSigns conflict: keeping local measurements');
         return {
           type: 'RETRY' as const,
           newModel: {
@@ -138,7 +138,7 @@ export function configureDataStore(): void {
         const local = localModel as any;
         const remote = remoteModel as any;
         
-        console.log('📋 PatientAssessment conflict: keeping local data');
+        console.log('[DS] PatientAssessment conflict: keeping local data');
         return {
           type: 'RETRY' as const,
           newModel: {
@@ -149,17 +149,17 @@ export function configureDataStore(): void {
       }
 
       // Default: Auto-merge for other models
-      console.log(`🔄 Auto-merging ${modelName}`);
+      console.log(`[DS] Auto-merging ${modelName}`);
       return { type: 'AUTOMERGE' as const };
     },
 
     // Error handler
     errorHandler: (error) => {
-      console.error('❌ DataStore sync error:', error);
+      console.error('[ERROR] DataStore sync error:', error);
       
       // Check for auth errors
       if (error.errorType === 'Unauthorized') {
-        console.error('🔐 Authentication error - user needs to re-login');
+        console.error('[AUTH] Authentication error - user needs to re-login');
         // Could dispatch an event here for the app to handle
         window.dispatchEvent(new CustomEvent('datastore:auth-error', { detail: error }));
       }
@@ -172,7 +172,7 @@ export function configureDataStore(): void {
     maxRecordsToSync: 10000,
   });
 
-  console.log('✅ DataStore configured with conflict resolution');
+  console.log('[OK] DataStore configured with conflict resolution');
 }
 
 /**
@@ -181,14 +181,14 @@ export function configureDataStore(): void {
  */
 export async function initializeDataStore(): Promise<void> {
   if (!currentNurseId || !currentTenantId) {
-    console.warn('⚠️ User context not set, DataStore may sync all data');
+    console.warn('[WARN] User context not set, DataStore may sync all data');
   }
   
   configureDataStore();
   
   // Start DataStore
   await DataStore.start();
-  console.log('🚀 DataStore started');
+  console.log('[OK] DataStore started');
 }
 
 /**
@@ -198,7 +198,7 @@ export async function initializeDataStore(): Promise<void> {
 export async function clearDataStore(): Promise<void> {
   await DataStore.clear();
   clearUserContext();
-  console.log('🧹 DataStore cleared');
+  console.log('[OK] DataStore cleared');
 }
 
 /**
@@ -207,5 +207,5 @@ export async function clearDataStore(): Promise<void> {
  */
 export async function stopDataStore(): Promise<void> {
   await DataStore.stop();
-  console.log('⏸️ DataStore stopped');
+  console.log('[OK] DataStore stopped');
 }

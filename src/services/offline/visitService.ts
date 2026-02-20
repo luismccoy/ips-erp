@@ -517,7 +517,7 @@ async function executeVisitMutation(mutation: PendingMutation): Promise<Mutation
  */
 export function initializeVisitService(): void {
   registerExecutor('Visit', executeVisitMutation);
-  console.log('✅ Visit service initialized');
+  console.log('[OK] Visit service initialized');
 }
 
 /**
@@ -526,7 +526,7 @@ export function initializeVisitService(): void {
 export function clearVisitCache(): void {
   visitCache.clear();
   visitListeners.clear();
-  console.log('🧹 Visit cache cleared');
+  console.log('[DATA] Visit cache cleared');
 }
 
 /**
@@ -543,5 +543,5 @@ export function populateVisitCache(visits: Visit[]): void {
     };
     visitCache.set(visit.id, offlineVisit);
   }
-  console.log(`📥 Populated visit cache with ${visits.length} visits`);
+  console.log(`[DATA] Populated visit cache with ${visits.length} visits`);
 }

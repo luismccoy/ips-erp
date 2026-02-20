@@ -34,14 +34,14 @@ export function isDemoMode(): boolean {
 export function enableDemoMode(): void {
     if (typeof window !== 'undefined') {
         sessionStorage.setItem(STORAGE_KEYS.DEMO_MODE, 'true');
-        console.log('🎭 Demo Mode Enabled - Using sample data');
+        console.log('[APP] Demo Mode Enabled - Using sample data');
     }
 }
 
 export function disableDemoMode(): void {
     if (typeof window !== 'undefined') {
         sessionStorage.removeItem(STORAGE_KEYS.DEMO_MODE);
-        console.log('🔐 Demo Mode Disabled - Using real backend');
+        console.log('[APP] Demo Mode Disabled - Using real backend');
     }
 }
 

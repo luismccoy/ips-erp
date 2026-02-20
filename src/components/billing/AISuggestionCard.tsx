@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, Info, XCircle, X, Check } from 'lucide-react';
+import { Warning, Info, XCircle, X, Check } from '@phosphor-icons/react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
@@ -41,7 +41,7 @@ export const AISuggestionCard: React.FC<AISuggestionCardProps> = ({
             label: 'Error',
         },
         warning: {
-            icon: AlertTriangle,
+            icon: Warning,
             badgeVariant: 'warning' as const,
             borderColor: 'border-amber-200',
             bgColor: 'bg-amber-50',

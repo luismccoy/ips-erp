@@ -11,7 +11,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { motion } from 'framer-motion';
-import { Navigation, Locate, Loader2, Route, Clock, MapPin } from 'lucide-react';
+import { NavigationArrow, Crosshair, CircleNotch, Path, Clock, MapPin } from '@phosphor-icons/react';
 import type { ShiftWithVisit } from './types';
 
 // Import Leaflet CSS
@@ -333,12 +333,12 @@ export function RouteMap({
         >
           {isOptimizing ? (
             <>
-              <Loader2 size={16} className="animate-spin" />
+              <CircleNotch size={16} className="animate-spin" />
               <span>Optimizando...</span>
             </>
           ) : (
             <>
-              <Route size={16} />
+              <Path size={16} />
               <span>Optimizar Ruta</span>
             </>
           )}
@@ -351,7 +351,7 @@ export function RouteMap({
           className="flex items-center justify-center gap-2 px-4 py-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium rounded-xl text-sm transition-colors disabled:opacity-50 min-h-[48px] touch-manipulation"
           aria-label="Centrar en mi ubicación"
         >
-          <Locate size={16} />
+          <Crosshair size={16} />
         </motion.button>
       </div>
 
@@ -365,7 +365,7 @@ export function RouteMap({
             </span>
           </div>
           <div className="flex items-center gap-1.5 text-blue-600">
-            <Navigation size={14} />
+            <NavigationArrow size={14} />
             <span>
               {optimizedStops.reduce((sum, s) => sum + (s.distanceKm || 0), 0).toFixed(1)} km
             </span>

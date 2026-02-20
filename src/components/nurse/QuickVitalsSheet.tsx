@@ -8,7 +8,8 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
-import { X, Activity, Minus, Plus } from 'lucide-react';
+import { X, Minus, Plus } from '@phosphor-icons/react';
+import { ActivityIcon } from '../ui/icons';
 import type { VitalsData } from '../../types/workflow';
 
 export interface QuickVitalsSheetProps {
@@ -188,7 +189,7 @@ export function QuickVitalsSheet({
             {/* Header */}
             <div className="flex items-center justify-between px-5 pb-3">
               <div className="flex items-center gap-2">
-                <Activity size={18} className="text-blue-600" />
+                <ActivityIcon size={18} className="text-blue-600" />
                 <div>
                   <h3 className="text-base font-bold text-slate-900">Signos Vitales</h3>
                   <p className="text-xs text-slate-500">{patientName}</p>

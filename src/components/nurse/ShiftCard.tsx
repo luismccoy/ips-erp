@@ -1,5 +1,6 @@
 import { memo } from 'react';
-import { AlertCircle, CloudOff, HeartPulse } from 'lucide-react';
+import { WarningCircle, CloudSlash } from '@phosphor-icons/react';
+import { HeartPulseIcon } from '../ui/icons';
 import { SyncCloudIcon } from '../SyncStatusBadge';
 import { DocumentationButton } from './DocumentationButton';
 import { VisitStatusBadge } from './VisitStatusBadge';
@@ -91,13 +92,13 @@ const ShiftCard = memo(({
                 {/* Sync Status Messages - Improved visibility */}
                 {visitSyncStatus === 'pending' && (
                     <div className="mt-2 text-xs text-yellow-400 flex items-center gap-1.5 bg-yellow-500/10 px-2 py-1.5 rounded relative z-20">
-                        <CloudOff size={12} />
+                        <CloudSlash size={12} />
                         <span>Se sincronizará cuando haya conexión</span>
                     </div>
                 )}
                 {visitSyncStatus === 'error' && (
                     <div className="mt-2 text-xs text-red-400 flex items-center gap-1.5 bg-red-500/10 px-2 py-1.5 rounded relative z-20">
-                        <AlertCircle size={12} />
+                        <WarningCircle size={12} />
                         <span>Error al sincronizar - toque para reintentar</span>
                     </div>
                 )}
@@ -132,7 +133,7 @@ const ShiftCard = memo(({
                                     : 'bg-pink-600/20 border border-pink-500/30 text-pink-400 hover:bg-pink-600/30'
                                 }`}
                         >
-                            <HeartPulse size={16} />
+                            <HeartPulseIcon size={16} />
                             <span className="whitespace-nowrap">Valoración Clínica</span>
                             {isOffline && <span className="text-[10px] ml-1">(offline)</span>}
                         </button>

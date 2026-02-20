@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import {
-    Save, X, Shield, Mail, User, Stethoscope,
-    AlertTriangle, ExternalLink, Briefcase
-} from 'lucide-react';
+    FloppyDisk, X, Shield, Envelope, User,
+    Warning, ArrowSquareOut, Briefcase
+} from '@phosphor-icons/react';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import type { Nurse } from '../../../types';
 
@@ -64,7 +64,7 @@ export function StaffForm({ initialData, onSubmit, onCancel, isLoading }: StaffF
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
             {!initialData && (
                 <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 flex items-start gap-3">
-                    <AlertTriangle className="text-amber-600 shrink-0 mt-0.5" size={18} />
+                    <Warning className="text-amber-600 shrink-0 mt-0.5" size={18} />
                     <div className="text-sm text-amber-900">
                         <p className="font-bold mb-1">AWS Cognito Requirement</p>
                         <p className="mb-2">Creating a staff member here adds them to the database but <strong>does NOT create a login account</strong>.</p>
@@ -74,7 +74,7 @@ export function StaffForm({ initialData, onSubmit, onCancel, isLoading }: StaffF
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-800 font-bold underline"
                         >
-                            Open Cognito Console <ExternalLink size={12} />
+                            Open Cognito Console <ArrowSquareOut size={12} />
                         </a>
                     </div>
                 </div>
@@ -110,7 +110,7 @@ export function StaffForm({ initialData, onSubmit, onCancel, isLoading }: StaffF
                     <div className="space-y-2">
                         <label className="text-xs font-bold text-slate-500 uppercase">Email Address</label>
                         <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                            <Envelope className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                             <input
                                 required
                                 type="email"
@@ -198,7 +198,7 @@ export function StaffForm({ initialData, onSubmit, onCancel, isLoading }: StaffF
                     disabled={isLoading}
                     className="px-5 py-2.5 bg-[#2563eb] text-white font-bold rounded-xl hover:bg-blue-600 transition-colors flex items-center gap-2 disabled:opacity-50"
                 >
-                    {isLoading ? <LoadingSpinner size="sm" /> : <Save size={18} />}
+                    {isLoading ? <LoadingSpinner size="sm" /> : <FloppyDisk size={18} />}
                     {initialData ? 'Guardar Cambios' : 'Crear Personal'}
                 </button>
             </div>

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    ChevronDown, ChevronUp, CheckCircle, Circle,
-    MapPin, FileText, Stethoscope, Pill, ListChecks, Activity, AlertTriangle
-} from 'lucide-react';
+    CaretDown, CaretUp, CheckCircle, Circle,
+    MapPin, FileText, ListChecks, Warning
+} from '@phosphor-icons/react';
+import { StethoscopeIcon, PillIcon, ActivityIcon } from './ui/icons';
 import { client, MOCK_USER } from '../amplify-utils';
 import { usePagination } from '../hooks/usePagination';
 import { type Patient, type Medication, type Task } from '../types';
@@ -36,7 +37,7 @@ function Section({ title, icon, defaultOpen = true, children, actions }: {
                 </div>
                 <div className="flex items-center gap-2">
                     {actions && <div onClick={e => e.stopPropagation()}>{actions}</div>}
-                    {open ? <ChevronUp size={16} className="text-slate-400" /> : <ChevronDown size={16} className="text-slate-400" />}
+                    {open ? <CaretUp size={16} className="text-slate-400" /> : <CaretDown size={16} className="text-slate-400" />}
                 </div>
             </button>
             <AnimatePresence initial={false}>
@@ -230,7 +231,7 @@ export const PatientDashboard: React.FC = () => {
                         delay={0}
                     />
                     <MetricCard
-                        icon={<Pill size={18} />}
+                        icon={<PillIcon size={18} />}
                         value={activeMeds}
                         label="Medicamentos"
                         trendDirection="neutral"
@@ -238,7 +239,7 @@ export const PatientDashboard: React.FC = () => {
                         delay={0.05}
                     />
                     <MetricCard
-                        icon={<Activity size={18} />}
+                        icon={<ActivityIcon size={18} />}
                         value={medications.length}
                         label="Total Kardex"
                         trendDirection="neutral"
@@ -246,7 +247,7 @@ export const PatientDashboard: React.FC = () => {
                         delay={0.1}
                     />
                     <MetricCard
-                        icon={<AlertTriangle size={18} />}
+                        icon={<Warning size={18} />}
                         value={deteriorationAnalysis?.overallRiskLevel || '—'}
                         label="Riesgo"
                         trendDirection={deteriorationAnalysis?.hasRisk ? 'down' : 'neutral'}
@@ -256,7 +257,7 @@ export const PatientDashboard: React.FC = () => {
                 </div>
 
                 {/* Medications Section */}
-                <Section title="Digital Kardex (Medicamentos)" icon={<Pill size={18} />}>
+                <Section title="Digital Kardex (Medicamentos)" icon={<PillIcon size={18} />}>
                     {medications.length === 0 ? (
                         <p className="text-sm text-slate-400 text-center py-6">No hay medicamentos registrados.</p>
                     ) : (
@@ -315,7 +316,7 @@ export const PatientDashboard: React.FC = () => {
                 {/* Clinical Assessments Section */}
                 <Section
                     title="Evaluaciones Clínicas"
-                    icon={<Stethoscope size={18} />}
+                    icon={<StethoscopeIcon size={18} />}
                     actions={
                         <div className="flex gap-2" onClick={e => e.stopPropagation()}>
                             <Button
@@ -323,7 +324,7 @@ export const PatientDashboard: React.FC = () => {
                                 size="sm"
                                 onClick={handleAnalyzeDeteriorationRisk}
                                 isLoading={isAnalyzing}
-                                icon={<AlertTriangle size={14} />}
+                                icon={<Warning size={14} />}
                             >
                                 Analizar Riesgo
                             </Button>

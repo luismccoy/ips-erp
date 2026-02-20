@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Heart, Thermometer, Scale, Activity, Droplets, Wind } from 'lucide-react';
+import { HeartIcon, ThermometerIcon, ScaleIcon, ActivityIcon, DropletsIcon, RespiratoryIcon } from './ui/icons';
 import type { KardexData, VitalsData, MedicationAdminData, TaskCompletionData } from '../types/workflow';
 
 interface KardexFormProps {
@@ -125,7 +125,7 @@ export const KardexForm: React.FC<KardexFormProps> = ({
       {/* ── Section 2: Signos Vitales ── */}
       <div>
         <h3 className="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-2">
-          <Heart size={16} className="text-red-500" />
+          <HeartIcon size={16} className="text-red-500" />
           Signos Vitales
           {vitalsErrors.length > 0 && (
             <span className="text-[11px] text-red-500 font-normal ml-2">— Complete todos los campos requeridos</span>
@@ -139,7 +139,7 @@ export const KardexForm: React.FC<KardexFormProps> = ({
             onChange={(v) => updateVital('sys', v)}
             min={60}
             max={250}
-            icon={Activity}
+            icon={ActivityIcon}
             hasError={vitalsErrors.includes('sys')}
             disabled={disabled}
           />
@@ -150,7 +150,7 @@ export const KardexForm: React.FC<KardexFormProps> = ({
             onChange={(v) => updateVital('dia', v)}
             min={30}
             max={160}
-            icon={Activity}
+            icon={ActivityIcon}
             hasError={vitalsErrors.includes('dia')}
             disabled={disabled}
           />
@@ -161,7 +161,7 @@ export const KardexForm: React.FC<KardexFormProps> = ({
             onChange={(v) => updateVital('spo2', v)}
             min={50}
             max={100}
-            icon={Droplets}
+            icon={DropletsIcon}
             hasError={vitalsErrors.includes('spo2')}
             disabled={disabled}
           />
@@ -172,7 +172,7 @@ export const KardexForm: React.FC<KardexFormProps> = ({
             onChange={(v) => updateVital('hr', v)}
             min={30}
             max={220}
-            icon={Heart}
+            icon={HeartIcon}
             hasError={vitalsErrors.includes('hr')}
             disabled={disabled}
           />
@@ -184,7 +184,7 @@ export const KardexForm: React.FC<KardexFormProps> = ({
             min={34}
             max={42}
             step={0.1}
-            icon={Thermometer}
+            icon={ThermometerIcon}
             disabled={disabled}
           />
           <VitalInput
@@ -195,7 +195,7 @@ export const KardexForm: React.FC<KardexFormProps> = ({
             min={20}
             max={200}
             step={0.5}
-            icon={Scale}
+            icon={ScaleIcon}
             disabled={disabled}
           />
         </div>

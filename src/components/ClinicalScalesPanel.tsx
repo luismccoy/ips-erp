@@ -16,11 +16,12 @@
  */
 
 import { useState, useEffect } from 'react';
-import { 
-  Activity, AlertTriangle, Brain, Heart, Shield, 
-  TrendingDown, TrendingUp, Minus, Clock, User,
-  ChevronDown, ChevronUp, FileText, BarChart3
-} from 'lucide-react';
+import {
+  Warning, Shield,
+  TrendDown, TrendUp, Minus, Clock, User,
+  CaretDown, CaretUp, FileText, ChartBar
+} from '@phosphor-icons/react';
+import { ActivityIcon, BrainIcon, HeartIcon } from './ui/icons';
 import { AssessmentTrendChart } from './AssessmentTrendChart';
 import { client } from '../amplify-utils';
 import type { 
@@ -139,7 +140,7 @@ function ScaleCard({ title, icon, score, maxScore, riskLevel, details, compact }
           <RiskBadge level={riskLevel} />
           {details && (
             <button className="p-1 text-gray-400 hover:text-gray-600">
-              {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              {expanded ? <CaretUp size={16} /> : <CaretDown size={16} />}
             </button>
           )}
         </div>
@@ -168,7 +169,7 @@ function AlertBanner({ alerts }: { alerts: AssessmentAlert[] }) {
       {criticalAlerts.length > 0 && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-3">
           <div className="flex items-start gap-2">
-            <AlertTriangle className="text-red-600 flex-shrink-0 mt-0.5" size={18} />
+            <Warning className="text-red-600 flex-shrink-0 mt-0.5" size={18} />
             <div>
               <h4 className="font-semibold text-red-800">Alertas Críticas</h4>
               <ul className="mt-1 space-y-1">
@@ -183,7 +184,7 @@ function AlertBanner({ alerts }: { alerts: AssessmentAlert[] }) {
       {warningAlerts.length > 0 && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
           <div className="flex items-start gap-2">
-            <AlertTriangle className="text-yellow-600 flex-shrink-0 mt-0.5" size={18} />
+            <Warning className="text-yellow-600 flex-shrink-0 mt-0.5" size={18} />
             <div>
               <h4 className="font-semibold text-yellow-800">Advertencias</h4>
               <ul className="mt-1 space-y-1">
@@ -340,7 +341,7 @@ export function ClinicalScalesPanel({
                   activeView === 'trends' ? 'bg-white shadow text-gray-900' : 'text-gray-600'
                 }`}
               >
-                <BarChart3 size={14} />
+                <ChartBar size={14} />
                 Tendencias
               </button>
             </div>
@@ -352,14 +353,14 @@ export function ClinicalScalesPanel({
                 disabled={selectedIndex >= assessments.length - 1}
                 className="p-1 rounded hover:bg-gray-100 disabled:opacity-50"
               >
-                <TrendingDown size={18} />
+                <TrendDown size={18} />
               </button>
               <button
                 onClick={() => setSelectedIndex(Math.max(selectedIndex - 1, 0))}
                 disabled={selectedIndex === 0}
                 className="p-1 rounded hover:bg-gray-100 disabled:opacity-50"
               >
-                <TrendingUp size={18} />
+                <TrendUp size={18} />
               </button>
             </>
           )}
@@ -384,7 +385,7 @@ export function ClinicalScalesPanel({
         {currentAssessment.glasgowScore && (
           <ScaleCard
             title="Glasgow (GCS)"
-            icon={<Brain size={20} />}
+            icon={<BrainIcon size={20} />}
             score={currentAssessment.glasgowScore.total}
             maxScore={15}
             riskLevel={glasgowRisk}
@@ -412,7 +413,7 @@ export function ClinicalScalesPanel({
         {currentAssessment.painScore !== null && currentAssessment.painScore !== undefined && (
           <ScaleCard
             title="Dolor (EVA)"
-            icon={<Activity size={20} />}
+            icon={<ActivityIcon size={20} />}
             score={currentAssessment.painScore}
             maxScore={10}
             riskLevel={painRisk}
@@ -464,7 +465,7 @@ export function ClinicalScalesPanel({
         {currentAssessment.morseScore && (
           <ScaleCard
             title="Morse (Caídas)"
-            icon={<AlertTriangle size={20} />}
+            icon={<Warning size={20} />}
             score={currentAssessment.morseScore.total}
             maxScore={125}
             riskLevel={morseRisk}
@@ -476,7 +477,7 @@ export function ClinicalScalesPanel({
         {currentAssessment.newsScore && (
           <ScaleCard
             title="NEWS (Alerta Temprana)"
-            icon={<Heart size={20} />}
+            icon={<HeartIcon size={20} />}
             score={currentAssessment.newsScore.total}
             maxScore={20}
             riskLevel={newsRisk}

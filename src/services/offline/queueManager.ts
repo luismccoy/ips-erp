@@ -116,7 +116,7 @@ function notifyListeners(): void {
  */
 export function initializeQueueManager(): void {
   mutationQueue = loadQueue();
-  console.log(`📋 Queue manager initialized with ${mutationQueue.length} pending mutations`);
+  console.log(`[INFO] Queue manager initialized with ${mutationQueue.length} pending mutations`);
   notifyListeners();
 }
 
@@ -162,7 +162,7 @@ export function enqueueMutation<T>(
   persistQueue();
   notifyListeners();
   
-  console.log(`📝 Queued ${operation} for ${modelName}:`, mutation.id);
+  console.log(`[QUEUE] Queued ${operation} for ${modelName}:`, mutation.id);
   
   return mutation.id;
 }
@@ -185,7 +185,7 @@ export function dequeueMutation(mutationId: string): boolean {
     retryTimeouts.delete(mutationId);
   }
   
-  console.log(`✅ Dequeued mutation:`, mutationId);
+  console.log(`[OK] Dequeued mutation:`, mutationId);
   return true;
 }
 
@@ -203,7 +203,7 @@ export function markMutationRetry(mutationId: string, error: Error): void {
   persistQueue();
   notifyListeners();
   
-  console.warn(`⚠️ Mutation retry ${mutation.retryCount}/${MAX_RETRY_COUNT}:`, mutationId, error.message);
+  console.warn(`[WARN] Mutation retry ${mutation.retryCount}/${MAX_RETRY_COUNT}:`, mutationId, error.message);
 }
 
 /**
@@ -285,7 +285,7 @@ export function clearQueue(): void {
   persistQueue();
   notifyListeners();
   
-  console.log('🧹 Mutation queue cleared');
+  console.log('[QUEUE] Mutation queue cleared');
 }
 
 /**
@@ -297,7 +297,7 @@ export function clearFailedMutations(): number {
   persistQueue();
   notifyListeners();
   
-  console.log(`🧹 Cleared ${failedCount} failed mutations`);
+  console.log(`[QUEUE] Cleared ${failedCount} failed mutations`);
   return failedCount;
 }
 
@@ -316,7 +316,7 @@ const executors = new Map<OfflineModelName, MutationExecutor>();
  */
 export function registerExecutor(modelName: OfflineModelName, executor: MutationExecutor): void {
   executors.set(modelName, executor);
-  console.log(`📝 Registered executor for ${modelName}`);
+  console.log(`[QUEUE] Registered executor for ${modelName}`);
 }
 
 /**
@@ -356,7 +356,7 @@ async function processMutation(mutation: PendingMutation): Promise<boolean> {
       
       // Schedule retry with backoff
       const delay = calculateRetryDelay(mutation.retryCount);
-      console.log(`⏰ Scheduling retry for ${mutation.id} in ${delay}ms`);
+      console.log(`[SYNC] Scheduling retry for ${mutation.id} in ${delay}ms`);
       
       const timeout = setTimeout(() => {
         retryTimeouts.delete(mutation.id);
@@ -387,12 +387,12 @@ export async function processQueue(): Promise<{
   failed: number;
 }> {
   if (isProcessing) {
-    console.log('⏳ Queue processing already in progress');
+    console.log('[PAUSE] Queue processing already in progress');
     return { processed: 0, succeeded: 0, failed: 0 };
   }
   
   if (!navigator.onLine) {
-    console.log('📴 Offline - skipping queue processing');
+    console.log('[SYNC] Offline - skipping queue processing');
     return { processed: 0, succeeded: 0, failed: 0 };
   }
   
@@ -404,7 +404,7 @@ export async function processQueue(): Promise<{
   
   try {
     const retryable = getRetryableMutations();
-    console.log(`🔄 Processing ${retryable.length} pending mutations`);
+    console.log(`[SYNC] Processing ${retryable.length} pending mutations`);
     
     for (const mutation of retryable) {
       processed++;
@@ -417,7 +417,7 @@ export async function processQueue(): Promise<{
       }
     }
     
-    console.log(`✅ Queue processing complete: ${succeeded}/${processed} succeeded`);
+    console.log(`[OK] Queue processing complete: ${succeeded}/${processed} succeeded`);
   } finally {
     isProcessing = false;
   }
@@ -441,7 +441,7 @@ export function isQueueProcessing(): boolean {
  */
 export function setupNetworkListener(): () => void {
   const handleOnline = () => {
-    console.log('🌐 Network online - processing mutation queue');
+    console.log('[SYNC] Network online - processing mutation queue');
     // Small delay to allow network to stabilize
     setTimeout(() => {
       processQueue();
@@ -472,5 +472,5 @@ export function cleanupQueueManager(): void {
   
   isProcessing = false;
   
-  console.log('🧹 Queue manager cleaned up');
+  console.log('[QUEUE] Queue manager cleaned up');
 }

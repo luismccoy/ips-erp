@@ -663,7 +663,7 @@ export function cleanupOldAssessments(): number {
   }
   
   if (removedCount > 0) {
-    console.log(`🧹 Cleaned up ${removedCount} old assessment records`);
+    console.log(`[DATA] Cleaned up ${removedCount} old assessment records`);
   }
   
   return removedCount;
@@ -678,7 +678,7 @@ export function cleanupOldAssessments(): number {
  */
 export function initializeAssessmentService(): void {
   registerExecutor('PatientAssessment', executeAssessmentMutation);
-  console.log('✅ Assessment service initialized');
+  console.log('[OK] Assessment service initialized');
 }
 
 /**
@@ -688,7 +688,7 @@ export function clearAssessmentCache(): void {
   assessmentCache.clear();
   assessmentsByPatient.clear();
   assessmentListeners.clear();
-  console.log('🧹 Assessment cache cleared');
+  console.log('[DATA] Assessment cache cleared');
 }
 
 /**
@@ -705,5 +705,5 @@ export function populateAssessmentCache(assessments: PatientAssessment[]): void 
     assessmentCache.set(a.id, offlineAssessment);
     indexByPatient(offlineAssessment);
   }
-  console.log(`📥 Populated assessment cache with ${assessments.length} records`);
+  console.log(`[DATA] Populated assessment cache with ${assessments.length} records`);
 }

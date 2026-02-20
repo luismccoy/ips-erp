@@ -37,7 +37,9 @@
 
 import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { Activity, LogOut, FileText, Edit3, Clock, CheckCircle, XCircle, AlertCircle, FileCheck, HeartPulse, CloudOff, ChevronRight, ArrowLeft, Calendar, BarChart3, MapPin } from 'lucide-react';
+import { SignOut, FileText, PencilSimple, Clock, CheckCircle, XCircle, WarningCircle, CloudSlash, CaretRight, ArrowLeft, CalendarBlank, ChartBar, MapPin } from '@phosphor-icons/react';
+import { ActivityIcon, HeartPulseIcon } from './ui/icons';
+import type { AppIcon } from './ui/icons';
 import { client, isUsingRealBackend } from '../amplify-utils';
 import { createVisitDraft } from '../api/workflow-api';
 import { usePagination } from '../hooks/usePagination';
@@ -184,7 +186,7 @@ const VisitStatusBadge: React.FC<VisitStatusBadgeProps> = ({ status, rejectionRe
                     animate={{ opacity: 1, height: 'auto' }}
                     className="text-sm text-red-600 mt-2 flex items-start gap-2 p-3 bg-red-50 rounded-lg border border-red-100"
                 >
-                    <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
+                    <WarningCircle size={16} className="mt-0.5 flex-shrink-0" />
                     <span>{rejectionReason}</span>
                 </motion.p>
             )}
@@ -220,7 +222,7 @@ const DocumentationButton: React.FC<DocumentationButtonProps> = ({
             <Button
                 variant="success"
                 size="lg"
-                icon={<FileCheck size={18} />}
+                icon={<FileText size={18} />}
                 onClick={() => onGeneratePacket(shift.id)}
                 className="mt-4 w-full min-h-[48px]"
             >
@@ -243,7 +245,7 @@ const DocumentationButton: React.FC<DocumentationButtonProps> = ({
             <Button
                 variant={visit.status === 'REJECTED' ? 'cta' : 'primary'}
                 size="lg"
-                icon={<Edit3 size={18} />}
+                icon={<PencilSimple size={18} />}
                 disabled={isLoading}
                 onClick={() => onContinueDocumentation(shift.id)}
                 className="mt-4 w-full min-h-[48px]"
@@ -530,7 +532,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
         try {
             // If offline, the draft is already saved optimistically
             if (isOffline) {
-                console.log('📴 Offline: Visit draft queued for sync');
+                console.log('[SYNC] Offline: Visit draft queued for sync');
                 // Mark as pending sync
                 setShifts(prev => prev.map(s => 
                     s.id === shiftId 
@@ -740,7 +742,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                 <div className="px-4 md:px-6 py-3 md:py-4 flex justify-between items-center">
                     <div className="flex items-center gap-3">
                         <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-sm">
-                            <Activity size={20} className="text-white" />
+                            <ActivityIcon size={20} className="text-white" />
                         </div>
                         <div>
                             <h1 className="font-bold text-lg md:text-xl text-slate-900" data-testid="nurse-dashboard-title">Enfermería</h1>
@@ -765,7 +767,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                             title="Cerrar sesión"
                             data-testid="nurse-logout-button"
                         >
-                            <LogOut size={20} />
+                            <SignOut size={20} />
                         </button>
                     </div>
                 </div>
@@ -794,9 +796,9 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                 <LayoutGroup>
                 <div className="flex gap-1 mb-5 bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm" role="tablist" aria-label="Secciones de enfermería">
                     {([
-                        { id: 'route', label: 'Mi Ruta', icon: <Calendar size={16} /> },
+                        { id: 'route', label: 'Mi Ruta', icon: <CalendarBlank size={16} /> },
                         { id: 'map', label: 'Mapa', icon: <MapPin size={16} /> },
-                        { id: 'stats', label: 'Estadísticas', icon: <BarChart3 size={16} /> },
+                        { id: 'stats', label: 'Estadísticas', icon: <ChartBar size={16} /> },
                     ] as const).map((tab, idx) => (
                         <button
                             key={tab.id}
@@ -837,7 +839,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                 {/* Error Message */}
                 {error && (
                     <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
-                        <AlertCircle size={20} className="text-red-500 mt-0.5 flex-shrink-0" />
+                        <WarningCircle size={20} className="text-red-500 mt-0.5 flex-shrink-0" />
                         <div className="flex-1">
                             <p className="text-sm text-red-700">{error}</p>
                             <button
@@ -917,7 +919,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                 {filteredShifts.length === 0 ? (
                                     <Card className="text-center py-12 px-6">
                                         <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center">
-                                            <Calendar size={28} className="text-slate-400" />
+                                            <CalendarBlank size={28} className="text-slate-400" />
                                         </div>
                                         <h3 className="font-semibold text-slate-700 mb-1">
                                             {showOnlyToday ? 'Sin visitas hoy' : 'Sin turnos asignados'}
@@ -1035,7 +1037,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                                     <SyncCloudIcon syncStatus={visitSyncStatus} size={14} />
                                                                 )}
                                                                 {isActionable && (
-                                                                    <ChevronRight size={16} className="text-blue-400 ml-auto flex-shrink-0" />
+                                                                    <CaretRight size={16} className="text-blue-400 ml-auto flex-shrink-0" />
                                                                 )}
                                                             </div>
                                                         </div>
@@ -1052,13 +1054,13 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                     {/* Offline sync status */}
                                                     {visitSyncStatus === 'pending' && (
                                                         <div className="mt-3 text-xs text-amber-700 flex items-center gap-2 bg-amber-50 px-3 py-2.5 rounded-lg border border-amber-200">
-                                                            <CloudOff size={14} />
+                                                            <CloudSlash size={14} />
                                                             <span>Se sincronizará cuando haya conexión</span>
                                                         </div>
                                                     )}
                                                     {visitSyncStatus === 'error' && (
                                                         <div className="mt-3 text-xs text-red-700 flex items-center gap-2 bg-red-50 px-3 py-2.5 rounded-lg border border-red-200 min-h-[44px] cursor-pointer active:bg-red-100">
-                                                            <AlertCircle size={14} />
+                                                            <WarningCircle size={14} />
                                                             <span>Error al sincronizar - toque para reintentar</span>
                                                         </div>
                                                     )}
@@ -1100,7 +1102,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                                 <Button
                                                                     variant={shift.visit?.status === 'REJECTED' ? 'cta' : 'primary'}
                                                                     size="lg"
-                                                                    icon={<Edit3 size={18} />}
+                                                                    icon={<PencilSimple size={18} />}
                                                                     disabled={isCreatingThisDraft}
                                                                     onClick={() => handleContinueDocumentation(shift.id)}
                                                                     className="w-full min-h-[48px]"
@@ -1125,7 +1127,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                                         <Button
                                                             variant="outline"
                                                             size="lg"
-                                                            icon={<HeartPulse size={18} />}
+                                                            icon={<HeartPulseIcon size={18} />}
                                                             disabled={isOffline}
                                                             onClick={() => {
                                                                 setAssessmentPatient({
@@ -1215,7 +1217,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                 {/* KPI Row with MetricCards */}
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                     <MetricCard
-                                        icon={<Calendar size={18} />}
+                                        icon={<CalendarBlank size={18} />}
                                         value={totalShifts}
                                         label="Total Turnos"
                                         color="blue"

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Plus, Edit, Trash2, Mail } from 'lucide-react';
+import { Plus, PencilSimple, Trash, Envelope } from '@phosphor-icons/react';
 import { client, isUsingRealBackend } from '../../amplify-utils';
 import type { Nurse } from '../../types';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
@@ -139,7 +139,7 @@ export function StaffPage() {
                         <div>
                             <div className="font-medium text-slate-900">{displayName}</div>
                             <div className="flex items-center gap-1 text-xs text-slate-500">
-                                <Mail size={10} /> {displayEmail}
+                                <Envelope size={10} /> {displayEmail}
                             </div>
                         </div>
                     </div>
@@ -198,14 +198,14 @@ export function StaffPage() {
                         className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                         title="Editar"
                     >
-                        <Edit size={16} />
+                        <PencilSimple size={16} />
                     </button>
                     <button
                         onClick={(e) => { e.stopPropagation(); handleDeleteClick(nurse); }}
                         className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         title="Eliminar"
                     >
-                        <Trash2 size={16} />
+                        <Trash size={16} />
                     </button>
                 </div>
             ),

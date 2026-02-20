@@ -14,7 +14,7 @@
  * @see docs/OFFLINE_SYNC_SPEC.md - Section 8.1: Global Offline Banner
  */
 
-import { Wifi, WifiOff, Cloud, Loader2 } from 'lucide-react';
+import { WifiHigh, WifiSlash, Cloud, CircleNotch } from '@phosphor-icons/react';
 import { useNetworkStatus } from '../../hooks/useNetworkStatus';
 import { useSyncStatus } from '../../hooks/useSyncStatus';
 
@@ -31,7 +31,7 @@ export function OfflineBanner() {
     if (isOffline) {
       return {
         bgColor: 'bg-red-600',
-        icon: <WifiOff size={16} />,
+        icon: <WifiSlash size={16} />,
         message: 'Sin conexión - Los cambios se guardan localmente',
       };
     }
@@ -39,7 +39,7 @@ export function OfflineBanner() {
     if (isSlow) {
       return {
         bgColor: 'bg-yellow-600',
-        icon: <Wifi size={16} className="opacity-50" />,
+        icon: <WifiHigh size={16} className="opacity-50" />,
         message: 'Conexión lenta - Modo ahorro de datos activado',
       };
     }
@@ -47,7 +47,7 @@ export function OfflineBanner() {
     if (isSyncing) {
       return {
         bgColor: 'bg-blue-600',
-        icon: <Loader2 size={16} className="animate-spin" />,
+        icon: <CircleNotch size={16} className="animate-spin" />,
         message: `Sincronizando ${pendingCount} cambios...`,
       };
     }

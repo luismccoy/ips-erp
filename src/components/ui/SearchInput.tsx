@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Search, X } from 'lucide-react';
+import { MagnifyingGlass, X } from '@phosphor-icons/react';
 
 interface SearchInputProps {
     placeholder?: string;
@@ -46,7 +46,7 @@ export function SearchInput({
 
     return (
         <div className={`relative ${className}`}>
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <MagnifyingGlass size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
                 type="text"
                 value={value}

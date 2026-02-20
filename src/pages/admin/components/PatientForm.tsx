@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import {
-    User, Save, X, Activity, Calendar, MapPin,
-    Phone, FileText, AlertCircle
-} from 'lucide-react';
+    User, FloppyDisk, X, CalendarBlank, MapPin,
+    Phone, FileText, WarningCircle
+} from '@phosphor-icons/react';
+import { ActivityIcon } from '../../../components/ui/icons';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import type { Patient } from '../../../types';
 
@@ -94,7 +95,7 @@ export function PatientForm({ initialData, onSubmit, onCancel, isLoading }: Pati
     return (
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
             <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start gap-3">
-                <AlertCircle className="text-blue-600 shrink-0 mt-0.5" size={18} />
+                <WarningCircle className="text-blue-600 shrink-0 mt-0.5" size={18} />
                 <div className="text-sm text-blue-800">
                     <p className="font-bold mb-1">Information Note</p>
                     <p>Some fields (Phone, City, Emergency Contact) are currently UI-only and wont be persisted to the database until the backend schema is updated.</p>
@@ -264,7 +265,7 @@ export function PatientForm({ initialData, onSubmit, onCancel, isLoading }: Pati
                     disabled={isLoading}
                     className="px-5 py-2.5 bg-[#2563eb] text-white font-bold rounded-xl hover:bg-blue-600 transition-colors flex items-center gap-2 disabled:opacity-50"
                 >
-                    {isLoading ? <LoadingSpinner size="sm" /> : <Save size={18} />}
+                    {isLoading ? <LoadingSpinner size="sm" /> : <FloppyDisk size={18} />}
                     {initialData ? 'Guardar Cambios' : 'Crear Paciente'}
                 </button>
             </div>

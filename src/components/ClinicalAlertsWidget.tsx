@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { AlertTriangle, ChevronRight, RefreshCw, User } from 'lucide-react';
+import { Warning, CaretRight, ArrowsClockwise, User } from '@phosphor-icons/react';
 import { client } from '../amplify-utils';
 import type { PatientAssessment, AssessmentAlert, AlertLevel } from '../types/clinical-scales';
 import type { Patient } from '../types';
@@ -118,7 +118,7 @@ export function ClinicalAlertsWidget({
       <div className="px-4 py-3 border-b bg-gradient-to-r from-red-50 to-yellow-50">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="text-red-500" size={20} />
+            <Warning className="text-red-500" size={20} />
             <h3 className="font-semibold text-gray-900">Alertas Clínicas</h3>
           </div>
           <button
@@ -126,19 +126,19 @@ export function ClinicalAlertsWidget({
             disabled={refreshing}
             className="p-1 text-gray-400 hover:text-gray-600 rounded"
           >
-            <RefreshCw size={16} className={refreshing ? 'animate-spin' : ''} />
+            <ArrowsClockwise size={16} className={refreshing ? 'animate-spin' : ''} />
           </button>
         </div>
         {(totalCritical > 0 || totalWarning > 0) && (
           <div className="flex items-center gap-3 mt-2 text-sm">
             {totalCritical > 0 && (
               <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-red-100 text-red-800">
-                🔴 {totalCritical} Críticas
+                <span className="w-2 h-2 rounded-full bg-red-500 inline-block" /> {totalCritical} Críticas
               </span>
             )}
             {totalWarning > 0 && (
               <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800">
-                🟡 {totalWarning} Advertencias
+                <span className="w-2 h-2 rounded-full bg-yellow-500 inline-block" /> {totalWarning} Advertencias
               </span>
             )}
           </div>
@@ -193,7 +193,7 @@ export function ClinicalAlertsWidget({
                     </div>
                   </div>
                 </div>
-                <ChevronRight size={16} className="text-gray-400 mt-1" />
+                <CaretRight size={16} className="text-gray-400 mt-1" />
               </div>
             </div>
           ))}
