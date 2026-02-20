@@ -70,9 +70,10 @@ export const handler: Handler = async (event) => {
       throw new Error('Shift not found');
     }
 
-    // 2. Verify shift.status === 'COMPLETED'
-    if (shift.status !== 'COMPLETED') {
-      throw new Error(`Cannot create visit from shift with status: ${shift.status}. Shift must be COMPLETED.`);
+    // 2. Verify shift is in a valid status for starting documentation
+    const allowedStatuses = ['PENDING', 'IN_PROGRESS', 'COMPLETED'];
+    if (!allowedStatuses.includes(shift.status)) {
+      throw new Error(`Cannot create visit from shift with status: ${shift.status}. Shift must be PENDING, IN_PROGRESS, or COMPLETED.`);
     }
 
     // 3. Verify shift.nurseId === caller's nurse record ID (assigned nurse only)
@@ -97,7 +98,13 @@ export const handler: Handler = async (event) => {
     });
 
     if (existingVisitResult.Item) {
-      throw new Error('Visit already exists for this shift. Each shift can have only one visit.');
+      // Idempotent: return existing visit instead of failing
+      return {
+        success: true,
+        visitId: shiftId,
+        status: existingVisitResult.Item.status || 'DRAFT',
+        message: 'Visit already exists for this shift',
+      };
     }
 
     // 6. Create Visit with id=shiftId (enforces 1:1 relationship)
@@ -122,15 +129,23 @@ export const handler: Handler = async (event) => {
       Item: visit
     }));
 
-    // 7. Update Shift.visitId = shiftId
+    // 7. Update Shift: set visitId and transition status to IN_PROGRESS if still PENDING
+    const shiftUpdateExpression = shift.status === 'PENDING'
+      ? 'SET visitId = :visitId, #status = :inProgress, updatedAt = :updatedAt'
+      : 'SET visitId = :visitId, updatedAt = :updatedAt';
+    const shiftUpdateValues: Record<string, any> = {
+      ':visitId': shiftId,
+      ':updatedAt': now,
+    };
+    if (shift.status === 'PENDING') {
+      shiftUpdateValues[':inProgress'] = 'IN_PROGRESS';
+    }
     await docClient.send(new UpdateCommand({
       TableName: SHIFT_TABLE,
       Key: { id: shiftId },
-      UpdateExpression: 'SET visitId = :visitId, updatedAt = :updatedAt',
-      ExpressionAttributeValues: {
-        ':visitId': shiftId,
-        ':updatedAt': now
-      }
+      UpdateExpression: shiftUpdateExpression,
+      ...(shift.status === 'PENDING' ? { ExpressionAttributeNames: { '#status': 'status' } } : {}),
+      ExpressionAttributeValues: shiftUpdateValues,
     }));
 
     // 8. Create AuditLog entry

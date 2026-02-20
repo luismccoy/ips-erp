@@ -271,12 +271,15 @@ export const VisitDocumentationForm: React.FC<VisitDocumentationFormProps> = ({
         setTimeout(() => setSuccessMessage(null), 3000);
       } else {
         // Real backend: update visit record and create/update assessment
+        // kardex is a custom type (KARDEX) — pass as object, not JSON string
+        // vitalsRecorded is a.json() — pass as JSON string
+        // medicationsAdministered/tasksCompleted are custom type arrays — pass as objects
         const updateData = {
           id: shiftId,
-          kardex: JSON.stringify(kardex),
+          kardex,
           vitalsRecorded: JSON.stringify(vitals),
-          medicationsAdministered: JSON.stringify(medications),
-          tasksCompleted: JSON.stringify(tasks),
+          medicationsAdministered: medications,
+          tasksCompleted: tasks,
         };
 
         // Save visit data
