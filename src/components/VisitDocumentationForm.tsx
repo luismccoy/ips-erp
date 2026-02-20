@@ -204,7 +204,10 @@ export const VisitDocumentationForm: React.FC<VisitDocumentationFormProps> = ({
               setVisitId(createResult.data || shiftId);
               setVisitStatus('DRAFT');
             } else {
-              setError(createResult.error || 'Error al crear el borrador de visita');
+              // Fallback: allow local editing even if backend draft creation fails
+              console.warn('Backend draft creation failed, enabling local editing:', createResult.error);
+              setVisitId(shiftId);
+              setVisitStatus('DRAFT');
             }
           }
         }
