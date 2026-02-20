@@ -361,22 +361,76 @@ export const VisitDocumentationForm: React.FC<VisitDocumentationFormProps> = ({
   }, [kardex, vitals, visitAssessment]);
 
   // ============================================================================
+  // Submit for Review
+  // ============================================================================
+
+  const handleSubmitForReview = useCallback(async () => {
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      // Save first
+      await handleSave();
+
+      if (!isUsingRealBackend()) {
+        console.log('[Mock] Submitting visit for review:', shiftId);
+        await simulateNetworkDelay();
+
+        if (mockVisitStore[shiftId]) {
+          mockVisitStore[shiftId].status = 'SUBMITTED';
+        }
+
+        setVisitStatus('SUBMITTED');
+        setSuccessMessage('Visita enviada para revisión exitosamente');
+        setTimeout(() => {
+          onSubmitSuccess();
+        }, 1500);
+      } else {
+        const result = await submitVisit(shiftId);
+        if (result.success) {
+          setVisitStatus('SUBMITTED');
+          setSuccessMessage('Visita enviada para revisión exitosamente');
+          setTimeout(() => {
+            onSubmitSuccess();
+          }, 1500);
+        } else {
+          setError(result.error || 'Error al enviar la visita para revisión');
+        }
+      }
+    } catch (err) {
+      console.error('Error submitting visit:', err);
+      setError('Error al enviar la visita. Por favor intente de nuevo.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [shiftId, validateForm, handleSave, onSubmitSuccess]);
+
+  // ============================================================================
   // Assessment Submit Handler
   // ============================================================================
 
   const handleAssessmentSubmit = async (assessment: Partial<PatientAssessment>) => {
     setVisitAssessment(assessment);
-    
+
     // Auto-save when assessment is updated
     await handleSave();
   };
 
   // ============================================================================
-  // Render Loading State (Keep existing code)
+  // Render Loading State
   // ============================================================================
 
   if (isLoading) {
-    // ... [Keep existing loading state JSX] ...
+    return (
+      <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-slate-600">Cargando documentación...</p>
+        </div>
+      </div>
+    );
   }
 
   // ============================================================================
@@ -413,7 +467,21 @@ export const VisitDocumentationForm: React.FC<VisitDocumentationFormProps> = ({
         </div>
 
         {/* Messages */}
-        {/* ... [Keep existing messages JSX] ... */}
+        {error && (
+          <div className="mx-6 mt-4 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+            {error}
+          </div>
+        )}
+        {successMessage && (
+          <div className="mx-6 mt-4 px-4 py-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700">
+            {successMessage}
+          </div>
+        )}
+        {visitStatus === 'REJECTED' && rejectionReason && (
+          <div className="mx-6 mt-4 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-700">
+            <strong>Rechazada:</strong> {rejectionReason}
+          </div>
+        )}
 
         {/* Form Content with Tabs */}
         <div className="p-6">
@@ -488,7 +556,63 @@ export const VisitDocumentationForm: React.FC<VisitDocumentationFormProps> = ({
         </div>
 
         {/* Footer Actions */}
-        {/* ... [Keep existing footer JSX] ... */}
+        {!isReadOnly && (
+          <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                if (hasUnsavedChanges()) {
+                  if (window.confirm('¿Estás seguro de salir? Los cambios sin guardar se perderán.')) {
+                    onClose();
+                  }
+                } else {
+                  onClose();
+                }
+              }}
+              className="px-4 py-2.5 text-sm text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+            >
+              Cancelar
+            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={isSaving}
+                className="px-5 py-2.5 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors disabled:opacity-50"
+              >
+                {isSaving ? 'Guardando...' : 'Guardar Borrador'}
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmitForReview}
+                disabled={isSubmitting || !isFormComplete()}
+                className="px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? 'Enviando...' : 'Enviar para Revisión'}
+              </button>
+            </div>
+          </div>
+        )}
+        {isReadOnly && (
+          <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
+            <span className={`text-sm font-medium px-3 py-1 rounded-full ${
+              visitStatus === 'APPROVED' ? 'bg-green-100 text-green-700' :
+              visitStatus === 'SUBMITTED' ? 'bg-amber-100 text-amber-700' :
+              'bg-slate-100 text-slate-600'
+            }`}>
+              {visitStatus === 'APPROVED' ? 'Aprobada' :
+               visitStatus === 'SUBMITTED' ? 'En Revisión' :
+               visitStatus}
+            </span>
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-5 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+            >
+              Cerrar
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

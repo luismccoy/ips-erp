@@ -674,16 +674,18 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
     // Computed Values
     // ========================================================================
     
-    // Filter shifts by today if toggle is active
-    const filteredShifts = showOnlyToday 
+    // Filter shifts by today if toggle is active, sorted chronologically
+    const filteredShifts = (showOnlyToday
         ? shifts.filter(shift => isToday(shift.scheduledTime))
-        : shifts;
+        : shifts
+    ).sort((a, b) => new Date(a.scheduledTime).getTime() - new Date(b.scheduledTime).getTime());
 
     const completedShifts = filteredShifts.filter(s => s.status === 'COMPLETED').length;
     const totalShifts = filteredShifts.length;
     const completionRate = totalShifts > 0 ? Math.round((completedShifts / totalShifts) * 100) : 0;
 
-    // Count visits by status
+    // Count shifts/visits by status
+    const pendingShifts = filteredShifts.filter(s => s.status === 'PENDING' || s.status === 'IN_PROGRESS').length;
     const pendingApproval = filteredShifts.filter(s => s.visit?.status === 'SUBMITTED').length;
     const rejectedVisits = filteredShifts.filter(s => s.visit?.status === 'REJECTED').length;
     const approvedVisits = filteredShifts.filter(s => s.visit?.status === 'APPROVED').length;
@@ -1229,7 +1231,7 @@ export default function SimpleNurseApp({ onLogout }: SimpleNurseAppProps) {
                                     />
                                     <MetricCard
                                         icon={<Clock size={18} />}
-                                        value={pendingApproval}
+                                        value={pendingShifts}
                                         label="Pendientes"
                                         color="amber"
                                         delay={0.16}
