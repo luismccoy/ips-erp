@@ -1,6 +1,6 @@
 import type { Schema } from '../../data/resource';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, GetCommand, UpdateCommand, PutCommand, ScanCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, UpdateCommand, PutCommand, ScanCommand } from '@aws-sdk/lib-dynamodb';
 
 const ddbClient = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddbClient);
@@ -25,25 +25,23 @@ type Handler = Schema['submitVisit']['functionHandler'];
 
 export const handler: Handler = async (event) => {
   const { shiftId } = event.arguments;
-  
-  // Extract identity with type assertion (Cognito user pool auth)
-  const identity = event.identity as { sub: string; claims: Record<string, string> };
-  const userId = identity?.sub;
-  const tenantId = identity?.claims?.['custom:tenantId'];
 
-  if (!userId || !tenantId) {
-    throw new Error('Unauthorized: Missing user identity or tenant');
+  // Extract user sub from identity context
+  // Works with both ID tokens and Access tokens
+  const rawIdentity = event.identity as any;
+  const userId = rawIdentity?.sub || rawIdentity?.claims?.sub;
+
+  if (!userId) {
+    console.error('No user sub found in identity:', JSON.stringify(event.identity));
+    throw new Error('Unauthorized: Missing user identity');
   }
 
   try {
     // 0. Look up caller's Nurse record by cognitoSub
-    const callerNurseResult = await docClient.send(new QueryCommand({
+    const callerNurseResult = await docClient.send(new ScanCommand({
       TableName: NURSE_TABLE,
-      IndexName: 'gsi-Tenant.nurses',
-      KeyConditionExpression: 'tenantId = :tenantId',
       FilterExpression: 'cognitoSub = :sub',
       ExpressionAttributeValues: {
-        ':tenantId': tenantId,
         ':sub': userId
       }
     }));
@@ -52,19 +50,14 @@ export const handler: Handler = async (event) => {
       throw new Error('Unauthorized: No nurse record found for this user');
     }
     const nurseRecordId = callerNurse.id;
+    const tenantId = callerNurse.tenantId;
 
     // 1. Query Visit by id=shiftId
     const visitResult = await safeGet({
       TableName: VISIT_TABLE,
       Key: { id: shiftId },
-      ProjectionExpression: 'id, tenantId, nurseId, #status, kardex',
-      ConditionExpression: 'tenantId = :tenantId',
-      ExpressionAttributeNames: { '#status': 'status' },
-      ExpressionAttributeValues: {
-        ':tenantId': tenantId
-      }
     });
-    
+
     const visit = visitResult.Item;
     if (!visit) {
       throw new Error('Visit not found');
@@ -128,8 +121,7 @@ export const handler: Handler = async (event) => {
       }
     }));
 
-    // 8. Scan all nurses in tenant and filter for admins
-    // Note: Using ScanCommand since Nurse table doesn't have GSI on tenantId
+    // 8. Find admins in the same tenant and notify them
     const nursesResult = await docClient.send(new ScanCommand({
       TableName: NURSE_TABLE,
       FilterExpression: 'tenantId = :tenantId AND #role = :role',
@@ -152,7 +144,7 @@ export const handler: Handler = async (event) => {
           tenantId,
           userId: admin.id,
           type: 'VISIT_PENDING_REVIEW',
-          message: `New visit submitted for review by ${visit.nurseId}`,
+          message: `New visit submitted for review by ${callerNurse.name || visit.nurseId}`,
           entityType: 'Visit',
           entityId: shiftId,
           read: false,

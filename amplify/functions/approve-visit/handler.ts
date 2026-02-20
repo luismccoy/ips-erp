@@ -1,19 +1,9 @@
 import type { Schema } from '../../data/resource';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, GetCommand, UpdateCommand, PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, UpdateCommand, PutCommand, ScanCommand } from '@aws-sdk/lib-dynamodb';
 
 const ddbClient = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddbClient);
-const safeGet = async (params: any) => {
-  try {
-    return await docClient.send(new GetCommand(params));
-  } catch (error: any) {
-    if (error?.name === 'ConditionalCheckFailedException') {
-      return { Item: undefined };
-    }
-    throw error;
-  }
-};
 
 // Table names from environment
 const VISIT_TABLE = process.env.VISIT_TABLE_NAME!;
@@ -27,44 +17,42 @@ type Handler = Schema['approveVisit']['functionHandler'];
 export const handler: Handler = async (event) => {
   const { shiftId } = event.arguments;
   
-  // Extract identity with type assertion (Cognito user pool auth)
-  const identity = event.identity as { sub: string; claims: Record<string, string> };
-  const userId = identity?.sub;
-  const tenantId = identity?.claims?.['custom:tenantId'];
+  // Extract user sub from identity context
+  // Works with both ID tokens and Access tokens
+  const rawIdentity = event.identity as any;
+  const userId = rawIdentity?.sub || rawIdentity?.claims?.sub;
 
-  if (!userId || !tenantId) {
-    throw new Error('Unauthorized: Missing user identity or tenant');
+  if (!userId) {
+    console.error('No user sub found in identity:', JSON.stringify(event.identity));
+    throw new Error('Unauthorized: Missing user identity');
   }
 
   try {
-    // 1. Verify user has admin role (lookup by cognitoSub via tenantId GSI)
-    const nurseResult = await docClient.send(new QueryCommand({
+    // 1. Look up caller's record by cognitoSub (Scan since we don't have tenantId from Access tokens)
+    const callerResult = await docClient.send(new ScanCommand({
       TableName: NURSE_TABLE,
-      IndexName: 'gsi-Tenant.nurses',
-      KeyConditionExpression: 'tenantId = :tenantId',
       FilterExpression: 'cognitoSub = :sub',
       ExpressionAttributeValues: {
-        ':tenantId': tenantId,
         ':sub': userId
       }
     }));
-    
-    const nurse = nurseResult.Items?.[0];
-    if (!nurse || nurse.role !== 'ADMIN') {
+    const caller = callerResult.Items?.[0];
+    if (!caller) {
+      throw new Error('Unauthorized: No nurse/admin record found for this user');
+    }
+    const tenantId = caller.tenantId;
+
+    if (caller.role !== 'ADMIN') {
       throw new Error('Unauthorized: Only admins can approve visits');
     }
 
     // 2. Query Visit by id=shiftId
-    const visitResult = await safeGet({
+    const visitResult = await docClient.send(new GetCommand({
       TableName: VISIT_TABLE,
       Key: { id: shiftId },
       ProjectionExpression: 'id, tenantId, #status, nurseId, patientId',
-      ConditionExpression: 'tenantId = :tenantId',
-      ExpressionAttributeNames: { '#status': 'status' },
-      ExpressionAttributeValues: {
-        ':tenantId': tenantId
-      }
-    });
+      ExpressionAttributeNames: { '#status': 'status' }
+    }));
     
     const visit = visitResult.Item;
     if (!visit) {
@@ -140,16 +128,12 @@ export const handler: Handler = async (event) => {
     }));
 
     // 8. Get patient to find family members
-    const patientResult = await safeGet({
+    const patientResult = await docClient.send(new GetCommand({
       TableName: PATIENT_TABLE,
       Key: { id: visit.patientId },
       ProjectionExpression: 'id, tenantId, #name, familyMembers',
-      ConditionExpression: 'tenantId = :tenantId',
-      ExpressionAttributeNames: { '#name': 'name' },
-      ExpressionAttributeValues: {
-        ':tenantId': tenantId
-      }
-    });
+      ExpressionAttributeNames: { '#name': 'name' }
+    }));
 
     const patient = patientResult.Item;
     if (patient && patient.familyMembers && patient.familyMembers.length > 0) {

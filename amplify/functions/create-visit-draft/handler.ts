@@ -1,6 +1,6 @@
 import type { Schema } from '../../data/resource';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, ScanCommand } from '@aws-sdk/lib-dynamodb';
 
 const ddbClient = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddbClient);
@@ -25,25 +25,24 @@ type Handler = Schema['createVisitDraftFromShift']['functionHandler'];
 
 export const handler: Handler = async (event) => {
   const { shiftId } = event.arguments;
-  
-  // Extract identity with type assertion (Cognito user pool auth)
-  const identity = event.identity as { sub: string; claims: Record<string, string> };
-  const userId = identity?.sub;
-  const tenantId = identity?.claims?.['custom:tenantId'];
 
-  if (!userId || !tenantId) {
-    throw new Error('Unauthorized: Missing user identity or tenant');
+  // Extract user sub from identity context
+  // Works with both ID tokens (has claims.sub + custom:tenantId) and Access tokens (has sub only)
+  const rawIdentity = event.identity as any;
+  const userId = rawIdentity?.sub || rawIdentity?.claims?.sub;
+
+  if (!userId) {
+    console.error('No user sub found in identity:', JSON.stringify(event.identity));
+    throw new Error('Unauthorized: Missing user identity');
   }
 
   try {
     // 0. Look up caller's Nurse record by cognitoSub
-    const callerNurseResult = await docClient.send(new QueryCommand({
+    // Scan is used because we can't rely on tenantId from the token (Access tokens don't have custom claims)
+    const callerNurseResult = await docClient.send(new ScanCommand({
       TableName: NURSE_TABLE,
-      IndexName: 'gsi-Tenant.nurses',
-      KeyConditionExpression: 'tenantId = :tenantId',
       FilterExpression: 'cognitoSub = :sub',
       ExpressionAttributeValues: {
-        ':tenantId': tenantId,
         ':sub': userId
       }
     }));
@@ -52,19 +51,14 @@ export const handler: Handler = async (event) => {
       throw new Error('Unauthorized: No nurse record found for this user');
     }
     const nurseRecordId = callerNurse.id;
+    const tenantId = callerNurse.tenantId;
 
     // 1. Query Shift by shiftId
     const shiftResult = await safeGet({
       TableName: SHIFT_TABLE,
       Key: { id: shiftId },
-      ProjectionExpression: 'id, tenantId, #status, nurseId, patientId, scheduledTime, completedAt',
-      ConditionExpression: 'tenantId = :tenantId',
-      ExpressionAttributeNames: { '#status': 'status' },
-      ExpressionAttributeValues: {
-        ':tenantId': tenantId
-      }
     });
-    
+
     const shift = shiftResult.Item;
     if (!shift) {
       throw new Error('Shift not found');
@@ -90,11 +84,6 @@ export const handler: Handler = async (event) => {
     const existingVisitResult = await safeGet({
       TableName: VISIT_TABLE,
       Key: { id: shiftId },
-      ProjectionExpression: 'id, tenantId',
-      ConditionExpression: 'tenantId = :tenantId',
-      ExpressionAttributeValues: {
-        ':tenantId': tenantId
-      }
     });
 
     if (existingVisitResult.Item) {
