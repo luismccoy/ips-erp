@@ -579,6 +579,19 @@ const schema = a.schema({
         .returns(a.json())
         .authorization(allow => [allow.authenticated()])
         .handler(a.handler.function('approve-visit')),
+
+    // Save visit documentation (bypasses auto-generated updateVisit VTL resolver)
+    saveVisitDocumentation: a.mutation()
+        .arguments({
+            shiftId: a.id().required(),
+            kardex: a.json().required(),
+            vitalsRecorded: a.json(),
+            medicationsAdministered: a.json(),
+            tasksCompleted: a.json(),
+        })
+        .returns(a.json())
+        .authorization(allow => [allow.authenticated()])
+        .handler(a.handler.function('save-visit-documentation')),
     
     // ============================================
     // PHASE 19: AWS LOCATION SERVICE - ROUTE OPTIMIZATION

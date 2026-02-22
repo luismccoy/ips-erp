@@ -7,7 +7,7 @@ import { useVoiceRecognition } from '../hooks/useVoiceRecognition';
 import { isUsingRealBackend, client, getUserId, getTenantId } from '../amplify-utils';
 import { KardexForm } from './KardexForm';
 import { AssessmentForm } from './clinical/AssessmentForm';
-import { createVisitDraft, submitVisit, simulateNetworkDelay } from '../api/workflow-api';
+import { createVisitDraft, submitVisit, saveVisitDocumentation, simulateNetworkDelay } from '../api/workflow-api';
 import type {
   VisitDocumentationFormProps,
   KardexData,
@@ -270,35 +270,35 @@ export const VisitDocumentationForm: React.FC<VisitDocumentationFormProps> = ({
         setSuccessMessage('Documentación guardada exitosamente');
         setTimeout(() => setSuccessMessage(null), 3000);
       } else {
-        // Real backend: update visit record and create/update assessment
-        // kardex is a custom type (KARDEX) — pass as object, not JSON string
-        // vitalsRecorded is a.json() — pass as JSON string
-        // medicationsAdministered/tasksCompleted are custom type arrays — pass as objects
-        const updateData = {
-          id: shiftId,
+        // Real backend: save via custom Lambda (bypasses broken auto-generated updateVisit VTL)
+        const saveResult = await saveVisitDocumentation(
+          shiftId,
           kardex,
-          vitalsRecorded: JSON.stringify(vitals),
-          medicationsAdministered: medications,
-          tasksCompleted: tasks,
-        };
+          vitals,
+          medications,
+          tasks
+        );
 
-        // Save visit data
-        const visitResponse = await (client.models as any).Visit?.update(updateData);
+        if (!saveResult.success) {
+          throw new Error(saveResult.error || 'Failed to save visit documentation');
+        }
 
         // Save assessment if it exists
         if (visitAssessment) {
-          const assessmentData = {
-            ...visitAssessment,
-            visitId: shiftId,
-            updatedAt: new Date().toISOString(),
-          };
+          try {
+            const assessmentData = {
+              ...visitAssessment,
+              visitId: shiftId,
+              updatedAt: new Date().toISOString(),
+            };
 
-          if (visitAssessment.id) {
-            // Update existing assessment
-            await client.models.PatientAssessment.update(assessmentData);
-          } else {
-            // Create new assessment
-            await client.models.PatientAssessment.create(assessmentData);
+            if (visitAssessment.id) {
+              await client.models.PatientAssessment.update(assessmentData);
+            } else {
+              await client.models.PatientAssessment.create(assessmentData);
+            }
+          } catch (assessErr) {
+            console.warn('Assessment save failed (non-blocking):', assessErr);
           }
         }
 

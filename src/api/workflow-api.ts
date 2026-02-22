@@ -66,6 +66,16 @@ const rejectVisitMutation = /* GraphQL */ `
 `;
 
 /**
+ * Mutation to save visit documentation (kardex, vitals, medications, tasks).
+ * Bypasses broken auto-generated updateVisit VTL resolver by writing directly to DynamoDB.
+ */
+const saveVisitDocumentationMutation = /* GraphQL */ `
+  mutation SaveVisitDocumentation($shiftId: ID!, $kardex: AWSJSON!, $vitalsRecorded: AWSJSON, $medicationsAdministered: AWSJSON, $tasksCompleted: AWSJSON) {
+    saveVisitDocumentation(shiftId: $shiftId, kardex: $kardex, vitalsRecorded: $vitalsRecorded, medicationsAdministered: $medicationsAdministered, tasksCompleted: $tasksCompleted)
+  }
+`;
+
+/**
  * Query to list approved visit summaries for family members.
  * Returns sanitized visit data without sensitive clinical information.
  */
@@ -433,6 +443,48 @@ export async function listApprovedVisitSummaries(patientId: string): Promise<Lis
       success: false,
       error: extractErrorMessage(error)
     };
+  }
+}
+
+/**
+ * Saves visit documentation (kardex, vitals, medications, tasks) directly to DynamoDB.
+ * Bypasses the broken auto-generated updateVisit VTL resolver.
+ */
+export async function saveVisitDocumentation(
+  shiftId: string,
+  kardex: any,
+  vitalsRecorded: any,
+  medicationsAdministered: any[],
+  tasksCompleted: any[]
+): Promise<WorkflowMutationResponse> {
+  if (!isUsingRealBackend()) {
+    console.log('[Mock] Saving visit documentation for shift:', shiftId);
+    await simulateNetworkDelay();
+    return { success: true, data: 'Documentation saved' };
+  }
+
+  try {
+    const client = generateClient({ authMode: 'userPool' });
+    const response = await client.graphql({
+      query: saveVisitDocumentationMutation,
+      variables: {
+        shiftId,
+        kardex: JSON.stringify(kardex),
+        vitalsRecorded: vitalsRecorded ? JSON.stringify(vitalsRecorded) : null,
+        medicationsAdministered: medicationsAdministered.length > 0 ? JSON.stringify(medicationsAdministered) : null,
+        tasksCompleted: tasksCompleted.length > 0 ? JSON.stringify(tasksCompleted) : null,
+      }
+    });
+
+    const result = (response as any).data?.saveVisitDocumentation;
+    if (result) {
+      return { success: true, data: result };
+    } else {
+      return { success: false, error: 'No response from saveVisitDocumentation mutation' };
+    }
+  } catch (error) {
+    console.error('Error saving visit documentation:', error);
+    return { success: false, error: extractErrorMessage(error) };
   }
 }
 

@@ -16,6 +16,7 @@ import { verifyFamilyAccess } from './functions/verify-family-access/resource';
 import { createNurseValidated } from './functions/create-nurse-validated/resource';
 import { routeOptimizer } from './functions/route-optimizer/resource';
 import { deteriorationDetector } from './functions/deterioration-detector/resource';
+import { saveVisitDocumentation } from './functions/save-visit-documentation/resource';
 
 /**
  * @see https://docs.amplify.aws/react/build-a-backend/
@@ -35,6 +36,7 @@ const backend = defineBackend({
     createNurseValidated,
     routeOptimizer,
     deteriorationDetector,
+    saveVisitDocumentation,
 });
 
 // Grant Bedrock permissions to AI-powered Lambda functions
@@ -115,6 +117,10 @@ backend.submitVisit.resources.lambda.addEnvironment('NURSE_TABLE_NAME', tables['
 backend.submitVisit.resources.lambda.addEnvironment('AUDIT_TABLE_NAME', tables['AuditLog'].tableName);
 backend.submitVisit.resources.lambda.addEnvironment('NOTIFICATION_TABLE_NAME', tables['Notification'].tableName);
 
+// save-visit-documentation: needs Visit, Nurse
+backend.saveVisitDocumentation.resources.lambda.addEnvironment('VISIT_TABLE_NAME', tables['Visit'].tableName);
+backend.saveVisitDocumentation.resources.lambda.addEnvironment('NURSE_TABLE_NAME', tables['Nurse'].tableName);
+
 // create-visit-draft: needs Shift, Visit, AuditLog, Nurse
 backend.createVisitDraft.resources.lambda.addEnvironment('SHIFT_TABLE_NAME', tables['Shift'].tableName);
 backend.createVisitDraft.resources.lambda.addEnvironment('VISIT_TABLE_NAME', tables['Visit'].tableName);
@@ -174,6 +180,7 @@ backend.rejectVisit.resources.lambda.addToRolePolicy(visitWorkflowPolicy);
 backend.submitVisit.resources.lambda.addToRolePolicy(visitWorkflowPolicy);
 backend.createVisitDraft.resources.lambda.addToRolePolicy(visitWorkflowPolicy);
 backend.listApprovedVisitSummaries.resources.lambda.addToRolePolicy(visitWorkflowPolicy);
+backend.saveVisitDocumentation.resources.lambda.addToRolePolicy(visitWorkflowPolicy);
 
 const nurseTablePolicy = new PolicyStatement({
     effect: Effect.ALLOW,
