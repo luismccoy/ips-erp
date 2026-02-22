@@ -607,16 +607,22 @@ test.describe.serial('Production Workflow: Nurse → Admin', () => {
     }
 
     // ── Step 8: Navigate to Pending Reviews ──
-    const reviewsNav = page.locator('text=Revisiones, text=Pendientes, text=Visitas').first();
-    if (await reviewsNav.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await reviewsNav.click();
-      await page.waitForTimeout(3000);
+    // Use the exact sidebar text — "Revisiones Pendientes" is in the CLINICO section
+    const reviewsNav = page.locator('nav >> text=Revisiones Pendientes').first();
+    const reviewsNavAlt = page.locator('text=Revisiones Pendientes').first();
+    const navTarget = await reviewsNav.isVisible({ timeout: 3000 }).catch(() => false) ? reviewsNav : reviewsNavAlt;
+    if (await navTarget.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await navTarget.click();
+      await page.waitForTimeout(5000);
       await snap(page, 'admin-pending-reviews');
+      console.log('  Navigated to Revisiones Pendientes');
+    } else {
+      console.log('  WARNING: Could not find Revisiones Pendientes nav');
     }
 
     // Look for submitted visits in the main content area
-    const pendingVisit = page.locator('text=Pendiente de Revisión, text=SUBMITTED, text=Enviada').first();
-    const hasPending = await pendingVisit.isVisible({ timeout: 5000 }).catch(() => false);
+    const pendingVisit = page.locator('text=Pendiente de Revisión').or(page.locator('text=Enviado')).first();
+    const hasPending = await pendingVisit.isVisible({ timeout: 8000 }).catch(() => false);
     console.log(`  Pending visits found: ${hasPending}`);
 
     if (hasPending) {
