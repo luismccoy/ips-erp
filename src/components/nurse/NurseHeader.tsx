@@ -27,7 +27,7 @@ const NurseHeader = memo(({
     return (
         <header className={`bg-slate-800 p-4 flex justify-between items-center ${(isOffline || isSlow || pendingCount > 0 || isSyncing) ? 'mt-10' : ''}`}>
             <div className="flex items-center gap-2">
-                <ActivityIcon size={24} className="text-[#2563eb]" />
+                <img src="/logo.png" alt="IPS-ERP Logo" className="w-8 h-8 rounded-lg shadow-sm" />
                 <span className="font-black text-lg">IPS ERP</span>
                 {/* Network status dot */}
                 {isOffline && (

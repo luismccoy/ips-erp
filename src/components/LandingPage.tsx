@@ -12,6 +12,7 @@ import { Button } from './ui/Button';
 import { Input } from './ui/Input';
 import { Card, CardContent } from './ui/Card';
 import FeatureSection from './FeatureSection';
+import AIChatWidget from './AIChatWidget';
 
 export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => void, onViewDemo: () => void }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -51,9 +52,7 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
                             </button>
                         </div>
                         <div className="flex items-center gap-2">
-                            <div className="bg-primary text-primary-foreground p-2 rounded-lg shadow-lg shadow-primary/20">
-                                <ActivityIcon className="h-6 w-6" />
-                            </div>
+                            <img src="/logo.png" alt="IPS-ERP Logo" className="w-10 h-10 rounded-xl shadow-lg shadow-blue-500/20" />
                             <span className="font-bold text-xl text-foreground tracking-tight">IPS-ERP</span>
                         </div>
                         <div className="hidden md:flex space-x-8">
@@ -330,7 +329,7 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
             <footer className="bg-slate-950 border-t border-white/5 py-10">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="flex items-center gap-2">
-                        <ActivityIcon className="h-5 w-5 text-blue-500" />
+                        <img src="/logo.png" alt="IPS-ERP Logo" className="w-6 h-6 rounded-md shadow-sm opacity-90" />
                         <span className="font-bold text-white text-sm tracking-wide">IPS-ERP</span>
                     </div>
                     <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
@@ -341,6 +340,9 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
                     </div>
                 </div>
             </footer>
+
+            {/* AI Chatbot Floating Prototype */}
+            <AIChatWidget />
         </div>
     );
 }
