@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Activity, CloudOff, LogOut } from 'lucide-react';
+import { CloudOff, LogOut } from 'lucide-react';
 import { NetworkStatusIndicator } from '../NetworkStatusIndicator';
 import { NotificationBell } from '../NotificationBell';
 import type { NotificationItem } from '../../types/workflow';
@@ -26,8 +26,8 @@ const NurseHeader = memo(({
     return (
         <header className={`bg-slate-800 p-4 flex justify-between items-center ${(isOffline || isSlow || pendingCount > 0 || isSyncing) ? 'mt-10' : ''}`}>
             <div className="flex items-center gap-2">
-                <Activity size={24} className="text-[#2563eb]" />
-                <span className="font-black text-lg">IPS ERP</span>
+                <img src="/logo.png" alt="IPS ERP" className="w-8 h-8 rounded-lg shadow-sm shadow-blue-500/20" />
+                <span className="font-black text-lg text-white">IPS ERP</span>
                 {/* Network status dot */}
                 {isOffline && (
                     <span className="text-xs text-red-400 flex items-center gap-1 ml-2">

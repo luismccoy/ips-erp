@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import { Sparkles, Save, FileText } from 'lucide-react';
+import { Sparkles, Save, FileText, CheckCircle2 } from 'lucide-react';
 import { AISuggestionList } from './AISuggestionCard';
 import { useAISuggestions } from './useAISuggestions';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
@@ -101,7 +101,7 @@ export const BillingFormWithAI: React.FC = () => {
 
         // Check if there are any errors
         const hasErrors = suggestions.some(s => s.severity === 'error');
-        
+
         if (hasErrors) {
             alert('Por favor, corrija los errores antes de guardar.');
             return;
@@ -285,8 +285,8 @@ export const BillingFormWithAI: React.FC = () => {
                 <Card className="border-green-200 bg-green-50">
                     <div className="flex items-center gap-2 text-green-700">
                         <Sparkles className="w-5 h-5" />
-                        <span className="text-sm font-medium">
-                            ✅ No se encontraron problemas. El registro cumple con las validaciones RIPS.
+                        <span className="text-sm font-medium flex items-center gap-1.5">
+                            <CheckCircle2 className="w-4 h-4" /> No se encontraron problemas. El registro cumple con las validaciones RIPS.
                         </span>
                     </div>
                 </Card>

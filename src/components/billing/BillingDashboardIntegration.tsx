@@ -12,7 +12,7 @@
  */
 
 import React from 'react';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, CheckCircle2 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { AISuggestionList } from './AISuggestionCard';
 import { useAISuggestions } from './useAISuggestions';
@@ -110,7 +110,7 @@ export function BillingRowWithValidation({ bill }: { bill: any }) {
                 <p className="font-medium">{bill.patientName}</p>
                 <p className="text-sm text-slate-500">{bill.date}</p>
             </div>
-            
+
             <div className="flex gap-2">
                 <Button
                     size="sm"
@@ -133,13 +133,13 @@ export function BillingRowWithValidation({ bill }: { bill: any }) {
 /**
  * If you prefer to show suggestions in a modal/dialog
  */
-export function BillingValidationModal({ 
-    bill, 
-    isOpen, 
-    onClose 
-}: { 
-    bill: any; 
-    isOpen: boolean; 
+export function BillingValidationModal({
+    bill,
+    isOpen,
+    onClose
+}: {
+    bill: any;
+    isOpen: boolean;
     onClose: () => void;
 }) {
     const {
@@ -165,7 +165,7 @@ export function BillingValidationModal({
                     <h2 className="text-xl font-bold">
                         Validación RIPS - {bill?.patientName}
                     </h2>
-                    <button 
+                    <button
                         onClick={onClose}
                         className="text-slate-400 hover:text-slate-600"
                     >
@@ -180,8 +180,8 @@ export function BillingValidationModal({
                 )}
 
                 {!isValidating && suggestions.length === 0 && (
-                    <div className="text-center py-8 text-green-600">
-                        ✅ No se encontraron problemas
+                    <div className="text-center py-8 text-green-600 flex items-center justify-center gap-2">
+                        <CheckCircle2 className="h-5 w-5" /> No se encontraron problemas
                     </div>
                 )}
 
@@ -250,7 +250,7 @@ export function BillingFormWithInlineSuggestions() {
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                     className="w-full p-2 border rounded"
                 />
-                
+
                 {/* ... more fields ... */}
             </div>
 

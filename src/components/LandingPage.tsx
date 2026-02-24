@@ -19,6 +19,7 @@ import {
     VipSupportIcon
 } from './ui/healthcare-icons';
 import FeatureSection from './FeatureSection';
+import AIChatWidget from './AIChatWidget';
 
 export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => void, onViewDemo: () => void }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -57,30 +58,30 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
                                 {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
                             </button>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <div className="bg-primary text-primary-foreground p-2 rounded-lg shadow-lg shadow-primary/20">
-                                <Activity className="h-6 w-6" />
-                            </div>
+                        <div className="flex items-center gap-3">
+                            <img src="/logo.png" alt="IPS-ERP Logo" className="w-10 h-10 rounded-xl shadow-lg shadow-blue-500/20" />
                             <span className="font-bold text-xl text-foreground tracking-tight">IPS-ERP</span>
                         </div>
-                        <div className="hidden md:flex space-x-8">
-                            <a href="#programa-beta" className="text-sm font-semibold text-primary hover:text-primary/80 transition-colors uppercase tracking-widest">Programa Beta</a>
-                            <a href="#modulos" className="text-sm font-medium hover:text-primary transition-colors">Módulos</a>
-                            <Button variant="ghost" size="sm" onClick={onViewDemo} className="text-sm font-medium hover:text-primary transition-colors" data-testid="family-portal-link">
+                        <div className="hidden md:flex items-center space-x-10">
+                            <a href="#programa-beta" className="text-sm font-bold text-slate-900 hover:text-blue-600 transition-colors tracking-widest uppercase">Programa Beta</a>
+                            <a href="#modulos" className="text-[15px] font-semibold text-slate-600 hover:text-slate-900 transition-colors tracking-wide">Módulos</a>
+                            <button onClick={onViewDemo} className="text-[15px] font-semibold text-slate-600 hover:text-slate-900 transition-colors tracking-wide" data-testid="family-portal-link">
                                 Portal Familiar
-                            </Button>
-                            <a href="#beta" className="text-sm font-medium hover:text-primary transition-colors">Solicitar Acceso</a>
+                            </button>
+                            <a href="#beta" className="text-[15px] font-semibold text-slate-600 hover:text-slate-900 transition-colors tracking-wide">Solicitar Acceso</a>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <Button variant="ghost" onClick={onLogin} className="font-bold text-foreground" data-testid="login-button">
+                        <div className="flex items-center gap-6">
+                            <button onClick={onLogin} className="text-[15px] font-bold text-slate-600 hover:text-slate-900 transition-colors" data-testid="login-button">
                                 Login
-                            </Button>
-                            <Button onClick={onViewDemo} variant="outline" className="font-bold text-foreground hidden md:inline-flex" data-testid="demo-button">
-                                Ver Demo
-                            </Button>
-                            <Button onClick={() => document.getElementById('beta')?.scrollIntoView({ behavior: 'smooth' })} className="rounded-full font-bold shadow-lg shadow-primary/20">
-                                Unirse Beta
-                            </Button>
+                            </button>
+                            <div className="flex items-center gap-3">
+                                <Button onClick={onViewDemo} variant="outline" className="text-sm font-bold text-blue-600 border-2 border-blue-600 hover:bg-blue-50 hidden md:inline-flex h-11 px-7 rounded-lg transition-colors" data-testid="demo-button">
+                                    Ver Demo
+                                </Button>
+                                <Button onClick={() => document.getElementById('beta')?.scrollIntoView({ behavior: 'smooth' })} className="text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20 h-11 px-7 rounded-lg transition-colors border-2 border-transparent">
+                                    Unirse Beta
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -337,7 +338,7 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
             <footer className="bg-slate-950 border-t border-white/5 py-10">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="flex items-center gap-2">
-                        <Activity className="h-5 w-5 text-blue-500" />
+                        <img src="/logo.png" alt="IPS-ERP Logo" className="w-6 h-6 rounded-md shadow-sm opacity-90" />
                         <span className="font-bold text-white text-sm tracking-wide">IPS-ERP</span>
                     </div>
                     <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
@@ -348,6 +349,9 @@ export default function LandingPage({ onLogin, onViewDemo }: { onLogin: () => vo
                     </div>
                 </div>
             </footer>
+
+            {/* AI Chatbot Floating Prototype */}
+            <AIChatWidget />
         </div>
     );
 }

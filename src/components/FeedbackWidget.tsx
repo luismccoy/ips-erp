@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { MessageSquarePlus, X, Send, CheckCircle } from 'lucide-react';
+import { MessageSquarePlus, X, Send, CheckCircle, MessageSquare, Heart, Star, ThumbsUp, HelpCircle, Lightbulb } from 'lucide-react';
 import { client, isDemoMode } from '../amplify-utils';
 
 interface FeedbackData {
@@ -108,7 +108,9 @@ export function FeedbackWidget() {
                         <div className="bg-gradient-to-r from-violet-600 to-indigo-600 p-6 rounded-t-2xl">
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <h2 className="text-xl font-bold text-white">💬 Tu Feedback</h2>
+                                    <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                                        <MessageSquare className="h-5 w-5" /> Tu Feedback
+                                    </h2>
                                     <p className="text-violet-200 text-sm mt-1">
                                         Ayúdanos a mejorar la aplicación
                                     </p>
@@ -126,8 +128,8 @@ export function FeedbackWidget() {
                         {isSubmitted ? (
                             <div className="p-8 text-center">
                                 <CheckCircle className="h-16 w-16 text-emerald-500 mx-auto mb-4" />
-                                <h3 className="text-xl font-bold text-slate-900 mb-2">
-                                    ¡Gracias! 🙏
+                                <h3 className="text-xl font-bold text-slate-900 mb-2 flex items-center justify-center gap-2">
+                                    ¡Gracias! <Heart className="h-5 w-5 text-rose-500" />
                                 </h3>
                                 <p className="text-slate-600">
                                     Tu feedback es muy valioso para nosotros.
@@ -146,11 +148,10 @@ export function FeedbackWidget() {
                                                 key={role}
                                                 type="button"
                                                 onClick={() => setFeedback({ ...feedback, role })}
-                                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                                                    feedback.role === role
+                                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${feedback.role === role
                                                         ? 'bg-violet-600 text-white'
                                                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                                                }`}
+                                                    }`}
                                             >
                                                 {role}
                                             </button>
@@ -169,11 +170,10 @@ export function FeedbackWidget() {
                                                 key={star}
                                                 type="button"
                                                 onClick={() => setFeedback({ ...feedback, rating: star })}
-                                                className={`text-2xl transition-transform hover:scale-125 ${
-                                                    feedback.rating >= star ? 'opacity-100' : 'opacity-30'
-                                                }`}
+                                                className={`text-2xl transition-transform hover:scale-125 ${feedback.rating >= star ? 'opacity-100' : 'opacity-30'
+                                                    }`}
                                             >
-                                                ⭐
+                                                <Star className={`h-8 w-8 transition-colors ${feedback.rating >= star ? 'fill-yellow-400 text-yellow-400' : 'text-slate-300 hover:text-yellow-200'}`} />
                                             </button>
                                         ))}
                                     </div>
@@ -182,7 +182,7 @@ export function FeedbackWidget() {
                                 {/* What they liked */}
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                        ¿Qué te gustó? 👍
+                                        <span className="flex items-center gap-2">¿Qué te gustó? <ThumbsUp className="h-4 w-4 text-emerald-500" /></span>
                                     </label>
                                     <textarea
                                         value={feedback.liked}
@@ -196,7 +196,7 @@ export function FeedbackWidget() {
                                 {/* What confused them */}
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                        ¿Qué te confundió? 🤔
+                                        <span className="flex items-center gap-2">¿Qué te confundió? <HelpCircle className="h-4 w-4 text-amber-500" /></span>
                                     </label>
                                     <textarea
                                         value={feedback.confused}
@@ -210,7 +210,7 @@ export function FeedbackWidget() {
                                 {/* Suggestions */}
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                        ¿Qué agregarías o cambiarías? 💡
+                                        <span className="flex items-center gap-2">¿Qué agregarías o cambiarías? <Lightbulb className="h-4 w-4 text-blue-500" /></span>
                                     </label>
                                     <textarea
                                         value={feedback.suggestions}

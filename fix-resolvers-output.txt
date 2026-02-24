@@ -1,0 +1,6 @@
+Scanning all AppSync functions for missing group auth...
+
+Already OK: 43 functions
+Need fixing: 0 functions
+
+Nothing to fix!
