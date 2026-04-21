@@ -1,12 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll } from 'framer-motion';
 import {
-    Activity,
-    CheckCircle,
+    Heartbeat,
     ShieldCheck,
     FileText,
     MapPin,
-    ChartBar,
     Warning,
     Invoice,
     FlowArrow,
@@ -27,7 +25,7 @@ const GlosasUI = () => (
             >
                 <div className="flex items-center gap-2 mb-2">
                     <div className="p-1.5 bg-emerald-100 text-emerald-600 rounded-md">
-                        <Activity size={16} />
+                        <Heartbeat size={16} />
                     </div>
                     <div className="text-slate-500 text-xs font-medium uppercase tracking-wider">Monto Recuperado</div>
                 </div>
